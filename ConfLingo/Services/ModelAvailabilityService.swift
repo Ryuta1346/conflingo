@@ -22,10 +22,10 @@ final class ModelAvailabilityService {
     private(set) var supportedSourceLocales: [Locale] = []
     private(set) var supportedTargetLanguages: [Locale.Language] = []
 
-    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String) async {
+    /// targetLanguageID が nil の場合は文字起こしのみモードとみなし、翻訳ペアの確認をスキップする
+    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String?) async {
         state = .checking
         let sourceName = LanguageCatalog.displayName(for: sourceLocaleID)
-        let targetName = LanguageCatalog.displayName(for: targetLanguageID)
 
         // 0. 言語 Picker 用の候補を取得
         // LanguageAvailability は非 Sendable のため、変数に保持せず呼び出しごとに生成する
@@ -75,6 +75,11 @@ final class ModelAvailabilityService {
         }
 
         // 3. 翻訳ペアのサポート確認（モデル未DLなら prepareTranslation がDLダイアログを出す）
+        guard let targetLanguageID else {
+            state = .ready
+            return
+        }
+        let targetName = LanguageCatalog.displayName(for: targetLanguageID)
         let translationStatus = await LanguageAvailability().status(
             from: locale.language,
             to: Locale.Language(identifier: targetLanguageID)

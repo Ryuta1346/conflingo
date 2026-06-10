@@ -14,4 +14,6 @@ struct TranscriptSegment: Identifiable, Equatable, Sendable {
     var japanese: String?
     var translationState: TranslationState
     let finalizedAt: Date
+    /// 録音開始からの発話開始位置（秒）。nil は時刻不明。
+    let startTime: TimeInterval?
 }

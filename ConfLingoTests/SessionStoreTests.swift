@@ -14,6 +14,15 @@ struct SessionStoreTests {
         #expect(store.segments[0].translationState == .pending)
     }
 
+    @Test func appendFinalStoresStartTime() {
+        let store = SessionStore()
+        store.appendFinal("Hello", startTime: 225.0)
+        #expect(store.segments[0].startTime == 225.0)
+        // 省略時は nil（時刻不明）
+        store.appendFinal("World")
+        #expect(store.segments[1].startTime == nil)
+    }
+
     @Test func appendFinalTrimsWhitespace() {
         let store = SessionStore()
         store.appendFinal("  Hello  \n")

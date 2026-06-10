@@ -1,4 +1,5 @@
 import AVFAudio
+import CoreMedia
 import Foundation
 import Speech
 
@@ -20,11 +21,17 @@ final class SpeechTranscriptionService {
     private var analyzer: SpeechAnalyzer?
     private var resultsTask: Task<Void, Never>?
 
-    static func makeTranscriber(locale: Locale) -> SpeechTranscriber {
+    /// fastResults は確定レイテンシと精度のトレードオフ。翻訳しない（文字起こしのみ）
+    /// セッションでのみ速度を優先する。
+    nonisolated static func reportingOptions(fastResults: Bool) -> Set<SpeechTranscriber.ReportingOption> {
+        fastResults ? [.volatileResults, .fastResults] : [.volatileResults]
+    }
+
+    static func makeTranscriber(locale: Locale, fastResults: Bool = false) -> SpeechTranscriber {
         SpeechTranscriber(
             locale: locale,
             transcriptionOptions: [],
-            reportingOptions: [.volatileResults],
+            reportingOptions: Self.reportingOptions(fastResults: fastResults),
             attributeOptions: []
         )
     }
@@ -32,11 +39,12 @@ final class SpeechTranscriptionService {
     func start(
         locale: Locale,
         contextKeywords: [String],
+        fastResults: Bool,
         store: SessionStore,
         audioService: AudioCaptureService,
         coordinator: TranslationCoordinator
     ) async throws {
-        let transcriber = Self.makeTranscriber(locale: locale)
+        let transcriber = Self.makeTranscriber(locale: locale, fastResults: fastResults)
         let analyzer = SpeechAnalyzer(modules: [transcriber])
         self.analyzer = analyzer
 
@@ -58,7 +66,11 @@ final class SpeechTranscriptionService {
                 for try await result in transcriber.results {
                     let text = String(result.text.characters)
                     if result.isFinal {
-                        if let id = store.appendFinal(text), let segment = store.segments.last {
+                        // 録音開始からの発話位置（秒）。invalid CMTime は NaN になるため除外
+                        let seconds = result.range.start.seconds
+                        let startTime = seconds.isFinite ? seconds : nil
+                        if let id = store.appendFinal(text, startTime: startTime),
+                           let segment = store.segments.last {
                             coordinator.enqueue(id: id, text: segment.english)
                         }
                     } else {
