@@ -4,11 +4,6 @@ created: 2026-06-10
 updated: 2026-06-10
 status: active
 type: product-design
-source: discord
-thread_id: "1503379844233429082"
-related:
-  - "[[40_Coaching/gavrri/ideas/2026-05-30-realtime-meeting-understanding-ai|会議・カンファレンスのリアルタイム理解支援AI]]"
-  - "[[20_Wiki/queries/adhoc/2026/05/20260530-realtime-meeting-understanding-ai|会議・カンファレンスのリアルタイム理解支援AI]]"
 ---
 
 # ConfLingo — Apple API版カンファレンス字幕翻訳MVP
