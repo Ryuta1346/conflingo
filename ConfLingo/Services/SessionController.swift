@@ -15,7 +15,8 @@ final class SessionController {
         store: SessionStore,
         coordinator: TranslationCoordinator,
         locale: Locale,
-        contextKeywords: [String] = []
+        contextKeywords: [String] = [],
+        fastResults: Bool = false
     ) async {
         Self.logger.info("start requested: keywords=\(contextKeywords.count)")
         guard store.phase == .idle else { return }
@@ -33,6 +34,7 @@ final class SessionController {
             try await speechService.start(
                 locale: locale,
                 contextKeywords: contextKeywords,
+                fastResults: fastResults,
                 store: store,
                 audioService: audioService,
                 coordinator: coordinator

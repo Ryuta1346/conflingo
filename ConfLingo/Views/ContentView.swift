@@ -11,6 +11,8 @@ struct ContentView: View {
     @AppStorage("contextKeywords") private var contextKeywords = KeywordParser.defaultKeywords
     @AppStorage("sourceLocaleID") private var sourceLocaleID = "en-US"
     @AppStorage("targetLanguageID") private var targetLanguageID = "ja"
+    @AppStorage("transcriptionOnly") private var transcriptionOnly = false
+    @AppStorage("fastFinalization") private var fastFinalization = false
 
     var body: some View {
         Group {
@@ -27,14 +29,17 @@ struct ContentView: View {
                 sessionView
             }
         }
-        .task(id: "\(sourceLocaleID)->\(targetLanguageID)") {
-            // 起動時および言語ペア変更時に利用可能性を再チェックする
+        .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)") {
+            // 起動時・言語ペア変更時・文字起こしのみモード切替時に利用可能性を再チェックする
             translationConfiguration = nil
             await availability.checkAndPrepare(
                 sourceLocaleID: sourceLocaleID,
-                targetLanguageID: targetLanguageID
+                targetLanguageID: transcriptionOnly ? nil : targetLanguageID
             )
-            if availability.state == .ready {
+            if transcriptionOnly {
+                // 消費されないキューにバッファが溜まらないよう finish し、以降の enqueue を no-op にする
+                coordinator.finish()
+            } else if availability.state == .ready {
                 translationConfiguration = TranslationSession.Configuration(
                     source: (availability.speechLocale ?? Locale(identifier: sourceLocaleID)).language,
                     target: Locale.Language(identifier: targetLanguageID)
@@ -90,17 +95,25 @@ struct ContentView: View {
                     .background(.red.opacity(0.8))
             }
 
-            VSplitView {
+            if transcriptionOnly {
                 TranscriptPane(
                     title: "\(LanguageCatalog.displayName(for: sourceLocaleID))（認識）",
                     entries: sourceEntries,
                     fontSize: fontSize
                 )
-                TranscriptPane(
-                    title: "\(LanguageCatalog.displayName(for: targetLanguageID))（翻訳）",
-                    entries: targetEntries,
-                    fontSize: fontSize
-                )
+            } else {
+                VSplitView {
+                    TranscriptPane(
+                        title: "\(LanguageCatalog.displayName(for: sourceLocaleID))（認識）",
+                        entries: sourceEntries,
+                        fontSize: fontSize
+                    )
+                    TranscriptPane(
+                        title: "\(LanguageCatalog.displayName(for: targetLanguageID))（翻訳）",
+                        entries: targetEntries,
+                        fontSize: fontSize
+                    )
+                }
             }
 
             Divider()
@@ -114,22 +127,33 @@ struct ContentView: View {
                 }
                 .frame(maxWidth: 240)
 
-                Image(systemName: "arrow.right")
-                    .foregroundStyle(.secondary)
+                if !transcriptionOnly {
+                    Image(systemName: "arrow.right")
+                        .foregroundStyle(.secondary)
 
-                Picker("翻訳先", selection: $targetLanguageID) {
-                    ForEach(
-                        LanguageCatalog.selectableTargets(
-                            availability.supportedTargetLanguages,
-                            excludingSourceLocaleID: sourceLocaleID
-                        ),
-                        id: \.minimalIdentifier
-                    ) { language in
-                        Text(LanguageCatalog.displayName(for: language.minimalIdentifier))
-                            .tag(language.minimalIdentifier)
+                    Picker("翻訳先", selection: $targetLanguageID) {
+                        ForEach(
+                            LanguageCatalog.selectableTargets(
+                                availability.supportedTargetLanguages,
+                                excludingSourceLocaleID: sourceLocaleID
+                            ),
+                            id: \.minimalIdentifier
+                        ) { language in
+                            Text(LanguageCatalog.displayName(for: language.minimalIdentifier))
+                                .tag(language.minimalIdentifier)
+                        }
                     }
+                    .frame(maxWidth: 240)
                 }
-                .frame(maxWidth: 240)
+
+                Toggle("文字起こしのみ", isOn: $transcriptionOnly)
+                    .toggleStyle(.checkbox)
+
+                if transcriptionOnly {
+                    // 議事録用途は精度優先（OFF）、リアルタイム字幕用途は速度優先（ON）
+                    Toggle("高速確定（精度低め）", isOn: $fastFinalization)
+                        .toggleStyle(.checkbox)
+                }
 
                 Spacer()
             }
@@ -156,7 +180,8 @@ struct ContentView: View {
                 coordinator: coordinator,
                 speechLocale: availability.speechLocale ?? Locale(identifier: sourceLocaleID),
                 sourceLanguage: sourceLocaleID,
-                targetLanguage: targetLanguageID,
+                targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                fastResults: transcriptionOnly && fastFinalization,
                 contextKeywords: $contextKeywords,
                 fontSize: $fontSize
             )

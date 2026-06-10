@@ -9,7 +9,10 @@ struct ControlBar: View {
     let coordinator: TranslationCoordinator
     let speechLocale: Locale
     let sourceLanguage: String
-    let targetLanguage: String
+    /// nil の場合は文字起こしのみモード（エクスポートに訳文を含めない）
+    let targetLanguage: String?
+    /// 確定の速さを精度より優先するか（文字起こしのみ × 高速確定の場合のみ true）
+    let fastResults: Bool
     @Binding var contextKeywords: String
     @Binding var fontSize: Double
     @AppStorage("alwaysOnTop") private var alwaysOnTop = false
@@ -60,7 +63,8 @@ struct ControlBar: View {
                         store: store,
                         coordinator: coordinator,
                         locale: speechLocale,
-                        contextKeywords: KeywordParser.parse(contextKeywords)
+                        contextKeywords: KeywordParser.parse(contextKeywords),
+                        fastResults: fastResults
                     )
                 }
             }

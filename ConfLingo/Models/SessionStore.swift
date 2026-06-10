@@ -28,7 +28,7 @@ final class SessionStore {
     /// final transcript を確定セグメントとして追加する。
     /// 空文字・直前セグメントと同一文は破棄して nil を返す（重複翻訳ガード）。
     @discardableResult
-    func appendFinal(_ text: String) -> UUID? {
+    func appendFinal(_ text: String, startTime: TimeInterval? = nil) -> UUID? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
         guard segments.last?.english != trimmed else { return nil }
@@ -39,7 +39,8 @@ final class SessionStore {
             english: trimmed,
             japanese: nil,
             translationState: .pending,
-            finalizedAt: Date()
+            finalizedAt: Date(),
+            startTime: startTime
         )
         segments.append(segment)
         volatileText = ""
