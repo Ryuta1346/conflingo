@@ -1,5 +1,5 @@
 ---
-title: ConfLingo 使い方ガイド
+title: ConfLingo Usage Guide
 created: 2026-06-10
 updated: 2026-06-10
 status: active
@@ -8,132 +8,134 @@ related:
   - "[[mvp]]"
 ---
 
-# ConfLingo 使い方ガイド
+# ConfLingo Usage Guide
 
-カンファレンスの登壇音声を、MacBook のマイクでリアルタイムに文字起こしし、翻訳字幕として表示するアプリの使い方ガイド。認識言語・翻訳先言語は自由に選択できる（デフォルト: 英語 → 日本語）。
+**English** | [日本語](usage.ja.md)
 
-## 1. 起動
+A usage guide for the app that transcribes conference talk audio in real time via the MacBook microphone and displays it as translated subtitles. The recognition language and target language can be freely chosen (default: English → Japanese).
+
+## 1. Launch
 
 ```sh
-# ビルド（初回・コード変更後のみ）
+# Build (first time and after code changes only)
 xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Debug build
 
-# 起動
+# Launch
 open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/ConfLingo.app
 ```
 
-一度起動すれば、以降は Spotlight（⌘Space → "ConfLingo"）や Dock からも起動できる。
+Once launched, you can also start it from Spotlight (⌘Space → "ConfLingo") or the Dock.
 
-## 2. 初回セットアップ
+## 2. First-time setup
 
-初回起動時に自動で以下が行われる。**会場に行く前に自宅などネットワークが安定した場所で一度起動しておくこと。**
+The following happens automatically at first launch. **Launch the app once at home or anywhere with a stable network before going to the venue.**
 
-| ステップ | 内容 | 操作 |
+| Step | What happens | Action |
 |---|---|---|
-| 英語認識モデル | 未インストールなら自動ダウンロード（数百MB） | 待つだけ（進捗バー表示） |
-| 英→日翻訳モデル | 未インストールなら初回 Start 後に OS のダイアログが出る | 「ダウンロード」を押す |
-| マイク許可 | 初回 Start 時にダイアログが出る | 「許可」を押す |
+| Recognition model | Downloads automatically if not installed (several hundred MB) | Just wait (progress bar shown) |
+| Translation model | If not installed, an OS dialog appears after the first Start | Press "Download" |
+| Microphone permission | A dialog appears on the first Start | Press "Allow" |
 
-モデルのダウンロードが完了していれば、**以降は完全オフラインで動作する**（会場の Wi-Fi 不要）。
+Once the model downloads are complete, **the app works fully offline** (no venue Wi-Fi needed).
 
-## 3. 画面の見方
+## 3. Understanding the screen
 
 ```
 ┌──────────────────────────────────────┐
-│ 英語（アメリカ）（認識）              │  ← 上ペイン: 原文（選択した認識言語）
-│ The speaker is explaining how...      │     確定した文（濃い色）
-│ and now we are going to ...           │     認識途中の文（薄い斜体・揺れる）
+│ English (United States) (recognition)│  ← Top pane: source text (selected recognition language)
+│ The speaker is explaining how...      │     Finalized sentences (solid color)
+│ and now we are going to ...           │     In-progress sentences (dimmed italic, may change)
 ├──────────────────────────────────────┤
-│ 日本語（翻訳）                        │  ← 下ペイン: 訳文（選択した翻訳先）
-│ 登壇者は〜について説明している。       │     確定文のみ翻訳（2〜5秒遅れ）
-│ …翻訳中                               │
+│ Japanese (translation)                │  ← Bottom pane: translation (selected target language)
+│ 登壇者は〜について説明している。       │     Only finalized sentences are translated (2–5 s delay)
+│ …translating                          │
 ├──────────────────────────────────────┤
-│ [認識言語 ▾] → [翻訳先 ▾]            │  ← 言語選択（§4.5）
-│ 🔍 [専門用語（カンマ区切り）...]      │  ← 専門用語欄（§5）
-│ [セッション名] [Start] [Save Markdown]│  ← コントロールバー
-│ [Clear]        [最前面] [A−] [A＋]    │
+│ [Recognition ▾] → [Target ▾]         │  ← Language selection (§4.5)
+│ 🔍 [Technical terms (comma-sep)...]  │  ← Technical terms field (§5)
+│ [Session name] [Start] [Save Markdown]│  ← Control bar
+│ [Clear]        [On top] [A−] [A＋]   │
 └──────────────────────────────────────┘
 ```
 
-- **薄い斜体の英文**は認識途中（partial）で、内容が変わることがある。確定すると濃い色で履歴に積まれ、そのタイミングで翻訳が始まる
-- 日本語訳が意図的に数秒遅れるのは**訳揺れ防止**のため（途中の文を翻訳すると訳が二転三転して読みにくい）
-- 両ペインとも新しい字幕が来ると自動で最下部にスクロールする
+- **Dimmed italic text** is an in-progress (partial) recognition and may change. Once finalized, it turns solid and is appended to the history, at which point translation begins
+- The translation intentionally lags by a few seconds to **avoid unstable translations** (translating in-progress sentences would make the output flip back and forth and hard to read)
+- Both panes auto-scroll to the bottom when new subtitles arrive
 
-## 4. 基本操作
+## 4. Basic operations
 
-| 操作 | 方法 | 備考 |
+| Operation | How | Notes |
 |---|---|---|
-| 文字起こし開始 | **Start** ボタン or ⌘R | 初回はマイク許可ダイアログ |
-| 停止 | **Stop** ボタン or ⌘R | 停止後 Start で履歴に追記再開 |
-| セッション名 | 左端のテキスト欄に入力 | 保存ファイル名と Markdown 見出しに使われる |
-| Markdown 保存 | **Save Markdown** ボタン | 保存先を選ぶダイアログが開く |
-| 履歴の破棄 | **Clear** ボタン | 停止中のみ押せる。元に戻せないので注意 |
-| 文字サイズ | **A−** / **A＋** or ⌘− / ⌘+ | 10〜48pt |
-| 最前面表示 | 「最前面」チェックボックス | メモアプリ等と並べて使うときに便利 |
+| Start transcription | **Start** button or ⌘R | Microphone permission dialog on first use |
+| Stop | **Stop** button or ⌘R | Pressing Start again appends to the history |
+| Session name | Type into the left text field | Used for the saved file name and the Markdown heading |
+| Save Markdown | **Save Markdown** button | Opens a save dialog |
+| Discard history | **Clear** button | Only while stopped. Cannot be undone |
+| Font size | **A−** / **A＋** or ⌘− / ⌘+ | 10–48 pt |
+| Always on top | "On top" checkbox | Handy when used side by side with a notes app |
 
-## 4.5 言語の切り替え
+## 4.5 Switching languages
 
-コントロールバー上部の2つの Picker で **認識言語（=翻訳元）と翻訳先言語を自由に選択**できる。
+The two pickers at the top of the control bar let you **freely choose the recognition language (= translation source) and the target language**.
 
-- **認識言語**: Mac の音声認識が対応する全言語（英語・日本語・中国語・韓国語・スペイン語・フランス語・ドイツ語など）から選択
-- **翻訳先**: Apple の翻訳が対応する全言語から選択（認識言語と同じ言語は選択肢から自動で除外）
-- 組み合わせは自由（例: 中国語→日本語、日本語→英語、英語→韓国語）
+- **Recognition language**: choose from all languages supported by macOS speech recognition (English, Japanese, Chinese, Korean, Spanish, French, German, etc.)
+- **Target language**: choose from all languages supported by Apple Translation (the same language as the recognition language is automatically excluded from the options)
+- Any combination works (e.g., Chinese → Japanese, Japanese → English, English → Korean)
 
-挙動の注意:
+Behavioral notes:
 
-- **変更できるのは停止中（idle）のみ**。リスニング中は Picker がグレーアウトする
-- 言語を変更すると利用可能性チェックが自動で走り、その言語の認識モデルが未インストールならダウンロードが始まる（**初回は要ネットワーク**）。翻訳モデルは次の Start 時に OS のダウンロード確認が出る
-- 認識言語を変えて翻訳先と同一言語になった場合は、翻訳先が自動で振り替わる（日本語⇔英語）
-- 言語を切り替えても**既存の字幕履歴はそのまま残る**。Markdown ヘッダには保存時点の言語ペアが記録されるので、言語ごとに整理したい場合は切り替え前に Save → Clear を推奨
-- このMacで翻訳できないペアを選んだ場合は「〜への翻訳はこのMacでは利用できません」と表示され Start できない
-- デフォルトの専門用語プリセットは英語イベント向け。**認識言語を英語以外にする場合は専門用語欄を自分で書き換える**こと（§5）
+- **Languages can only be changed while stopped (idle)**. The pickers are grayed out while listening
+- Changing a language automatically triggers an availability check; if the recognition model for that language is not installed, the download starts (**network required the first time**). For the translation model, the OS download confirmation appears at the next Start
+- If changing the recognition language makes it collide with the target language, the target is switched automatically (Japanese ⇔ English)
+- Switching languages **keeps the existing subtitle history**. The Markdown header records the language pair at save time, so if you want to organize per language, Save → Clear before switching is recommended
+- If you choose a pair this Mac cannot translate, "translation to ... is not available on this Mac" is shown and you cannot Start
+- The default technical-term preset targets English-language events. **If you set the recognition language to something other than English, rewrite the technical terms field yourself** (§5)
 
-## 5. 専門用語の追加・編集
+## 5. Adding and editing technical terms
 
-### 何のための機能か
+### What this feature is for
 
-音声認識は一般的な英語に最適化されているため、`Claude Code` が "cloud code"、`MCP` が "M C P" や別の語に化けることがある。**専門用語欄に登録した語は認識エンジンに「この語が出やすい」とヒントとして渡され（contextual strings）、固有名詞・略語・人名の認識精度が大きく改善する。**
+Speech recognition is optimized for general English, so `Claude Code` may come out as "cloud code" and `MCP` as "M C P" or another word. **Terms registered in the technical terms field are passed to the recognition engine as hints that these words are likely to appear (contextual strings), greatly improving recognition of proper nouns, abbreviations, and personal names.**
 
-### 編集方法
+### How to edit
 
-1. コントロールバーの上にある 🔍 付きテキスト欄が専門用語欄
-2. **カンマ（`,` または `、`）か改行区切り**で用語を入力する
+1. The text field with the 🔍 icon above the control bar is the technical terms field
+2. Enter terms separated by **commas (`,` or `、`) or newlines**
    ```
    Claude Code, MCP, sub-agent, Cat Wu, primeNumber
    ```
-3. 前後の空白は自動で除去され、大文字小文字だけ違う重複は自動でまとめられる
-4. **反映タイミングは次回の Start 時**。リスニング中は欄がグレーアウトして編集できないので、変更したいときは一度 Stop → 編集 → Start する
-5. 内容は自動保存され、アプリを再起動しても保持される
+3. Leading/trailing whitespace is removed automatically, and duplicates differing only in case are merged
+4. **Changes take effect at the next Start**. The field is grayed out while listening, so Stop → edit → Start to change it
+5. The content is saved automatically and persists across app restarts
 
-### デフォルトのプリセット
+### Default preset
 
-初期状態では **Code with Claude Tokyo Extended（2026-06-11）向けの約40語**が登録済み:
+By default, **about 40 terms for Code with Claude Tokyo Extended (2026-06-11)** are registered:
 
 > Claude, Claude Code, Anthropic, Opus, Sonnet, Haiku, Fable, MCP, Model Context Protocol, sub-agent, subagents, orchestrator, Managed Agents, Agent SDK, Routines, agentic, multi-agent, evals, evaluation, Constitutional AI, system prompt, prompt engineering, context window, tool use, function calling, hooks, slash command, plugin, skill, RAG, fine-tuning, token, LLM, API key, rate limit, workflow, Bedrock, Vertex AI, primeNumber
 
-### 効果的な登録のコツ
+### Tips for effective registration
 
-- **登壇者名・社名を足す**: セッション開始前にスピーカー名（例: `Cat Wu`, `Ami Vora`）を追記すると人名の認識が安定する
-- **そのセッション固有の語を足す**: アジェンダを見て製品名・ツール名を事前に入れておく
-- **数は40〜60語程度まで**: 多すぎると効果が薄まる。終わったセッションの用語は消してよい
-- **複合語はそのまま入れる**: `Model Context Protocol` のようにフレーズごと登録できる
-- 日本語の用語は不要（認識対象は英語音声のみ）
+- **Add speaker and company names**: adding speaker names (e.g., `Cat Wu`, `Ami Vora`) before a session stabilizes name recognition
+- **Add session-specific terms**: check the agenda and add product/tool names in advance
+- **Keep it to roughly 40–60 terms**: too many dilutes the effect. Feel free to remove terms from finished sessions
+- **Register compound terms as-is**: whole phrases like `Model Context Protocol` can be registered
+- Terms in the target language are unnecessary (only the recognized speech is matched)
 
-### プリセットに戻したい / 全部消したい
+### Reset to the preset / clear everything
 
-- 欄を空にすれば「登録なし」で動作する（エラーにはならない）
-- 初期プリセットに戻すには、アプリ終了後にターミナルで:
+- Leaving the field empty means "no terms registered" (not an error)
+- To restore the initial preset, quit the app and run in Terminal:
   ```sh
   defaults delete com.gavrri.conflingo contextKeywords
   ```
-  次回起動時にプリセットが再投入される
+  The preset is re-populated at the next launch
 
-## 6. Markdown 保存の内容
+## 6. Markdown export format
 
-Stop 後（または途中でも）**Save Markdown** で以下の形式で保存される。未翻訳のセグメントは `(untranslated)` と明記される。
+After Stop (or even mid-session), **Save Markdown** saves in the following format. Untranslated segments are marked `(untranslated)`.
 
 ```markdown
-# ConfLingo Session: <セッション名>
+# ConfLingo Session: <session name>
 
 - Date: 2026-06-11 10:30
 - Source language: en-US
@@ -151,48 +153,48 @@ Japanese:
 皆さんこんにちは、カンファレンスへようこそ。
 ```
 
-デフォルトのファイル名は `<セッション名>-<日時>.md`。
+The default file name is `<session name>-<datetime>.md`.
 
-## 7. カンファレンス当日の実践 Tips
+## 7. Practical tips for conference day
 
-1. **前日までに一度起動**してモデルのダウンロードとマイク許可を済ませる
-2. **MacBook をスピーカー（登壇者）方向に向ける**。可能なら前方席へ
-3. AirPods を着けている場合も**マイクは MacBook 内蔵が使われる設計**（会場音には内蔵マイクの方が向く）
-4. セッション開始前に**セッション名と登壇者名（専門用語欄）を入力** → Start
-5. 電源確保を推奨（連続認識はバッテリーを消費する）
-6. セッション終了ごとに **Stop → Save Markdown** で保存してから **Clear** すると整理しやすい
+1. **Launch the app at least once the day before** to finish the model downloads and microphone permission
+2. **Point the MacBook toward the speakers (the presenter)**. Sit near the front if possible
+3. Even with AirPods on, **the built-in MacBook microphone is used by design** (it is better suited for venue audio)
+4. Before the session starts, **enter the session name and speaker names (technical terms field)** → Start
+5. Securing a power outlet is recommended (continuous recognition drains the battery)
+6. After each session, **Stop → Save Markdown**, then **Clear** to keep things organized
 
-## 8. トラブルシューティング
+## 8. Troubleshooting
 
-| 症状 | 対処 |
+| Symptom | Fix |
 |---|---|
-| Start を押してもエラーバナーが出る | バナーの指示を確認。マイク拒否済みなら「システム設定 > プライバシーとセキュリティ > マイク」で ConfLingo を ON |
-| マイク許可ダイアログが出ない | `tccutil reset Microphone com.gavrri.conflingo` で許可状態をリセットして再起動 |
-| 「利用できません」画面になる | macOS 26 以降か、英語認識・英日翻訳対応の Mac かを確認 |
-| 日本語訳だけ出ない | 翻訳モデル未ダウンロードの可能性。ネットワーク接続のある状態でアプリを再起動し、ダイアログで「ダウンロード」を押す |
-| 認識精度が低い | マイク位置を見直す（§7）。固有名詞の誤認識は専門用語欄に登録（§5） |
-| 動作ログを確認したい | `log show --last 5m --predicate 'subsystem == "com.gavrri.conflingo"'` |
+| An error banner appears when pressing Start | Follow the banner's instructions. If the microphone was denied, enable ConfLingo under System Settings > Privacy & Security > Microphone |
+| The microphone permission dialog does not appear | Reset the permission with `tccutil reset Microphone com.gavrri.conflingo` and relaunch |
+| The "unavailable" screen appears | Check that the Mac runs macOS 26 or later and supports the selected recognition/translation languages |
+| Only the translation is missing | The translation model may not be downloaded. Relaunch the app with a network connection and press "Download" in the dialog |
+| Poor recognition accuracy | Reconsider the microphone position (§7). Register misrecognized proper nouns in the technical terms field (§5) |
+| Inspect runtime logs | `log show --last 5m --predicate 'subsystem == "com.gavrri.conflingo"'` |
 
-## 9. 知り合いから zip で受け取った場合のインストール
+## 9. Installing from a zip received from a friend
 
-AirDrop 等で `ConfLingo-1.0.zip` を受け取った場合:
+If you received `ConfLingo-1.0.zip` via AirDrop etc.:
 
-1. zip をダブルクリックして展開し、`ConfLingo.app` を「アプリケーション」フォルダ等に移動
-2. ダブルクリックすると**「開発元を確認できないため開けません」**と出る（個人ビルドのため正常な挙動）
-3. **システム設定 > プライバシーとセキュリティ** を開き、下の方に表示される **「このまま開く」** をクリック
-4. 以降は普通に起動できる
+1. Double-click the zip to extract, then move `ConfLingo.app` to the Applications folder or similar
+2. Double-clicking shows **"cannot be opened because the developer cannot be verified"** (expected behavior for a personal build)
+3. Open **System Settings > Privacy & Security** and click **"Open Anyway"** near the bottom
+4. After that it launches normally
 
-動作要件と初回セットアップ:
+Requirements and first-time setup:
 
-- **macOS 26 以降 + Apple Silicon** が必須
-- 初回起動時に認識・翻訳モデル（数百MB）のダウンロードが走るため**ネットワーク接続が必要**。会場 Wi-Fi が不安定なら受け取ってすぐ起動しておく
-- 初回 Start 時のマイク許可ダイアログで「許可」を押す
+- **macOS 26 or later + Apple Silicon** is required
+- The first launch downloads the recognition and translation models (several hundred MB), so **a network connection is required**. If the venue Wi-Fi is unreliable, launch the app as soon as you receive it
+- Press "Allow" in the microphone permission dialog at the first Start
 
-配布用 zip の作り方（ビルドする側の手順）は [README の「配布」セクション](../README.md#配布知り合いに共有する) を参照。
+For how to create the distribution zip (the builder's steps), see the ["Distribution" section of the README](../README.md#distribution).
 
-## 10. 既知の制限
+## 10. Known limitations
 
-- 言語・専門用語の変更は停止中のみ（リスニング中に反映されない。次回 Start から）
-- Zoom / YouTube などの Mac 内部音声は拾えない（マイク経由のみ）
-- 話者分離・要約・録音保存は非対応
-- 翻訳できる言語ペアは Apple Translation の対応範囲に依存する（非対応ペアはエラー表示）
+- Language and technical-term changes are only possible while stopped (not applied while listening; effective from the next Start)
+- Internal Mac audio such as Zoom / YouTube cannot be captured (microphone input only)
+- Speaker diarization, summarization, and audio recording are not supported
+- Translatable language pairs depend on what Apple Translation supports (unsupported pairs show an error)

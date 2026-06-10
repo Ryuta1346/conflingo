@@ -1,127 +1,129 @@
 # ConfLingo
 
-カンファレンス会場で、MacBook のマイク音声を Apple/macOS 組み込み API でリアルタイム文字起こしし、翻訳字幕として表示する自分用 macOS アプリ。認識言語・翻訳先言語は OS が対応する言語から自由に選択できる（デフォルト: 英語 → 日本語）。
+**English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | [Español](README.es.md)
 
-- 文字起こし: `Speech.framework`（macOS 26 の `SpeechAnalyzer` / `SpeechTranscriber`、オンデバイス）
-- 翻訳: `Translation.framework`（`TranslationSession`、オンデバイス）
-- UI: SwiftUI 2ペイン（英語原文 / 日本語訳）
+A personal macOS app that transcribes MacBook microphone audio in real time at conference venues using Apple's built-in macOS APIs, and displays the result as translated subtitles. The recognition language and target language can be freely chosen from the languages supported by the OS (default: English → Japanese).
 
-📖 **詳しい使い方（専門用語の登録方法・当日の Tips・トラブルシューティング）は [docs/usage.md](docs/usage.md) を参照。**
+- Transcription: `Speech.framework` (`SpeechAnalyzer` / `SpeechTranscriber` on macOS 26, on-device)
+- Translation: `Translation.framework` (`TranslationSession`, on-device)
+- UI: SwiftUI two-pane layout (source transcript / translated text)
 
-## 動作要件
+📖 **For detailed usage (registering technical terms, on-site tips, troubleshooting), see [docs/usage.md](docs/usage.md).**
 
-- macOS 26.0 以降 / Apple Silicon
-- Xcode 26 以降（ビルドに使用）
-- 初回のみ: 英語音声認識モデルと英→日翻訳モデルのダウンロードにネットワーク接続が必要
+## Requirements
 
-## ビルドと起動
+- macOS 26.0 or later / Apple Silicon
+- Xcode 26 or later (for building)
+- First launch only: a network connection is required to download the speech recognition model and the translation model
+
+## Build and Run
 
 ```sh
-# ビルド
+# Build
 xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Debug build
 
-# 起動（DerivedData 配下に生成された .app を開く）
+# Launch (open the .app generated under DerivedData)
 open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/ConfLingo.app
 ```
 
-テスト実行:
+Run tests:
 
 ```sh
 xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -destination 'platform=macOS'
 ```
 
-## 権限許可
+## Permissions
 
-1. **マイク**: 初回の Start 押下時にマイク使用許可ダイアログが表示される。許可しないと文字起こしできない
-2. **音声認識モデル**: 初回起動時に英語認識モデルが未インストールの場合、自動でダウンロードが始まる（進捗表示あり）
-3. **翻訳モデル**: 英→日翻訳モデルが未インストールの場合、OS 標準のダウンロード確認ダイアログが表示される
+1. **Microphone**: A microphone permission dialog appears the first time you press Start. Transcription does not work without it
+2. **Speech recognition model**: If the recognition model is not installed at first launch, the download starts automatically (with progress display)
+3. **Translation model**: If the translation model is not installed, the standard OS download confirmation dialog appears
 
-マイク許可をやり直したい場合:
+To reset the microphone permission:
 
 ```sh
 tccutil reset Microphone com.gavrri.conflingo
 ```
 
-許可を拒否してしまった場合は「システム設定 > プライバシーとセキュリティ > マイク」で ConfLingo を有効にする。
+If you accidentally denied the permission, enable ConfLingo under System Settings > Privacy & Security > Microphone.
 
-## 使い方
+## Usage
 
-1. アプリを起動（初回はモデルの確認・ダウンロードが走る）
-2. **言語 Picker** で認識言語と翻訳先言語を選択（停止中のみ変更可。変更すると利用可能性チェックとモデルダウンロードが自動で走る）
-3. 必要ならセッション名を入力
-4. **専門用語欄**にイベント固有の用語（登壇者名・製品名・技術用語）をカンマ区切りで入力。Start 時に音声認識の contextual strings として登録され、固有名詞の認識精度が上がる（デフォルトで Code with Claude Tokyo 向け用語をプリセット済み。変更は次回 Start から反映）
-5. **Start**（⌘R）で文字起こし開始
-   - 認識ペイン: 認識途中の文（partial）は薄く斜体で表示され、確定すると履歴に積まれる
-   - 翻訳ペイン: 確定した原文のみ翻訳され、確定文単位で履歴に積まれる
-6. **Stop**（⌘R）で停止。Start で再開すると履歴に追記される
-7. **Save Markdown** でセッション全体を Markdown 保存
-8. **A− / A＋**（⌘− / ⌘+）でフォントサイズ調整、「最前面」チェックでウィンドウを常に手前に表示
-9. **Clear** で履歴を破棄（停止中のみ）
+1. Launch the app (on first launch, model checks and downloads run)
+2. Choose the recognition language and target language with the **language pickers** (changeable only while stopped; changing them automatically triggers an availability check and model download)
+3. Enter a session name if needed
+4. In the **technical terms field**, enter event-specific terms (speaker names, product names, technical jargon) separated by commas. They are registered as contextual strings for speech recognition at Start, improving recognition accuracy for proper nouns (preset with terms for Code with Claude Tokyo by default; changes take effect from the next Start)
+5. Press **Start** (⌘R) to begin transcription
+   - Recognition pane: in-progress (partial) sentences are shown dimmed and italic, then appended to the history once finalized
+   - Translation pane: only finalized source sentences are translated, appended per finalized sentence
+6. Press **Stop** (⌘R) to stop. Pressing Start again appends to the existing history
+7. **Save Markdown** saves the entire session as Markdown
+8. **A− / A＋** (⌘− / ⌘+) adjusts the font size; the "always on top" checkbox keeps the window in front
+9. **Clear** discards the history (only while stopped)
 
-## 配布
+## Distribution
 
-### 方法A: ソース共有（Xcode を持つ開発者向け・推奨）
+### Option A: Share the source (recommended for developers with Xcode)
 
-リポジトリの URL を渡し、相手に以下を実行してもらう。Gatekeeper の警告は出ない。
+Share the repository URL and have the recipient run the following. No Gatekeeper warning appears.
 
 ```sh
-git clone <リポジトリURL> && cd conflingo
+git clone <repository URL> && cd conflingo
 xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo build
 open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/ConfLingo.app
 ```
 
-### 方法B: Release ビルドの zip を AirDrop
+### Option B: AirDrop a zip of the Release build
 
 ```sh
-# 1. Release ビルド（出力先を build/ に固定）
+# 1. Release build (fix the output path to build/)
 xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo \
   -configuration Release -derivedDataPath build build
 
-# 2. ditto で zip 化（zip -r は署名・拡張属性を壊すことがあるので使わない）
+# 2. Zip with ditto (zip -r can break signatures and extended attributes)
 ditto -c -k --sequesterRsrc --keepParent \
   build/Build/Products/Release/ConfLingo.app dist/ConfLingo-1.0.zip
 ```
 
-できた `dist/ConfLingo-1.0.zip` を AirDrop で送る。**アドホック署名（notarize なし）のため、受け取った側は初回起動時に Gatekeeper の解除が必要**:
+Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad-hoc signed (not notarized), the recipient must bypass Gatekeeper on first launch**:
 
-1. 展開してダブルクリック →「開発元を確認できないため開けません」
-2. システム設定 > プライバシーとセキュリティ > 「このまま開く」
-3. 以降は普通に起動できる（開発者なら `xattr -dr com.apple.quarantine ConfLingo.app` でも可）
+1. Unzip and double-click → "cannot be opened because the developer cannot be verified"
+2. System Settings > Privacy & Security > "Open Anyway"
+3. After that, it launches normally (developers can also run `xattr -dr com.apple.quarantine ConfLingo.app`)
 
-### 共有相手に伝える動作要件
+### Requirements to tell recipients
 
-- **macOS 26 以降 + Apple Silicon**（未満の macOS では起動しない）
-- **初回はネットワーク必須**: 認識・翻訳モデル（数百MB）を各自の Mac がダウンロードする。会場 Wi-Fi が貧弱な場合に備え、受け取ったらすぐ起動してもらう
-- 初回 Start 時にマイク許可ダイアログ →「許可」
+- **macOS 26 or later + Apple Silicon** (does not launch on earlier macOS versions)
+- **Network required on first launch**: each Mac downloads the recognition and translation models (several hundred MB). In case the venue Wi-Fi is weak, ask recipients to launch the app as soon as they receive it
+- Microphone permission dialog on first Start → "Allow"
 
-## 制限事項
+## Limitations
 
-- 会場音は MacBook 内蔵マイクで拾う前提。Zoom / YouTube などの Mac 内部音声（システム音声）はキャプチャできない
-- 認識途中の文（partial）は翻訳しない設計（訳揺れ防止）。翻訳は確定文単位で 2〜5 秒程度遅延する
-- 言語の変更は停止中のみ。言語を切り替えても既存の字幕履歴は保持される（Markdown ヘッダには保存時点の言語ペアが記録される）
-- 話者分離・要約・録音保存は非対応
-- 配布用の署名・notarize はしていない（ローカルビルドでの自分用利用前提）
-- 認識精度はマイク位置・周囲ノイズの影響が大きい。MacBook をスピーカー方向へ向け、可能なら前方席を推奨
+- Venue audio is assumed to be captured by the MacBook's built-in microphone. Internal Mac audio (system audio) such as Zoom / YouTube cannot be captured
+- In-progress (partial) sentences are not translated by design (to avoid unstable translations). Translation lags finalized sentences by roughly 2–5 seconds
+- Languages can only be changed while stopped. Switching languages keeps the existing subtitle history (the Markdown header records the language pair at save time)
+- Speaker diarization, summarization, and audio recording are not supported
+- No code signing / notarization for distribution (intended for personal use with local builds)
+- Recognition accuracy is heavily affected by microphone position and ambient noise. Point the MacBook toward the speakers and sit near the front if possible
 
-## アーキテクチャ
+## Architecture
 
 ```
-AVAudioEngine マイク入力（ハードウェアフォーマット）
-  └ AVAudioConverter で SpeechAnalyzer 推奨フォーマットへ変換
-    └ AsyncStream<AnalyzerInput> → SpeechAnalyzer / SpeechTranscriber（en-US, volatileResults）
-        ├ partial → SessionStore.volatileText（英語ペインに薄く表示）
-        └ final  → SessionStore.segments に確定 → TranslationCoordinator のキューへ
-            └ .translationTask クロージャ内の TranslationSession が逐次翻訳
-                └ SessionStore.applyTranslation → 日本語ペインに表示
+AVAudioEngine microphone input (hardware format)
+  └ AVAudioConverter converts to SpeechAnalyzer's preferred format
+    └ AsyncStream<AnalyzerInput> → SpeechAnalyzer / SpeechTranscriber (volatileResults)
+        ├ partial → SessionStore.volatileText (shown dimmed in the recognition pane)
+        └ final  → finalized into SessionStore.segments → TranslationCoordinator queue
+            └ TranslationSession inside the .translationTask closure translates sequentially
+                └ SessionStore.applyTranslation → shown in the translation pane
 ```
 
-| ファイル | 責務 |
+| File | Responsibility |
 |---|---|
-| `Models/SessionStore.swift` | UI の単一情報源。セグメント履歴・partial・重複排除 |
-| `Models/KeywordParser.swift` | 専門用語欄のパース + イベント用プリセット |
-| `Models/LanguageCatalog.swift` | 言語の表示名・翻訳先候補の整形 |
-| `Services/AudioCaptureService.swift` | マイク入力・フォーマット変換・権限要求 |
-| `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber 配線 |
-| `Services/TranslationCoordinator.swift` | 翻訳キュー（ID dedup + AsyncStream） |
-| `Services/ModelAvailabilityService.swift` | 起動時の利用可能性チェック・モデル DL |
-| `Export/MarkdownExporter.swift` | Markdown 生成（純関数） |
+| `Models/SessionStore.swift` | Single source of truth for the UI. Segment history, partials, dedup |
+| `Models/KeywordParser.swift` | Parses the technical terms field + event presets |
+| `Models/LanguageCatalog.swift` | Language display names and target candidate filtering |
+| `Services/AudioCaptureService.swift` | Microphone input, format conversion, permission requests |
+| `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber wiring |
+| `Services/TranslationCoordinator.swift` | Translation queue (ID dedup + AsyncStream) |
+| `Services/ModelAvailabilityService.swift` | Availability checks and model downloads at launch |
+| `Export/MarkdownExporter.swift` | Markdown generation (pure function) |
