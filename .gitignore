@@ -1,0 +1,11 @@
+# Xcode
+build/
+DerivedData/
+xcuserdata/
+*.xcuserstate
+
+# 配布物
+dist/
+
+# macOS
+.DS_Store
