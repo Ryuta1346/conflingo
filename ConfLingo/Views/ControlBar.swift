@@ -8,6 +8,7 @@ struct ControlBar: View {
     let controller: SessionController
     let coordinator: TranslationCoordinator
     let speechLocale: Locale
+    @Binding var contextKeywords: String
     @Binding var fontSize: Double
     @AppStorage("alwaysOnTop") private var alwaysOnTop = false
 
@@ -53,7 +54,12 @@ struct ControlBar: View {
         case .idle:
             Button("Start") {
                 Task {
-                    await controller.start(store: store, coordinator: coordinator, locale: speechLocale)
+                    await controller.start(
+                        store: store,
+                        coordinator: coordinator,
+                        locale: speechLocale,
+                        contextKeywords: KeywordParser.parse(contextKeywords)
+                    )
                 }
             }
             .keyboardShortcut("r", modifiers: .command)

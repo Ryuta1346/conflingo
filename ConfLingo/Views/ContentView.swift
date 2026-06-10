@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var controller = SessionController()
     @State private var translationConfiguration: TranslationSession.Configuration?
     @AppStorage("fontSize") private var fontSize = 16.0
+    @AppStorage("contextKeywords") private var contextKeywords = KeywordParser.defaultKeywords
 
     var body: some View {
         Group {
@@ -78,11 +79,25 @@ struct ContentView: View {
 
             Divider()
 
+            HStack(spacing: 8) {
+                Image(systemName: "character.magnify")
+                    .foregroundStyle(.secondary)
+                TextField(
+                    "専門用語（カンマ区切り）。Start 時に音声認識へ登録され、固有名詞の認識精度が上がります",
+                    text: $contextKeywords
+                )
+                .textFieldStyle(.roundedBorder)
+                .disabled(store.phase != .idle)
+            }
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
+
             ControlBar(
                 store: store,
                 controller: controller,
                 coordinator: coordinator,
                 speechLocale: availability.speechLocale ?? Locale(identifier: "en_US"),
+                contextKeywords: $contextKeywords,
                 fontSize: $fontSize
             )
         }

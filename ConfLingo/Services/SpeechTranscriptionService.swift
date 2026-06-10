@@ -31,6 +31,7 @@ final class SpeechTranscriptionService {
 
     func start(
         locale: Locale,
+        contextKeywords: [String],
         store: SessionStore,
         audioService: AudioCaptureService,
         coordinator: TranslationCoordinator
@@ -38,6 +39,13 @@ final class SpeechTranscriptionService {
         let transcriber = Self.makeTranscriber(locale: locale)
         let analyzer = SpeechAnalyzer(modules: [transcriber])
         self.analyzer = analyzer
+
+        // 専門用語（固有名詞・技術用語）を contextual strings として登録し認識精度を上げる
+        if !contextKeywords.isEmpty {
+            let context = AnalysisContext()
+            context.contextualStrings = [.general: contextKeywords]
+            try await analyzer.setContext(context)
+        }
 
         guard let format = await SpeechAnalyzer.bestAvailableAudioFormat(compatibleWith: [transcriber]) else {
             throw TranscriptionError.audioFormatUnavailable

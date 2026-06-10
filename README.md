@@ -6,6 +6,8 @@
 - 翻訳: `Translation.framework`（`TranslationSession`、オンデバイス）
 - UI: SwiftUI 2ペイン（英語原文 / 日本語訳）
 
+📖 **詳しい使い方（専門用語の登録方法・当日の Tips・トラブルシューティング）は [docs/usage.md](docs/usage.md) を参照。**
+
 ## 動作要件
 
 - macOS 26.0 以降 / Apple Silicon
@@ -46,13 +48,14 @@ tccutil reset Microphone com.gavrri.conflingo
 
 1. アプリを起動（初回はモデルの確認・ダウンロードが走る）
 2. 必要ならセッション名を入力
-3. **Start**（⌘R）で文字起こし開始
+3. **専門用語欄**にイベント固有の用語（登壇者名・製品名・技術用語）をカンマ区切りで入力。Start 時に音声認識の contextual strings として登録され、固有名詞の認識精度が上がる（デフォルトで Code with Claude Tokyo 向け用語をプリセット済み。変更は次回 Start から反映）
+4. **Start**（⌘R）で文字起こし開始
    - 英語ペイン: 認識途中の文（partial）は薄く斜体で表示され、確定すると履歴に積まれる
    - 日本語ペイン: 確定した英文のみ翻訳され、確定文単位で履歴に積まれる
-4. **Stop**（⌘R）で停止。Start で再開すると履歴に追記される
-5. **Save Markdown** でセッション全体を Markdown 保存
-6. **A− / A＋**（⌘− / ⌘+）でフォントサイズ調整、「最前面」チェックでウィンドウを常に手前に表示
-7. **Clear** で履歴を破棄（停止中のみ）
+5. **Stop**（⌘R）で停止。Start で再開すると履歴に追記される
+6. **Save Markdown** でセッション全体を Markdown 保存
+7. **A− / A＋**（⌘− / ⌘+）でフォントサイズ調整、「最前面」チェックでウィンドウを常に手前に表示
+8. **Clear** で履歴を破棄（停止中のみ）
 
 ## 制限事項
 
@@ -77,6 +80,7 @@ AVAudioEngine マイク入力（ハードウェアフォーマット）
 | ファイル | 責務 |
 |---|---|
 | `Models/SessionStore.swift` | UI の単一情報源。セグメント履歴・partial・重複排除 |
+| `Models/KeywordParser.swift` | 専門用語欄のパース + イベント用プリセット |
 | `Services/AudioCaptureService.swift` | マイク入力・フォーマット変換・権限要求 |
 | `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber 配線 |
 | `Services/TranslationCoordinator.swift` | 翻訳キュー（ID dedup + AsyncStream） |

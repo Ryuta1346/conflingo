@@ -1,20 +1,29 @@
 import Foundation
 import Observation
+import os
 
 /// Start / Stop の状態遷移と、音声入力・文字起こしサービスの編成を担う。
 @MainActor
 @Observable
 final class SessionController {
+    private static let logger = Logger(subsystem: "com.gavrri.conflingo", category: "session")
     private let audioService = AudioCaptureService()
     private let speechService = SpeechTranscriptionService()
     private(set) var lastError: String?
 
-    func start(store: SessionStore, coordinator: TranslationCoordinator, locale: Locale) async {
+    func start(
+        store: SessionStore,
+        coordinator: TranslationCoordinator,
+        locale: Locale,
+        contextKeywords: [String] = []
+    ) async {
+        Self.logger.info("start requested: keywords=\(contextKeywords.count)")
         guard store.phase == .idle else { return }
         store.phase = .preparing
         lastError = nil
 
         guard await AudioCaptureService.requestPermission() else {
+            Self.logger.error("microphone permission denied")
             lastError = "マイクへのアクセスが許可されていません。システム設定 > プライバシーとセキュリティ > マイク で ConfLingo を許可してください。"
             store.phase = .idle
             return
@@ -23,16 +32,19 @@ final class SessionController {
         do {
             try await speechService.start(
                 locale: locale,
+                contextKeywords: contextKeywords,
                 store: store,
                 audioService: audioService,
                 coordinator: coordinator
             )
             store.markSessionStarted()
             store.phase = .listening
+            Self.logger.info("listening started")
         } catch {
             audioService.stop()
             lastError = "文字起こしを開始できませんでした: \(error.localizedDescription)"
             store.phase = .idle
+            Self.logger.error("start failed: \(error)")
         }
     }
 
