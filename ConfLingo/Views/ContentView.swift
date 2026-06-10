@@ -66,8 +66,12 @@ struct ContentView: View {
             for await item in stream {
                 await store.beginTranslating(item.id)
                 do {
-                    let response = try await session.translate(item.text)
-                    await store.applyTranslation(id: item.id, japanese: response.targetText)
+                    // 専門用語をプレースホルダで保護してから翻訳し、訳文で原文表記に復元する
+                    let terms = await store.activeKeywords
+                    let (masked, mapping) = TermProtector.mask(item.text, terms: terms)
+                    let response = try await session.translate(masked)
+                    let restored = TermProtector.unmask(response.targetText, mapping: mapping)
+                    await store.applyTranslation(id: item.id, japanese: restored)
                 } catch {
                     await store.markTranslationFailed(id: item.id, reason: error.localizedDescription)
                 }
@@ -137,7 +141,7 @@ struct ContentView: View {
                 Image(systemName: "character.magnify")
                     .foregroundStyle(.secondary)
                 TextField(
-                    "専門用語（カンマ区切り）。Start 時に音声認識へ登録され、固有名詞の認識精度が上がります",
+                    "専門用語（カンマ区切り）。音声認識の精度向上に加え、翻訳でも原文表記のまま保持されます",
                     text: $contextKeywords
                 )
                 .textFieldStyle(.roundedBorder)

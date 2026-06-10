@@ -96,6 +96,8 @@ open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/Conf
 
 音声認識は一般的な英語に最適化されているため、`Claude Code` が "cloud code"、`MCP` が "M C P" や別の語に化けることがある。**専門用語欄に登録した語は認識エンジンに「この語が出やすい」とヒントとして渡され（contextual strings）、固有名詞・略語・人名の認識精度が大きく改善する。**
 
+さらに、登録した専門用語は**翻訳時にも保護され、訳文の中でも原文表記のまま表示される**（例: "Claude Code" がカタカナに訳されない）。
+
 ### 編集方法
 
 1. コントロールバーの上にある 🔍 付きテキスト欄が専門用語欄

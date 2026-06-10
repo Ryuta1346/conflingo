@@ -88,6 +88,16 @@ struct SessionStoreTests {
         #expect(store.untranslatedSegments.map(\.english) == ["B", "C"])
     }
 
+    @Test func storesActiveKeywords() {
+        let store = SessionStore()
+        #expect(store.activeKeywords.isEmpty)
+        store.setActiveKeywords(["Claude Code", "MCP"])
+        #expect(store.activeKeywords == ["Claude Code", "MCP"])
+        // 再 Start で上書きされる
+        store.setActiveKeywords(["evals"])
+        #expect(store.activeKeywords == ["evals"])
+    }
+
     @Test func resetClearsSession() {
         let store = SessionStore()
         store.appendFinal("Hello")

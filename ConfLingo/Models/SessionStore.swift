@@ -18,6 +18,9 @@ final class SessionStore {
     var sessionName: String = ""
     private(set) var startedAt: Date?
 
+    /// Start 時点で確定した専門用語。翻訳時の do-not-translate リストとして参照する。
+    private(set) var activeKeywords: [String] = []
+
     var untranslatedSegments: [TranscriptSegment] {
         segments.filter { $0.japanese == nil }
     }
@@ -61,6 +64,10 @@ final class SessionStore {
     func markTranslationFailed(id: UUID, reason: String) {
         guard let i = segments.firstIndex(where: { $0.id == id }) else { return }
         segments[i].translationState = .failed(reason)
+    }
+
+    func setActiveKeywords(_ keywords: [String]) {
+        activeKeywords = keywords
     }
 
     func markSessionStarted() {
