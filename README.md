@@ -57,6 +57,42 @@ tccutil reset Microphone com.gavrri.conflingo
 7. **A− / A＋**（⌘− / ⌘+）でフォントサイズ調整、「最前面」チェックでウィンドウを常に手前に表示
 8. **Clear** で履歴を破棄（停止中のみ）
 
+## 配布（知り合いに共有する）
+
+### 方法A: ソース共有（Xcode を持つ開発者向け・推奨）
+
+リポジトリの URL を渡し、相手に以下を実行してもらう。Gatekeeper の警告は出ない。
+
+```sh
+git clone <リポジトリURL> && cd conflingo
+xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo build
+open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/ConfLingo.app
+```
+
+### 方法B: Release ビルドの zip を AirDrop
+
+```sh
+# 1. Release ビルド（出力先を build/ に固定）
+xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo \
+  -configuration Release -derivedDataPath build build
+
+# 2. ditto で zip 化（zip -r は署名・拡張属性を壊すことがあるので使わない）
+ditto -c -k --sequesterRsrc --keepParent \
+  build/Build/Products/Release/ConfLingo.app dist/ConfLingo-1.0.zip
+```
+
+できた `dist/ConfLingo-1.0.zip` を AirDrop で送る。**アドホック署名（notarize なし）のため、受け取った側は初回起動時に Gatekeeper の解除が必要**:
+
+1. 展開してダブルクリック →「開発元を確認できないため開けません」
+2. システム設定 > プライバシーとセキュリティ > 「このまま開く」
+3. 以降は普通に起動できる（開発者なら `xattr -dr com.apple.quarantine ConfLingo.app` でも可）
+
+### 共有相手に伝える動作要件
+
+- **macOS 26 以降 + Apple Silicon**（未満の macOS では起動しない）
+- **初回はネットワーク必須**: 認識・翻訳モデル（数百MB）を各自の Mac がダウンロードする。会場 Wi-Fi が貧弱な場合に備え、受け取ったらすぐ起動してもらう
+- 初回 Start 時にマイク許可ダイアログ →「許可」
+
 ## 制限事項
 
 - 会場音は MacBook 内蔵マイクで拾う前提。Zoom / YouTube などの Mac 内部音声（システム音声）はキャプチャできない
