@@ -37,6 +37,7 @@ final class SessionController {
                 audioService: audioService,
                 coordinator: coordinator
             )
+            store.setActiveKeywords(contextKeywords)
             store.markSessionStarted()
             store.phase = .listening
             Self.logger.info("listening started")
