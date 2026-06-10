@@ -141,7 +141,7 @@ struct ContentView: View {
                 Image(systemName: "character.magnify")
                     .foregroundStyle(.secondary)
                 TextField(
-                    "専門用語（カンマ区切り）。Start 時に音声認識へ登録され、固有名詞の認識精度が上がります",
+                    "専門用語（カンマ区切り）。音声認識の精度向上に加え、翻訳でも原文表記のまま保持されます",
                     text: $contextKeywords
                 )
                 .textFieldStyle(.roundedBorder)

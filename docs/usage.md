@@ -96,6 +96,8 @@ Behavioral notes:
 
 Speech recognition is optimized for general English, so `Claude Code` may come out as "cloud code" and `MCP` as "M C P" or another word. **Terms registered in the technical terms field are passed to the recognition engine as hints that these words are likely to appear (contextual strings), greatly improving recognition of proper nouns, abbreviations, and personal names.**
 
+In addition, registered terms are **protected during translation and appear verbatim in the translated text** (e.g., "Claude Code" is never transliterated).
+
 ### How to edit
 
 1. The text field with the 🔍 icon above the control bar is the technical terms field
