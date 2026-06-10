@@ -18,13 +18,32 @@ final class ModelAvailabilityService {
     private(set) var state: State = .checking
     private(set) var downloadProgress: Progress?
     private(set) var speechLocale: Locale?
+    /// 言語 Picker 用の候補（初回チェック時に取得・キャッシュ）
+    private(set) var supportedSourceLocales: [Locale] = []
+    private(set) var supportedTargetLanguages: [Locale.Language] = []
 
-    func checkAndPrepare() async {
+    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String) async {
         state = .checking
+        let sourceName = LanguageCatalog.displayName(for: sourceLocaleID)
+        let targetName = LanguageCatalog.displayName(for: targetLanguageID)
 
-        // 1. 英語音声認識のサポート確認
-        guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: Locale(identifier: "en_US")) else {
-            state = .unavailable("英語の音声認識はこのMacでは利用できません。")
+        // 0. 言語 Picker 用の候補を取得
+        // LanguageAvailability は非 Sendable のため、変数に保持せず呼び出しごとに生成する
+        if supportedSourceLocales.isEmpty {
+            supportedSourceLocales = await SpeechTranscriber.supportedLocales
+                .sorted { $0.identifier < $1.identifier }
+        }
+        if supportedTargetLanguages.isEmpty {
+            // 非 Sendable な LanguageAvailability の async プロパティは MainActor から
+            // 直接読めないため、nonisolated なタスク内で取得する（返り値は Sendable）
+            supportedTargetLanguages = await Task.detached {
+                await LanguageAvailability().supportedLanguages
+            }.value.sorted { $0.minimalIdentifier < $1.minimalIdentifier }
+        }
+
+        // 1. 認識言語のサポート確認
+        guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: Locale(identifier: sourceLocaleID)) else {
+            state = .unavailable("\(sourceName)の音声認識はこのMacでは利用できません。")
             return
         }
         speechLocale = locale
@@ -34,7 +53,7 @@ final class ModelAvailabilityService {
         let speechStatus = await AssetInventory.status(forModules: [transcriber])
         switch speechStatus {
         case .unsupported:
-            state = .unavailable("英語の音声認識モデルがサポートされていません。")
+            state = .unavailable("\(sourceName)の音声認識モデルがサポートされていません。")
             return
         case .installed:
             break
@@ -55,14 +74,14 @@ final class ModelAvailabilityService {
             }
         }
 
-        // 3. 英→日翻訳のサポート確認（モデル未DLなら prepareTranslation がDLダイアログを出す）
+        // 3. 翻訳ペアのサポート確認（モデル未DLなら prepareTranslation がDLダイアログを出す）
         let translationStatus = await LanguageAvailability().status(
-            from: Locale.Language(identifier: "en"),
-            to: Locale.Language(identifier: "ja")
+            from: locale.language,
+            to: Locale.Language(identifier: targetLanguageID)
         )
         switch translationStatus {
         case .unsupported:
-            state = .unavailable("英語から日本語への翻訳はこのMacでは利用できません。")
+            state = .unavailable("\(sourceName)から\(targetName)への翻訳はこのMacでは利用できません。")
         case .installed, .supported:
             state = .ready
         @unknown default:

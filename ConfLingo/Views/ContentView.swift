@@ -9,6 +9,8 @@ struct ContentView: View {
     @State private var translationConfiguration: TranslationSession.Configuration?
     @AppStorage("fontSize") private var fontSize = 16.0
     @AppStorage("contextKeywords") private var contextKeywords = KeywordParser.defaultKeywords
+    @AppStorage("sourceLocaleID") private var sourceLocaleID = "en-US"
+    @AppStorage("targetLanguageID") private var targetLanguageID = "ja"
 
     var body: some View {
         Group {
@@ -25,14 +27,26 @@ struct ContentView: View {
                 sessionView
             }
         }
-        .task {
-            await availability.checkAndPrepare()
+        .task(id: "\(sourceLocaleID)->\(targetLanguageID)") {
+            // 起動時および言語ペア変更時に利用可能性を再チェックする
+            translationConfiguration = nil
+            await availability.checkAndPrepare(
+                sourceLocaleID: sourceLocaleID,
+                targetLanguageID: targetLanguageID
+            )
             if availability.state == .ready {
                 translationConfiguration = TranslationSession.Configuration(
-                    source: Locale.Language(identifier: "en"),
-                    target: Locale.Language(identifier: "ja")
+                    source: (availability.speechLocale ?? Locale(identifier: sourceLocaleID)).language,
+                    target: Locale.Language(identifier: targetLanguageID)
                 )
             }
+        }
+        .onChange(of: sourceLocaleID) {
+            // 認識言語と翻訳先が同一言語に衝突したら自動で振り替える
+            targetLanguageID = LanguageCatalog.resolveTarget(
+                current: targetLanguageID,
+                sourceLocaleID: sourceLocaleID
+            )
         }
         // @Sendable でクロージャを nonisolated にし、非 Sendable な session を
         // MainActor 領域に取り込まずタスク領域に留める（translate 呼び出しに必須）。
@@ -73,11 +87,51 @@ struct ContentView: View {
             }
 
             VSplitView {
-                TranscriptPane(title: "English transcript", entries: englishEntries, fontSize: fontSize)
-                TranscriptPane(title: "日本語翻訳", entries: japaneseEntries, fontSize: fontSize)
+                TranscriptPane(
+                    title: "\(LanguageCatalog.displayName(for: sourceLocaleID))（認識）",
+                    entries: sourceEntries,
+                    fontSize: fontSize
+                )
+                TranscriptPane(
+                    title: "\(LanguageCatalog.displayName(for: targetLanguageID))（翻訳）",
+                    entries: targetEntries,
+                    fontSize: fontSize
+                )
             }
 
             Divider()
+
+            HStack(spacing: 8) {
+                Picker("認識", selection: $sourceLocaleID) {
+                    ForEach(availability.supportedSourceLocales, id: \.identifier) { locale in
+                        Text(LanguageCatalog.displayName(for: locale.identifier))
+                            .tag(locale.identifier)
+                    }
+                }
+                .frame(maxWidth: 240)
+
+                Image(systemName: "arrow.right")
+                    .foregroundStyle(.secondary)
+
+                Picker("翻訳先", selection: $targetLanguageID) {
+                    ForEach(
+                        LanguageCatalog.selectableTargets(
+                            availability.supportedTargetLanguages,
+                            excludingSourceLocaleID: sourceLocaleID
+                        ),
+                        id: \.minimalIdentifier
+                    ) { language in
+                        Text(LanguageCatalog.displayName(for: language.minimalIdentifier))
+                            .tag(language.minimalIdentifier)
+                    }
+                }
+                .frame(maxWidth: 240)
+
+                Spacer()
+            }
+            .disabled(store.phase != .idle)
+            .padding(.horizontal, 12)
+            .padding(.top, 8)
 
             HStack(spacing: 8) {
                 Image(systemName: "character.magnify")
@@ -96,14 +150,16 @@ struct ContentView: View {
                 store: store,
                 controller: controller,
                 coordinator: coordinator,
-                speechLocale: availability.speechLocale ?? Locale(identifier: "en_US"),
+                speechLocale: availability.speechLocale ?? Locale(identifier: sourceLocaleID),
+                sourceLanguage: sourceLocaleID,
+                targetLanguage: targetLanguageID,
                 contextKeywords: $contextKeywords,
                 fontSize: $fontSize
             )
         }
     }
 
-    private var englishEntries: [TranscriptPane.Entry] {
+    private var sourceEntries: [TranscriptPane.Entry] {
         var entries = store.segments.map {
             TranscriptPane.Entry(id: $0.id.uuidString, text: $0.english, dimmed: false)
         }
@@ -113,7 +169,7 @@ struct ContentView: View {
         return entries
     }
 
-    private var japaneseEntries: [TranscriptPane.Entry] {
+    private var targetEntries: [TranscriptPane.Entry] {
         store.segments.map { segment in
             let text: String
             let dimmed: Bool

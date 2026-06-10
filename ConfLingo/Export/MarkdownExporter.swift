@@ -8,14 +8,20 @@ enum MarkdownExporter {
         return formatter
     }()
 
-    static func render(sessionName: String, date: Date, segments: [TranscriptSegment]) -> String {
+    static func render(
+        sessionName: String,
+        date: Date,
+        segments: [TranscriptSegment],
+        sourceLanguage: String,
+        targetLanguage: String
+    ) -> String {
         let name = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         var lines: [String] = []
         lines.append("# ConfLingo Session: \(name.isEmpty ? "Untitled" : name)")
         lines.append("")
         lines.append("- Date: \(dateFormatter.string(from: date))")
-        lines.append("- Source language: en-US")
-        lines.append("- Target language: ja-JP")
+        lines.append("- Source language: \(sourceLanguage)")
+        lines.append("- Target language: \(targetLanguage)")
         lines.append("- Segments: \(segments.count)")
         lines.append("")
         lines.append("## Transcript")

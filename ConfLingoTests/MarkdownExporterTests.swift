@@ -21,7 +21,13 @@ struct MarkdownExporterTests {
             segment(index: 1, english: "Hello everyone.", japanese: "皆さんこんにちは。"),
             segment(index: 2, english: "Welcome to the conference.", japanese: nil),
         ]
-        let markdown = MarkdownExporter.render(sessionName: "WWDC Keynote", date: date, segments: segments)
+        let markdown = MarkdownExporter.render(
+            sessionName: "WWDC Keynote",
+            date: date,
+            segments: segments,
+            sourceLanguage: "en-US",
+            targetLanguage: "ja"
+        )
 
         let dateString = MarkdownExporter.dateFormatter.string(from: date)
         let expected = """
@@ -29,7 +35,7 @@ struct MarkdownExporterTests {
 
         - Date: \(dateString)
         - Source language: en-US
-        - Target language: ja-JP
+        - Target language: ja
         - Segments: 2
 
         ## Transcript
@@ -54,13 +60,28 @@ struct MarkdownExporterTests {
     }
 
     @Test func emptySessionNameFallsBackToUntitled() {
-        let markdown = MarkdownExporter.render(sessionName: "  ", date: date, segments: [])
+        let markdown = MarkdownExporter.render(
+            sessionName: "  ", date: date, segments: [],
+            sourceLanguage: "en-US", targetLanguage: "ja"
+        )
         #expect(markdown.hasPrefix("# ConfLingo Session: Untitled"))
     }
 
     @Test func emptySegmentsRendersHeaderOnly() {
-        let markdown = MarkdownExporter.render(sessionName: "Empty", date: date, segments: [])
+        let markdown = MarkdownExporter.render(
+            sessionName: "Empty", date: date, segments: [],
+            sourceLanguage: "en-US", targetLanguage: "ja"
+        )
         #expect(markdown.contains("- Segments: 0"))
         #expect(!markdown.contains("### Segment"))
+    }
+
+    @Test func rendersSelectedLanguagePair() {
+        let markdown = MarkdownExporter.render(
+            sessionName: "中国語セッション", date: date, segments: [],
+            sourceLanguage: "zh-Hans", targetLanguage: "ko"
+        )
+        #expect(markdown.contains("- Source language: zh-Hans"))
+        #expect(markdown.contains("- Target language: ko"))
     }
 }

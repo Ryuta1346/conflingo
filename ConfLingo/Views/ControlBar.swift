@@ -8,6 +8,8 @@ struct ControlBar: View {
     let controller: SessionController
     let coordinator: TranslationCoordinator
     let speechLocale: Locale
+    let sourceLanguage: String
+    let targetLanguage: String
     @Binding var contextKeywords: String
     @Binding var fontSize: Double
     @AppStorage("alwaysOnTop") private var alwaysOnTop = false
@@ -96,7 +98,9 @@ struct ControlBar: View {
         let markdown = MarkdownExporter.render(
             sessionName: store.sessionName,
             date: store.startedAt ?? Date(),
-            segments: store.segments
+            segments: store.segments,
+            sourceLanguage: sourceLanguage,
+            targetLanguage: targetLanguage
         )
         do {
             try markdown.write(to: url, atomically: true, encoding: .utf8)

@@ -1,6 +1,6 @@
 # ConfLingo
 
-英語カンファレンス会場で、MacBook のマイク音声を Apple/macOS 組み込み API でリアルタイム文字起こしし、日本語翻訳字幕として表示する自分用 macOS アプリ。
+カンファレンス会場で、MacBook のマイク音声を Apple/macOS 組み込み API でリアルタイム文字起こしし、翻訳字幕として表示する自分用 macOS アプリ。認識言語・翻訳先言語は OS が対応する言語から自由に選択できる（デフォルト: 英語 → 日本語）。
 
 - 文字起こし: `Speech.framework`（macOS 26 の `SpeechAnalyzer` / `SpeechTranscriber`、オンデバイス）
 - 翻訳: `Translation.framework`（`TranslationSession`、オンデバイス）
@@ -47,15 +47,16 @@ tccutil reset Microphone com.gavrri.conflingo
 ## 使い方
 
 1. アプリを起動（初回はモデルの確認・ダウンロードが走る）
-2. 必要ならセッション名を入力
-3. **専門用語欄**にイベント固有の用語（登壇者名・製品名・技術用語）をカンマ区切りで入力。Start 時に音声認識の contextual strings として登録され、固有名詞の認識精度が上がる（デフォルトで Code with Claude Tokyo 向け用語をプリセット済み。変更は次回 Start から反映）
-4. **Start**（⌘R）で文字起こし開始
-   - 英語ペイン: 認識途中の文（partial）は薄く斜体で表示され、確定すると履歴に積まれる
-   - 日本語ペイン: 確定した英文のみ翻訳され、確定文単位で履歴に積まれる
-5. **Stop**（⌘R）で停止。Start で再開すると履歴に追記される
-6. **Save Markdown** でセッション全体を Markdown 保存
-7. **A− / A＋**（⌘− / ⌘+）でフォントサイズ調整、「最前面」チェックでウィンドウを常に手前に表示
-8. **Clear** で履歴を破棄（停止中のみ）
+2. **言語 Picker** で認識言語と翻訳先言語を選択（停止中のみ変更可。変更すると利用可能性チェックとモデルダウンロードが自動で走る）
+3. 必要ならセッション名を入力
+4. **専門用語欄**にイベント固有の用語（登壇者名・製品名・技術用語）をカンマ区切りで入力。Start 時に音声認識の contextual strings として登録され、固有名詞の認識精度が上がる（デフォルトで Code with Claude Tokyo 向け用語をプリセット済み。変更は次回 Start から反映）
+5. **Start**（⌘R）で文字起こし開始
+   - 認識ペイン: 認識途中の文（partial）は薄く斜体で表示され、確定すると履歴に積まれる
+   - 翻訳ペイン: 確定した原文のみ翻訳され、確定文単位で履歴に積まれる
+6. **Stop**（⌘R）で停止。Start で再開すると履歴に追記される
+7. **Save Markdown** でセッション全体を Markdown 保存
+8. **A− / A＋**（⌘− / ⌘+）でフォントサイズ調整、「最前面」チェックでウィンドウを常に手前に表示
+9. **Clear** で履歴を破棄（停止中のみ）
 
 ## 配布
 
@@ -97,6 +98,7 @@ ditto -c -k --sequesterRsrc --keepParent \
 
 - 会場音は MacBook 内蔵マイクで拾う前提。Zoom / YouTube などの Mac 内部音声（システム音声）はキャプチャできない
 - 認識途中の文（partial）は翻訳しない設計（訳揺れ防止）。翻訳は確定文単位で 2〜5 秒程度遅延する
+- 言語の変更は停止中のみ。言語を切り替えても既存の字幕履歴は保持される（Markdown ヘッダには保存時点の言語ペアが記録される）
 - 話者分離・要約・録音保存は非対応
 - 配布用の署名・notarize はしていない（ローカルビルドでの自分用利用前提）
 - 認識精度はマイク位置・周囲ノイズの影響が大きい。MacBook をスピーカー方向へ向け、可能なら前方席を推奨
@@ -117,6 +119,7 @@ AVAudioEngine マイク入力（ハードウェアフォーマット）
 |---|---|
 | `Models/SessionStore.swift` | UI の単一情報源。セグメント履歴・partial・重複排除 |
 | `Models/KeywordParser.swift` | 専門用語欄のパース + イベント用プリセット |
+| `Models/LanguageCatalog.swift` | 言語の表示名・翻訳先候補の整形 |
 | `Services/AudioCaptureService.swift` | マイク入力・フォーマット変換・権限要求 |
 | `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber 配線 |
 | `Services/TranslationCoordinator.swift` | 翻訳キュー（ID dedup + AsyncStream） |
