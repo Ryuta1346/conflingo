@@ -66,8 +66,12 @@ struct ContentView: View {
             for await item in stream {
                 await store.beginTranslating(item.id)
                 do {
-                    let response = try await session.translate(item.text)
-                    await store.applyTranslation(id: item.id, japanese: response.targetText)
+                    // 専門用語をプレースホルダで保護してから翻訳し、訳文で原文表記に復元する
+                    let terms = await store.activeKeywords
+                    let (masked, mapping) = TermProtector.mask(item.text, terms: terms)
+                    let response = try await session.translate(masked)
+                    let restored = TermProtector.unmask(response.targetText, mapping: mapping)
+                    await store.applyTranslation(id: item.id, japanese: restored)
                 } catch {
                     await store.markTranslationFailed(id: item.id, reason: error.localizedDescription)
                 }
