@@ -33,26 +33,34 @@ enum MarkdownExporter {
 
         if targetLanguage == nil {
             for segment in segments {
-                lines.append("")
-                lines.append(heading(index: segment.index, startTime: segment.startTime))
-                lines.append("")
-                lines.append("English:")
-                lines.append(segment.english)
+                lines.append(contentsOf: entry(
+                    index: segment.index, startTime: segment.startTime,
+                    english: segment.english, japanese: nil
+                ))
             }
         } else {
             for unit in units {
-                lines.append("")
-                lines.append(heading(index: unit.index, startTime: unit.startTime))
-                lines.append("")
-                lines.append("English:")
-                lines.append(unit.english)
-                lines.append("")
-                lines.append("Japanese:")
-                lines.append(unit.japanese ?? "(untranslated)")
+                lines.append(contentsOf: entry(
+                    index: unit.index, startTime: unit.startTime,
+                    english: unit.english, japanese: unit.japanese ?? "(untranslated)"
+                ))
             }
         }
 
         return lines.joined(separator: "\n")
+    }
+
+    private static func entry(
+        index: Int,
+        startTime: TimeInterval?,
+        english: String,
+        japanese: String?
+    ) -> [String] {
+        var lines = ["", heading(index: index, startTime: startTime), "", "English:", english]
+        if let japanese {
+            lines.append(contentsOf: ["", "Japanese:", japanese])
+        }
+        return lines
     }
 
     private static func heading(index: Int, startTime: TimeInterval?) -> String {

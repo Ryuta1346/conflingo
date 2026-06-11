@@ -17,6 +17,8 @@ final class SessionStore {
     static let maxBufferedSegments = 4
 
     private(set) var segments: [TranscriptSegment] = []
+    /// ID 引きの逆引きインデックス。bufferedSegments が segments を線形探索しないため。
+    private var segmentByID: [UUID: TranscriptSegment] = [:]
     private(set) var units: [TranslationUnit] = []
     /// 文末待ちで翻訳単位に未確定のセグメント ID（出現順）
     private(set) var bufferedSegmentIDs: [UUID] = []
@@ -48,6 +50,7 @@ final class SessionStore {
             startTime: startTime
         )
         segments.append(segment)
+        segmentByID[segment.id] = segment
         volatileText = ""
         return segment.id
     }
@@ -56,7 +59,7 @@ final class SessionStore {
     /// flush 条件を満たしたら翻訳単位を確定して返し、それ以外は nil（文末待ち）。
     @discardableResult
     func bufferSegment(_ id: UUID) -> TranslationUnit? {
-        guard let segment = segments.first(where: { $0.id == id }) else { return nil }
+        guard let segment = segmentByID[id] else { return nil }
         bufferedSegmentIDs.append(id)
 
         let combinedLength = bufferedSegments.reduce(0) { $0 + $1.english.count + 1 }
@@ -90,7 +93,7 @@ final class SessionStore {
     }
 
     private var bufferedSegments: [TranscriptSegment] {
-        bufferedSegmentIDs.compactMap { id in segments.first(where: { $0.id == id }) }
+        bufferedSegmentIDs.compactMap { segmentByID[$0] }
     }
 
     func updateVolatile(_ text: String) {
@@ -125,6 +128,7 @@ final class SessionStore {
 
     func reset() {
         segments = []
+        segmentByID = [:]
         units = []
         bufferedSegmentIDs = []
         volatileText = ""

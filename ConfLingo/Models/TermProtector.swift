@@ -75,6 +75,9 @@ enum TermProtector {
         return UnmaskResult(text: result, unresolvedTokens: unresolved.sorted())
     }
 
+    /// Regex は Sendable 非準拠だが、生成後に変異しないため共有しても安全
+    nonisolated(unsafe) private static let brokenTokenPattern = /[⟦〚\[]{1,2}\s*([0-9０-９]+)\s*[⟧〛\]]{1,2}/
+
     /// 寛容パス。翻訳エンジンに崩されたトークン（全角数字化・括弧の置換/二重化・空白挿入）を
     /// index 正規化で特定し、未解決のものだけ復元する。
     /// mapping にない index（訳文中の正当な [1] 等）と復元済み index は誤食しない。
@@ -83,10 +86,11 @@ enum TermProtector {
         mapping: [String: String],
         unresolved: Set<String>
     ) -> (String, Set<String>) {
-        let pattern = /[⟦〚\[]{1,2}\s*([0-9０-９]+)\s*[⟧〛\]]{1,2}/
         var result = text
         var remaining = unresolved
-        while let match = result.firstMatch(of: pattern) {
+        var searchStart = result.startIndex
+        while !remaining.isEmpty,
+              let match = result[searchStart...].firstMatch(of: brokenTokenPattern) {
             let normalizedDigits = String(match.1.map { c -> Character in
                 if let value = c.wholeNumberValue, ("０"..."９").contains(c) {
                     return Character(String(value))
@@ -95,17 +99,16 @@ enum TermProtector {
             })
             guard let index = Int(normalizedDigits) else { break }
             let token = placeholder(for: index)
-            // 未解決トークンに対応する index のみ復元対象（範囲外・復元済みはスキップ）
+            // 未解決トークンに対応する index のみ復元対象（範囲外・復元済みはスキップして先へ進む）
             guard remaining.contains(token), let replacement = mapping[token] else {
-                // この match は触らず、以降を再帰的に処理（無限ループ防止のため範囲を分割）
-                let head = String(result[..<match.range.upperBound])
-                let tail = String(result[match.range.upperBound...])
-                let (recoveredTail, rest) = recoverBrokenTokens(in: tail, mapping: mapping, unresolved: remaining)
-                return (head + recoveredTail, rest)
+                searchStart = match.range.upperBound
+                continue
             }
+            // replaceSubrange で String.Index が無効化されるため、走査位置はオフセットで保持する
+            let offset = result.distance(from: result.startIndex, to: searchStart)
             result.replaceSubrange(match.range, with: replacement)
+            searchStart = result.index(result.startIndex, offsetBy: offset)
             remaining.remove(token)
-            if remaining.isEmpty { break }
         }
         return (result, remaining)
     }
