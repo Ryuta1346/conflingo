@@ -63,20 +63,27 @@ struct ContentView: View {
                 return
             }
             let stream = await coordinator.attach()
-            for segment in await store.untranslatedSegments {
-                await coordinator.enqueue(id: segment.id, text: segment.english)
+            for unit in await store.untranslatedUnits {
+                await coordinator.enqueue(id: unit.id, text: unit.english)
             }
             // session は隔離ドメインを跨げないため、翻訳ループはこの場で回す。
             // 個別の翻訳失敗は failed を記録して続行する（セッションは落とさない）。
             for await item in stream {
                 await store.beginTranslating(item.id)
                 do {
-                    // 専門用語をプレースホルダで保護してから翻訳し、訳文で原文表記に復元する
-                    let terms = await store.activeKeywords
-                    let (masked, mapping) = TermProtector.mask(item.text, terms: terms)
+                    // 専門用語をプレースホルダで保護してから翻訳し、訳文で原文表記（または指定訳語）に復元する
+                    let glossary = await store.activeGlossary
+                    let (masked, mapping) = TermProtector.mask(item.text, glossary: glossary)
                     let response = try await session.translate(masked)
-                    let restored = TermProtector.unmask(response.targetText, mapping: mapping)
-                    await store.applyTranslation(id: item.id, japanese: restored)
+                    let unmasked = TermProtector.unmask(response.targetText, mapping: mapping)
+                    var japanese = unmasked.text
+                    if !unmasked.unresolvedTokens.isEmpty,
+                       let retry = try? await session.translate(item.text) {
+                        // プレースホルダが復元不能に崩れた場合はマスクなしで再翻訳する
+                        // （用語保護より「壊れたトークンを表示しない」ことを優先。再翻訳も失敗なら寛容パス適用済みを採用）
+                        japanese = retry.targetText
+                    }
+                    await store.applyTranslation(id: item.id, japanese: japanese)
                 } catch {
                     await store.markTranslationFailed(id: item.id, reason: error.localizedDescription)
                 }
@@ -161,13 +168,16 @@ struct ContentView: View {
             .padding(.horizontal, 12)
             .padding(.top, 8)
 
-            HStack(spacing: 8) {
+            HStack(alignment: .top, spacing: 8) {
                 Image(systemName: "character.magnify")
                     .foregroundStyle(.secondary)
+                    .padding(.top, 4)
                 TextField(
-                    "専門用語（カンマ区切り）。音声認識の精度向上に加え、翻訳でも原文表記のまま保持されます",
-                    text: $contextKeywords
+                    "専門用語（カンマ区切り）。「term=訳語」で訳語を固定できます（例: evals=評価）。未指定は原文表記のまま保持",
+                    text: $contextKeywords,
+                    axis: .vertical
                 )
+                .lineLimit(1...4)
                 .textFieldStyle(.roundedBorder)
                 .disabled(store.phase != .idle)
             }
@@ -199,12 +209,12 @@ struct ContentView: View {
     }
 
     private var targetEntries: [TranscriptPane.Entry] {
-        store.segments.map { segment in
+        var entries = store.units.map { unit in
             let text: String
             let dimmed: Bool
-            switch segment.translationState {
+            switch unit.translationState {
             case .done:
-                text = segment.japanese ?? ""
+                text = unit.japanese ?? ""
                 dimmed = false
             case .failed:
                 text = "（翻訳に失敗しました）"
@@ -213,8 +223,13 @@ struct ContentView: View {
                 text = "…翻訳中"
                 dimmed = true
             }
-            return TranscriptPane.Entry(id: segment.id.uuidString, text: text, dimmed: dimmed)
+            return TranscriptPane.Entry(id: unit.id.uuidString, text: text, dimmed: dimmed)
         }
+        if !store.bufferedSegmentIDs.isEmpty {
+            // 文末待ちでまだ翻訳単位になっていないセグメントがあることを示す
+            entries.append(TranscriptPane.Entry(id: "buffered", text: "…翻訳中", dimmed: true))
+        }
+        return entries
     }
 }
 

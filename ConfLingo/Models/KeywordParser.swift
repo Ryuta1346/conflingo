@@ -14,14 +14,40 @@ enum KeywordParser {
     Bedrock, Vertex AI, primeNumber
     """
 
-    /// カンマ（, ・、）・改行区切りの文字列をトリム・空除去・大文字小文字無視の
-    /// 重複排除（先勝ち）をかけて配列化する。
-    static func parse(_ raw: String) -> [String] {
+    /// 用語1件分。`target` が non-nil なら翻訳後にその訳語へ置換し、
+    /// nil なら原文表記のまま保持する（do-not-translate）。
+    struct GlossaryEntry: Equatable, Sendable {
+        let term: String
+        let target: String?
+    }
+
+    /// カンマ（, ・、）・改行区切りの各トークンを `term=訳語` 形式としてパースする。
+    /// 区切りは最初の `=` / `＝` のみ（訳語側に `=` を含められる）。
+    /// `=` なし・訳語が空なら target = nil（従来のキーワード指定と完全互換）。
+    /// term の重複は大文字小文字無視で先勝ち排除する。
+    static func parseGlossary(_ raw: String) -> [GlossaryEntry] {
         var seen = Set<String>()
         return raw
             .split(whereSeparator: { $0 == "," || $0 == "、" || $0.isNewline })
-            .map { $0.trimmingCharacters(in: .whitespacesAndNewlines) }
-            .filter { !$0.isEmpty }
-            .filter { seen.insert($0.lowercased()).inserted }
+            .compactMap { token -> GlossaryEntry? in
+                let term: String
+                let target: String?
+                if let eq = token.firstIndex(where: { $0 == "=" || $0 == "＝" }) {
+                    term = String(token[..<eq]).trimmingCharacters(in: .whitespacesAndNewlines)
+                    let rawTarget = String(token[token.index(after: eq)...])
+                        .trimmingCharacters(in: .whitespacesAndNewlines)
+                    target = rawTarget.isEmpty ? nil : rawTarget
+                } else {
+                    term = token.trimmingCharacters(in: .whitespacesAndNewlines)
+                    target = nil
+                }
+                guard !term.isEmpty, seen.insert(term.lowercased()).inserted else { return nil }
+                return GlossaryEntry(term: term, target: target)
+            }
+    }
+
+    /// contextual strings 用に term のみを配列化する（訳語部分は含めない）。
+    static func parse(_ raw: String) -> [String] {
+        parseGlossary(raw).map(\.term)
     }
 }

@@ -11,7 +11,6 @@ struct SessionStoreTests {
         #expect(store.segments.count == 1)
         #expect(store.segments[0].english == "Hello world")
         #expect(store.segments[0].index == 1)
-        #expect(store.segments[0].translationState == .pending)
     }
 
     @Test func appendFinalStoresStartTime() {
@@ -69,50 +68,141 @@ struct SessionStoreTests {
         #expect(store.segments.map(\.index) == [1, 2])
     }
 
+    // MARK: - 翻訳単位（TranslationUnit）バッファリング
+
+    /// 文末まで final を投入して unit を1つ確定させるヘルパー
+    private func makeUnit(_ store: SessionStore, _ text: String) throws -> TranslationUnit {
+        let id = try #require(store.appendFinal(text))
+        return try #require(store.bufferSegment(id))
+    }
+
+    @Test func bufferSegmentHoldsFragmentUntilSentenceEnd() throws {
+        let store = SessionStore()
+        let a = try #require(store.appendFinal("This is the first half"))
+        #expect(store.bufferSegment(a) == nil)
+        #expect(store.bufferedSegmentIDs == [a])
+
+        let b = try #require(store.appendFinal("and this finishes it."))
+        let unit = try #require(store.bufferSegment(b))
+        #expect(unit.english == "This is the first half and this finishes it.")
+        #expect(unit.segmentIDs == [a, b])
+        #expect(unit.index == 1)
+        #expect(store.units.count == 1)
+        #expect(store.bufferedSegmentIDs.isEmpty)
+    }
+
+    @Test func bufferSegmentFlushesImmediatelyOnSentenceEnd() throws {
+        let store = SessionStore()
+        let unit = try makeUnit(store, "Hello everyone.")
+        #expect(unit.english == "Hello everyone.")
+        #expect(unit.segmentIDs.count == 1)
+    }
+
+    @Test func bufferSegmentFlushesOnSegmentCountLimit() throws {
+        let store = SessionStore()
+        var unit: TranslationUnit?
+        for i in 1...4 {
+            let id = try #require(store.appendFinal("fragment \(i) without punctuation"))
+            unit = store.bufferSegment(id)
+            if i < 4 {
+                #expect(unit == nil)
+            }
+        }
+        // 4セグメント目で文末がなくても強制 flush（暴走ガード）
+        #expect(unit != nil)
+        #expect(unit?.segmentIDs.count == 4)
+    }
+
+    @Test func bufferSegmentFlushesOnCharacterLimit() throws {
+        let store = SessionStore()
+        let long = String(repeating: "word ", count: 90).trimmingCharacters(in: .whitespaces)
+        let id = try #require(store.appendFinal(long))
+        // 400文字以上なら文末がなくても flush
+        let unit = try #require(store.bufferSegment(id))
+        #expect(unit.english == long)
+    }
+
+    @Test func flushBufferForcesPendingFragment() throws {
+        let store = SessionStore()
+        let a = try #require(store.appendFinal("unfinished fragment"))
+        #expect(store.bufferSegment(a) == nil)
+        let unit = try #require(store.flushBuffer())
+        #expect(unit.english == "unfinished fragment")
+        #expect(store.bufferedSegmentIDs.isEmpty)
+        // バッファが空なら nil
+        #expect(store.flushBuffer() == nil)
+    }
+
+    @Test func unitStartTimeComesFromFirstSegment() throws {
+        let store = SessionStore()
+        let a = try #require(store.appendFinal("first part", startTime: 10.0))
+        #expect(store.bufferSegment(a) == nil)
+        let b = try #require(store.appendFinal("second part.", startTime: 15.0))
+        let unit = try #require(store.bufferSegment(b))
+        #expect(unit.startTime == 10.0)
+    }
+
+    @Test func unitIndexIncrements() throws {
+        let store = SessionStore()
+        let first = try makeUnit(store, "One.")
+        let second = try makeUnit(store, "Two.")
+        #expect(first.index == 1)
+        #expect(second.index == 2)
+    }
+
     @Test func applyTranslationSetsJapaneseAndState() throws {
         let store = SessionStore()
-        let id = try #require(store.appendFinal("Hello"))
-        store.beginTranslating(id)
-        #expect(store.segments[0].translationState == .translating)
-        store.applyTranslation(id: id, japanese: "こんにちは")
-        #expect(store.segments[0].japanese == "こんにちは")
-        #expect(store.segments[0].translationState == .done)
+        let unit = try makeUnit(store, "Hello.")
+        #expect(store.units[0].translationState == .pending)
+        store.beginTranslating(unit.id)
+        #expect(store.units[0].translationState == .translating)
+        store.applyTranslation(id: unit.id, japanese: "こんにちは。")
+        #expect(store.units[0].japanese == "こんにちは。")
+        #expect(store.units[0].translationState == .done)
     }
 
     @Test func markTranslationFailedSetsState() throws {
         let store = SessionStore()
-        let id = try #require(store.appendFinal("Hello"))
-        store.markTranslationFailed(id: id, reason: "network")
-        #expect(store.segments[0].translationState == .failed("network"))
-        #expect(store.segments[0].japanese == nil)
+        let unit = try makeUnit(store, "Hello.")
+        store.markTranslationFailed(id: unit.id, reason: "network")
+        #expect(store.units[0].translationState == .failed("network"))
+        #expect(store.units[0].japanese == nil)
     }
 
-    @Test func untranslatedSegmentsReturnsOnlyMissingJapanese() throws {
+    @Test func untranslatedUnitsReturnsOnlyMissingJapanese() throws {
         let store = SessionStore()
-        let a = try #require(store.appendFinal("A"))
-        let b = try #require(store.appendFinal("B"))
-        _ = b
-        store.appendFinal("C")
-        store.applyTranslation(id: a, japanese: "あ")
-        #expect(store.untranslatedSegments.map(\.english) == ["B", "C"])
+        let a = try makeUnit(store, "A.")
+        _ = try makeUnit(store, "B.")
+        _ = try makeUnit(store, "C.")
+        store.applyTranslation(id: a.id, japanese: "あ。")
+        #expect(store.untranslatedUnits.map(\.english) == ["B.", "C."])
     }
 
-    @Test func storesActiveKeywords() {
+    @Test func storesActiveGlossary() {
         let store = SessionStore()
-        #expect(store.activeKeywords.isEmpty)
-        store.setActiveKeywords(["Claude Code", "MCP"])
-        #expect(store.activeKeywords == ["Claude Code", "MCP"])
+        #expect(store.activeGlossary.isEmpty)
+        let first = [
+            KeywordParser.GlossaryEntry(term: "Claude Code", target: nil),
+            KeywordParser.GlossaryEntry(term: "evals", target: "評価"),
+        ]
+        store.setActiveGlossary(first)
+        #expect(store.activeGlossary == first)
         // 再 Start で上書きされる
-        store.setActiveKeywords(["evals"])
-        #expect(store.activeKeywords == ["evals"])
+        let second = [KeywordParser.GlossaryEntry(term: "MCP", target: nil)]
+        store.setActiveGlossary(second)
+        #expect(store.activeGlossary == second)
     }
 
-    @Test func resetClearsSession() {
+    @Test func resetClearsSession() throws {
         let store = SessionStore()
-        store.appendFinal("Hello")
+        _ = try makeUnit(store, "Hello.")
+        let pending = try #require(store.appendFinal("unfinished"))
+        _ = store.bufferSegment(pending)
         store.updateVolatile("partial")
         store.reset()
         #expect(store.segments.isEmpty)
+        #expect(store.units.isEmpty)
+        #expect(store.bufferedSegmentIDs.isEmpty)
         #expect(store.volatileText.isEmpty)
     }
 }

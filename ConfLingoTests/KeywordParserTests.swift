@@ -34,4 +34,52 @@ struct KeywordParserTests {
         #expect(parsed.contains("Claude Code"))
         #expect(parsed.contains("MCP"))
     }
+
+    // MARK: - parseGlossary（term=訳語）
+
+    @Test func glossaryParsesTargetAfterEquals() {
+        let entries = KeywordParser.parseGlossary("evals=評価, MCP")
+        #expect(entries == [
+            KeywordParser.GlossaryEntry(term: "evals", target: "評価"),
+            KeywordParser.GlossaryEntry(term: "MCP", target: nil),
+        ])
+    }
+
+    @Test func glossarySupportsFullWidthEquals() {
+        let entries = KeywordParser.parseGlossary("token＝トークン")
+        #expect(entries == [KeywordParser.GlossaryEntry(term: "token", target: "トークン")])
+    }
+
+    @Test func glossarySplitsOnFirstEqualsOnly() {
+        let entries = KeywordParser.parseGlossary("a=b=c")
+        #expect(entries == [KeywordParser.GlossaryEntry(term: "a", target: "b=c")])
+    }
+
+    @Test func glossaryEmptyTargetBecomesNil() {
+        let entries = KeywordParser.parseGlossary("Claude= , MCP=")
+        #expect(entries == [
+            KeywordParser.GlossaryEntry(term: "Claude", target: nil),
+            KeywordParser.GlossaryEntry(term: "MCP", target: nil),
+        ])
+    }
+
+    @Test func glossaryTrimsAroundEquals() {
+        let entries = KeywordParser.parseGlossary("fine-tuning = ファインチューニング")
+        #expect(entries == [KeywordParser.GlossaryEntry(term: "fine-tuning", target: "ファインチューニング")])
+    }
+
+    @Test func glossaryDeduplicatesByTermKeepingFirst() {
+        let entries = KeywordParser.parseGlossary("MCP=エムシーピー, mcp=別訳")
+        #expect(entries == [KeywordParser.GlossaryEntry(term: "MCP", target: "エムシーピー")])
+    }
+
+    @Test func glossaryDropsEntriesWithEmptyTerm() {
+        let entries = KeywordParser.parseGlossary("=訳語だけ, Claude")
+        #expect(entries == [KeywordParser.GlossaryEntry(term: "Claude", target: nil)])
+    }
+
+    @Test func parseDelegatesToGlossaryTerms() {
+        // 既存の parse は term のみ返す（contextualStrings 用）
+        #expect(KeywordParser.parse("evals=評価, MCP") == ["evals", "MCP"])
+    }
 }

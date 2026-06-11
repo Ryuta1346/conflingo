@@ -8,29 +8,44 @@ struct MarkdownExporterTests {
     private func segment(
         index: Int,
         english: String,
-        japanese: String?,
         startTime: TimeInterval? = nil
     ) -> TranscriptSegment {
         TranscriptSegment(
             id: UUID(),
             index: index,
             english: english,
-            japanese: japanese,
-            translationState: japanese == nil ? .pending : .done,
             finalizedAt: date,
             startTime: startTime
         )
     }
 
+    private func unit(
+        index: Int,
+        english: String,
+        japanese: String?,
+        startTime: TimeInterval? = nil
+    ) -> TranslationUnit {
+        TranslationUnit(
+            id: UUID(),
+            index: index,
+            segmentIDs: [UUID()],
+            english: english,
+            japanese: japanese,
+            translationState: japanese == nil ? .pending : .done,
+            startTime: startTime
+        )
+    }
+
     @Test func rendersFullSessionWithTranslatedAndUntranslated() {
-        let segments = [
-            segment(index: 1, english: "Hello everyone.", japanese: "皆さんこんにちは。"),
-            segment(index: 2, english: "Welcome to the conference.", japanese: nil),
+        let units = [
+            unit(index: 1, english: "Hello everyone.", japanese: "皆さんこんにちは。"),
+            unit(index: 2, english: "Welcome to the conference.", japanese: nil),
         ]
         let markdown = MarkdownExporter.render(
             sessionName: "WWDC Keynote",
             date: date,
-            segments: segments,
+            segments: [],
+            units: units,
             sourceLanguage: "en-US",
             targetLanguage: "ja"
         )
@@ -93,8 +108,8 @@ struct MarkdownExporterTests {
 
     @Test func transcriptionOnlyOmitsTargetLanguageAndJapaneseBlocks() {
         let segments = [
-            segment(index: 1, english: "Hello everyone.", japanese: nil),
-            segment(index: 2, english: "Welcome to the conference.", japanese: nil),
+            segment(index: 1, english: "Hello everyone."),
+            segment(index: 2, english: "Welcome to the conference."),
         ]
         let markdown = MarkdownExporter.render(
             sessionName: "Transcription Only",
@@ -129,6 +144,19 @@ struct MarkdownExporterTests {
         #expect(!markdown.contains("Japanese:"))
     }
 
+    @Test func translationSessionHeadingIncludesUnitTimestamp() {
+        let units = [unit(index: 1, english: "Hello.", japanese: "こんにちは。", startTime: 225.0)]
+        let markdown = MarkdownExporter.render(
+            sessionName: "Keynote",
+            date: date,
+            segments: [],
+            units: units,
+            sourceLanguage: "en-US",
+            targetLanguage: "ja"
+        )
+        #expect(markdown.contains("### Segment 1 [00:03:45]"))
+    }
+
     @Test func timestampFormatsAsHoursMinutesSeconds() {
         #expect(MarkdownExporter.timestamp(0) == "00:00:00")
         #expect(MarkdownExporter.timestamp(225) == "00:03:45")
@@ -138,8 +166,8 @@ struct MarkdownExporterTests {
 
     @Test func segmentHeadingIncludesTimestampWhenAvailable() {
         let segments = [
-            segment(index: 1, english: "Hello.", japanese: nil, startTime: 225.0),
-            segment(index: 2, english: "World.", japanese: nil),
+            segment(index: 1, english: "Hello.", startTime: 225.0),
+            segment(index: 2, english: "World."),
         ]
         let markdown = MarkdownExporter.render(
             sessionName: "Minutes",

@@ -9,18 +9,27 @@ enum TermProtector {
     /// 用語をプレースホルダに置換し、復元用マッピング（プレースホルダ → ソース上の実際の表記）を返す。
     /// 最長一致優先・大文字小文字無視・ASCII 英数字の単語境界を考慮する。
     static func mask(_ text: String, terms: [String]) -> (masked: String, mapping: [String: String]) {
-        let sortedTerms = terms.filter { !$0.isEmpty }.sorted { $0.count > $1.count }
-        guard !text.isEmpty, !sortedTerms.isEmpty else { return (text, [:]) }
+        mask(text, glossary: terms.map { KeywordParser.GlossaryEntry(term: $0, target: nil) })
+    }
+
+    /// glossary 版。訳語指定あり（target non-nil）の用語は復元時に訳語へ置換され、
+    /// 指定なしはソース上の実際の表記を維持する。
+    static func mask(
+        _ text: String,
+        glossary: [KeywordParser.GlossaryEntry]
+    ) -> (masked: String, mapping: [String: String]) {
+        let sortedEntries = glossary.filter { !$0.term.isEmpty }.sorted { $0.term.count > $1.term.count }
+        guard !text.isEmpty, !sortedEntries.isEmpty else { return (text, [:]) }
 
         // 最長の用語から順に占有範囲を確定し、重複マッチを防ぐ
-        var claimed: [Range<String.Index>] = []
-        for term in sortedTerms {
+        var claimed: [(range: Range<String.Index>, restoration: String)] = []
+        for entry in sortedEntries {
             var searchRange = text.startIndex..<text.endIndex
-            while let found = text.range(of: term, options: .caseInsensitive, range: searchRange) {
+            while let found = text.range(of: entry.term, options: .caseInsensitive, range: searchRange) {
                 searchRange = found.upperBound..<text.endIndex
                 guard hasWordBoundary(text, found) else { continue }
-                guard !claimed.contains(where: { $0.overlaps(found) }) else { continue }
-                claimed.append(found)
+                guard !claimed.contains(where: { $0.range.overlaps(found) }) else { continue }
+                claimed.append((found, entry.target ?? String(text[found])))
             }
         }
         guard !claimed.isEmpty else { return (text, [:]) }
@@ -29,25 +38,76 @@ enum TermProtector {
         var parts: [String] = []
         var mapping: [String: String] = [:]
         var cursor = text.startIndex
-        for (index, range) in claimed.sorted(by: { $0.lowerBound < $1.lowerBound }).enumerated() {
+        for (index, match) in claimed.sorted(by: { $0.range.lowerBound < $1.range.lowerBound }).enumerated() {
             let token = placeholder(for: index)
-            parts.append(String(text[cursor..<range.lowerBound]))
+            parts.append(String(text[cursor..<match.range.lowerBound]))
             parts.append(token)
-            mapping[token] = String(text[range])
-            cursor = range.upperBound
+            mapping[token] = match.restoration
+            cursor = match.range.upperBound
         }
         parts.append(String(text[cursor...]))
         return (parts.joined(), mapping)
     }
 
-    /// 翻訳結果中のプレースホルダを元の用語に復元する。
-    /// 翻訳エンジンに崩されて見つからないトークンは無視する（翻訳文をそのまま残す）。
-    static func unmask(_ translated: String, mapping: [String: String]) -> String {
+    /// unmask の結果。`unresolvedTokens` が非空なら翻訳エンジンがプレースホルダを
+    /// 復元不能な形に崩した（または消した）ことを示す。呼び出し側で再翻訳等のフォールバックに使う。
+    struct UnmaskResult: Equatable {
+        let text: String
+        let unresolvedTokens: [String]
+    }
+
+    /// 翻訳結果中のプレースホルダを元の用語（または指定訳語）に復元する。
+    /// 完全一致で見つからないトークンは寛容パス（崩れトークンの正規化マッチ）で復元を試み、
+    /// それでも残ったものを `unresolvedTokens` として報告する。
+    static func unmask(_ translated: String, mapping: [String: String]) -> UnmaskResult {
         var result = translated
-        for (token, original) in mapping {
-            result = result.replacingOccurrences(of: token, with: original)
+        var unresolved: Set<String> = []
+        for (token, replacement) in mapping {
+            if result.contains(token) {
+                result = result.replacingOccurrences(of: token, with: replacement)
+            } else {
+                unresolved.insert(token)
+            }
         }
-        return result
+        if !unresolved.isEmpty {
+            (result, unresolved) = recoverBrokenTokens(in: result, mapping: mapping, unresolved: unresolved)
+        }
+        return UnmaskResult(text: result, unresolvedTokens: unresolved.sorted())
+    }
+
+    /// 寛容パス。翻訳エンジンに崩されたトークン（全角数字化・括弧の置換/二重化・空白挿入）を
+    /// index 正規化で特定し、未解決のものだけ復元する。
+    /// mapping にない index（訳文中の正当な [1] 等）と復元済み index は誤食しない。
+    private static func recoverBrokenTokens(
+        in text: String,
+        mapping: [String: String],
+        unresolved: Set<String>
+    ) -> (String, Set<String>) {
+        let pattern = /[⟦〚\[]{1,2}\s*([0-9０-９]+)\s*[⟧〛\]]{1,2}/
+        var result = text
+        var remaining = unresolved
+        while let match = result.firstMatch(of: pattern) {
+            let normalizedDigits = String(match.1.map { c -> Character in
+                if let value = c.wholeNumberValue, ("０"..."９").contains(c) {
+                    return Character(String(value))
+                }
+                return c
+            })
+            guard let index = Int(normalizedDigits) else { break }
+            let token = placeholder(for: index)
+            // 未解決トークンに対応する index のみ復元対象（範囲外・復元済みはスキップ）
+            guard remaining.contains(token), let replacement = mapping[token] else {
+                // この match は触らず、以降を再帰的に処理（無限ループ防止のため範囲を分割）
+                let head = String(result[..<match.range.upperBound])
+                let tail = String(result[match.range.upperBound...])
+                let (recoveredTail, rest) = recoverBrokenTokens(in: tail, mapping: mapping, unresolved: remaining)
+                return (head + recoveredTail, rest)
+            }
+            result.replaceSubrange(match.range, with: replacement)
+            remaining.remove(token)
+            if remaining.isEmpty { break }
+        }
+        return (result, remaining)
     }
 
     /// マッチ端と隣接文字が共に ASCII 英数字なら単語境界なしとみなす

@@ -8,11 +8,13 @@ enum MarkdownExporter {
         return formatter
     }()
 
-    /// targetLanguage が nil の場合は文字起こしのみセッションとみなし、訳文ブロックを出力しない
+    /// targetLanguage が nil の場合は文字起こしのみセッションとみなし、認識セグメント単位で出力する。
+    /// 翻訳セッションでは翻訳単位（複数セグメントを文末まで結合したもの）で出力する。
     static func render(
         sessionName: String,
         date: Date,
         segments: [TranscriptSegment],
+        units: [TranslationUnit] = [],
         sourceLanguage: String,
         targetLanguage: String?
     ) -> String {
@@ -25,28 +27,40 @@ enum MarkdownExporter {
         if let targetLanguage {
             lines.append("- Target language: \(targetLanguage)")
         }
-        lines.append("- Segments: \(segments.count)")
+        lines.append("- Segments: \(targetLanguage == nil ? segments.count : units.count)")
         lines.append("")
         lines.append("## Transcript")
 
-        for segment in segments {
-            lines.append("")
-            if let startTime = segment.startTime {
-                lines.append("### Segment \(segment.index) [\(timestamp(startTime))]")
-            } else {
-                lines.append("### Segment \(segment.index)")
+        if targetLanguage == nil {
+            for segment in segments {
+                lines.append("")
+                lines.append(heading(index: segment.index, startTime: segment.startTime))
+                lines.append("")
+                lines.append("English:")
+                lines.append(segment.english)
             }
-            lines.append("")
-            lines.append("English:")
-            lines.append(segment.english)
-            if targetLanguage != nil {
+        } else {
+            for unit in units {
+                lines.append("")
+                lines.append(heading(index: unit.index, startTime: unit.startTime))
+                lines.append("")
+                lines.append("English:")
+                lines.append(unit.english)
                 lines.append("")
                 lines.append("Japanese:")
-                lines.append(segment.japanese ?? "(untranslated)")
+                lines.append(unit.japanese ?? "(untranslated)")
             }
         }
 
         return lines.joined(separator: "\n")
+    }
+
+    private static func heading(index: Int, startTime: TimeInterval?) -> String {
+        if let startTime {
+            "### Segment \(index) [\(timestamp(startTime))]"
+        } else {
+            "### Segment \(index)"
+        }
     }
 
     /// 録音開始からの経過秒を hh:mm:ss 形式にする

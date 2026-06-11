@@ -63,7 +63,7 @@ struct ControlBar: View {
                         store: store,
                         coordinator: coordinator,
                         locale: speechLocale,
-                        contextKeywords: KeywordParser.parse(contextKeywords),
+                        glossary: KeywordParser.parseGlossary(contextKeywords),
                         fastResults: fastResults
                     )
                 }
@@ -76,7 +76,7 @@ struct ControlBar: View {
         case .listening:
             Button("Stop") {
                 Task {
-                    await controller.stop(store: store)
+                    await controller.stop(store: store, coordinator: coordinator)
                 }
             }
             .keyboardShortcut("r", modifiers: .command)
@@ -103,6 +103,7 @@ struct ControlBar: View {
             sessionName: store.sessionName,
             date: store.startedAt ?? Date(),
             segments: store.segments,
+            units: store.units,
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage
         )
