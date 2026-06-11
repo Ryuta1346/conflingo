@@ -1,0 +1,29 @@
+{
+  "metadata": {
+    "branch": "feat/translation-accuracy-improvements",
+    "base_branch": "main",
+    "round": 1,
+    "max_rounds": 3,
+    "timestamp": "2026-06-11T21:21:00+09:00",
+    "rules_hash": { "merged": "sha256:none (0 applicable rules)" },
+    "changed_files_count": 17,
+    "options": { "category": "all", "full": false, "severity_filter": "all" }
+  },
+  "summary": {
+    "total_rules": 62,
+    "evaluated": 0,
+    "pass": 0,
+    "fail": 0,
+    "na": 0,
+    "needs_human_review": 0,
+    "skipped": 62,
+    "error": 0,
+    "override": 0
+  },
+  "status": "APPROVED",
+  "note": "全変更ファイルが Swift (*.swift)。現行ルールセットの applicable_files は TS/JS/Python/Go/Ruby 系のみで Swift 対応ルールが存在しないため、全62ルールが SKIPPED。規則ベース判定としては適用対象なし = ブロッキング違反なしで APPROVED。",
+  "results": [],
+  "skipped_rules_reason": "applicable_files に *.swift を含むルールなし",
+  "overrides": [],
+  "errors": []
+}
