@@ -1,5 +1,6 @@
 import Foundation
 import Observation
+import os
 
 /// 複数の名前付きキーワードプロファイルを管理し UserDefaults に永続化する。
 /// @AppStorage は配列を持てないため、profiles を JSON 化して単一キーに保存する。
@@ -15,6 +16,8 @@ final class KeywordProfileStore {
     static let legacyKeywordsKey = "contextKeywords"
     /// マイグレーションや完全新規時に生成する初期プロファイル名。
     static let defaultProfileName = "デフォルト"
+
+    private static let logger = Logger(subsystem: "com.gavrri.conflingo", category: "keywordProfile")
 
     private let defaults: UserDefaults
 
@@ -39,14 +42,14 @@ final class KeywordProfileStore {
 
     // MARK: - 選択中プロファイル
 
-    /// 選択中プロファイル。selectedID が壊れていれば先頭にフォールバックする。
-    var selectedProfile: KeywordProfile {
-        profiles.first { $0.id == selectedID } ?? profiles[0]
-    }
-
     /// 選択中プロファイルの配列インデックス（常に有効。先頭フォールバック）。
     private var selectedIndex: Int {
         profiles.firstIndex { $0.id == selectedID } ?? 0
+    }
+
+    /// 選択中プロファイル。selectedID が壊れていれば先頭にフォールバックする。
+    var selectedProfile: KeywordProfile {
+        profiles[selectedIndex]
     }
 
     func select(_ id: UUID) {
@@ -73,23 +76,25 @@ final class KeywordProfileStore {
     /// 新規プロファイルを作成して選択する。
     @discardableResult
     func addProfile(name: String, keywords: String = "") -> KeywordProfile {
-        let profile = KeywordProfile(name: uniqueName(name), keywords: keywords)
-        profiles.append(profile)
-        selectedID = profile.id
-        return profile
+        appendAndSelect(KeywordProfile(name: uniqueName(name), keywords: keywords))
     }
 
     /// 指定プロファイルを複製して選択する。
     @discardableResult
     func duplicate(_ id: UUID) -> KeywordProfile? {
         guard let source = profiles.first(where: { $0.id == id }) else { return nil }
-        let copy = KeywordProfile(
+        return appendAndSelect(KeywordProfile(
             name: uniqueName("\(source.name) のコピー"),
             keywords: source.keywords
-        )
-        profiles.append(copy)
-        selectedID = copy.id
-        return copy
+        ))
+    }
+
+    /// プロファイルを末尾に追加して選択中にする。add / duplicate 共通の確定処理。
+    @discardableResult
+    private func appendAndSelect(_ profile: KeywordProfile) -> KeywordProfile {
+        profiles.append(profile)
+        selectedID = profile.id
+        return profile
     }
 
     /// プロファイルを削除する。最後の1件は削除不可（false を返す）。
@@ -109,8 +114,13 @@ final class KeywordProfileStore {
     // MARK: - 永続化 / ロード
 
     private func persistProfiles() {
-        guard let data = try? JSONEncoder().encode(profiles) else { return }
-        defaults.set(data, forKey: Self.profilesKey)
+        do {
+            let data = try JSONEncoder().encode(profiles)
+            defaults.set(data, forKey: Self.profilesKey)
+        } catch {
+            // 通常は到達しない（String/UUID のみ）。原因追跡のため記録する。
+            Self.logger.error("failed to encode profiles: \(error)")
+        }
     }
 
     /// 同名が既にあれば " 2", " 3" … と連番を付けて一意化する。
@@ -126,17 +136,23 @@ final class KeywordProfileStore {
     private static func load(from defaults: UserDefaults)
         -> (profiles: [KeywordProfile], selectedID: UUID) {
         // 1) 既存プロファイル配列があればそれをロード。
-        if let data = defaults.data(forKey: profilesKey),
-           let decoded = try? JSONDecoder().decode([KeywordProfile].self, from: data),
-           !decoded.isEmpty {
-            let saved = defaults.string(forKey: selectedIDKey).flatMap(UUID.init(uuidString:))
-            let selectedID = decoded.first { $0.id == saved }?.id ?? decoded[0].id
-            return (decoded, selectedID)
+        if let data = defaults.data(forKey: profilesKey) {
+            do {
+                let decoded = try JSONDecoder().decode([KeywordProfile].self, from: data)
+                if !decoded.isEmpty {
+                    let saved = defaults.string(forKey: selectedIDKey).flatMap(UUID.init(uuidString:))
+                    let selectedID = decoded.first { $0.id == saved }?.id ?? decoded[0].id
+                    return (decoded, selectedID)
+                }
+            } catch {
+                // 破損データはマイグレーション/デフォルトへフォールバックするが、原因追跡のため記録する。
+                logger.error("failed to decode profiles, falling back: \(error)")
+            }
         }
 
-        // 2) 初回（プロファイル未保存）: 旧 contextKeywords を取り込む。
+        // 2) 初回（プロファイル未保存）or 破損: 旧 contextKeywords を取り込む。
         let legacy = defaults.string(forKey: legacyKeywordsKey)
-        let seed = (legacy?.isEmpty == false) ? legacy! : KeywordParser.defaultKeywords
+        let seed = legacy.flatMap { $0.isEmpty ? nil : $0 } ?? KeywordParser.defaultKeywords
         let initial = KeywordProfile(name: defaultProfileName, keywords: seed)
         return ([initial], initial.id)
     }

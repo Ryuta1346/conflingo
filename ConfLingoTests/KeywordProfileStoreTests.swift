@@ -198,4 +198,73 @@ struct KeywordProfileStoreTests {
         let store = KeywordProfileStore(defaults: defaults)
         #expect(store.selectedID == store.profiles[0].id)
     }
+
+    /// 破損した profiles JSON はデコード失敗としてフォールバックし、旧キーワードを取り込む。
+    @Test func corruptedProfilesJSONFallsBackToLegacy() {
+        let defaults = makeDefaults()
+        defaults.set(Data("not valid json".utf8), forKey: KeywordProfileStore.profilesKey)
+        defaults.set("Legacy, Keywords", forKey: KeywordProfileStore.legacyKeywordsKey)
+
+        let store = KeywordProfileStore(defaults: defaults)
+
+        #expect(store.profiles.count == 1)
+        #expect(store.profiles[0].name == KeywordProfileStore.defaultProfileName)
+        #expect(store.profiles[0].keywords == "Legacy, Keywords")
+    }
+
+    // MARK: - delete 境界
+
+    /// 中途位置の選択中プロファイルを削除すると、同インデックス（=次の要素）へ選択が移る。
+    @Test func deleteMiddleProfileSelectsNext() {
+        let store = KeywordProfileStore(defaults: makeDefaults())
+        let first = store.selectedProfile
+        let second = store.addProfile(name: "B")
+        store.select(first.id)
+        let third = store.addProfile(name: "C") // profiles = [first, second, third]
+        store.select(second.id)                 // 中途位置(index 1)を選択
+
+        let ok = store.delete(second.id)
+
+        #expect(ok)
+        #expect(store.profiles.count == 2)
+        #expect(store.selectedID == third.id) // min(1, 1) → 次の要素 third
+        #expect(!store.profiles.contains { $0.id == second.id })
+    }
+
+    // MARK: - rename / uniqueName / update のエッジ
+
+    @Test func renameUnknownIDIsIgnored() {
+        let store = KeywordProfileStore(defaults: makeDefaults())
+        _ = store.addProfile(name: "元", keywords: "kw")
+        let before = store.profiles
+
+        store.rename(UUID(), to: "新名")
+
+        #expect(store.profiles == before)
+    }
+
+    /// 同名が複数層（base, base 2, base 3 …）存在しても連番が衝突しない。
+    @Test func uniqueNameHandlesMultipleLevelsOfCollision() {
+        let store = KeywordProfileStore(defaults: makeDefaults())
+        let p1 = store.addProfile(name: "テスト")
+        let p2 = store.addProfile(name: "テスト")
+        let p3 = store.addProfile(name: "テスト")
+        let p4 = store.addProfile(name: "テスト")
+
+        #expect(p1.name == "テスト")
+        #expect(p2.name == "テスト 2")
+        #expect(p3.name == "テスト 3")
+        #expect(p4.name == "テスト 4")
+    }
+
+    /// 同一内容での更新は no-op（値は保持され往復しても一致する）。
+    @Test func updateSelectedKeywordsWithSameValueIsNoOp() {
+        let defaults = makeDefaults()
+        let store = KeywordProfileStore(defaults: defaults)
+        store.updateSelectedKeywords("A, B")
+        store.updateSelectedKeywords("A, B") // 同一内容 → 再永続化なし
+
+        let reloaded = KeywordProfileStore(defaults: defaults)
+        #expect(reloaded.selectedProfile.keywords == "A, B")
+    }
 }
