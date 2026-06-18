@@ -7,8 +7,10 @@ struct ContentView: View {
     @State private var availability = ModelAvailabilityService()
     @State private var controller = SessionController()
     @State private var translationConfiguration: TranslationSession.Configuration?
+    @State private var profileStore = KeywordProfileStore()
+    @State private var renameTarget: KeywordProfile?
+    @State private var renameText = ""
     @AppStorage("fontSize") private var fontSize = 16.0
-    @AppStorage("contextKeywords") private var contextKeywords = KeywordParser.defaultKeywords
     @AppStorage("sourceLocaleID") private var sourceLocaleID = "en-US"
     @AppStorage("targetLanguageID") private var targetLanguageID = "ja"
     @AppStorage("transcriptionOnly") private var transcriptionOnly = false
@@ -172,13 +174,57 @@ struct ContentView: View {
                 Image(systemName: "character.magnify")
                     .foregroundStyle(.secondary)
                     .padding(.top, 4)
-                TextField(
-                    "専門用語（カンマ区切り）。「term=訳語」で訳語を固定できます（例: evals=評価）。未指定は原文表記のまま保持",
-                    text: $contextKeywords,
-                    axis: .vertical
-                )
-                .lineLimit(1...4)
-                .textFieldStyle(.roundedBorder)
+
+                VStack(alignment: .leading, spacing: 6) {
+                    // 用語辞書プロファイルの選択・管理
+                    HStack(spacing: 8) {
+                        Picker("用語辞書", selection: profileSelectionBinding) {
+                            ForEach(profileStore.profiles) { profile in
+                                Text(profile.name).tag(profile.id)
+                            }
+                        }
+                        .labelsHidden()
+                        .frame(maxWidth: 220)
+
+                        Button {
+                            renameText = profileStore.selectedProfile.name
+                            renameTarget = profileStore.selectedProfile
+                        } label: {
+                            Image(systemName: "pencil")
+                        }
+                        .help("名前を変更")
+
+                        Button {
+                            profileStore.addProfile(name: "新しい辞書")
+                        } label: {
+                            Image(systemName: "plus")
+                        }
+                        .help("新規作成")
+
+                        Button {
+                            profileStore.duplicate(profileStore.selectedID)
+                        } label: {
+                            Image(systemName: "doc.on.doc")
+                        }
+                        .help("複製")
+
+                        Button {
+                            profileStore.delete(profileStore.selectedID)
+                        } label: {
+                            Image(systemName: "trash")
+                        }
+                        .help("削除")
+                        .disabled(profileStore.profiles.count <= 1)
+                    }
+
+                    TextField(
+                        "専門用語（カンマ区切り）。「term=訳語」で訳語を固定できます（例: evals=評価）。未指定は原文表記のまま保持",
+                        text: selectedKeywordsBinding,
+                        axis: .vertical
+                    )
+                    .lineLimit(1...4)
+                    .textFieldStyle(.roundedBorder)
+                }
                 .disabled(store.phase != .idle)
             }
             .padding(.horizontal, 12)
@@ -192,10 +238,43 @@ struct ContentView: View {
                 sourceLanguage: sourceLocaleID,
                 targetLanguage: transcriptionOnly ? nil : targetLanguageID,
                 fastResults: transcriptionOnly && fastFinalization,
-                contextKeywords: $contextKeywords,
+                contextKeywords: selectedKeywordsBinding,
                 fontSize: $fontSize
             )
         }
+        .alert(
+            "用語辞書の名前を変更",
+            isPresented: Binding(
+                get: { renameTarget != nil },
+                set: { if !$0 { renameTarget = nil } }
+            )
+        ) {
+            TextField("名前", text: $renameText)
+            Button("変更") {
+                if let target = renameTarget {
+                    profileStore.rename(target.id, to: renameText)
+                }
+                renameTarget = nil
+            }
+            Button("キャンセル", role: .cancel) { renameTarget = nil }
+        }
+    }
+
+    /// 選択中プロファイルの keywords を双方向編集する Binding。
+    /// set で1文字ごとにストアへ即書き戻すため、切替時に未保存差分は発生しない。
+    private var selectedKeywordsBinding: Binding<String> {
+        Binding(
+            get: { profileStore.selectedProfile.keywords },
+            set: { profileStore.updateSelectedKeywords($0) }
+        )
+    }
+
+    /// プロファイル選択 Picker 用の Binding。
+    private var profileSelectionBinding: Binding<UUID> {
+        Binding(
+            get: { profileStore.selectedID },
+            set: { profileStore.select($0) }
+        )
     }
 
     private var sourceEntries: [TranscriptPane.Entry] {
