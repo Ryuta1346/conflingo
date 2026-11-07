@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・未実装**（2026-11-07：UI/UX全面刷新方針を正式採用。計画書をリポジトリに記録。実装コードの変更は未着手）
+- 状態: **実装計画 v1.1・PR0着手**（2026-11-08：停止処理の最小修正と自動検証を実施。実音声の回帰確認は未完了。Meeting機能・UI刷新は未実装。[検証記録](validation/conference-baseline.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略

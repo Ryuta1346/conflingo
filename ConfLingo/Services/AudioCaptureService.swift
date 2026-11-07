@@ -66,6 +66,8 @@ final class AudioCaptureService {
     }
 
     func stop() {
+        // 未開始・停止済みの場合、inputNode の取得による音声デバイス接続を避ける。
+        guard continuation != nil else { return }
         engine.inputNode.removeTap(onBus: 0)
         engine.stop()
         continuation?.finish()

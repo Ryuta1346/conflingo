@@ -32,6 +32,14 @@ open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/Conf
 xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -destination 'platform=macOS'
 ```
 
+Lint（SwiftLint 0.65.1）:
+
+```sh
+swiftlint lint --strict --no-cache
+```
+
+導入・検証コマンドと結果は [Conference回帰基準](docs/validation/conference-baseline.md)、音声素材・実機確認は [音声試験手順](docs/validation/audio-benchmark.md) を参照。
+
 ## 権限許可
 
 1. **マイク**: 初回の Start 押下時にマイク使用許可ダイアログが表示される。許可しないと文字起こしできない

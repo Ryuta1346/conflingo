@@ -32,6 +32,14 @@ Run tests:
 xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -destination 'platform=macOS'
 ```
 
+Lint (SwiftLint 0.65.1):
+
+```sh
+swiftlint lint --strict --no-cache
+```
+
+See the [Conference baseline](docs/validation/conference-baseline.md) for setup, reproducible checks, and results, and the [audio test procedure](docs/validation/audio-benchmark.md) for fixtures and manual validation (Japanese).
+
 ## Permissions
 
 1. **Microphone**: A microphone permission dialog appears the first time you press Start. Transcription does not work without it
