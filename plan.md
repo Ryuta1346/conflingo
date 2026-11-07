@@ -15,7 +15,7 @@
 
 | ID | 作業 | 依存 | 状態 | PR |
 |---|---|---|---|---|
-| PR0 | Baseline・検証環境 | — | **DOING** | — |
+| PR0 | Baseline・検証環境 | — | **DOING** | [#5 (Draft)](https://github.com/Ryuta1346/conflingo/pull/5) |
 | PR1 | 会話イベント・Event Hub | PR0 | TODO | — |
 | PR2 | 音声入力の共通化 | PR1 | TODO | — |
 | PR3 | システム音声キャプチャ | PR2 | TODO | — |
