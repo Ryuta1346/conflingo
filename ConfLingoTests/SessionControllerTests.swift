@@ -63,4 +63,24 @@ struct SessionControllerTests {
         #expect(store.units.isEmpty)
         #expect(store.bufferedSegmentIDs.count == 1)
     }
+
+    @Test func repeatedStopFlushesBufferedSegmentOnlyOnce() async {
+        let store = SessionStore()
+        let coordinator = TranslationCoordinator()
+        let stream = coordinator.attach()
+        let controller = SessionController()
+        let id = store.appendFinal("an unfinished segment")!
+        _ = store.bufferSegment(id)
+        store.phase = .listening
+
+        await controller.stop(store: store, coordinator: coordinator)
+        await controller.stop(store: store, coordinator: coordinator)
+        coordinator.finish()
+
+        var enqueued: [TranslationCoordinator.PendingItem] = []
+        for await item in stream { enqueued.append(item) }
+        #expect(store.phase == .idle)
+        #expect(store.units.count == 1)
+        #expect(enqueued.map(\.id) == store.units.map(\.id))
+    }
 }

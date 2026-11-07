@@ -1,0 +1,5 @@
+Welcome to the local test meeting. Today we will review the release plan.
+The API response time is two hundred milliseconds. The target is one hundred milliseconds.
+Can we release the update on Friday? Please confirm the remaining tests.
+We decided to keep the current file format. Alex will review the test results tomorrow.
+This is the end of the test meeting.
