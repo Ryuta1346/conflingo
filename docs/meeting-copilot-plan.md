@@ -1,0 +1,464 @@
+# ConfLingo — リアルタイム会議支援プロダクト 改善・実装計画
+
+- 作成日: 2026-11-07
+- 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
+- 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
+- 状態: **実装計画 v1.1・未実装**（2026-11-07：UI/UX全面刷新方針を正式採用。計画書をリポジトリに記録。実装コードの変更は未着手）
+- 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
+
+## 0. 結論・プロダクト戦略
+
+ConfLingoを別製品として作り直さず、既存の「文字起こし・翻訳」を**入力・表示の基盤**にして、**会話理解・判断支援・ナレッジ参照**を追加する。**UI/UXはConferenceを含むアプリ全体を再設計し、共通デザインシステムの下に統一する**（既存操作と保存データの互換は維持）。最初の狙いは会議録ではなく、会議中に根拠のある応答や確認事項を適切なタイミングで提示すること。
+
+- **Conferenceモード:** 従来のマイク音声→オンデバイス文字起こし→オンデバイス翻訳。既存利用者の体験・保存形式を維持。
+- **Meetingモード:** マイク + Mac内部音声 → オンデバイス文字起こし → 会話イベント → AI提案・会議状態追跡。
+- **専門プリセット:** 最初はGeneralを実用化。Engineering / Salesは共通基盤上の分析ルール・辞書・参照先の違いとして追加。
+- **Local-first:** 音声・認識・翻訳は原則Macで完結。AI支援が有効な会議だけ、必要最小限の文字列・検索結果を外部AIへ送信。
+- **UI/UX全面刷新（採用済み）:** 先に高品質モックで完成形を定義 → SwiftUIのデザイントークン・共通コンポーネントを整備 → ConferenceとMeetingに反映。PR5は **PR5-A / PR5-B / PR5-C** に分割する。
+
+### MVPに含める
+
+1. Zoom / Google Meet / Teamsで再生される音声とマイク入力を並行取得する。
+2. 日本語・英語を手動選択してリアルタイム認識し、「自分／相手側」の入力元を区別する。
+3. 発話内容から質問候補・回答提案・確認質問・リスク・決定候補・アクション候補を生成する。
+4. AI提案の根拠となる発話時刻と、利用可能な場合は参照資料を表示する。
+5. 会議中は最前面・小窓UI。終了時に会話・確認済み決定事項・宿題をMarkdown保存する。
+6. 既存の翻訳・専門用語辞書・履歴・Markdown出力を壊さない。
+
+### 初期MVPでは含めない
+
+- 会議ボットの参加、クラウド音声録音保存、複数相手の人物名への自動話者識別。
+- Zoom/Teamsの専用API連携、他人への自動メッセージ送信、タスクの自動登録、同意なき会議録画。
+- Windows / iOS、組織共通のナレッジ管理、多数の外部サービスへの双方向同期。
+- 自動発言・音声合成・無人会議代理。
+
+## 1. 既存実装の確認結果と改修箇所
+
+| ファイル | 現状 | 改修方針 |
+|---|---|---|
+| `ConfLingo/Services/AudioCaptureService.swift` | `AVAudioEngine`のマイク入力を`AsyncStream<AnalyzerInput>`へ変換 | 既存機能を残しつつマイク用AudioSourceアダプタを追加 |
+| `ConfLingo/Services/SpeechTranscriptionService.swift` | `SpeechAnalyzer`/`SpeechTranscriber`、VAD、確定・途中結果、翻訳キューへ直接渡す | 結果を型付き`TranscriptEvent`として配信し、翻訳と分析へ分岐させる |
+| `ConfLingo/Services/SessionController.swift` | マイク入力1系統・文字起こし1系統の開始停止 | 2入力の起動・停止・権限・失敗時縮退、セッション共通時計を扱う |
+| `ConfLingo/Models/SessionStore.swift` | `english`/`japanese`前提、翻訳単位バッファ、UI状態 | 既存モード用に残す。新MeetingSessionStoreを設け段階的に統合 |
+| `ConfLingo/Models/TranscriptSegment.swift` | 原文プロパティが`english`固定 | Meeting用に言語非依存のイベントモデルを新設。変換アダプタで互換維持 |
+| `ConfLingo/Services/TranslationCoordinator.swift` | 文単位・ID重複排除キュー | AI分析とは独立したConsumerとして維持、再接続時重複を検証 |
+| `ConfLingo/Models/KeywordProfileStore.swift` | 辞書プロファイルをUserDefaultsに永続化 | Meetingプリセットと専門用語に再利用 |
+| `ConfLingo/Views/ContentView.swift` | 文字起こし／翻訳画面、設定・翻訳処理が集中 | `AppShellView`に責務を分離。画面ナビゲーションを統一し、既存Conferenceも全面刷新 |
+| `ConfLingo/Views/ControlBar.swift` | Start/Stop・保存・Clear・最前面 | `SessionTransportControls`等の共通部品へ分離し、Conference/Meetingの操作・状態表示を統一 |
+| `ConfLingo/Export/MarkdownExporter.swift` | 文字起こし・翻訳のMarkdown生成 | 従来出力互換を維持。MeetingExporterを追加 |
+| `ConfLingo/ConfLingo.entitlements` | App Sandbox有効、マイク・ネットワーク・ユーザー選択ファイルの権限 | システム音声方式に応じて権限・配布制約を検証 |
+
+**重要:** `SessionStore` / `TranscriptSegment` の既存構造を最初から全置換しない。新しい会議用ドメインを追加し、従来モードへのアダプタで回帰リスクを下げる。
+
+## 2. 目標アーキテクチャ
+
+```text
+                   ConfLingo macOS App (SwiftUI)
+ ┌──────────────────────────────────────────────────────┐
+ │ MicrophoneAudioSource     SystemAudioSource          │
+ │ (既存AVAudioEngine)       (まずScreenCaptureKitで検証)│
+ └─────────┬───────────────────────┬────────────────────┘
+           │ PCM + source + clock  │ PCM + source + clock
+           ▼                       ▼
+      SpeechPipeline(self)    SpeechPipeline(remote)
+          SpeechAnalyzer / SpeechTranscriber
+           └───────────┬───────────┘
+                       ▼
+           TranscriptEventHub (Actor)
+            ├─ LegacyTranslationAdapter → 翻訳字幕
+            ├─ MeetingSessionStore → 発話・時系列
+            └─ ConversationEventDetector
+                        ├─ Question / Clarification
+                        ├─ Risk / Contradiction
+                        └─ DecisionCandidate / ActionCandidate
+                       ▼
+             AI Insight Coordinator
+             ├─ Local rules / throttling
+             ├─ Knowledge Retrieval (local FTS5 first)
+             └─ Remote LLM via Hono API (明示的許可時のみ)
+                       ▼
+          MeetingCopilotView + MeetingExporter
+```
+
+### 2.1 音声の共通インターフェース
+
+- `AudioSource`プロトコルを定義。`start()` / `stop()` / 音声PCMストリーム / 入力元識別子 / 権限状態を公開。
+- `MicrophoneAudioSource`は現行`AudioCaptureService`をアダプタで包む。
+- `SystemAudioSource`は最初にScreenCaptureKitを使用。`capturesAudio = true`、`excludesCurrentProcessAudio = true`を基本とし、録音対象の選び方と権限を実機で検証。
+- Process Tapは独立した技術検証。アプリ単位で取得できるメリットはあるが、現行App Sandboxとの互換性・署名/配布制約を確認するまで本線に入れない。
+- 音声コールバックで重い処理をしない。音声バッファを低負荷で受け渡し、サンプルレート/チャンネル変換は専用処理系で行う。
+- マイクと内部音声にそれぞれ認識インスタンスを割り当てる。2つの`SpeechAnalyzer`を同時に安定動作させられるか早期に検証する。
+- 自分のスピーカー出力がマイクに回り込む場合の重複抑制を検討。ヘッドフォン利用を推奨し、無理に高精度話者分離を約束しない。
+
+### 2.2 会話イベントモデル
+
+新規型の例（最終的な名称・フィールドは実装時に調整可）：
+
+```swift
+enum AudioOrigin: String, Codable, Sendable {
+    case microphone
+    case systemAudio
+}
+
+struct TranscriptEvent: Identifiable, Sendable {
+    let id: UUID
+    let sessionID: UUID
+    let origin: AudioOrigin
+    let languageCode: String
+    let startOffset: TimeInterval
+    let endOffset: TimeInterval?
+    let text: String
+    let isFinal: Bool
+    let revision: Int
+}
+
+enum InsightKind: String, Codable, Sendable {
+    case answerSuggestion, followUpQuestion, risk
+    case decisionCandidate, actionCandidate
+}
+
+enum InsightStatus: String, Codable, Sendable {
+    case suggested, acknowledged, dismissed
+}
+```
+
+- 会議の共通時刻（monotonic clock）を基準とし、Start→Stop→再開時に経過時刻がリセットされないようにする。
+- 途中結果は同じ発話IDに対するrevisionとして更新。**確定結果だけ**判断・アクション候補の確定入力にする。
+- `EventHub`は複数Consumerにファンアウト。遅いAI通信によって音声や字幕を止めない。
+- UI用のpartialイベントは古いものを破棄可能。finalイベントは重要データとして保持し、容量上限時はエラー通知/縮退（無制限キューにしない）。
+
+### 2.3 AI支援パイプライン
+
+1. 文字起こしイベントを発話単位に正規化し、直近の会話履歴と要約状態を更新する。
+2. **手動質問**は即実行。**自動提案**は質問検出・重要な矛盾・決定候補等でトリガーする。
+3. 類似したイベントはdebounce/dedupし、提案の連続表示を抑制する。初期値は自動提案最大2件/分、最短間隔12秒（実測調整）。
+4. 必要なときだけナレッジ検索し、直近の発言・要約・検索結果をLLMへ渡す。
+5. ストリーミングでカードを表示する。提案の種類・発話根拠ID・資料根拠・根拠不足を構造化する。
+6. 「候補」と「確定事項」は厳密に区別。ユーザーの明示的な承認なしにAIが合意済みに変えない。
+7. ネットワーク断は字幕・既存翻訳を止めず、AI支援のみ利用不可表示にする。
+
+#### AI生成の品質ルール
+
+- 知らない仕様・価格・日程を断定しない。根拠がなければ「要確認」を表示。
+- 参照文書のソース（タイトル・該当箇所）を必ず返す。ただし文書なしの一般アドバイスはその旨を明示。
+- 前の発言と矛盾する場合は引用発話と時刻を示す。
+- 自動提案は控えめに。手動`Ask AI`を最優先する。
+- 会議モード（General / Engineering / Sales）ごとに検出ルールとプロンプトを切り替える。
+
+### 2.4 AIバックエンドの分割
+
+- 最初はHonoの**最小API**としてLLM呼び出し、認証、レート制限、APIキー秘匿を担当。
+- 音声PCMは送らず、**外部送信が有効なときのみ**必要な確定テキストと検索スニペットを送る。
+- `POST /v1/insights`などの短いリクエスト + ストリーミングレスポンス（SSE等）を第一候補にする。音声自体を常時WebSocket転送する必要はない。
+- クライアントが送るデータは `sessionId`、`mode`、`trigger`、直近セグメント、会話の短い要約、許可済み資料スニペット、匿名化された参照ID。
+- 返却は`insight.created` / `insight.updated` / `analysis.finished` / `error`等の型付きイベント。
+- 製品化時にはユーザー認証・アクセス制御・利用上限・支出上限・監査ログと保持期間ポリシーを追加。
+- 個別のAPIキーをデスクトップに直書きしない。クラウド提供では秘密情報はサーバーに置く。ローカルPoCのBYOKを許す場合はKeychainのみ。
+
+### 2.5 ナレッジ検索
+
+- 初期MVPは**少量のローカル資料のインポート**（Markdown / Text、PDFは抽出結果を要検証）。
+- ローカルSQLite FTS5（キーワード検索）でまず根拠抽出を成立させる。複雑なベクトル基盤をMVPの先行条件にしない。
+- `KnowledgeReference`には文書ID、タイトル、位置、スニペット、取り込み日時を保存。
+- 仕様書のRAG検索は`Engineering`の重要機能だが、外部モデルへの資料送信は会議ごとに明示許可。
+- 組織共有ナレッジ、Embedding、reranking、pgvector/専用ベクトルDB、GitHub/NotionコネクタはMVP検証後に追加する。
+
+### 2.6 UI/UX全面刷新方針（採用済み）
+
+PR5を単発のMeeting画面追加にはしない。**デザイン設計（5-A）→ UI基盤および既存Conference刷新（5-B）→ Meeting Copilot UI（5-C）** の3段階で、同じ情報設計・操作体系を使う。
+
+#### 2.6.1 情報設計と画面マップ
+
+```text
+AppShell
+├── Home / Recent Sessions
+├── Conference
+│   ├── Session Setup（言語ペア・マイク・専門用語辞書）
+│   └── Live Captions（原文 / 翻訳 / 字幕履歴）
+├── Meeting
+│   ├── Preparation（参加者への通知・同意確認 / 入力 / AI / 資料）
+│   ├── Live（Insights優先 / 文脈・全文の展開 / 会議状態）
+│   └── Review（決定・アクション候補 / 根拠 / Export）
+├── Sessions（検索・閲覧・削除。初期MVPではローカル保存済みセッションに限定）
+└── Settings（音声・言語・AI・データ保持・ショートカット）
+```
+
+- `Conference` / `Meeting`は**同じアプリ内の独立モード**。会議中の誤操作を避けるため、実行中のモード切替は確認を要求する。
+- 既存のConference機能（多言語音声認識、翻訳、辞書プロファイル、最前面、フォントサイズ、Markdown出力）を全面刷新したUIに移す。機能を削らない。
+- `Sessions`は自動クラウド保存を意味しない。ローカルに保存したものだけが一覧に現れる。保存OFFの会議は終了時に破棄できる。
+- 初期リリースで表示するが機能がないナビゲーション項目を作らない。先行デザインでのみ将来画面を扱う場合は、実装範囲外を明示する。
+
+#### 2.6.2 画面ごとの役割
+
+| 画面 | 主要情報と操作 | 重要なUX要件 |
+|---|---|---|
+| App Shell / Home | Conference/Meetingの開始、最近の保存セッション、入力の接続状態 | 1〜2クリックで開始地点に到達。初期設定不足を明示 |
+| Conference Live | 原文・翻訳の2ペイン、partial/final差分、用語辞書、再開/保存 | 従来操作を維持しつつ字幕が最優先。長文・フォント拡大・左右/上下レイアウトを検証 |
+| Meeting Preparation | 会議名、入力元、言語、プリセット、ナレッジ、音声取得・AI送信の許可 | **収集する音声・送信するデータ・保存先**を開始前に説明 |
+| Meeting Live Expanded | 今必要なAI提案、時系列発話、未決定事項、根拠リンク、Ask AI | 「AIによる提案」と「確定した事実」を混同しない。会議の妨げにならない |
+| Meeting Floating | 最新の重要提案1件、次の質問、警告、録音/送信状態、折りたたみ/拡大 | サイズ変更可。必要時だけ表示。クリック・ショートカットで復帰 |
+| Meeting Review | タイムライン、AI抽出した決定・宿題候補、確認/却下、Markdown出力 | AIの候補は未確定から開始。根拠発話へ移動できる |
+| Sessions | 保存済み会議・字幕の検索、エクスポート、削除 | 保持・破棄の結果を明示。意図しない自動保存を防ぐ |
+| Settings | マイク/システム音声、認識言語、LLM送信、秘密情報、保持、キー操作 | プライバシー設定と動作の対応が一目で分かる |
+
+#### 2.6.3 デザインシステム
+
+- **macOSネイティブ優先:** SwiftUI標準のメニュー、フォーカス、Window、アクセシビリティ、状態表現を活用。Web風の過度な装飾を避ける。
+- **トークン:** 背景/サーフェス/境界/テキスト/ステータス、文字サイズ・行間、余白、角丸、階層、アイコン、フォーカス・hover・disabled状態。
+- **共通コンポーネント:** `ModeSwitcher`、`SessionTransportControls`、`AudioSourceStatus`、`CloudSharingStatus`、`TranscriptTimeline`、`InsightCard`、`EvidenceLink`、`DecisionCandidateCard`、`EmptyState`、`ErrorBanner`。
+- **AIカードの情報優先順位:** ①提案内容 ②理由・引用元 ③未確認/リスク ④ユーザー操作。未検証の数値的「確信度」は出さない。
+- **状態設計:** idle / requestingPermission / preparing / listening / paused / stopping / error / offline / reconnecting / AI-disabled / no-knowledge / no-insights を画面ごとに定義。
+- **アクセシビリティ:** VoiceOverラベル、キーボード操作、フォーカス順序、Dynamic Type相当の文字拡大、視認性・コントラスト、色だけに頼らない状態表示、Reduce Motion対応。
+- **画面サイズ:** MacBook 14インチを優先し、狭いウィンドウ・分割表示・大きな文字サイズでも操作が隠れないこと。
+- **モックと実装の整合:** PR5-Aのモックを設計上の基準とし、PR5-B/Cのスクリーンショットを同一状態・サイズで比較。デザイン変更は差分と理由を記録。
+
+#### 2.6.4 フローティングUIのルール
+
+- コンパクト/展開/非表示の3状態。デスクトップ上での位置・幅・高さを保存する。
+- コンパクト時は最新の**重要度が高い提案を最大1件**表示。会議中の原文全文を常時流さない。
+- `Ask AI`は手動起動可能。自動提案は静かに更新し、モーダルや強制フォーカス変更をしない。
+- 録音中（マイク/システム）、クラウド送信中、クラウドAI停止中を常時区別する。
+- `Pause Capture` / `Stop Session` / `Disable Cloud AI`を意味別に分け、停止時の実際の音声・ネットワーク状態と一致させる。
+- 画面共有時の振る舞いは実機で検証。**「画面共有に映らない」ことは保証しない**。必要に応じて明示的な非表示操作を提供する。
+
+#### 2.6.5 UI受入条件
+
+- Conferenceの従来主要操作を、新UI上ですべて再現できる。
+- Recording / AI Sending / Paused / Disconnected / Permission Denied の各状態で表示が正しい。
+- Live中に入力・表示・AI分析のいずれかが失敗しても、影響のない機能は継続する。
+- UI内で根拠のない断定、AI候補の自動確定、同意なしの送信が起きない。
+- 長い日英字幕、多数のInsight、複数画面、縮小幅、文字拡大、キーボード操作を試験する。
+- 最終受入は**モック比較 + 自動UIテスト + 実機利用テスト**の3点で行う。
+
+## 3. 実装PR計画と依存関係
+
+見積もりはAIコード生成・レビューを活用する1名開発の**純作業日**（待機/審査/予期せぬOS問題は別）。PRは原則独立・小さめ、各PRで`xcodebuild test`を通す。
+
+| PR | 優先 | 主な実装 | 完了条件 | 概算 |
+|---|---|---|---|---|
+| **PR0: Baseline** | P0 | 現行ビルド・テスト、同意/権限・ベンチ用音声、計測基盤、設計ADR | 既存操作のベースラインを記録 | 1–2日 |
+| **PR1: Core Events** | P0 | `AudioOrigin`/`TranscriptEvent`/`TranscriptEventHub`/`MeetingSessionStore`、テスト | 既存字幕・翻訳を壊さずイベント配信 | 2–3日 |
+| **PR2: Audio Abstraction** | P0 | `AudioSource`、既存マイクのAdapter、開始停止の状態機械 | 従来モードと同じ認識結果、停止後リソース解放 | 1–2日 |
+| **PR3: System Audio Spike** | P0 | ScreenCaptureKit実装、権限表示、CoreAudio Tap比較メモ | Zoom/Meet/Teamsでシステム音声入力成功、結果をADRに記載 | 2–4日 |
+| **PR4: Dual Transcription** | P0 | マイク/内部音声の2認識系統、共通時計、VAD、重複/順序の処理 | 会議中に両側の字幕が同時に出て区別できる | 2–4日 |
+| **PR5-A: UX/UI Design** | P1 | 既存ConferenceのUX監査、全体画面マップ、情報階層、高品質モック・状態別プロトタイプ | 必須画面・状態・操作フローのモック承認、UI受入仕様確定 | 2–3日 |
+| **PR5-B: Design System & Conference** | P1 | SwiftUIデザイントークン/共通部品、App Shell、Conference全面リデザイン、設定/保存の整流化 | 既存Conference機能を落とさず、承認モックに合わせた画面・操作が動く | 3–5日 |
+| **PR5-C: Meeting Copilot UI** | P1 | Preparation/Live/Review、Insight/根拠カード、コンパクト・展開フローティングUI | モックイベントと実データで全状態を操作でき、会議中の認知負荷を抑えられる | 3–5日 |
+| **PR6: Insight Engine** | P0 | 会話イベント検出、手動質問、自動提案、LLM Proxy、ストリーミング | 質問に対し会議文脈を使った提案、失敗時縮退 | 3–5日 |
+| **PR7: Meeting State** | P1 | 決定候補・アクション候補、確認/却下、要約、Markdown出力 | 誤って自動確定しない・根拠が追える | 2–3日 |
+| **PR8: Local RAG** | P1 | ファイル取り込み、全文検索、根拠参照、資料送信制御 | 登録資料の該当箇所を根拠として提示 | 3–5日 |
+| **PR9: Hardening** | P1 | 60分試験、入力切断/再接続、権限/プライバシー、ログ・テスト・CI | 下記受入基準を満たす | 3–5日 |
+
+**技術の重要経路:** PR0→PR1→PR2→PR3→PR4→PR6。PR7/PR8はPR6の安定後に実装。**UIの重要経路:** PR0→PR5-A→PR5-B→PR5-C。PR5-AはPR1〜4と並行開始できるが、PR5-Bは承認済みモックの後に行う。PR5-Cはモックイベントを使ってPR6と並行実装し、結合検証で統合する。
+
+**初期PoC:** PR0–4 + PR6の最小機能（簡易UI、手動Ask AI、モックナレッジ）で約2–3週間。UI PoCは完成UIとは区別する。
+
+**UI設計マイルストーン:** PR5-A承認→PR5-B Conference改修承認→PR5-C Meeting表示承認。前ステージの未承認モックで次の段階を作り込まない。
+
+**実用MVP:** PR0–9（PR5はA/B/Cに分割）を通し、部分並行で**約6–10週間**を初期目標。UI刷新分を含めて再見積もりし、技術検証結果によって調整する。
+
+## 4. フェーズごとの受入基準
+
+### Gate A — 既存機能を壊さない
+
+- `xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Debug build`が成功。
+- `xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -destination 'platform=macOS'`が成功。
+- マイク単独、英語→日本語翻訳、文字起こし専用、専門用語辞書、途中字幕/確定字幕、Start/Stop再開、Markdown出力が動作。
+- 既存Markdownの内容が予期なく変わらない（スナップショットテスト）。
+
+### Gate B — 会議音声が実際に取れる
+
+- Zoom、Google Meet、Teamsの**それぞれ**で相手側の音声が認識される（公開テスト音声や同意済みのテスト会議で検証）。
+- ヘッドフォン/内蔵スピーカー、マイク有効/無効を切り替えても状態表示が破綻しない。
+- 会議途中で音声機器・入出力権限が変わったとき、通知し再開できる。
+- 2つの入力が混同されず、発話順序・時刻を保持する。
+- 2つのSpeechAnalyzer同時実行の性能・メモリ・認識精度を確認。成立しなければ認識方式を再評価する。
+
+### Gate C — AI提案が有用
+
+- テスト会議で、質問→回答候補、確認事項、技術上の懸念、決定候補が発生する。
+- AIの回答に会議中の関連発話ID/時刻が表示される。
+- 文書参照時は根拠資料を開ける。根拠がない回答は明確に未確認扱い。
+- AIの無限連続提案や同一提案の連発が発生しない。
+- `decisionCandidate`は必ずユーザー確認前は未確定として表示される。
+- ネットワーク切断時は字幕・オンデバイス翻訳が継続し、AI機能のみ一時停止する。
+
+### Gate U — UI/UX全面刷新の品質（PR5-A/B/C）
+
+- PR5-Aの主要画面のモックが定義され、実装前にデザインと利用フローをレビュー済み。
+- Conferenceの言語切替、専門用語辞書、字幕、翻訳、Start/Stop、Clear、Export、最前面、文字拡大を新UIでも利用できる。
+- MeetingのPreparation→Live→Reviewを、キーボード中心でも完了できる。
+- コンパクト/展開ウィンドウ、音声取得・AI送信の状態、プライバシー操作、失敗・空状態を実装している。
+- 14インチMacBookでの通常ウィンドウ、狭い分割表示、大きい文字サイズ、VoiceOverの基本操作を確認。
+- 承認したモックと実装のスクリーンショットを比較し、意図しない構造差分を修正または記録。
+
+### Gate D — 利用者に出せるMVP
+
+- 実際の60分会議でクラッシュなし、継続的なメモリ増加・処理滞留なし。
+- **目標値（要実測）:** 質問発話の終了→AIカード完成がp95で8秒以内。入力認識のpartial表示・final確定も分けて計測。
+- 評価データに対する質問検知率、誤提案率、ソース根拠の正確性を記録。数値の閾値は最初の評価セットで決める。
+- 音声収集中とクラウド送信中の状態をUIから確認可能。停止操作後はキャプチャ/送信を止める。
+- 保持しない設定では会議音声・文字起こしを自動永続化しない。保存設定がある場合は削除できる。
+- デスクトップにAPI秘密鍵を埋め込まない。デバッグログに会議本文・秘密情報を出さない。
+
+## 5. テスト計画
+
+| 種別 | テスト内容 |
+|---|---|
+| 単体 | 文末確定、重複排除、Partialの更新、確定順序、Stop/再開時刻、会議状態遷移 |
+| 音声統合 | マイクのみ、システム音声のみ、両方、無音、同時発話、ヘッドフォン切替 |
+| 翻訳回帰 | 既存翻訳タスク、用語保護・プロファイル、Markdown形式、開始停止 |
+| AI評価 | 事前に正解を定義した日本語/英語会議テキストで質問・矛盾・決定候補を検出 |
+| RAG評価 | 登録した資料を参照した回答と根拠の一致、未登録情報への不正な断定を検出 |
+| 耐久性 | 60分連続動作、ネットワーク断、APIタイムアウト、連続Start/Stop、会議アプリ終了 |
+| セキュリティ | 権限拒否時挙動、送信OFF時の通信なし、秘密鍵/ログ露出、ファイル削除、メモリ破棄 |
+| UI単体・スナップショット | Conference/Meeting各画面の状態別描画、同一モック状態の画像差分、ダーク/ライト両対応 |
+| UI実機・アクセシビリティ | 14インチ画面、狭いウィンドウ、拡大文字、VoiceOver、キーボード、画面共有時の表示確認 |
+
+テスト用録音は自作または利用許諾が明確な素材を使用する。参加者の許諾なく実会議を保存・クラウド送信しない。
+
+## 6. リスク・設計上の論点
+
+| リスク | 重要度 | 対応 |
+|---|---|---|
+| **ScreenCaptureKitの音声範囲・許可** | 高 | 該当アプリの音声を正しく取得できるか、実機で先行検証。画面取得権限を求めるUIを明示 |
+| **CoreAudio TapとApp Sandbox** | 高 | 実験ブランチ/PoCで検証。Sandbox無効化や配布方針変更は製品判断なしに行わない |
+| **2系統のオンデバイス認識負荷** | 高 | CPU/メモリ、温度、バッテリー、遅延を計測。必要なら認識系統・方式を切替可能に |
+| **同時発話・エコー・入力重複** | 高 | 入力元タグ/時刻合わせ、ヘッドフォン推奨、重複検知、利用時の注意表示 |
+| **AI提案の誤り** | 高 | 根拠提示、確信度らしい数値を安易に表示しない、候補状態、手動確定のみ |
+| **プライバシー/会議相手の同意** | 高 | 明示的な権限・外部送信許可、不要データを送らない、保存はオプトイン |
+| **字幕/翻訳の回帰** | 中 | Legacyモードを残し、イベントモデルをアダプタで接続。既存テスト + 操作試験 |
+| **大幅なUI刷新による既存利用者の混乱** | 中 | 主要ショートカット・機能・保存形式を維持し、旧新対応表と移行テストを作成 |
+| **フローティングUIが会議画面や共有画面を妨げる** | 中 | サイズ/表示状態の制御、フォーカス奪取なし、画面共有時の動作実機検証 |
+| **クラウド遅延/コスト** | 中 | 発言単位でトリガー、抑制、キャッシュ、上限、手動Ask AI優先 |
+| **言語切り替え・混在発話** | 中 | 最初は入力ごとに認識言語を手動指定。多言語自動切替は将来課題 |
+
+## 7. 初期ディレクトリ追加案
+
+```text
+ConfLingo/
+  Audio/
+    AudioSource.swift
+    MicrophoneAudioSource.swift
+    SystemAudioCaptureService.swift
+    AudioClock.swift
+  DesignSystem/                       # PR5-B
+    Tokens/
+      ColorTokens.swift
+      TypographyTokens.swift
+      SpacingTokens.swift
+    Components/
+      SessionTransportControls.swift
+      AudioSourceStatus.swift
+      CloudSharingStatus.swift
+      TranscriptTimeline.swift
+      InsightCard.swift
+      EvidenceLink.swift
+      EmptyState.swift
+  App/
+    AppShellView.swift                 # PR5-B
+    HomeView.swift
+    SettingsView.swift
+  Conference/
+    Views/
+      ConferenceLiveView.swift        # PR5-B
+      ConferenceSetupView.swift
+  Meeting/
+    Models/
+      TranscriptEvent.swift
+      MeetingSession.swift
+      MeetingInsight.swift
+      MeetingDecision.swift
+      KnowledgeReference.swift
+    Services/
+      TranscriptEventHub.swift
+      MeetingSessionStore.swift
+      ConversationEventDetector.swift
+      InsightCoordinator.swift
+      KnowledgeSearchService.swift
+      MeetingExporter.swift
+    Views/
+      MeetingPreparationView.swift
+      MeetingLiveView.swift
+      MeetingFloatingPanel.swift      # PR5-C
+      MeetingInsightsPane.swift
+      MeetingReviewView.swift
+  Sessions/
+    Views/
+      SessionHistoryView.swift
+docs/
+  design/
+    app-information-architecture.md   # PR5-A
+    design-system.md
+    ux-states-and-flows.md
+    mockups/                          # PR5-A: 採用済みモック・状態別比較資料
+  Services/
+    AudioCaptureService.swift          # 既存を段階的にAdapter化
+    SpeechTranscriptionService.swift   # 既存をイベント発行型へ
+    TranslationCoordinator.swift       # 維持
+server/                              # PR6以降、必要になった時点で追加
+  src/
+    index.ts
+    routes/insights.ts
+    services/llm.ts
+    middleware/auth.ts
+ConfLingoTests/
+  Meeting/
+    TranscriptEventHubTests.swift
+    MeetingSessionStoreTests.swift
+    ConversationEventDetectorTests.swift
+    MeetingExporterTests.swift
+```
+
+> これはファイル設計案であり、現時点でこれらのファイルが存在するという意味ではない。
+
+## 8. 実装順を決める判断基準
+
+- **最初の最大の不確実性:** 内部音声の取り込みと、マイク+内部音声のオンデバイス同時文字起こし。
+- **次の不確実性:** 十分な認識精度と低遅延でAI提案が本当に会議の役に立つか。
+- **UI設計上の先行判断:** PR5-AでConferenceを含む全画面・状態を可視化し、実装前に採用モックを確定する。PR5-B/Cではそのモックを基準に比較する。
+- **後回しでよい不確実性:** 商用RAG基盤、SaaS課金、ユーザー組織、外部サービス連携。
+- Gate Bで2系統認識が失敗したら、ソースごとのSTTエンジン差し替えを試す。すぐにMacアプリや既存翻訳エンジン自体を作り直さない。
+- Gate Cで提案精度が低ければ、UIを先に作り込まず、テストコーパス・イベント検知とプロンプトを修正する。
+
+## 9. 最初の着手指示（Codex/Claude Code向け）
+
+1. `main`を変更せず`feature/meeting-copilot`を作成する。
+2. `README.ja.md`と現行のSwiftソース/テストを読み、`xcodebuild build` / `xcodebuild test`のベースラインを取得する。
+3. 本計画のPR0→PR1から実装。既存翻訳機能の入出力を保ったまま、`TranscriptEventHub`を追加する。
+4. PR3ではScreenCaptureKitのマイクとは別のシステム音声ストリームを作成し、単独キャプチャが動くか先に検証する。
+5. PR4で2音声ソース・共通タイムライン・文字起こしを完成させる。権限拒否やソース切断でのエラー処理必須。
+6. PR5-AをPR1〜4と並行して開始する。Conference/Meeting/Home/Sessions/Settingsの情報設計と主要状態モックを作成し、**UI承認をPR5-B/Cの着手条件にする**。
+7. PR5-Bで共通デザインシステムとConference画面を刷新する。従来の翻訳・辞書・履歴・ショートカット・保存形式の無回帰を確認。
+8. PR5-CでMeeting Preparation/Live/Reviewおよびコンパクト/展開フローティングUIを実装する。まずモックデータで表示/操作、次に実会話イベントへ結合。
+9. PR6は最初にモックイベント・モックAIでE2Eを完成させ、次に実LLMバックエンドへ差し替える。
+10. PRごとに変更点・回帰テスト・測定結果・残課題を記録する。実機テストが必要な項目を自動テスト合格と混同しない。
+
+## 10. 成果物とGo/No-Go
+
+### 初期PoCで得たいもの
+
+- マイクと会議アプリ音声を取れるMacアプリ。
+- 相手側の質問を認識してAIカードを出せる画面。
+- 短い会話履歴と、固定した少量の資料に基づく回答候補。
+- 認識・AI提案の速度、CPU/メモリ、誤提案の計測結果。
+
+### 実用MVPで得たいもの
+
+- 1時間の会議で破綻しない利用体験。
+- General / Engineering / Salesの基本プリセット。
+- 資料を根拠とする提案と、決定候補/アクション候補のユーザー確認。
+- 会議後Markdown出力、保存・削除・送信の透明な制御。
+- 既存Conference翻訳の無回帰。
+- デザインシステム、Conference全面刷新、Meeting Copilotの各画面とフローティングUIが採用モックと一致すること。
+
+**Go判断:** Gate A/Bを通過したらAI実装へ、Gate Cで支援価値を評価する。UIはPR5-Aでデザイン承認、PR5-B/CでGate Uを通過する。**Gate C/U/Dを満たして**招待制の実利用検証を始める。
+
+---
+
+### 技術参考（公式ドキュメント）
+
+- Apple ScreenCaptureKit: https://developer.apple.com/documentation/screencapturekit
+- Apple `SCStreamConfiguration.capturesAudio`: https://developer.apple.com/documentation/screencapturekit/scstreamconfiguration/capturesaudio
+- Apple Core Audio taps: https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps
+- Apple `SpeechAnalyzer`: https://developer.apple.com/documentation/speech/speechanalyzer
