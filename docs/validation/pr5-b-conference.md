@@ -1,0 +1,87 @@
+# PR5-B — Conference刷新 検証記録
+
+2026-11-08 / `feature/design-system-conference` / **実装・自動検証済み、REVIEW**
+
+ユーザー「進めて」により[実装計画](../design/pr5-b-implementation-plan.md)を承認。主担当によるコード確認と非録音プレビュー検証。独立レビュー・実音声受入・Gate U全体の合格を意味しない。マージ前のレビュー対象。
+
+## 実装
+
+- 共通色・余白・状態表示とHome / Conference / SettingsのApp Shell。
+- Conference準備に言語・モード・辞書管理を集約。モデル準備・エラー・再試行を表示。
+- 原文/訳文を通常幅は左右、狭幅は上下、専用モードは原文1ペインで表示。
+- 時刻・途中認識・翻訳待ち・翻訳失敗、スクロール追従解除と「最新へ」。
+- 停止完了を待つ画面移動、停止再試行、消去確認、ウィンドウ終了確認。
+- Markdown書き出し、文字サイズ、最前面、Light/Dark/System設定。既存の保存キーとエクスポーター形式を維持。
+- ルートのStore/Controller/Coordinatorと翻訳タスクの所有を維持。音声入力・Hub・認識・翻訳サービスは変更していない。
+
+## 自動検証
+
+| 検証 | 結果 | ログ |
+|---|---|---|
+| TDD初期Red | 新しい遷移/表示型が存在しないためビルド失敗を確認 | `/private/tmp/conflingo-pr5b-red.log` |
+| 関連テストGreen | 遷移6件、字幕表示3件成功 | `/private/tmp/conflingo-pr5b-green.log` |
+| 終了委譲テストRed | 新しいwindow引数を持たない旧シグネチャでコンパイル失敗。Swiftは診断生成失敗も出力 | `/private/tmp/conflingo-pr5b-close-red.log` |
+| 最終Debug build/test | **206テスト・26スイート成功**。既存195件＋新規11件 | `/private/tmp/conflingo-pr5b-final-tests.log` |
+| Release build | 成功。DEBUG専用fixtureを除いた構成を確認 | `/private/tmp/conflingo-pr5b-release.log` |
+| SwiftLint | **73ファイル・違反0** | `/private/tmp/conflingo-pr5b-final-lint.log` |
+| `git diff --check` | 成功 | 最終差分確認 |
+
+実行コマンド:
+
+```sh
+xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /private/tmp/conflingo-pr5b-build
+xcodebuild build -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath /private/tmp/conflingo-pr5b-build
+/private/tmp/conflingo-swiftlint-0.65.1/swiftlint lint --strict --no-cache
+git diff --check
+```
+
+新規テストは、保留翻訳を含む状態保持、遷移取消、停止待ち/失敗、準備/停止中の操作抑止、二重停止回避、文単位の訳文、途中/失敗の表示、終了要求の対象と既存delegateの拒否を検証する。色や余白そのものの単体テストは追加していない。
+
+## ネイティブ操作で確認したもの
+
+Debugの `--ui-preview` を使用。通常とは別のUserDefaults suite `com.gavrri.conflingo.ui-preview` に設定・辞書を保存する。準備/認識/翻訳の実処理を起動せず、固定例文と疑似開始停止だけを用いる。通常起動時とReleaseではfixtureを使用しない。
+
+| 操作 | 観察結果 |
+|---|---|
+| 開始/停止・設定への移動 | 疑似認識中の状態と途中字幕を表示。移動確認後に停止し、名前と字幕を保持 |
+| 開始中の消去 | 消去ボタン無効 |
+| 消去取消・確定 | 取消で2件保持、確定で空状態になり書き出し/消去が無効 |
+| 辞書 | 管理シート、新規作成、用語編集、選択保持、最後の辞書削除無効を確認。改名/複製/削除の全UI操作は未網羅、Store既存テストで回帰確認 |
+| 書き出し | NSSavePanelの既定名、キャンセル保持、`/private/tmp/conflingo-pr5b-native-export.md` 保存を確認。原文/訳文2件、時刻、言語メタデータを確認 |
+| 配色・サイズ | ライトへの切替、ダーク狭幅、最大48ptと通常16ptへの復帰を確認 |
+| スクロール | 原文を上へスクロールすると「履歴を表示中」「最新へ」を表示。ボタンで最新へ復帰 |
+| 文字起こしのみ | 翻訳先が隠れ高速確定が現れる。原文1ペインになり、戻すと訳文も保持 |
+| ウィンドウを閉じる | 認識中に停止確認、取消で維持、確定でidleになって閉鎖。再表示で現在字幕を保持 |
+
+閉鎖確認では、CUAが次の観察時にアプリを再表示し、閉じていないように見えた。診断版で閉鎖直後の `requested=true phase=idle visible=[]` を記録して確認した。終了処理はSwiftUIの `dismissWindow(id: "main")` に整理。一時診断コードは除去し、その後の全テスト・Lintを実行した。Cmd+Qの新しい終了ガードは追加していない。
+
+UI確認はボタン・選択操作中心。⌘Rは疑似停止で確認。全キーボード経路、OS最前面の前後関係、選択コピーのクリップボード内容までは網羅していない。
+
+## 画像とモックとの差分
+
+画像はCUAから取得した未加工JPEG。通常幅はズーム後の **1512×949pt**、狭幅は **720×560pt**（いずれも2倍の画素数）。計画上の1280×800ptと同一寸法でのピクセル比較は未実施。PR5-AのHTML画像は承認時の基準として保持している。
+
+| ネイティブ画面 | 画像 |
+|---|---|
+| Conference・Light | [通常幅](pr5-b-screenshots/conference-wide-light.jpg) |
+| Conference・Dark | [狭幅](pr5-b-screenshots/conference-narrow-dark.jpg) |
+| 最大48pt・読み返し中 | [狭幅](pr5-b-screenshots/conference-large-text.jpg) |
+| Conference準備 | [Light](pr5-b-screenshots/preparation-light.jpg) |
+| Settings | [Light](pr5-b-screenshots/settings-light.jpg) |
+| 文字起こし専用 | [Light](pr5-b-screenshots/transcription-only-light.jpg) |
+
+モックから維持したものは、字幕優先の領域配分、左右字幕、上部表示/保存操作、下部の常設停止操作、グレー系サーフェスと青のアクセント。実装での変更点:
+
+- App Shellには実装済みのHome / Conference / Settingsだけを表示。Meeting / Sessions / AI設定は後続PR。
+- OS標準のPicker、ボタン、保存ダイアログを採用。辞書は専用シートへ集約。
+- 狭幅でVSplitViewにするとヘッダーが見切れたため、上下のVStackへ変更。余白を縮め、本文だけをスクロールする。
+- 原文と訳文は各々の発話/翻訳単位で表示し、架空の1対1行対応は作らない。
+- コピーはネイティブの文字選択を利用。本文へ実装用の疑似状態切替UIは出さない。
+
+## 残る受入
+
+実音声・モデル取得・実翻訳・停止のハードウェア受入は、既存の延期方針どおり未実施。既存の入力競合防止と2つの検証ウィンドウはコード/自動テストで維持確認したが、音声を開始しての結合確認はしていない。
+
+VoiceOver、全対応言語、長時間利用、高コントラスト、複数画面、画面共有、通常起動でのモデル取得/権限拒否/復旧表示、実保存失敗のUI表示も未検証。準備・停止失敗の遷移契約はfakeテストで確認したが、ネイティブの全失敗状態画像を揃えたわけではない。Gate A/Uの全条件を合格とせず、PR5-BはREVIEWで扱う。
+
+参考API: Apple [dismissWindow](https://developer.apple.com/documentation/swiftui/environmentvalues/dismisswindow)、[onScrollPhaseChange](https://developer.apple.com/documentation/swiftui/view/onscrollphasechange(_:))。Context7経由で公式資料を確認。

@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4実装・自動検証・コードレビュー済み**（2026-11-08：PR3マージ `6b34a45` を反映。PR4は195テスト・build・lint成功、[Draft PR #9](https://github.com/Ryuta1346/conflingo/pull/9)作成済み。[PR4検証記録](validation/dual-transcription.md)。Gate A/Bは未検証。[PR3検証記録](validation/system-audio.md)）
+- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4実装・自動検証・コードレビュー済み／PR5-A方向性承認済み／PR5-B実装・自動検証済み**（2026-11-08：PR3マージ `6b34a45` を反映。PR4は195テスト・build・lint成功、[Draft PR #9](https://github.com/Ryuta1346/conflingo/pull/9)作成済み。[PR4検証記録](validation/dual-transcription.md)。Gate A/Bは未検証。[PR3検証記録](validation/system-audio.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -209,6 +209,14 @@ enum InsightStatus: String, Codable, Sendable {
 ### 2.6 UI/UX全面刷新方針（採用済み）
 
 PR5を単発のMeeting画面追加にはしない。**デザイン設計（5-A）→ UI基盤および既存Conference刷新（5-B）→ Meeting Copilot UI（5-C）** の3段階で、同じ情報設計・操作体系を使う。
+
+#### PR5-Aの設計成果物（2026-11-08・モック方向性承認済み）
+
+- [レビュー入口・画面一覧](design/README.md)から9画面の操作モック、ライト/ダーク・狭幅画像を確認できる。
+- [情報設計](design/app-information-architecture.md)、[デザインシステム](design/design-system.md)、[状態・フロー・受入仕様](design/ux-states-and-flows.md)を作成。現行コードの観察と将来仕様を区別した。
+- [検証記録](design/validation.md): 主要操作24項目、拡大表示368ケース、構文・lint確認。製品Swiftコード・音声経路は未変更。モックの操作試験はネイティブ受入の代替ではない。
+- 主要4画面の画像提示後、ユーザー「OK」によりモック方向性を承認。PR5-Aは未マージのためREVIEW。PR5-B実装済み、PR5-C未着手。Gate U全体は未完了。ローカルSessionsの永続化担当とAI接続先・保持表示は後続実装計画で確定する。
+- [PR5-B実装計画](design/pr5-b-implementation-plan.md)を作成済み。共通デザイン部品とConference刷新を対象とし、ユーザー「進めて」により計画承認後に実装。206テスト・Debug/Release build・lint成功、非録音の画面/操作を確認。REVIEW。[PR5-B検証記録](validation/pr5-b-conference.md)。
 
 #### 2.6.1 情報設計と画面マップ
 
