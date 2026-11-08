@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" href="data:,">
+  <title>ConfLingo — UI/UX Design Review</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="review-bar">
+    <a class="review-brand" href="../app-information-architecture.md">ConfLingo <span>Design review · 01</span></a>
+    <div class="review-tools">
+      <label>画面<select id="screen-picker">
+        <option value="home">01 ホーム</option><option value="conference-setup">02 Conference 準備</option>
+        <option value="conference">03 Conference 字幕</option><option value="preparation">04 Meeting 準備</option>
+        <option value="meeting" selected>05 Meeting Live</option><option value="floating">06 Floating</option>
+        <option value="review">07 Meeting Review</option><option value="sessions">08 保存セッション</option><option value="settings">09 設定</option>
+      </select></label>
+      <label>状態<select id="state-picker"></select></label>
+      <label>配色<select id="theme-picker"><option value="light">ライト</option><option value="dark">ダーク</option></select></label>
+      <label>文字<select id="scale-picker"><option value="1">標準</option><option value="1.25">拡大</option></select></label>
+    </div>
+  </header>
+  <div class="review-note"><span class="review-dot"></span>操作できる設計モック · 架空データ / 音声取得・外部送信なし <span>PR5-A · 方向性承認済み</span></div>
+  <div id="app" class="app-window"></div>
+  <footer class="review-footer"><span>ConfLingo for macOS</span><span>会話を理解する。次の一言を、考える。</span><a href="../ux-states-and-flows.md">操作フロー・受入仕様 ↗</a></footer>
+  <div id="toast" role="status" aria-live="polite"></div>
+  <dialog id="dialog" aria-labelledby="dialog-title"></dialog>
+  <script src="app.js"></script>
+</body>
+</html>

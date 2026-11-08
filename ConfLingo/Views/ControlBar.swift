@@ -1,121 +1,52 @@
-import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 
-/// 画面下部のコントロールバー。Start/Stop・保存・フォントサイズ・最前面表示・セッション名。
 struct ControlBar: View {
-    @Bindable var store: SessionStore
-    let controller: SessionController
-    let coordinator: TranslationCoordinator
-    let speechLocale: Locale
-    let sourceLanguage: String
-    /// nil の場合は文字起こしのみモード（エクスポートに訳文を含めない）
-    let targetLanguage: String?
-    /// 確定の速さを精度より優先するか（文字起こしのみ × 高速確定の場合のみ true）
-    let fastResults: Bool
-    @Binding var contextKeywords: String
-    @Binding var fontSize: Double
-    @AppStorage("alwaysOnTop") private var alwaysOnTop = false
+    let phase: SessionPhase
+    let isStopping: Bool
+    let canStart: Bool
+    let hasTranscript: Bool
+    let start: () -> Void
+    let stop: () -> Void
 
     var body: some View {
-        HStack(spacing: 12) {
-            TextField("セッション名", text: $store.sessionName)
-                .textFieldStyle(.roundedBorder)
-                .frame(width: 180)
-
-            startStopButton
-
-            Button("Save Markdown") {
-                saveMarkdown()
+        HStack(spacing: 16) {
+            StatusLabel(text: status, symbol: phase == .listening ? "mic.fill" : "mic",
+                        color: phase == .listening ? DesignTokens.positive : DesignTokens.secondary)
+            Text("オンデバイス処理")
+                .font(.caption).foregroundStyle(DesignTokens.secondary)
+            Spacer(minLength: 8)
+            switch phase {
+            case .idle:
+                Button(hasTranscript ? "字幕を再開" : "字幕を開始", systemImage: "play.fill", action: start)
+                    .buttonStyle(.borderedProminent)
+                    .keyboardShortcut("r", modifiers: .command)
+                    .disabled(!canStart)
+            case .preparing:
+                ProgressView().controlSize(.small)
+                Button("開始準備中…") {}.disabled(true)
+            case .listening:
+                Button("停止する", systemImage: "stop.fill", action: stop)
+                    .tint(DesignTokens.danger)
+                    .buttonStyle(.bordered)
+                    .keyboardShortcut("r", modifiers: .command)
+            case .stopping:
+                Button(isStopping ? "停止処理中…" : "停止を再試行", action: stop)
+                    .disabled(isStopping)
+                    .tint(DesignTokens.danger)
             }
-            .disabled(store.segments.isEmpty)
-
-            Button("Clear") {
-                controller.reset(store: store)
-            }
-            .disabled(store.phase != .idle)
-
-            Spacer()
-
-            Toggle("最前面", isOn: $alwaysOnTop)
-                .toggleStyle(.checkbox)
-
-            Button("A−") {
-                fontSize = max(10, fontSize - 2)
-            }
-            .keyboardShortcut("-", modifiers: .command)
-
-            Button("A＋") {
-                fontSize = min(48, fontSize + 2)
-            }
-            .keyboardShortcut("+", modifiers: .command)
         }
-        .padding(12)
+        .controlSize(.large)
+        .padding(.horizontal, 22)
+        .padding(.vertical, 14)
+        .background(DesignTokens.surface)
     }
 
-    @ViewBuilder
-    private var startStopButton: some View {
-        switch store.phase {
-        case .idle:
-            Button("Start") {
-                Task {
-                    await controller.start(
-                        store: store,
-                        coordinator: coordinator,
-                        locale: speechLocale,
-                        glossary: KeywordParser.parseGlossary(contextKeywords),
-                        fastResults: fastResults
-                    )
-                }
-            }
-            .keyboardShortcut("r", modifiers: .command)
-            .buttonStyle(.borderedProminent)
-        case .preparing:
-            Button("Starting…") {}
-                .disabled(true)
-        case .listening:
-            Button("Stop") {
-                Task {
-                    await controller.stop(store: store, coordinator: coordinator)
-                }
-            }
-            .keyboardShortcut("r", modifiers: .command)
-            .buttonStyle(.borderedProminent)
-            .tint(.red)
-        case .stopping:
-            Button(controller.isStopping ? "Stopping…" : "停止を再試行") {
-                Task { await controller.stop(store: store, coordinator: coordinator) }
-            }
-            .disabled(controller.isStopping)
-        }
-    }
-
-    private func saveMarkdown() {
-        let panel = NSSavePanel()
-        panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
-
-        let formatter = DateFormatter()
-        formatter.locale = Locale(identifier: "en_US_POSIX")
-        formatter.dateFormat = "yyyyMMdd-HHmm"
-        let baseName = store.sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
-        panel.nameFieldStringValue = "\(baseName.isEmpty ? "ConfLingo" : baseName)-\(formatter.string(from: Date())).md"
-
-        guard panel.runModal() == .OK, let url = panel.url else { return }
-        let markdown = MarkdownExporter.render(
-            sessionName: store.sessionName,
-            date: store.startedAt ?? Date(),
-            segments: store.segments,
-            units: store.units,
-            sourceLanguage: sourceLanguage,
-            targetLanguage: targetLanguage
-        )
-        do {
-            try markdown.write(to: url, atomically: true, encoding: .utf8)
-        } catch {
-            let alert = NSAlert()
-            alert.messageText = "保存に失敗しました"
-            alert.informativeText = error.localizedDescription
-            alert.runModal()
+    private var status: String {
+        switch phase {
+        case .idle: "マイク 停止中"
+        case .preparing: "マイク 準備中"
+        case .listening: "マイク 取得中"
+        case .stopping: isStopping ? "マイク 停止処理中" : "マイク 停止未確認"
         }
     }
 }

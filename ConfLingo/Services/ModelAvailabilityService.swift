@@ -1,9 +1,7 @@
 import Foundation
 import Observation
-import Speech
-import Translation
 
-/// 起動時に英語音声認識モデルと英→日翻訳の利用可能性を確認し、
+/// 選択された認識言語と翻訳ペアの利用可能性を確認し、
 /// 必要なら音声認識モデルのダウンロードを行う。
 @MainActor
 @Observable
@@ -37,75 +35,72 @@ final class ModelAvailabilityService {
     private(set) var supportedSourceLocales: [Locale] = []
     private(set) var supportedTargetLanguages: [Locale.Language] = []
 
-    /// targetLanguageID が nil の場合は文字起こしのみモードとみなし、翻訳ペアの確認をスキップする
-    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String?) async {
-        state = .checking
-        let sourceName = LanguageCatalog.displayName(for: sourceLocaleID)
+    private let backend: any ModelPreparing
+    private var requestID = UUID()
 
-        // 0. 言語 Picker 用の候補を取得
-        // LanguageAvailability は非 Sendable のため、変数に保持せず呼び出しごとに生成する
+    init(backend: any ModelPreparing = SystemModelPreparation()) {
+        self.backend = backend
+    }
+
+    /// Returns true only when this request has prepared the selected language pair.
+    @discardableResult
+    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String?) async -> Bool {
+        guard !Task.isCancelled else { return false }
+        let request = UUID()
+        requestID = request
+        func isCurrent() -> Bool { requestID == request && !Task.isCancelled }
+
+        state = .checking
+        speechLocale = nil
+        downloadProgress = nil
+        let sourceName = LanguageCatalog.displayName(for: sourceLocaleID)
         if supportedSourceLocales.isEmpty {
-            supportedSourceLocales = await SpeechTranscriber.supportedLocales
-                .sorted { $0.identifier < $1.identifier }
+            let locales = await backend.sourceLocales()
+            guard isCurrent() else { return false }
+            supportedSourceLocales = locales
         }
         if targetLanguageID != nil, supportedTargetLanguages.isEmpty {
-            // 非 Sendable な LanguageAvailability の async プロパティは MainActor から
-            // 直接読めないため、nonisolated なタスク内で取得する（返り値は Sendable）
-            supportedTargetLanguages = await Task.detached {
-                await LanguageAvailability().supportedLanguages
-            }.value.sorted { $0.minimalIdentifier < $1.minimalIdentifier }
+            let languages = await backend.targetLanguages()
+            guard isCurrent() else { return false }
+            supportedTargetLanguages = languages
         }
-
-        // 1. 認識言語のサポート確認
-        guard let locale = await SpeechTranscriber.supportedLocale(equivalentTo: Locale(identifier: sourceLocaleID)) else {
+        let resolvedLocale = await backend.supportedLocale(for: sourceLocaleID)
+        guard isCurrent() else { return false }
+        guard let locale = resolvedLocale else {
             state = .unavailable("\(sourceName)の音声認識はこのMacでは利用できません。")
-            return
+            return false
         }
-        speechLocale = locale
-
-        // 2. 音声認識モデルのインストール確認・ダウンロード
-        let transcriber = SpeechTranscriptionService.makeTranscriber(locale: locale)
-        let speechStatus = await AssetInventory.status(forModules: [transcriber])
-        switch speechStatus {
-        case .unsupported:
-            state = .unavailable("\(sourceName)の音声認識モデルがサポートされていません。")
-            return
-        case .installed:
-            break
-        case .supported, .downloading:
-            fallthrough
-        @unknown default:
-            do {
-                _ = try? await AssetInventory.reserve(locale: locale)
-                if let request = try await AssetInventory.assetInstallationRequest(supporting: [transcriber]) {
-                    state = .downloadingSpeechModel
-                    downloadProgress = request.progress
-                    try await request.downloadAndInstall()
-                    downloadProgress = nil
-                }
-            } catch {
-                state = .unavailable("音声認識モデルのダウンロードに失敗しました: \(error.localizedDescription)")
-                return
+        do {
+            let supported = try await backend.prepareSpeech(for: locale) { progress in
+                guard isCurrent() else { return }
+                self.state = .downloadingSpeechModel
+                self.downloadProgress = progress
+            }
+            guard isCurrent() else { return false }
+            downloadProgress = nil
+            guard supported else {
+                state = .unavailable("\(sourceName)の音声認識モデルがサポートされていません。")
+                return false
+            }
+        } catch {
+            guard isCurrent() else { return false }
+            downloadProgress = nil
+            state = .unavailable("音声認識モデルのダウンロードに失敗しました: \(error.localizedDescription)")
+            return false
+        }
+        if let targetLanguageID {
+            let supported = await backend.supportsTranslation(
+                from: locale.language, to: Locale.Language(identifier: targetLanguageID)
+            )
+            guard isCurrent() else { return false }
+            guard supported else {
+                let targetName = LanguageCatalog.displayName(for: targetLanguageID)
+                state = .unavailable("\(sourceName)から\(targetName)への翻訳はこのMacでは利用できません。")
+                return false
             }
         }
-
-        // 3. 翻訳ペアのサポート確認（モデル未DLなら prepareTranslation がDLダイアログを出す）
-        guard let targetLanguageID else {
-            state = .ready
-            return
-        }
-        let targetName = LanguageCatalog.displayName(for: targetLanguageID)
-        let translationStatus = await LanguageAvailability().status(
-            from: locale.language,
-            to: Locale.Language(identifier: targetLanguageID)
-        )
-        switch translationStatus {
-        case .unsupported:
-            state = .unavailable("\(sourceName)から\(targetName)への翻訳はこのMacでは利用できません。")
-        case .installed, .supported:
-            state = .ready
-        @unknown default:
-            state = .ready
-        }
+        speechLocale = locale
+        state = .ready
+        return true
     }
 }

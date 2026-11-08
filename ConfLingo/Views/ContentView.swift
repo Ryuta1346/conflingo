@@ -1,51 +1,115 @@
+import AppKit
 import SwiftUI
 import Translation
 
 struct ContentView: View {
-    @State private var store = SessionStore()
+    @State private var store: SessionStore
     @State private var coordinator = TranslationCoordinator()
     @State private var availability = ModelAvailabilityService()
     @State private var controller: SessionController
+    @State private var navigation: ConferenceNavigation
     @State private var translationConfiguration: TranslationSession.Configuration?
-    @State private var profileStore = KeywordProfileStore()
-    @State private var renameTarget: KeywordProfile?
-    @State private var renameText = ""
+    @State private var profileStore: KeywordProfileStore
+    @State private var showDictionary = false
+    @State private var showClearConfirmation = false
+    @State private var preparationRetry = 0
+    @Environment(\.dismissWindow) private var dismissWindow
+    @State private var closeRequested = false
+    @State private var showCloseBlocked = false
     @AppStorage("fontSize") private var fontSize = 16.0
     @AppStorage("sourceLocaleID") private var sourceLocaleID = "en-US"
     @AppStorage("targetLanguageID") private var targetLanguageID = "ja"
     @AppStorage("transcriptionOnly") private var transcriptionOnly = false
     @AppStorage("fastFinalization") private var fastFinalization = false
+    @AppStorage("alwaysOnTop") private var alwaysOnTop = false
+    @AppStorage("appearance") private var appearance = "system"
+    private let isPreview: Bool
 
-    init(activity: AudioInputUse = AudioInputUse()) {
+    init(activity: AudioInputUse = AudioInputUse(), preview: Bool = false, defaults: UserDefaults = .standard) {
+        #if DEBUG
+        isPreview = preview
+        #else
+        isPreview = false
+        #endif
+        let session = SessionStore()
+        let settings: UserDefaults
+        #if DEBUG
+        settings = isPreview ? ConferencePreview.defaults : defaults
+        if isPreview { ConferencePreview.populate(session) }
+        #else
+        settings = defaults
+        #endif
+        _fontSize = AppStorage(wrappedValue: 16, "fontSize", store: settings)
+        _sourceLocaleID = AppStorage(wrappedValue: "en-US", "sourceLocaleID", store: settings)
+        _targetLanguageID = AppStorage(wrappedValue: "ja", "targetLanguageID", store: settings)
+        _transcriptionOnly = AppStorage(wrappedValue: false, "transcriptionOnly", store: settings)
+        _fastFinalization = AppStorage(wrappedValue: false, "fastFinalization", store: settings)
+        _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: settings)
+        _appearance = AppStorage(wrappedValue: "system", "appearance", store: settings)
+        _store = State(initialValue: session)
         _controller = State(initialValue: SessionController(activity: activity))
+        _navigation = State(initialValue: ConferenceNavigation(destination: isPreview ? .live : .home))
+        _profileStore = State(initialValue: KeywordProfileStore(defaults: settings))
     }
 
     var body: some View {
-        Group {
-            switch availability.state {
-            case .checking, .downloadingSpeechModel:
-                SetupView(availability: availability)
-            case .unavailable(let reason):
-                ContentUnavailableView {
-                    Label("利用できません", systemImage: "exclamationmark.triangle")
-                } description: {
-                    Text(reason)
+        AppShellView(destination: navigation.destination, phase: store.phase, navigate: navigate) {
+            VStack(spacing: 0) {
+                topBar
+                Divider()
+                if let error = controller.lastError {
+                    SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
                 }
-            case .ready:
-                sessionView
+                page
+                if navigation.destination == .setup || navigation.destination == .live {
+                    Divider()
+                    ControlBar(phase: store.phase, isStopping: controller.isStopping,
+                               canStart: modelState == .ready, hasTranscript: !store.segments.isEmpty,
+                               start: startSession, stop: { Task { await stopSession() } })
+                }
             }
         }
-        .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)") {
+        .background(WindowCloseGuard(shouldClose: shouldCloseWindow))
+        .alert("処理が完了するまでお待ちください", isPresented: $showCloseBlocked) {
+            Button("閉じる", role: .cancel) {}
+        } message: {
+            Text("開始・停止の処理中です。停止が失敗した場合は「停止を再試行」を操作してください。")
+        }
+        .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
+        .sheet(isPresented: $showDictionary) {
+            KeywordProfileEditor(profiles: profileStore).disabled(store.phase != .idle)
+        }
+        .alert(closeRequested ? "字幕を停止してウィンドウを閉じますか？" : "字幕を停止して移動しますか？", isPresented: $navigation.showsStopConfirmation) {
+            Button("キャンセル", role: .cancel) { navigation.cancelNavigation(); closeRequested = false }
+            Button(closeRequested ? "停止して閉じる" : "停止して移動") {
+                Task {
+                    await navigation.confirmNavigation(store: store, stop: stopSession)
+                    if closeRequested && store.phase == .idle { dismissWindow(id: "main") }
+                    closeRequested = false
+                }
+            }
+        } message: {
+            Text(closeRequested ? "必要な字幕は先に書き出してください。停止が完了した後にウィンドウを閉じます。" : "ここまでの字幕は保持します。停止が完了すると画面を切り替えます。")
+        }
+        .alert("字幕を消去しますか？", isPresented: $showClearConfirmation) {
+            Button("キャンセル", role: .cancel) {}
+            Button("消去", role: .destructive) { controller.reset(store: store) }
+        } message: {
+            Text("現在の字幕を消去します。書き出し済みのMarkdownは削除しません。")
+        }
+        .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)|retry=\(preparationRetry)") {
+            guard !isPreview else { return }
             // 起動時・言語ペア変更時・文字起こしのみモード切替時に利用可能性を再チェックする
             translationConfiguration = nil
-            await availability.checkAndPrepare(
+            let ready = await availability.checkAndPrepare(
                 sourceLocaleID: sourceLocaleID,
                 targetLanguageID: transcriptionOnly ? nil : targetLanguageID
             )
+            guard ready, !Task.isCancelled else { return }
             if transcriptionOnly {
                 // 消費されないキューにバッファが溜まらないよう finish し、以降の enqueue を no-op にする
                 coordinator.finish()
-            } else if availability.state == .ready {
+            } else {
                 translationConfiguration = TranslationSession.Configuration(
                     source: (availability.speechLocale ?? Locale(identifier: sourceLocaleID)).language,
                     target: Locale.Language(identifier: targetLanguageID)
@@ -62,6 +126,7 @@ struct ContentView: View {
         // @Sendable でクロージャを nonisolated にし、非 Sendable な session を
         // MainActor 領域に取り込まずタスク領域に留める（translate 呼び出しに必須）。
         .translationTask(translationConfiguration) { @Sendable session in
+            guard !isPreview else { return }
             do {
                 try await session.prepareTranslation()
             } catch {
@@ -97,225 +162,122 @@ struct ContentView: View {
         }
     }
 
-    private var sessionView: some View {
-        VStack(spacing: 0) {
-            if let error = controller.lastError {
-                Text(error)
-                    .font(.callout)
-                    .foregroundStyle(.white)
-                    .frame(maxWidth: .infinity, alignment: .leading)
-                    .padding(8)
-                    .background(.red.opacity(0.8))
-            }
-
-            if transcriptionOnly {
-                TranscriptPane(
-                    title: "\(LanguageCatalog.displayName(for: sourceLocaleID))（認識）",
-                    entries: sourceEntries,
-                    fontSize: fontSize
-                )
-            } else {
-                VSplitView {
-                    TranscriptPane(
-                        title: "\(LanguageCatalog.displayName(for: sourceLocaleID))（認識）",
-                        entries: sourceEntries,
-                        fontSize: fontSize
-                    )
-                    TranscriptPane(
-                        title: "\(LanguageCatalog.displayName(for: targetLanguageID))（翻訳）",
-                        entries: targetEntries,
-                        fontSize: fontSize
-                    )
-                }
-            }
-
-            Divider()
-
-            HStack(spacing: 8) {
-                Picker("認識", selection: $sourceLocaleID) {
-                    ForEach(availability.supportedSourceLocales, id: \.identifier) { locale in
-                        Text(LanguageCatalog.displayName(for: locale.identifier))
-                            .tag(locale.identifier)
-                    }
-                }
-                .frame(maxWidth: 240)
-
-                if !transcriptionOnly {
-                    Image(systemName: "arrow.right")
-                        .foregroundStyle(.secondary)
-
-                    Picker("翻訳先", selection: $targetLanguageID) {
-                        ForEach(
-                            LanguageCatalog.selectableTargets(
-                                availability.supportedTargetLanguages,
-                                excludingSourceLocaleID: sourceLocaleID
-                            ),
-                            id: \.minimalIdentifier
-                        ) { language in
-                            Text(LanguageCatalog.displayName(for: language.minimalIdentifier))
-                                .tag(language.minimalIdentifier)
-                        }
-                    }
-                    .frame(maxWidth: 240)
-                }
-
-                Toggle("文字起こしのみ", isOn: $transcriptionOnly)
-                    .toggleStyle(.checkbox)
-
-                if transcriptionOnly {
-                    // 議事録用途は精度優先（OFF）、リアルタイム字幕用途は速度優先（ON）
-                    Toggle("高速確定（精度低め）", isOn: $fastFinalization)
-                        .toggleStyle(.checkbox)
-                }
-
-                Spacer()
-            }
-            .disabled(store.phase != .idle)
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-
-            HStack(alignment: .top, spacing: 8) {
-                Image(systemName: "character.magnify")
-                    .foregroundStyle(.secondary)
-                    .padding(.top, 4)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    // 用語辞書プロファイルの選択・管理
-                    HStack(spacing: 8) {
-                        Picker("用語辞書", selection: profileSelectionBinding) {
-                            ForEach(profileStore.profiles) { profile in
-                                Text(profile.name).tag(profile.id)
-                            }
-                        }
-                        .labelsHidden()
-                        .frame(maxWidth: 220)
-
-                        Button {
-                            renameText = profileStore.selectedProfile.name
-                            renameTarget = profileStore.selectedProfile
-                        } label: {
-                            Image(systemName: "pencil")
-                        }
-                        .help("名前を変更")
-
-                        Button {
-                            profileStore.addProfile(name: "新しい辞書")
-                        } label: {
-                            Image(systemName: "plus")
-                        }
-                        .help("新規作成")
-
-                        Button {
-                            profileStore.duplicate(profileStore.selectedID)
-                        } label: {
-                            Image(systemName: "doc.on.doc")
-                        }
-                        .help("複製")
-
-                        Button {
-                            profileStore.delete(profileStore.selectedID)
-                        } label: {
-                            Image(systemName: "trash")
-                        }
-                        .help("削除")
-                        .disabled(profileStore.profiles.count <= 1)
-                    }
-
-                    TextField(
-                        "専門用語（カンマ区切り）。「term=訳語」で訳語を固定できます（例: evals=評価）。未指定は原文表記のまま保持",
-                        text: selectedKeywordsBinding,
-                        axis: .vertical
-                    )
-                    .lineLimit(1...4)
-                    .textFieldStyle(.roundedBorder)
-                }
-                .disabled(store.phase != .idle)
-            }
-            .padding(.horizontal, 12)
-            .padding(.top, 8)
-
-            ControlBar(
-                store: store,
-                controller: controller,
-                coordinator: coordinator,
-                speechLocale: availability.speechLocale ?? Locale(identifier: sourceLocaleID),
-                sourceLanguage: sourceLocaleID,
+    @ViewBuilder
+    private var page: some View {
+        switch navigation.destination {
+        case .home:
+            HomeView(hasTranscript: !store.segments.isEmpty,
+                     prepare: { navigate(.setup) }, openTranscript: { navigate(.live) })
+        case .setup:
+            ConferenceSetupView(
+                sessionName: $store.sessionName, sourceLanguage: $sourceLocaleID,
+                targetLanguage: $targetLanguageID, transcriptionOnly: $transcriptionOnly,
+                fastFinalization: $fastFinalization, profiles: profileStore,
+                sourceLocales: sourceLocales, targetLanguages: targetLanguages,
+                modelState: modelState, downloadProgress: availability.downloadProgress,
+                canEdit: store.phase == .idle, hasTranscript: !store.segments.isEmpty,
+                editDictionary: { showDictionary = true }, retry: { preparationRetry += 1 },
+                openTranscript: { navigate(.live) }
+            )
+        case .live:
+            ConferenceLiveView(
+                store: store, sourceLanguage: sourceLocaleID,
                 targetLanguage: transcriptionOnly ? nil : targetLanguageID,
-                fastResults: transcriptionOnly && fastFinalization,
-                contextKeywords: selectedKeywordsBinding,
-                fontSize: $fontSize
+                profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
+                editSettings: { navigate(.setup) },
+                clear: { showClearConfirmation = true }
+            )
+        case .settings:
+            SettingsView(fontSize: $fontSize, alwaysOnTop: $alwaysOnTop, appearance: $appearance,
+                         editDictionary: { showDictionary = true }, prepare: { navigate(.setup) })
+        }
+    }
+
+    private var topBar: some View {
+        HStack(spacing: 10) {
+            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : "Conference")
+                .font(.callout.weight(.medium))
+                .foregroundStyle(DesignTokens.secondary)
+            Spacer(minLength: 8)
+            if navigation.destination == .live {
+                Button("A−") { fontSize = max(10, fontSize - 2) }
+                    .keyboardShortcut("-", modifiers: .command)
+                    .accessibilityLabel("字幕を小さく")
+                Button("A＋") { fontSize = min(48, fontSize + 2) }
+                    .keyboardShortcut("+", modifiers: .command)
+                    .accessibilityLabel("字幕を大きく")
+                Toggle(isOn: $alwaysOnTop) { Label("最前面", systemImage: "pin") }
+                    .toggleStyle(.button)
+                ConferenceExportButton(store: store, sourceLanguage: sourceLocaleID,
+                                       targetLanguage: transcriptionOnly ? nil : targetLanguageID)
+            }
+        }
+        .controlSize(.regular)
+        .padding(.horizontal, 22)
+        .padding(.vertical, 14)
+        .background(DesignTokens.surface)
+    }
+
+    private var modelState: ModelAvailabilityService.State { isPreview ? .ready : availability.state }
+
+    private var sourceLocales: [Locale] {
+        if isPreview { return [Locale(identifier: "en-US"), Locale(identifier: "ja-JP"), Locale(identifier: "de-DE")] }
+        let locales = availability.supportedSourceLocales
+        return locales.contains { $0.identifier == sourceLocaleID } ? locales : [Locale(identifier: sourceLocaleID)] + locales
+    }
+
+    private var targetLanguages: [Locale.Language] {
+        if isPreview { return [.init(identifier: "ja"), .init(identifier: "en"), .init(identifier: "de")] }
+        let languages = availability.supportedTargetLanguages
+        return languages.contains { $0.minimalIdentifier == targetLanguageID } ? languages : [.init(identifier: targetLanguageID)] + languages
+    }
+
+    private func shouldCloseWindow(_: NSWindow) -> Bool {
+        switch store.phase {
+        case .idle:
+            return true
+        case .listening:
+            closeRequested = true
+            navigation.request(.home, phase: store.phase)
+        case .preparing, .stopping:
+            showCloseBlocked = true
+        }
+        return false
+    }
+
+    private func navigate(_ destination: ConferenceNavigation.Destination) {
+        navigation.request(destination, phase: store.phase)
+    }
+
+    private func startSession() {
+        guard modelState == .ready, store.phase == .idle else { return }
+        navigate(.live)
+        if isPreview {
+            store.phase = .listening
+            store.updateVolatile("And that gives us a different way to think about…")
+            return
+        }
+        Task {
+            await controller.start(
+                store: store, coordinator: coordinator,
+                locale: availability.speechLocale ?? Locale(identifier: sourceLocaleID),
+                glossary: KeywordParser.parseGlossary(profileStore.selectedProfile.keywords),
+                fastResults: transcriptionOnly && fastFinalization
             )
         }
-        .alert(
-            "用語辞書の名前を変更",
-            isPresented: Binding(
-                get: { renameTarget != nil },
-                set: { if !$0 { renameTarget = nil } }
-            )
-        ) {
-            TextField("名前", text: $renameText)
-            Button("変更") {
-                if let target = renameTarget {
-                    profileStore.rename(target.id, to: renameText)
-                }
-                renameTarget = nil
-            }
-            Button("キャンセル", role: .cancel) { renameTarget = nil }
-        }
     }
 
-    /// 選択中プロファイルの keywords を双方向編集する Binding。
-    /// set で1文字ごとにストアへ即書き戻すため、切替時に未保存差分は発生しない。
-    private var selectedKeywordsBinding: Binding<String> {
-        Binding(
-            get: { profileStore.selectedProfile.keywords },
-            set: { profileStore.updateSelectedKeywords($0) }
-        )
-    }
-
-    /// プロファイル選択 Picker 用の Binding。
-    private var profileSelectionBinding: Binding<UUID> {
-        Binding(
-            get: { profileStore.selectedID },
-            set: { profileStore.select($0) }
-        )
-    }
-
-    private var sourceEntries: [TranscriptPane.Entry] {
-        var entries = store.segments.map {
-            TranscriptPane.Entry(id: $0.id.uuidString, text: $0.english, dimmed: false)
+    private func stopSession() async {
+        if isPreview {
+            store.phase = .idle
+            store.updateVolatile("")
+            return
         }
-        if !store.volatileText.isEmpty {
-            entries.append(TranscriptPane.Entry(id: "volatile", text: store.volatileText, dimmed: true))
-        }
-        return entries
-    }
-
-    private var targetEntries: [TranscriptPane.Entry] {
-        var entries = store.units.map { unit in
-            let text: String
-            let dimmed: Bool
-            switch unit.translationState {
-            case .done:
-                text = unit.japanese ?? ""
-                dimmed = false
-            case .failed:
-                text = "（翻訳に失敗しました）"
-                dimmed = true
-            case .pending, .translating:
-                text = "…翻訳中"
-                dimmed = true
-            }
-            return TranscriptPane.Entry(id: unit.id.uuidString, text: text, dimmed: dimmed)
-        }
-        if !store.bufferedSegmentIDs.isEmpty {
-            // 文末待ちでまだ翻訳単位になっていないセグメントがあることを示す
-            entries.append(TranscriptPane.Entry(id: "buffered", text: "…翻訳中", dimmed: true))
-        }
-        return entries
+        await controller.stop(store: store, coordinator: coordinator)
     }
 }
 
 #Preview {
-    ContentView()
+    ContentView(preview: true)
+        .frame(width: 1280, height: 800)
 }

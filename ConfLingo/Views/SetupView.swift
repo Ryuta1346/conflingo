@@ -1,26 +1,27 @@
 import SwiftUI
 
-/// 起動時チェック・音声認識モデルダウンロード中の画面。
 struct SetupView: View {
-    let availability: ModelAvailabilityService
+    let state: ModelAvailabilityService.State
+    let progress: Progress?
+    let sourceLanguage: String
 
     var body: some View {
-        VStack(spacing: 16) {
-            if availability.state == .downloadingSpeechModel {
-                if let progress = availability.downloadProgress {
-                    ProgressView(progress)
-                        .frame(maxWidth: 320)
+        HStack(spacing: 14) {
+            ProgressView().controlSize(.small)
+            VStack(alignment: .leading, spacing: 8) {
+                if state == .downloadingSpeechModel {
+                    Text("\(LanguageCatalog.displayName(for: sourceLanguage))の認識モデルを準備しています…")
+                    if let progress { ProgressView(progress).frame(maxWidth: 320) }
                 } else {
-                    ProgressView()
+                    Text("利用できる言語とモデルを確認しています…")
                 }
-                Text("英語音声認識モデルをダウンロードしています…")
-                    .foregroundStyle(.secondary)
-            } else {
-                ProgressView()
-                Text("利用可能な機能を確認しています…")
-                    .foregroundStyle(.secondary)
+                Text("準備が完了してから、字幕を開始できます。")
+                    .font(.caption).foregroundStyle(DesignTokens.secondary)
             }
         }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .font(.callout)
+        .padding(16)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: 8))
     }
 }
