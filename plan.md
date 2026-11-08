@@ -17,7 +17,7 @@
 |---|---|---|---|---|
 | PR0 | Baseline・検証環境 | — | **DOING** | [#5 (Merged・実機確認待ち)](https://github.com/Ryuta1346/conflingo/pull/5) |
 | PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **DONE** | [#6 (Merged)](https://github.com/Ryuta1346/conflingo/pull/6) |
-| PR2 | 音声入力の共通化 | PR1 | **REVIEW** | — |
+| PR2 | 音声入力の共通化 | PR1 | **REVIEW** | [#7 (Draft)](https://github.com/Ryuta1346/conflingo/pull/7) |
 | PR3 | システム音声キャプチャ | PR2 | TODO | — |
 | PR4 | マイク＋内部音声の同時STT | PR3 | TODO | — |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | TODO | — |
@@ -43,7 +43,7 @@
 ## 主な未解決事項
 
 - **PR0:** 実音声試験はユーザー指示で後日実施。起動・専用モード切替は確認済み。Gate Aは未検証を維持。[検証記録](docs/validation/conference-baseline.md)
-- **PR2:** 音声入力の共通化を実装し、152テスト・build・lint成功。次はレビュー・受入確認。実音声試験の延期は継続。
+- **PR2:** Draft PR #7。音声入力の共通化を実装し、152テスト・build・lint成功。次はレビュー・受入確認。実音声試験の延期は継続。
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
 - **PR4:** 2系統SpeechAnalyzerの性能・精度・遅延
 - **PR5-A:** UIモック未承認（5-B/Cの着手条件）
