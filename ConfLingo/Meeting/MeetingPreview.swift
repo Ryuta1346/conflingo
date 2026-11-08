@@ -24,7 +24,8 @@ enum MeetingPreview {
                 return locale
             }
         )
-        return MeetingWorkspace(controller: controller)
+        return MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
+                                credentials: GeminiCredentials(store: PreviewAPIKeyStore()))
     }
 
     static func prepare(_ meeting: MeetingWorkspace, scenario: String) async {
@@ -35,8 +36,8 @@ enum MeetingPreview {
         guard meeting.phase == .listening else { return }
         populate(meeting)
         if scenario == "review" || scenario == "stop-failed" { await meeting.end() }
-        if scenario == "offline" { meeting.aiStatus = "プレビュー：AIオフライン・外部送信なし" }
-        if scenario == "sending" { meeting.aiStatus = "プレビュー：AI送信中の表示（実通信なし）" }
+        if scenario == "offline" { meeting.previewAIStatus = "プレビュー：AIオフライン・外部送信なし" }
+        if scenario == "sending" { meeting.previewAIStatus = "プレビュー：AI送信中の表示（実通信なし）" }
     }
 
     static func populate(_ meeting: MeetingWorkspace, count: Int = 12) {
@@ -56,13 +57,32 @@ enum MeetingPreview {
             ))
         }
         meeting.insights = [
-            MeetingInsight(kind: "回答のヒント", text: "来週金曜は、セキュリティレビューの完了を条件に。日程を確約する前に、担当者と完了予定を確認しましょう。",
+            MeetingInsight(kind: .answerSuggestion, text: "来週金曜は、セキュリティレビューの完了を条件に。日程を確約する前に、担当者と完了予定を確認しましょう。",
                            priority: 2, evidenceIDs: Array(ids.dropFirst().prefix(1))),
-            MeetingInsight(kind: "確認質問の候補", text: "レビューの担当者は決まっていますか？", priority: 1,
+            MeetingInsight(kind: .followUpQuestion, text: "レビューの担当者は決まっていますか？", priority: 1,
                            evidenceIDs: Array(ids.suffix(1)))
         ]
-        meeting.aiStatus = "プレビュー：架空の提案・外部送信なし"
+        meeting.previewAIStatus = "プレビュー：架空の提案・外部送信なし"
     }
+}
+
+@MainActor
+private struct PreviewInsightClient: InsightClient {
+    func generate(_ request: InsightRequest, update: @escaping @MainActor (String) -> Void) async throws -> InsightResult {
+        for text in ["担当者と", "担当者と完了予定を", "担当者と完了予定を確認しましょう。（架空の回答）"] {
+            try await Task.sleep(for: .milliseconds(150))
+            update(text)
+        }
+        return InsightResult(kind: .followUpQuestion, text: "担当者と完了予定を確認しましょう。（架空の回答）",
+                             evidenceIDs: Array(request.events.prefix(1).map(\.id)))
+    }
+}
+
+@MainActor
+private final class PreviewAPIKeyStore: APIKeyStore {
+    func read() throws -> String? { nil }
+    func save(_ key: String) throws { throw InsightFailure.keyStorage }
+    func delete() throws { throw InsightFailure.keyStorage }
 }
 
 @MainActor

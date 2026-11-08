@@ -13,8 +13,21 @@ final class MeetingWorkspace {
     var systemLocaleID = "en-US"
     var consentConfirmed = false
     var showsDiscardConfirmation = false
-    var insights: [MeetingInsight] = []
-    var aiStatus = "AI未接続・外部送信なし"
+    let ai: InsightCoordinator
+    let credentials: GeminiCredentials
+    var insights: [MeetingInsight] {
+        get { ai.insights }
+        set { ai.insights = newValue }
+    }
+    #if DEBUG
+    var previewAIStatus: String?
+    #endif
+    var aiStatus: String {
+        #if DEBUG
+        if let previewAIStatus { return previewAIStatus }
+        #endif
+        return ai.statusText
+    }
     var selectedEvidence: UUID?
     private(set) var evidenceRequest = UUID()
     private(set) var page: Page = .setup
@@ -22,8 +35,28 @@ final class MeetingWorkspace {
     private(set) var isTransitioning = false
     private var pendingCompletion: Completion?
 
-    init(controller: DualTranscriptionController) {
+    init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
+         credentials: GeminiCredentials? = nil) {
         self.controller = controller
+        let credentials = credentials ?? GeminiCredentials()
+        self.credentials = credentials
+        let client = insightClient ?? GeminiInsightClient(key: { try credentials.store.read() })
+        let ai = InsightCoordinator(store: controller.store, client: client)
+        self.ai = ai
+        controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
+        controller.captureActivityChanged = { [weak ai] active in
+            if active { ai?.resume() } else { ai?.suspend() }
+        }
+        credentials.onChange = { [weak ai] in ai?.setPermission(false, after: 0) }
+    }
+
+    func setAIAllowed(_ allowed: Bool) {
+        guard !allowed || (page != .review && phase != .stopping) else { return }
+        ai.setPermission(allowed, after: controller.elapsedOffset)
+    }
+
+    func setAutomaticAI(_ allowed: Bool) {
+        ai.setAutomatic(allowed, after: controller.elapsedOffset)
     }
 
     var store: MeetingSessionStore { controller.store }
@@ -60,12 +93,13 @@ final class MeetingWorkspace {
 
     func editPreparation() {
         guard canDiscard, page != .review else { return }
+        ai.suspend()
         page = .setup
     }
 
     func requestDiscard() {
         guard canDiscard else { return }
-        if store.finals.isEmpty && store.partials.isEmpty {
+        if store.finals.isEmpty && store.partials.isEmpty && insights.isEmpty {
             reset()
         } else {
             showsDiscardConfirmation = true
@@ -79,6 +113,7 @@ final class MeetingWorkspace {
 
     private func complete(_ completion: Completion) async {
         guard !isTransitioning, page != .review else { return }
+        ai.suspend()
         isTransitioning = true
         pendingCompletion = completion
         defer { isTransitioning = false }
@@ -93,6 +128,7 @@ final class MeetingWorkspace {
     }
 
     private func reset() {
+        ai.reset()
         controller.clear()
         name = ""
         insights = []

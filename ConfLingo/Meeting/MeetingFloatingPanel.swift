@@ -113,6 +113,9 @@ private struct MeetingFloatingView: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
                     Label(meeting.aiStatus, systemImage: "cloud").font(.caption)
+                    if meeting.ai.permitted {
+                        Button("AI送信を停止") { meeting.setAIAllowed(false) }
+                    }
                     if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
                     if let insight = MeetingInsight.featured(in: meeting.insights) {
                         MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)

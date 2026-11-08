@@ -4,12 +4,12 @@
 
 ## 現在地
 
-- 更新: **2026-11-08**／状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4・PR5-A/Bマージ済み、残る受入待ち／PR5-C実装・自動検証済み**／進捗: **2/12**
+- 更新: **2026-11-09**／状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4・PR5-A/B/Cマージ済み、残る受入待ち／PR6実装・自動検証済み、実API受入待ち**／進捗: **2/12**
 - **持ち越し:** PR0の実音声・翻訳・保存操作、PR3の内部音声・権限・配布条件の確認（音声試験はユーザー指示で延期）
-- **次の作業:** [PR5-C（Draft #11）](https://github.com/Ryuta1346/conflingo/pull/11)の差分・[検証記録と画像](docs/validation/pr5-c-meeting.md)をレビュー。実音声受入は引き続き延期
+- **次の作業:** アプリへキー登録後の合成会話による実Gemini評価。PR6の独立レビューと指摘2件の修正・自動検証は完了。[PR6検証記録](docs/validation/pr6-insights.md)。実音声受入の延期は継続
 - 概算: PoC 2〜3週間、実用MVP 6〜10週間（着手日・期限は未設定）
-- **確認済み:** PR5-CのMeeting準備/Live/Review・小窓・PR4接続を実装。展開時の停止確認と発話順のレビュー修正後、Debug/Releaseビルド、236テスト、lint（86ファイル・違反0）成功。初期実装時の非録音操作・読み返し保持も確認済み。[PR5-C検証記録](docs/validation/pr5-c-meeting.md)
-- **未検証:** 実音声・実翻訳、内部音声取得、2入力STT
+- **確認済み:** PR6のGemini直接接続・手動Ask AI・初期オフの自動提案・Keychain・停止連動を実装。レビュー修正後267テスト/39 suites、Debugビルド、lint（101ファイル・違反0）成功。Releaseは修正前の成功記録あり。モックによる非録音UI操作も確認済み。
+- **未検証:** 実Gemini評価1件はスキップ。実APIの品質・費用、実音声・実翻訳、内部音声取得、2入力STT。
 
 ## PR進捗
 
@@ -22,8 +22,8 @@
 | PR4 | マイク＋内部音声の同時STT | PR3（実機確認持ち越し承認済み） | **REVIEW** | [#9 (Merged・実機受入待ち)](https://github.com/Ryuta1346/conflingo/pull/9) |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | **REVIEW** | [設計・モック](docs/design/README.md)・[#10 (Merged)](https://github.com/Ryuta1346/conflingo/pull/10)（方向性承認済み） |
 | PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [PR #10 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/10)・[211テスト／レビュー修正検証](docs/validation/pr5-b-conference.md) |
-| PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、PR4実機受入持ち越し承認済み／AIはPR6 | **REVIEW** | [実装計画](docs/design/pr5-c-implementation-plan.md)・[検証記録](docs/validation/pr5-c-meeting.md)・[Draft #11](https://github.com/Ryuta1346/conflingo/pull/11) |
-| PR6 | AI会話理解・根拠付き回答 | PR1/PR4 | TODO | — |
+| PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、PR4実機受入持ち越し承認済み／AIはPR6 | **REVIEW** | [実装計画](docs/design/pr5-c-implementation-plan.md)・[検証記録](docs/validation/pr5-c-meeting.md)・[#11 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/11) |
+| PR6 | AI会話理解・根拠付き回答 | PR1/PR4、実機受入持ち越し承認済み | **REVIEW** | [Draft PR #12](https://github.com/Ryuta1346/conflingo/pull/12)・[検証記録](docs/validation/pr6-insights.md) |
 | PR7 | 決定・アクション候補管理 | PR6 | TODO | — |
 | PR8 | ローカル資料検索・RAG | PR6 | TODO | — |
 | PR9 | 結合・性能・安全性検証 | 全PR | TODO | — |
@@ -47,7 +47,8 @@
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
 - **PR4:** [PR #9](https://github.com/Ryuta1346/conflingo/pull/9)マージ済み（`c714f9c`）、実装・自動検証・コードレビュー完了。2系統SpeechAnalyzerの性能・精度・時刻誤差・遅延は未検証。新検証画面の閉鎖確認はUI取得タイムアウトで持ち越し。
 - **PR5-A:** 9画面・状態別モックと設計資料を作成、ブラウザ検証済み。主要4画面の画像提示後に方向性承認済み。PR #10でマージ済み。個別状態・全操作の受入記録は未完了のためREVIEWを維持。[検証記録](docs/design/validation.md)
-- **PR5-C:** 独立コードレビュー・実音声受入・VoiceOver/画面共有等は未実施。AI通信・候補確定・Meeting保存は後続PR。
+- **PR5-C:** 独立コードレビュー・実音声受入・VoiceOver/画面共有等は未実施。AI通信はPR6で実装。候補確定・Meeting保存は後続PR。
+- **PR6:** Gemini BYOKの個人PoC、将来は複数Provider/運営Proxyを選択する方針。実装・モック検証済み。独立レビューの指摘2件を修正・再レビュー済み。実API接続・品質・費用は未検証。サブスク連携は後続調査。
 - **PR5-C/6/8:** 会議参加者への通知・同意、資料・発話の外部送信制御
 
 ## 更新ルール
@@ -59,5 +60,6 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-08:** PR4（#9、`c714f9c`）とPR5-A/B（#10、`c34ddd1`）のマージを反映。PR5-B修正後211テスト・Debug/Release build・lint成功。PR5-Cは`feature/meeting-ui`で計画承認後、実装・229テスト・build/lint・非録音操作確認を完了。実装を`fa5f515`にコミットし、[Draft PR #11](https://github.com/Ryuta1346/conflingo/pull/11)を作成。実音声受入とGate A/B/Uは未完了を維持。
+- **2026-11-09:** PR6レビュー指摘2件を修正。起動中の発話保持と購読障害後の復旧案内を追加し、267テスト・lint成功。独立再レビューで追加の不具合指摘なし。
+- **2026-11-08:** PR4（#9、`c714f9c`）、PR5-A/B（#10、`c34ddd1`）、PR5-C（#11、`e167765`）のマージをローカルmainで確認。PR5-C修正後236テスト・build/lint成功の既存記録あり。PR6は計画承認後に実装し、263テスト・Debug/Release・lint成功、モックUI操作を確認。実音声受入とGate A/B/Uは未完了を維持。
 - **2026-11-07:** [詳細計画 v1.1](docs/meeting-copilot-plan.md)確定、UI刷新をPR5-A/B/Cに分割。

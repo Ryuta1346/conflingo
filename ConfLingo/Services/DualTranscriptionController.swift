@@ -17,6 +17,9 @@ final class DualTranscriptionController {
     private(set) var startedInputs: Set<AudioOrigin> = []
     let store: MeetingSessionStore
     let activity: AudioInputUse
+    var prepareOptionalConsumer: (@MainActor (TranscriptEventHub) async -> Void)?
+    var captureActivityChanged: (@MainActor (Bool) -> Void)?
+    var elapsedOffset: TimeInterval { timeline.offset }
     var isStopping: Bool { stopTask != nil }
 
     private let inputs: [Input]
@@ -106,6 +109,7 @@ final class DualTranscriptionController {
         }
         guard phase != .idle else { return }
         phase = .stopping
+        captureActivityChanged?(false)
         let pendingStart = startTask
         pendingStart?.cancel()
         let task = Task {
@@ -167,6 +171,7 @@ final class DualTranscriptionController {
                 }
                 await subscription.cancel()
             }
+            await prepareOptionalConsumer?(hub)
             for input in inputs {
                 currentOrigin = input.origin
                 try Task.checkCancellation()
@@ -200,6 +205,7 @@ final class DualTranscriptionController {
             guard !failed, phase == .preparing else { throw CancellationError() }
             preparation = ""
             phase = .listening
+            captureActivityChanged?(true)
         } catch {
             if !(error is CancellationError) { recordFailure(error, origin: currentOrigin, run: run) }
         }
@@ -241,6 +247,7 @@ final class DualTranscriptionController {
     private func recordFailure(_ error: any Error, origin: AudioOrigin?, run: UUID) {
         guard runID == run, !failed else { return }
         failed = true
+        captureActivityChanged?(false)
         let prefix = origin.map { "\($0.label)：" } ?? ""
         lastError = error as? TranscriptEventHub.Failure == .overflow
             ? "\(prefix)字幕の処理が追いつかないため入力を停止します。最後の発話が欠けている可能性があります。"

@@ -1,6 +1,6 @@
 # PR5-C — Meeting UI・フローティングUI 検証記録
 
-2026-11-08 / `feature/meeting-ui` / **実装・自動検証済み、REVIEW。** 実装コミット: `fa5f515` / [Draft PR #11](https://github.com/Ryuta1346/conflingo/pull/11)
+2026-11-08 / `feature/meeting-ui` / **PR #11マージ済み、残る受入待ち（REVIEW）。** 初期実装: `fa5f515` / レビュー修正: `4c1902d` / マージ: `e167765` / [PR #11](https://github.com/Ryuta1346/conflingo/pull/11)
 
 ユーザー「進めて」により[実装計画](../design/pr5-c-implementation-plan.md)を承認。基点main `c34ddd1`。PR4の実機受入を持ち越し、接続コードとfake結合検証を先行する方針を含む。実音声試験の延期は継続している。
 
@@ -89,7 +89,7 @@ CUAから取得した未加工JPEG。主画面は外枠込み1512×949pt相当�
 
 実音声・実モデル取得・実翻訳、Zoom/Meet/Teams、2入力の精度/遅延/性能、60分利用、実AI、画面共有、複数モニターの実配置、VoiceOver読み上げ・全キーボード経路は未検証。画面外位置は計算テストでのみ確認。通常製品でのAI通信・Meeting保存はそもそも今回の実装対象外。
 
-主担当が差分とテストを確認した。独立コードレビューは未実施。PR5-CのDONE判定、Gate A/B/U全体の合格、実会議での利用可否の判定は保留する。次は差分・画像レビューと、延期中の実機受入の実施判断。
+主担当が差分とテストを確認した。独立コードレビューは未実施。2026-11-08、ローカルmainでPR #11のマージ（`e167765`）を確認。マージは残る受入の合格を意味しない。PR5-CのDONE判定、Gate A/B/U全体の合格、実会議での利用可否の判定は保留する。差分・画像の独立レビュー、VoiceOver/画面共有等の受入、延期中の実機受入は残課題として維持する。次の開発計画は[PR6](../design/pr6-implementation-plan.md)。
 
 参考: Context7経由でApple公式の[NSPanel](https://developer.apple.com/documentation/appkit/nspanel)と[nonactivatingPanel](https://developer.apple.com/documentation/appkit/nswindow/stylemask-swift.struct/nonactivatingpanel)を確認。新規パネルの表示時にアプリをアクティブ化しない構成へ適用した。
 
