@@ -6,6 +6,7 @@ import Observation
 final class AudioInputUse {
     enum Owner: String {
         case conference = "Conference"
+        case meeting = "Meeting"
         case systemAudioProbe = "システム音声の確認"
         case dualTranscription = "2入力文字起こしの確認"
     }

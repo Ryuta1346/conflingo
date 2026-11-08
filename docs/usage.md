@@ -12,6 +12,22 @@ type: user-guide
 
 Conference transcribes microphone input and displays source text with translations. Choose recognition and target languages supported on your Mac; the default is English → Japanese. Requires macOS 26 or later and Apple Silicon. UI labels below match the current Japanese interface.
 
+## Meeting transcription
+
+1. Open **会議を開く** (Open meeting) on Home or select **Meeting**.
+2. Enter a name, choose Japanese or English independently for the microphone and system audio, and confirm that participants have been notified and have consented. The checkbox does not send notifications.
+3. Select **会議を開始** (Start meeting). The app prepares recognition models and checks input permissions. System audio may include other playback on your Mac; headphones are recommended.
+4. **一時停止** (Pause) stops both inputs; **再開** (Resume) preserves the same meeting and transcript. Preparation can be cancelled. If stopping fails, select **停止を再試行** (Retry stop).
+5. **会議を終了** (End meeting) waits for inputs to stop and final results to arrive before opening Review.
+
+The timeline identifies input sources, not individual participants. Reading older speech suspends automatic scrolling; **最新へ** returns to the latest speech. Text size and appearance are shared with Conference.
+
+**小さく表示** hides the main window and opens the floating panel. **展開** restores the main window. Hiding or closing the panel does not stop capture. Restore it through **Window → Meetingの小窓を表示**. Use Pause or End to stop capture. The panel is not guaranteed to be excluded from screen sharing.
+
+Transcripts remain in memory until the app exits. Audio files and transcripts are not saved automatically, and no content is sent to an AI service. AI assistance, candidate confirmation/rejection, and Meeting save/export are not available yet. Text can be selected and copied. Starting a new meeting asks before discarding existing speech. Conference Markdown export is a separate feature.
+
+Acceptance tests with real Zoom/Meet/Teams audio remain deferred. See the [PR5-C validation record](validation/pr5-c-meeting.md) for automated and non-recording checks.
+
 ## Launch and prepare
 
 ```sh

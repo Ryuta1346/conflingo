@@ -3,6 +3,9 @@ import SwiftUI
 import Translation
 
 struct ContentView: View {
+    @State private var meeting: MeetingWorkspace
+    @State private var floatingPanel: MeetingFloatingPanel
+    @Environment(\.openWindow) private var openWindow
     @State private var store: SessionStore
     @State private var coordinator = TranslationCoordinator()
     @State private var availability = ModelAvailabilityService()
@@ -25,7 +28,8 @@ struct ContentView: View {
     @AppStorage("appearance") private var appearance = "system"
     private let isPreview: Bool
 
-    init(activity: AudioInputUse = AudioInputUse(), preview: Bool = false, defaults: UserDefaults = .standard) {
+    init(activity: AudioInputUse = AudioInputUse(), preview: Bool = false, defaults: UserDefaults = .standard,
+         meeting: MeetingWorkspace? = nil, floatingPanel: MeetingFloatingPanel? = nil, meetingPreview: Bool = false) {
         #if DEBUG
         isPreview = preview
         #else
@@ -34,7 +38,7 @@ struct ContentView: View {
         let session = SessionStore()
         let settings: UserDefaults
         #if DEBUG
-        settings = isPreview ? ConferencePreview.defaults : defaults
+        settings = isPreview ? (meetingPreview ? MeetingPreview.defaults : ConferencePreview.defaults) : defaults
         if isPreview { ConferencePreview.populate(session) }
         #else
         settings = defaults
@@ -46,21 +50,36 @@ struct ContentView: View {
         _fastFinalization = AppStorage(wrappedValue: false, "fastFinalization", store: settings)
         _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: settings)
         _appearance = AppStorage(wrappedValue: "system", "appearance", store: settings)
+        #if DEBUG
+        _meeting = State(initialValue: meeting ?? (isPreview ? MeetingPreview.make(activity: activity)
+            : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting))))
+        #else
+        _meeting = State(initialValue: meeting ?? MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting)))
+        #endif
+        _floatingPanel = State(initialValue: floatingPanel ?? MeetingFloatingPanel(defaults: settings))
         _store = State(initialValue: session)
         _controller = State(initialValue: SessionController(activity: activity))
-        _navigation = State(initialValue: ConferenceNavigation(destination: isPreview ? .live : .home))
+        _navigation = State(initialValue: ConferenceNavigation(destination: meetingPreview ? .meeting : isPreview ? .live : .home))
         _profileStore = State(initialValue: KeywordProfileStore(defaults: settings))
     }
 
     var body: some View {
-        AppShellView(destination: navigation.destination, phase: store.phase, navigate: navigate) {
+        AppShellView(destination: navigation.destination, phase: activePhase, navigate: navigate) {
             VStack(spacing: 0) {
                 topBar
                 Divider()
                 if let error = controller.lastError {
                     SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
                 }
-                page
+                ZStack {
+                    page
+                    MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
+                                         compact: { floatingPanel.show(meeting: meeting, compactMain: true) })
+                        .opacity(navigation.destination == .meeting ? 1 : 0)
+                        .allowsHitTesting(navigation.destination == .meeting)
+                        .disabled(navigation.destination != .meeting)
+                        .accessibilityHidden(navigation.destination != .meeting)
+                }
                 if navigation.destination == .setup || navigation.destination == .live {
                     Divider()
                     ControlBar(phase: store.phase, isStopping: controller.isStopping,
@@ -69,7 +88,14 @@ struct ContentView: View {
                 }
             }
         }
+        .onAppear {
+            floatingPanel.expand = {
+                openWindow(id: "main")
+                navigate(.meeting)
+            }
+        }
         .background(WindowCloseGuard(shouldClose: shouldCloseWindow))
+        .background(MeetingWindowAttachment(floating: floatingPanel))
         .alert("処理が完了するまでお待ちください", isPresented: $showCloseBlocked) {
             Button("閉じる", role: .cancel) {}
         } message: {
@@ -79,17 +105,17 @@ struct ContentView: View {
         .sheet(isPresented: $showDictionary) {
             KeywordProfileEditor(profiles: profileStore).disabled(store.phase != .idle)
         }
-        .alert(closeRequested ? "字幕を停止してウィンドウを閉じますか？" : "字幕を停止して移動しますか？", isPresented: $navigation.showsStopConfirmation) {
+        .alert(closeRequested ? "音声収集を停止してウィンドウを閉じますか？" : "音声収集を停止して移動しますか？", isPresented: $navigation.showsStopConfirmation) {
             Button("キャンセル", role: .cancel) { navigation.cancelNavigation(); closeRequested = false }
             Button(closeRequested ? "停止して閉じる" : "停止して移動") {
                 Task {
-                    await navigation.confirmNavigation(store: store, stop: stopSession)
-                    if closeRequested && store.phase == .idle { dismissWindow(id: "main") }
+                    await navigation.confirmNavigation(phase: { activePhase }, stop: stopActiveSession)
+                    if closeRequested && activePhase == .idle { dismissWindow(id: "main") }
                     closeRequested = false
                 }
             }
         } message: {
-            Text(closeRequested ? "必要な字幕は先に書き出してください。停止が完了した後にウィンドウを閉じます。" : "ここまでの字幕は保持します。停止が完了すると画面を切り替えます。")
+            Text(closeRequested ? "停止が完了した後にウィンドウを閉じます。アプリを終了すると未保存の内容は失われます。" : "ここまでの字幕は保持します。停止が完了すると画面を切り替えます。")
         }
         .alert("字幕を消去しますか？", isPresented: $showClearConfirmation) {
             Button("キャンセル", role: .cancel) {}
@@ -167,7 +193,8 @@ struct ContentView: View {
         switch navigation.destination {
         case .home:
             HomeView(hasTranscript: !store.segments.isEmpty,
-                     prepare: { navigate(.setup) }, openTranscript: { navigate(.live) })
+                     prepare: { navigate(.setup) }, openTranscript: { navigate(.live) },
+                     openMeeting: { navigate(.meeting) })
         case .setup:
             ConferenceSetupView(
                 sessionName: $store.sessionName, sourceLanguage: $sourceLocaleID,
@@ -187,6 +214,8 @@ struct ContentView: View {
                 editSettings: { navigate(.setup) },
                 clear: { showClearConfirmation = true }
             )
+        case .meeting:
+            Color.clear
         case .settings:
             SettingsView(fontSize: $fontSize, alwaysOnTop: $alwaysOnTop, appearance: $appearance,
                          editDictionary: { showDictionary = true }, prepare: { navigate(.setup) })
@@ -195,11 +224,11 @@ struct ContentView: View {
 
     private var topBar: some View {
         HStack(spacing: 10) {
-            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : "Conference")
+            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .meeting ? "Meeting" : "Conference")
                 .font(.callout.weight(.medium))
                 .foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)
-            if navigation.destination == .live {
+            if navigation.destination == .live || navigation.destination == .meeting {
                 Button("A−") { fontSize = max(10, fontSize - 2) }
                     .keyboardShortcut("-", modifiers: .command)
                     .accessibilityLabel("字幕を小さく")
@@ -208,8 +237,10 @@ struct ContentView: View {
                     .accessibilityLabel("字幕を大きく")
                 Toggle(isOn: $alwaysOnTop) { Label("最前面", systemImage: "pin") }
                     .toggleStyle(.button)
-                ConferenceExportButton(store: store, sourceLanguage: sourceLocaleID,
-                                       targetLanguage: transcriptionOnly ? nil : targetLanguageID)
+                if navigation.destination == .live {
+                    ConferenceExportButton(store: store, sourceLanguage: sourceLocaleID,
+                                           targetLanguage: transcriptionOnly ? nil : targetLanguageID)
+                }
             }
         }
         .controlSize(.regular)
@@ -232,13 +263,19 @@ struct ContentView: View {
         return languages.contains { $0.minimalIdentifier == targetLanguageID } ? languages : [.init(identifier: targetLanguageID)] + languages
     }
 
+    private var activePhase: SessionPhase { meeting.phase != .idle ? meeting.phase : store.phase }
+
+    private func stopActiveSession() async {
+        if meeting.phase != .idle { await meeting.pause() } else { await stopSession() }
+    }
+
     private func shouldCloseWindow(_: NSWindow) -> Bool {
-        switch store.phase {
+        switch activePhase {
         case .idle:
             return true
         case .listening:
             closeRequested = true
-            navigation.request(.home, phase: store.phase)
+            navigation.request(navigation.destination, phase: activePhase, forceConfirmation: true)
         case .preparing, .stopping:
             showCloseBlocked = true
         }
@@ -246,7 +283,7 @@ struct ContentView: View {
     }
 
     private func navigate(_ destination: ConferenceNavigation.Destination) {
-        navigation.request(destination, phase: store.phase)
+        navigation.request(destination, phase: activePhase)
     }
 
     private func startSession() {

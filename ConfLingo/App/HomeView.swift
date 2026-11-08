@@ -4,6 +4,7 @@ struct HomeView: View {
     let hasTranscript: Bool
     let prepare: () -> Void
     let openTranscript: () -> Void
+    var openMeeting: () -> Void = {}
 
     var body: some View {
         ScrollView {
@@ -38,6 +39,15 @@ struct HomeView: View {
                             Spacer()
                             Button("字幕を開く", action: openTranscript)
                         }
+                    }
+                }
+                Surface {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Label("Meeting", systemImage: "person.2").font(.title2.weight(.semibold))
+                        Text("自分と相手側の発話を、このMacで文字起こし。会議の流れを読み返せます。")
+                            .foregroundStyle(DesignTokens.secondary)
+                        Button("会議を開く", systemImage: "arrow.right", action: openMeeting)
+                            .buttonStyle(.bordered).controlSize(.large)
                     }
                 }
                 Label("音声は保存せず、認識と翻訳はMacで処理します。", systemImage: "checkmark.shield")

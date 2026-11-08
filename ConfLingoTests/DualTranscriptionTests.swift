@@ -166,13 +166,14 @@ final class DualFixture {
 
     func controller(
         timeline: MeetingTimeline = MeetingTimeline(),
+        owner: AudioInputUse.Owner = .dualTranscription,
         prepareModel: @escaping @MainActor (Locale) async throws -> Locale = { $0 }
     ) -> DualTranscriptionController {
         DualTranscriptionController(
             microphone: microphonePermission.source(capture: StubAudioCapture()),
             systemAudio: SystemAudioSource(capture: StubSystemCapture(), permissionStatus: { .granted }),
             microphoneSpeech: microphone, systemSpeech: system,
-            timeline: timeline, activity: activity, prepareModel: prepareModel
+            timeline: timeline, activity: activity, owner: owner, prepareModel: prepareModel
         )
     }
 }

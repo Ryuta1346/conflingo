@@ -36,14 +36,14 @@ struct SettingsView: View {
                         Stepper("字幕の文字サイズ：\(Int(fontSize)) pt", value: $fontSize, in: 10...48, step: 2)
                         Toggle("ウィンドウを最前面に表示", isOn: $alwaysOnTop)
                         Divider()
-                        LabeledContent("開始 / 停止", value: "⌘ R")
+                        LabeledContent("Conferenceの開始 / 停止", value: "⌘ R")
                         LabeledContent("文字を拡大 / 縮小", value: "⌘ ＋ / −")
                     }
                 }
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("データの扱い").font(.headline)
-                        Text("字幕は自動保存されません。必要な内容はMarkdownで書き出してください。音声ファイルは保存しません。")
+                        Text("Conferenceの字幕はMarkdownで書き出せます。Meetingの発話はアプリ終了まで保持し、保存・書き出しにはまだ対応していません。どちらも自動保存せず、音声ファイルは保存しません。")
                             .foregroundStyle(DesignTokens.secondary)
                     }
                 }

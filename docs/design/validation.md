@@ -58,4 +58,4 @@
 
 2026-11-08、Meeting / Conference / Floating / Reviewの4画像をチャット内で提示後、ユーザー「OK」によりモックの方向性を承認。個々の操作や実機受入の完了は意味しない。
 
-PR5-Aは未マージのため**REVIEW**を維持。[PR5-B実装計画](pr5-b-implementation-plan.md)は承認済み。PR5-B実装・自動検証は[別記録](../validation/pr5-b-conference.md)を参照。PR5-C未着手。PR5-A DONEとGate U全体の合格は保留。
+PR5-A/BはPR #10でマージ済み（`c34ddd1`）。個別状態・全操作の受入記録は未完了のため**REVIEW**を維持。[PR5-B実装計画](pr5-b-implementation-plan.md)は承認済み。PR5-B実装・自動検証は[別記録](../validation/pr5-b-conference.md)を参照。[PR5-C実装計画](pr5-c-implementation-plan.md)は承認済み。[実装・検証記録](../validation/pr5-c-meeting.md)を参照。PR5-A DONEとGate U全体の合格は保留。

@@ -31,6 +31,7 @@ struct AppShellView<Content: View>: View {
         HStack(spacing: 8) {
             navigationButton("ホーム", symbol: "house", target: .home)
             navigationButton("Conference", symbol: "captions.bubble", target: .setup)
+            navigationButton("Meeting", symbol: "person.2", target: .meeting)
             Spacer(minLength: 0)
             navigationButton("設定", symbol: "gearshape", target: .settings)
         }
@@ -54,6 +55,7 @@ struct AppShellView<Content: View>: View {
                 .padding(8)
             navigationButton("ホーム", symbol: "house", target: .home)
             navigationButton("Conference", symbol: "captions.bubble", target: .setup)
+            navigationButton("Meeting", symbol: "person.2", target: .meeting)
             Spacer()
             navigationButton("設定", symbol: "gearshape", target: .settings)
             Divider().padding(.vertical, 12)
