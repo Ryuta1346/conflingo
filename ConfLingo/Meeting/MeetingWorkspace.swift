@@ -27,6 +27,9 @@ final class MeetingWorkspace {
     }
 
     var store: MeetingSessionStore { controller.store }
+    var transcriptEvents: [TranscriptEvent] {
+        (store.finals + store.partials).sorted { $0.startOffset < $1.startOffset }
+    }
     var phase: SessionPhase { controller.phase }
     var isBusy: Bool { isStarting || isTransitioning || controller.isStopping }
     var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && page != .review }

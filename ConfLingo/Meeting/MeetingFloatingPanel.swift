@@ -6,7 +6,7 @@ final class MeetingFloatingPanel: NSObject, NSWindowDelegate {
     private(set) var panel: NSPanel?
     weak var mainWindow: NSWindow?
     private let defaults: UserDefaults
-    var expand: (() -> Void)?
+    var expand: (() -> Bool)?
 
     init(defaults: UserDefaults = .standard) {
         self.defaults = defaults
@@ -42,8 +42,7 @@ final class MeetingFloatingPanel: NSObject, NSWindowDelegate {
     }
 
     func showMain() {
-        hide()
-        expand?()
+        if expand?() == true { hide() }
         mainWindow?.makeKeyAndOrderFront(nil)
     }
 

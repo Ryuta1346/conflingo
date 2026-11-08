@@ -6,6 +6,68 @@ import Testing
 @MainActor
 @Suite(.serialized, .timeLimit(.minutes(1)))
 struct MeetingLayoutTests {
+    @Test func expansionPreservesMeetingDuringCaptureAndFailedStop() async throws {
+        let fixture = DualFixture()
+        let meeting = MeetingWorkspace(controller: fixture.controller(owner: .meeting))
+        meeting.consentConfirmed = true
+        await meeting.start()
+        await meeting.pause()
+        let navigation = ConferenceNavigation(destination: .settings)
+        let suite = "MeetingExpansionTests.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        let floating = MeetingFloatingPanel(defaults: defaults)
+        defer { floating.hide(); defaults.removePersistentDomain(forName: suite) }
+        floating.expand = { navigation.requestMeetingExpansion(conferencePhase: .idle) }
+        floating.show(meeting: meeting)
+        await meeting.start()
+        let id = meeting.store.sessionID
+        floating.showMain()
+        #expect(navigation.destination == .meeting)
+        #expect(!navigation.showsStopConfirmation)
+        #expect(meeting.phase == .listening)
+        #expect(meeting.store.sessionID == id)
+        #expect(floating.panel?.isVisible == false)
+        await meeting.pause()
+        navigation.request(.settings, phase: meeting.phase)
+        floating.show(meeting: meeting)
+        await meeting.start()
+        fixture.system.stopError = .stop
+        await meeting.end()
+        #expect(meeting.phase == .stopping)
+        floating.showMain()
+        #expect(navigation.destination == .meeting)
+        #expect(meeting.phase == .stopping)
+        #expect(meeting.page == .live)
+        #expect(meeting.store.sessionID == id)
+        #expect(floating.panel?.isVisible == false)
+        fixture.system.stopError = nil
+        await meeting.retryStop()
+        #expect(meeting.page == .review)
+    }
+
+    @Test func expansionKeepsPanelVisibleUntilNavigationSucceeds() throws {
+        let meeting = MeetingPreview.make(activity: AudioInputUse())
+        let navigation = ConferenceNavigation(destination: .settings)
+        let suite = "MeetingExpansionTests.\(UUID())"
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        let floating = MeetingFloatingPanel(defaults: defaults)
+        defer { floating.hide(); defaults.removePersistentDomain(forName: suite) }
+        var conferencePhase = SessionPhase.listening
+        floating.expand = { navigation.requestMeetingExpansion(conferencePhase: conferencePhase) }
+        floating.show(meeting: meeting)
+        floating.showMain()
+        #expect(floating.panel?.isVisible == true)
+        #expect(navigation.showsStopConfirmation)
+        navigation.cancelNavigation()
+        conferencePhase = .stopping
+        floating.showMain()
+        #expect(floating.panel?.isVisible == true)
+        conferencePhase = .idle
+        floating.showMain()
+        #expect(navigation.destination == .meeting)
+        #expect(floating.panel?.isVisible == false)
+    }
+
     @Test func resizingAndFloatingKeepTranscriptIdentityAndReadingPosition() async throws {
         let meeting = MeetingPreview.make(activity: AudioInputUse())
         meeting.consentConfirmed = true

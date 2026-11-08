@@ -220,7 +220,7 @@ PR5を単発のMeeting画面追加にはしない。**デザイン設計（5-A�
 
 #### PR5-Cの実装計画（2026-11-08承認・実装/自動検証済み）
 
-- [実装計画](design/pr5-c-implementation-plan.md)に範囲・操作契約・テスト・受入条件を記載。ブランチは`feature/meeting-ui`。ユーザー「進めて」により計画承認後、実装・229テスト・Debug/Release build・lint・非録音ネイティブ操作を確認。[検証記録](validation/pr5-c-meeting.md)。独立レビューと実音声受入は未実施。
+- [実装計画](design/pr5-c-implementation-plan.md)に範囲・操作契約・テスト・受入条件を記載。ブランチは`feature/meeting-ui`。ユーザー「進めて」により計画承認後、実装・非録音ネイティブ操作を確認。展開時の停止確認と発話順のレビュー修正後、236テスト・Debug/Release build・lint成功。[検証記録](validation/pr5-c-meeting.md)。別エージェントによる独立レビューと実音声受入は未実施。
 - Meeting Preparation/Live/Review、根拠表示、コンパクト/展開/非表示を対象とする。AI通信はPR6、候補確定・Meeting出力はPR7、資料検索はPR8に残す。
 - **承認済みの方針:** PR4実機受入の延期を維持して接続コードとfake結合検証を先行する。従来の「PR4受入後に結合」の条件変更は、本計画承認により適用する。実音声受入・Gate A/B/Uは未完了のまま管理する。
 

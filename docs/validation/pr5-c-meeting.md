@@ -92,3 +92,21 @@ CUAから取得した未加工JPEG。主画面は外枠込み1512×949pt相当�
 主担当が差分とテストを確認した。独立コードレビューは未実施。PR5-CのDONE判定、Gate A/B/U全体の合格、実会議での利用可否の判定は保留する。次は差分・画像レビューと、延期中の実機受入の実施判断。
 
 参考: Context7経由でApple公式の[NSPanel](https://developer.apple.com/documentation/appkit/nspanel)と[nonactivatingPanel](https://developer.apple.com/documentation/appkit/nswindow/stylemask-swift.struct/nonactivatingpanel)を確認。新規パネルの表示時にアプリをアクティブ化しない構成へ適用した。
+
+## レビュー指摘の修正（2026-11-08）
+
+`f450d9c`までの差分レビューで、小窓からMeetingを展開すると停止確認が入る問題と、認識中発話が時刻順に並ばない問題を確認。ユーザー「修正進めて。その後コミットandプッシュ」により修正を承認。
+
+- 展開時はConferenceのphaseを参照し、Meetingの収集・準備・停止を継続する。Conferenceの停止確認や処理中の移動保留は維持し、移動できなければ小窓を表示したままにする。
+- Meetingの表示イベントをfinal/partial結合後に開始時刻で安定整列する。発話ID、revision、確定データは保持する。
+- 7テスト追加。実controller＋fake入力で設定からの復帰、収集維持、準備維持、停止失敗後の復帰を検証。NSPanelの表示継続/非表示、Conferenceの停止確認/取消/処理中拒否、partial更新・確定前後の表示順、同時刻の安定順を確認した。
+
+| 検証 | 結果 | ログ |
+|---|---|---|
+| 回帰テストRed | 展開専用操作・表示イベントが未実装のためコンパイル失敗 | `/private/tmp/conflingo-review-fix-red.log` |
+| Debug build/test | **236テスト・31スイート成功** | `/private/tmp/conflingo-review-fix-tests.log` |
+| Release build | 成功 | `/private/tmp/conflingo-review-fix-release.log` |
+| SwiftLint strict | **86ファイル・違反0** | `/private/tmp/conflingo-review-fix-lint.log` |
+| 差分 | `git diff --check`成功 | 最終確認 |
+
+Releaseの既知のDEBUG専用分岐の到達不能警告とAppIntents非対象警告は継続。実音声・実AI・手動UIの追加受入は未実施。新規スクリーンショットは取得していない。今回のレビュー・修正は単独実行で、独立した別エージェントによるレビューは未実施。

@@ -4,6 +4,80 @@ import Testing
 
 @MainActor
 struct MeetingPresentationTests {
+    @Test func expandingMeetingDoesNotCancelPreparation() async {
+        let fixture = DualFixture()
+        let gate = TestGate()
+        let meeting = MeetingWorkspace(controller: fixture.controller(prepareModel: { locale in
+            await gate.wait()
+            return locale
+        }))
+        meeting.consentConfirmed = true
+        let start = Task { await meeting.start() }
+        await gate.entered.next()
+        let navigation = ConferenceNavigation(destination: .settings)
+        #expect(navigation.requestMeetingExpansion(conferencePhase: .idle))
+        #expect(navigation.destination == .meeting)
+        #expect(!navigation.showsStopConfirmation)
+        #expect(meeting.phase == .preparing)
+        let cancel = Task { await meeting.cancelPreparation() }
+        await gate.cancelled.next()
+        gate.release()
+        await start.value
+        await cancel.value
+    }
+
+    @Test func expandingMeetingPreservesConferenceStopConfirmation() async {
+        let navigation = ConferenceNavigation(destination: .live)
+        var conferencePhase = SessionPhase.listening
+        #expect(!navigation.requestMeetingExpansion(conferencePhase: conferencePhase))
+        #expect(navigation.showsStopConfirmation)
+        #expect(navigation.destination == .live)
+        navigation.cancelNavigation()
+        #expect(navigation.destination == .live)
+        #expect(!navigation.requestMeetingExpansion(conferencePhase: conferencePhase))
+        await navigation.confirmNavigation(phase: { conferencePhase }) { conferencePhase = .idle }
+        #expect(navigation.destination == .meeting)
+    }
+
+    @Test(arguments: [SessionPhase.preparing, .stopping])
+    func expandingMeetingWaitsForConferenceProcessing(phase: SessionPhase) {
+        let navigation = ConferenceNavigation(destination: .settings)
+        #expect(!navigation.requestMeetingExpansion(conferencePhase: phase))
+        #expect(navigation.destination == .settings)
+        #expect(!navigation.showsStopConfirmation)
+    }
+
+    @Test func partialsKeepChronologicalPositionWhenFinalized() {
+        let meeting = MeetingWorkspace(controller: DualFixture().controller())
+        let earlierID = UUID()
+        let laterID = UUID()
+        func event(_ id: UUID, origin: AudioOrigin, time: Double, final: Bool, revision: Int) -> TranscriptEvent {
+            TranscriptEvent(id: id, sessionID: meeting.store.sessionID, origin: origin,
+                            languageCode: "en-US", startOffset: time, endOffset: time + 1,
+                            text: "t=\(time)", isFinal: final, revision: revision, sourceStartTime: time)
+        }
+        meeting.store.receive(event(earlierID, origin: .microphone, time: 10, final: false, revision: 1))
+        meeting.store.receive(event(laterID, origin: .systemAudio, time: 12, final: true, revision: 1))
+        #expect(meeting.transcriptEvents.map(\.id) == [earlierID, laterID])
+        meeting.store.receive(event(earlierID, origin: .microphone, time: 10, final: false, revision: 2))
+        #expect(meeting.transcriptEvents.map(\.id) == [earlierID, laterID])
+        meeting.store.receive(event(earlierID, origin: .microphone, time: 10, final: true, revision: 3))
+        #expect(meeting.transcriptEvents.map(\.id) == [earlierID, laterID])
+        #expect(meeting.transcriptEvents.allSatisfy { $0.isFinal })
+    }
+
+    @Test func equalTimeTranscriptEventsKeepStableOrder() {
+        let meeting = MeetingWorkspace(controller: DualFixture().controller())
+        let ids = [UUID(), UUID(), UUID()]
+        for (index, id) in ids.enumerated() {
+            meeting.store.receive(TranscriptEvent(id: id, sessionID: meeting.store.sessionID,
+                                                 origin: .microphone, languageCode: "ja-JP",
+                                                 startOffset: 10, endOffset: 11, text: "\(index)",
+                                                 isFinal: index < 2, revision: 1, sourceStartTime: 10))
+        }
+        #expect(meeting.transcriptEvents.map(\.id) == ids)
+    }
+
     @Test func repeatedEvidenceRequestsRemainObservable() {
         let meeting = MeetingWorkspace(controller: DualFixture().controller())
         let event = TranscriptEvent(id: UUID(), sessionID: meeting.store.sessionID, origin: .microphone,

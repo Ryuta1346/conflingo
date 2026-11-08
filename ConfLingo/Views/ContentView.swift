@@ -91,7 +91,7 @@ struct ContentView: View {
         .onAppear {
             floatingPanel.expand = {
                 openWindow(id: "main")
-                navigate(.meeting)
+                return navigation.requestMeetingExpansion(conferencePhase: store.phase)
             }
         }
         .background(WindowCloseGuard(shouldClose: shouldCloseWindow))

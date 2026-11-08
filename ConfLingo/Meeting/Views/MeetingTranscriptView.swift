@@ -7,7 +7,7 @@ struct MeetingTranscriptView: View {
     @State private var userScrolling = false
     @State private var atBottom = true
 
-    private var events: [TranscriptEvent] { meeting.store.finals + meeting.store.partials }
+    private var events: [TranscriptEvent] { meeting.transcriptEvents }
 
     var body: some View {
         VStack(spacing: 0) {

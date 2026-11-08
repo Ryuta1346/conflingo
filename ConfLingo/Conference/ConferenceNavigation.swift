@@ -35,6 +35,11 @@ final class ConferenceNavigation {
         pendingDestination = nil
     }
 
+    func requestMeetingExpansion(conferencePhase: SessionPhase) -> Bool {
+        request(.meeting, phase: conferencePhase)
+        return destination == .meeting && !isTransitioning
+    }
+
     func confirmNavigation(store: SessionStore, stop: () async -> Void) async {
         await confirmNavigation(phase: { store.phase }, stop: stop)
     }

@@ -8,7 +8,7 @@
 - **持ち越し:** PR0の実音声・翻訳・保存操作、PR3の内部音声・権限・配布条件の確認（音声試験はユーザー指示で延期）
 - **次の作業:** [PR5-C（Draft #11）](https://github.com/Ryuta1346/conflingo/pull/11)の差分・[検証記録と画像](docs/validation/pr5-c-meeting.md)をレビュー。実音声受入は引き続き延期
 - 概算: PoC 2〜3週間、実用MVP 6〜10週間（着手日・期限は未設定）
-- **確認済み:** PR5-CのMeeting準備/Live/Review・小窓・PR4接続を実装。Debug/Releaseビルド、229テスト、lint（86ファイル・違反0）、非録音操作・読み返し保持。[PR5-C検証記録](docs/validation/pr5-c-meeting.md)
+- **確認済み:** PR5-CのMeeting準備/Live/Review・小窓・PR4接続を実装。展開時の停止確認と発話順のレビュー修正後、Debug/Releaseビルド、236テスト、lint（86ファイル・違反0）成功。初期実装時の非録音操作・読み返し保持も確認済み。[PR5-C検証記録](docs/validation/pr5-c-meeting.md)
 - **未検証:** 実音声・実翻訳、内部音声取得、2入力STT
 
 ## PR進捗
