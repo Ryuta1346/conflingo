@@ -22,7 +22,8 @@ final class MeetingSessionStore {
         latest[event.id] = event
         partials.removeAll { $0.origin == event.origin }
         if event.isFinal {
-            finals.append(event)
+            let position = finals.firstIndex { $0.startOffset > event.startOffset } ?? finals.endIndex
+            finals.insert(event, at: position)
         } else {
             partials.append(event)
         }

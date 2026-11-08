@@ -5,7 +5,7 @@ struct ContentView: View {
     @State private var store = SessionStore()
     @State private var coordinator = TranslationCoordinator()
     @State private var availability = ModelAvailabilityService()
-    @State private var controller = SessionController()
+    @State private var controller: SessionController
     @State private var translationConfiguration: TranslationSession.Configuration?
     @State private var profileStore = KeywordProfileStore()
     @State private var renameTarget: KeywordProfile?
@@ -15,6 +15,10 @@ struct ContentView: View {
     @AppStorage("targetLanguageID") private var targetLanguageID = "ja"
     @AppStorage("transcriptionOnly") private var transcriptionOnly = false
     @AppStorage("fastFinalization") private var fastFinalization = false
+
+    init(activity: AudioInputUse = AudioInputUse()) {
+        _controller = State(initialValue: SessionController(activity: activity))
+    }
 
     var body: some View {
         Group {

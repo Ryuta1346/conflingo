@@ -8,6 +8,21 @@ import Translation
 @MainActor
 @Observable
 final class ModelAvailabilityService {
+    private struct PreparationError: LocalizedError {
+        let errorDescription: String?
+    }
+
+    static func prepareForTranscription(_ locale: Locale) async throws -> Locale {
+        let availability = ModelAvailabilityService()
+        await availability.checkAndPrepare(sourceLocaleID: locale.identifier, targetLanguageID: nil)
+        try Task.checkCancellation()
+        guard availability.state == .ready, let prepared = availability.speechLocale else {
+            if case .unavailable(let reason) = availability.state { throw PreparationError(errorDescription: reason) }
+            throw PreparationError(errorDescription: "認識モデルを準備できませんでした。")
+        }
+        return prepared
+    }
+
     enum State: Equatable {
         case checking
         case downloadingSpeechModel
@@ -33,7 +48,7 @@ final class ModelAvailabilityService {
             supportedSourceLocales = await SpeechTranscriber.supportedLocales
                 .sorted { $0.identifier < $1.identifier }
         }
-        if supportedTargetLanguages.isEmpty {
+        if targetLanguageID != nil, supportedTargetLanguages.isEmpty {
             // 非 Sendable な LanguageAvailability の async プロパティは MainActor から
             // 直接読めないため、nonisolated なタスク内で取得する（返り値は Sendable）
             supportedTargetLanguages = await Task.detached {

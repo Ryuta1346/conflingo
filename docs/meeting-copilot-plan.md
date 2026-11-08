@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3実装・自動検証完了、レビュー待ち**（2026-11-08：PR2マージ `da6c7aa` とユーザーの完了確認を反映。PR3は同時停止のレビュー修正後、176テスト・build・lint成功。[PR3検証記録](validation/system-audio.md)。Gate A/Bは未検証。[PR2検証記録](validation/audio-abstraction.md)）
+- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4実装・自動検証・コードレビュー済み**（2026-11-08：PR3マージ `6b34a45` を反映。PR4は195テスト・build・lint成功、未コミット。[PR4検証記録](validation/dual-transcription.md)。Gate A/Bは未検証。[PR3検証記録](validation/system-audio.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -110,6 +110,14 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
 - PCMは独立所有し、256フレームの待機上限超過はエラー終了する。正常停止・入力形式変更ではリサンプラーの末尾を排出する。停止失敗は状態を保持して再試行し、閉じる操作時の失敗では検証画面を再表示する。
 - 自動受入はfake OS境界と合成PCMで行う。実音声試験の延期は継続し、Zoom/Meet/Teamsと配布版での成功は未検証として残す。
 - [方式比較ADR](adr/002-system-audio-capture.md)と[検証記録](validation/system-audio.md)に根拠と結果を記録する。
+
+#### PR4の実装契約（2026-11-08承認、実装・自動検証済み）
+
+- 次の作業はPR3レビュー→PR4というユーザー指示に従う。PR0/3の実音声試験延期を継続し、PR3のマージと実機受入を区別する。
+- 計画の保存先: `~/.coding-agents/docs/conflingo/feature-dual-transcription/000_pr4-dual-transcription-plan.md`。ユーザー承認済み（「進めて」）。TDDで実装し、[検証記録](validation/dual-transcription.md)に結果を記録した。
+- 2入力に独立した認識系統・入力別言語を割り当て、共通Timeline・Hub・MeetingSessionStoreへ接続する。入力開始通知を時刻基準とするため、サンプル時刻の厳密同期と時刻誤差は実機検証が必要。
+- 発話ID/revisionによる重複除外と時刻順の安定整列を行う。別入力の同じ発話内容は保持する。片系失敗時は両入力を停止し、停止失敗の再試行・最後のfinalの取り込みを保証する。
+- 独立した2入力検証画面を用意し、既存Conference・単独音声検証との競合起動を防ぐ。完成Meeting UIはPR5-C。実機受入までGate BとPR4のDONE判定は保留する。
 
 ### 2.2 会話イベントモデル
 

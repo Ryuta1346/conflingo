@@ -83,8 +83,10 @@ struct ControlBar: View {
             .buttonStyle(.borderedProminent)
             .tint(.red)
         case .stopping:
-            Button("Stopping…") {}
-                .disabled(true)
+            Button(controller.isStopping ? "Stopping…" : "停止を再試行") {
+                Task { await controller.stop(store: store, coordinator: coordinator) }
+            }
+            .disabled(controller.isStopping)
         }
     }
 

@@ -24,6 +24,9 @@ protocol SpeechTranscribing: AnyObject {
         onFailure: @escaping @MainActor (any Error) -> Void
     ) async throws
     func stop() async throws
+    func stopInput() async throws
+    func finishRecognition() async throws
+    func cancelRecognition() async
 }
 
 @MainActor
@@ -104,20 +107,40 @@ final class SpeechTranscriptionService: SpeechTranscribing {
 
     /// 終了時に生成されるfinalも、購読側へ発行し終えるまで待つ。
     func stop() async throws {
+        do {
+            try await stopInput()
+            try await finishRecognition()
+        } catch {
+            await cancelRecognition()
+            throw error
+        }
+    }
+
+    func stopInput() async throws {
+        try await audioSource.stop()
+    }
+
+    func finishRecognition() async throws {
         guard let analyzer else {
-            try await audioSource.stop()
             return
         }
         do {
-            try await audioSource.stop()
             try await analyzer.finalizeAndFinishThroughEndOfInput()
             try await resultsTask?.value
             resultsTask = nil
             self.analyzer = nil
         } catch {
-            try await cancel(analyzer)
+            await cancelRecognition()
             throw error
         }
+    }
+
+    func cancelRecognition() async {
+        resultsTask?.cancel()
+        await analyzer?.cancelAndFinishNow()
+        _ = await resultsTask?.result
+        resultsTask = nil
+        analyzer = nil
     }
 
     private func cancel(_ analyzer: SpeechAnalyzer) async throws {

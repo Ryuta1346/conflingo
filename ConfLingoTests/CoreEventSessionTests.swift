@@ -245,6 +245,10 @@ private final class StubSpeechInput: SpeechTranscribing {
 
     func releaseStop() { stopGate.continuation.yield(()) }
 
+    func stopInput() async throws {}
+    func finishRecognition() async throws { try await stop() }
+    func cancelRecognition() async {}
+
     func stop() async throws {
         stops += 1
         stopSignal.continuation.yield(())
