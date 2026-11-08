@@ -43,7 +43,7 @@
 ## 主な未解決事項
 
 - **PR0:** 実音声試験はユーザー指示で後日実施。起動・専用モード切替は確認済み。Gate Aは未検証を維持。[検証記録](docs/validation/conference-baseline.md)
-- **PR1:** Draft PR #6でレビュー待ち。次はPR1レビュー後にPR2（音声入力の共通化）。実入力での認識範囲・時刻・終了処理は未検証。
+- **PR1:** Draft PR #6。レビュー指摘の字幕なしClearを修正し、137テスト・lint成功。次は受入確認後にPR2（音声入力の共通化）。実入力での認識範囲・時刻・終了処理は未検証。
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
 - **PR4:** 2系統SpeechAnalyzerの性能・精度・遅延
 - **PR5-A:** UIモック未承認（5-B/Cの着手条件）

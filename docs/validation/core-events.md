@@ -48,6 +48,14 @@ git diff --check
 
 SwiftLint未導入の場合は[PR0の導入手順](conference-baseline.md#swiftlintの導入)を参照。今回の実体は/private/tmp/conflingo-swiftlint-0.65.1/swiftlint。
 
+## 2026-11-08 レビュー指摘修正: 字幕なしセッションのClear
+
+- 指摘: 字幕なしでStart→Stopした場合にも会議時計は開始されるが、字幕件数を条件にClearが無効になり、会議IDと時計を初期化できなかった。
+- 修正: ControlBarのClearをidleで有効にし、字幕件数の条件を削除した。preparing / listening / stoppingでは引き続き無効。既存のSessionController.resetを利用する。
+- 検証: 修正後のDebugビルドを含む全137テスト・15スイート成功（終了0）。会議ID・時計の初期化と再開の既存テストを含む。SwiftLint strict / no-cacheは40ファイル・違反0（終了0）。git diff --checkも成功。
+- 証跡: `/private/tmp/conflingo-clear-fix-tests.log`、`/private/tmp/conflingo-review-20261108/clear-fix-tests.xcresult`、`/private/tmp/conflingo-clear-fix-lint.log`。
+- 軽微なUI条件変更のため新規テストは追加していない。Clearボタンの実画面操作と実音声は未検証。新規テストによるRed→Greenの記録ではない。
+
 ## 持ち越し
 
 PR0の実音声・実翻訳・保存操作等は延期済み。Gate Aは未検証。合成入力の成功で実機試験成功としない。内部音声取得・2入力性能・実入力時刻精度・実SpeechAnalyzerの終了動作も未検証。

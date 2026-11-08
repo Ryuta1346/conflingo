@@ -137,6 +137,7 @@ enum InsightStatus: String, Codable, Sendable {
 - LegacyTranslationAdapterが既存の文境界・4秒タイムアウト・翻訳キューを維持する。認識結果の読取完了→Hub終了→購読処理完了→残りの翻訳flushの順で停止する。
 - 辞書は入力開始時に適用する。自動停止中のstop呼び出しも同じ終了処理の完了を待ち、最後の翻訳を確定してからidleへ戻る。
 - 開始失敗・認識失敗・停止で購読とタイマーを解放する。再開で会議IDと履歴を維持し、Clearで既存・Meetingストアをまとめて初期化する。
+- Clearはidleであれば字幕が空でも利用できること。字幕なしで停止したセッションでも会議IDと時計を初期化でき、preparing / listening / stoppingでは利用できないこと。
 - 実入力はマイクのみ。内部音声、2入力同期、UI刷新、AI、永続化は後続PR。合成入力による検証と実機回帰は区別する。
 - 自動受入は発話更新、複数配信、容量上限、購読取消、停止直前final、失敗・再開・Clear、既存字幕・翻訳・辞書・Markdown回帰、build/test/lint。結果は[PR1検証記録](validation/core-events.md)へ記載する。
 
