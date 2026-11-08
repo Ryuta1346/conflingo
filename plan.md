@@ -19,7 +19,7 @@
 | PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **DONE** | [#6 (Merged)](https://github.com/Ryuta1346/conflingo/pull/6) |
 | PR2 | 音声入力の共通化 | PR1 | **DONE** | [#7 (Merged)](https://github.com/Ryuta1346/conflingo/pull/7) |
 | PR3 | システム音声キャプチャ | PR2 | **REVIEW** | [#8 (Merged・実機受入待ち)](https://github.com/Ryuta1346/conflingo/pull/8) |
-| PR4 | マイク＋内部音声の同時STT | PR3（実機確認持ち越し承認済み） | **REVIEW** | —（未コミット） |
+| PR4 | マイク＋内部音声の同時STT | PR3（実機確認持ち越し承認済み） | **REVIEW** | [#9 (Draft)](https://github.com/Ryuta1346/conflingo/pull/9) |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | TODO | — |
 | PR5-B | デザインシステム・Conference刷新 | PR5-A | TODO | — |
 | PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、実結合はPR4/6 | TODO | — |
@@ -45,7 +45,7 @@
 - **PR0:** 実音声試験はユーザー指示で後日実施。起動・専用モード切替は確認済み。Gate Aは未検証を維持。[検証記録](docs/validation/conference-baseline.md)
 - **PR3:** PR #8マージ（`6b34a45`）・固定差分の独立コードレビュー完了、追加指摘なし。Zoom/Meet/Teamsの実音声・権限操作・配布条件は未検証。実音声試験の延期は継続。
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
-- **PR4:** 実装・自動検証・コードレビュー完了、未コミット。2系統SpeechAnalyzerの性能・精度・時刻誤差・遅延は未検証。新検証画面の閉鎖確認はUI取得タイムアウトで持ち越し。
+- **PR4:** 実装・自動検証・コードレビュー完了、[Draft PR #9](https://github.com/Ryuta1346/conflingo/pull/9)作成済み。2系統SpeechAnalyzerの性能・精度・時刻誤差・遅延は未検証。新検証画面の閉鎖確認はUI取得タイムアウトで持ち越し。
 - **PR5-A:** UIモック未承認（5-B/Cの着手条件）
 - **PR5-C/6/8:** 会議参加者への通知・同意、資料・発話の外部送信制御
 

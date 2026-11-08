@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4実装・自動検証・コードレビュー済み**（2026-11-08：PR3マージ `6b34a45` を反映。PR4は195テスト・build・lint成功、未コミット。[PR4検証記録](validation/dual-transcription.md)。Gate A/Bは未検証。[PR3検証記録](validation/system-audio.md)）
+- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4実装・自動検証・コードレビュー済み**（2026-11-08：PR3マージ `6b34a45` を反映。PR4は195テスト・build・lint成功、[Draft PR #9](https://github.com/Ryuta1346/conflingo/pull/9)作成済み。[PR4検証記録](validation/dual-transcription.md)。Gate A/Bは未検証。[PR3検証記録](validation/system-audio.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略

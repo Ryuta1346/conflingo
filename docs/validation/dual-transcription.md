@@ -1,6 +1,6 @@
 # PR4 2入力文字起こし 検証記録
 
-2026-11-08。計画承認済み、実装・自動検証・コードレビュー完了。基点main / `6b34a45`、作業ブランチ`feature/dual-transcription`。未コミット、実機受入待ち。
+2026-11-08。計画承認済み、実装・自動検証・コードレビュー完了。基点main / `6b34a45`、作業ブランチ`feature/dual-transcription`。実装コミット`1a0e75a`をpushし、[Draft PR #9](https://github.com/Ryuta1346/conflingo/pull/9)を作成済み。実機受入待ち。
 
 ## 自動受入仕様
 
