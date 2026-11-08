@@ -14,7 +14,7 @@ enum AudioCaptureError: LocalizedError {
 
 @MainActor
 protocol AudioCapturing: AnyObject {
-    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame>
+    func start(targetFormat: AVAudioFormat) throws -> AudioFrameStream
     func stop()
 }
 
@@ -22,9 +22,9 @@ protocol AudioCapturing: AnyObject {
 @MainActor
 final class AudioCaptureService: AudioCapturing {
     private let engine = AVAudioEngine()
-    private var continuation: AsyncStream<AudioFrame>.Continuation?
+    private var continuation: AudioFrameStream.Continuation?
 
-    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame> {
+    func start(targetFormat: AVAudioFormat) throws -> AudioFrameStream {
         guard continuation == nil else { throw AudioSourceError.alreadyRunning }
         let inputNode = engine.inputNode
         let hardwareFormat = inputNode.outputFormat(forBus: 0)
@@ -33,7 +33,7 @@ final class AudioCaptureService: AudioCapturing {
             throw AudioCaptureError.converterUnavailable
         }
 
-        let (stream, newContinuation) = AsyncStream.makeStream(of: AudioFrame.self)
+        let (stream, newContinuation) = AudioFrameStream.makeStream()
         continuation = newContinuation
 
         // tap コールバックは音声スレッドで呼ばれる。@Sendable を明示しないと

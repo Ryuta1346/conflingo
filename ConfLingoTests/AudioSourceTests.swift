@@ -14,7 +14,7 @@ struct AudioSourceTests {
         let task = Task {
             let allowed = await source.requestPermission()
             #expect(!allowed)
-            #expect(throws: CancellationError.self) { try source.start(targetFormat: format) }
+            await #expect(throws: CancellationError.self) { try await source.start(targetFormat: format) }
         }
         task.cancel()
         await task.value
@@ -34,11 +34,11 @@ struct AudioSourceTests {
     }
 
     @Test(arguments: [AudioPermissionStatus.denied, .undetermined, .unknown])
-    func unpermittedStartDoesNotOpenDevice(status: AudioPermissionStatus) throws {
+    func unpermittedStartDoesNotOpenDevice(status: AudioPermissionStatus) async throws {
         let capture = StubAudioCapture()
         let source = StubMicrophonePermission(status: status).source(capture: capture)
         let format = try makeFormat()
-        #expect(throws: AudioSourceError.permissionDenied) { try source.start(targetFormat: format) }
+        await #expect(throws: AudioSourceError.permissionDenied) { try await source.start(targetFormat: format) }
         #expect(capture.starts == 0)
         #expect(source.state == .idle)
     }
@@ -55,11 +55,11 @@ struct AudioSourceTests {
         #expect(source.permissionStatus == (granted ? .granted : .denied))
         let format = try makeFormat()
         if granted {
-            _ = try source.start(targetFormat: format)
-            source.stop()
+            _ = try await source.start(targetFormat: format)
+            try await source.stop()
             #expect(capture.starts == 1)
         } else {
-            #expect(throws: AudioSourceError.permissionDenied) { try source.start(targetFormat: format) }
+            await #expect(throws: AudioSourceError.permissionDenied) { try await source.start(targetFormat: format) }
             #expect(capture.starts == 0)
         }
     }
@@ -100,17 +100,17 @@ struct AudioSourceTests {
         let capture = StubAudioCapture()
         let source = StubMicrophonePermission().source(capture: capture)
         let format = try makeFormat()
-        source.stop()
+        try await source.stop()
         #expect(capture.stops == 0)
-        let stream = try source.start(targetFormat: format)
+        let stream = try await source.start(targetFormat: format)
         #expect(source.state == .running)
         #expect(capture.format == format)
         try capture.emit([0.25, -0.5], format: format)
         try capture.emit([0.75], format: format)
-        source.stop()
-        source.stop()
+        try await source.stop()
+        try await source.stop()
         var values: [[Float]] = []
-        for await frame in stream { values.append(samples(frame.buffer)) }
+        for try await frame in stream { values.append(samples(frame.buffer)) }
         #expect(values == [[0.25, -0.5], [0.75]])
         #expect(capture.stops == 1)
         #expect(source.state == .idle)
@@ -120,15 +120,15 @@ struct AudioSourceTests {
         let capture = StubAudioCapture()
         let source = StubMicrophonePermission().source(capture: capture)
         let format = try makeFormat()
-        let stream = try source.start(targetFormat: format)
-        #expect(throws: AudioSourceError.alreadyRunning) { try source.start(targetFormat: format) }
+        let stream = try await source.start(targetFormat: format)
+        await #expect(throws: AudioSourceError.alreadyRunning) { try await source.start(targetFormat: format) }
         #expect(capture.starts == 1)
         #expect(capture.stops == 0)
         #expect(source.state == .running)
         try capture.emit([0.5], format: format)
-        source.stop()
+        try await source.stop()
         var values: [Float] = []
-        for await frame in stream { values += samples(frame.buffer) }
+        for try await frame in stream { values += samples(frame.buffer) }
         #expect(values == [0.5])
     }
 
@@ -137,18 +137,18 @@ struct AudioSourceTests {
         capture.failStart = true
         let source = StubMicrophonePermission().source(capture: capture)
         let format = try makeFormat()
-        #expect(throws: StubAudioCapture.Failure.start) { try source.start(targetFormat: format) }
+        await #expect(throws: StubAudioCapture.Failure.start) { try await source.start(targetFormat: format) }
         #expect(capture.stops == 1)
         #expect(source.state == .idle)
         var failed = try #require(capture.stream).makeAsyncIterator()
-        let end = await failed.next()
+        let end = try await failed.next()
         #expect(end == nil)
         capture.failStart = false
-        let retried = try source.start(targetFormat: format)
+        let retried = try await source.start(targetFormat: format)
         try capture.emit([1], format: format)
-        source.stop()
+        try await source.stop()
         var values: [Float] = []
-        for await frame in retried { values += samples(frame.buffer) }
+        for try await frame in retried { values += samples(frame.buffer) }
         #expect(values == [1])
         #expect(source.state == .idle)
     }
@@ -157,18 +157,18 @@ struct AudioSourceTests {
         let capture = StubAudioCapture()
         let source = StubMicrophonePermission().source(capture: capture)
         let format = try makeFormat()
-        let first = try source.start(targetFormat: format)
+        let first = try await source.start(targetFormat: format)
         let oldProducer = try #require(capture.continuation)
-        source.stop()
-        let second = try source.start(targetFormat: format)
+        try await source.stop()
+        let second = try await source.start(targetFormat: format)
         let stale = try #require(AudioFrame(copying: makeBuffer([0.1], format: format)))
         if case .terminated = oldProducer.yield(stale) {} else { Issue.record("Old producer is still active") }
         try capture.emit([0.9], format: format)
-        source.stop()
+        try await source.stop()
         var oldCount = 0
-        for await _ in first { oldCount += 1 }
+        for try await _ in first { oldCount += 1 }
         var values: [Float] = []
-        for await frame in second { values += samples(frame.buffer) }
+        for try await frame in second { values += samples(frame.buffer) }
         #expect(oldCount == 0)
         #expect(values == [0.9])
     }
@@ -220,13 +220,13 @@ final class StubAudioCapture: AudioCapturing {
     var stops = 0
     var failStart = false
     var format: AVAudioFormat?
-    var stream: AsyncStream<AudioFrame>?
-    var continuation: AsyncStream<AudioFrame>.Continuation?
+    var stream: AudioFrameStream?
+    var continuation: AudioFrameStream.Continuation?
 
-    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame> {
+    func start(targetFormat: AVAudioFormat) throws -> AudioFrameStream {
         starts += 1
         format = targetFormat
-        let pair = AsyncStream<AudioFrame>.makeStream()
+        let pair = AudioFrameStream.makeStream()
         stream = pair.stream
         continuation = pair.continuation
         if failStart { throw Failure.start }

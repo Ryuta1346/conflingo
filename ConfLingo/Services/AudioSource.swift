@@ -34,12 +34,14 @@ struct AudioFrame: @unchecked Sendable {
     }
 }
 
+typealias AudioFrameStream = AsyncThrowingStream<AudioFrame, any Error>
+
 @MainActor
 protocol AudioSource: AnyObject {
     var origin: AudioOrigin { get }
     var permissionStatus: AudioPermissionStatus { get }
     var state: AudioSourceState { get }
     func requestPermission() async -> Bool
-    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame>
-    func stop()
+    func start(targetFormat: AVAudioFormat) async throws -> AudioFrameStream
+    func stop() async throws
 }

@@ -1,6 +1,6 @@
 # PR2 音声入力の共通化 検証記録
 
-2026-11-08。計画承認済み、実装・自動検証完了、レビュー待ち。基点main / 8812ae0、ブランチfeature/audio-abstraction。実装コミット`d5928f3`。[Draft PR #7](https://github.com/Ryuta1346/conflingo/pull/7)を作成済み。
+2026-11-08。PR2完了（ユーザー確認済み）。基点main / 8812ae0、ブランチfeature/audio-abstraction。実装コミット`d5928f3`。[PR #7](https://github.com/Ryuta1346/conflingo/pull/7)はマージ済み（`da6c7aa`）。実音声試験の延期は継続し、以下の自動検証結果と区別する。
 
 ## 受入条件
 
