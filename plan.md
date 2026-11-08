@@ -20,8 +20,8 @@
 | PR2 | 音声入力の共通化 | PR1 | **DONE** | [#7 (Merged)](https://github.com/Ryuta1346/conflingo/pull/7) |
 | PR3 | システム音声キャプチャ | PR2 | **REVIEW** | [#8 (Merged・実機受入待ち)](https://github.com/Ryuta1346/conflingo/pull/8) |
 | PR4 | マイク＋内部音声の同時STT | PR3（実機確認持ち越し承認済み） | **REVIEW** | [#9 (Draft)](https://github.com/Ryuta1346/conflingo/pull/9) |
-| PR5-A | UI/UX全体設計・高品質モック | PR0 | **REVIEW** | [設計・モック](docs/design/README.md)（方向性承認済み・PR未作成） |
-| PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [実装計画](docs/design/pr5-b-implementation-plan.md)・[206テスト／画面検証](docs/validation/pr5-b-conference.md) |
+| PR5-A | UI/UX全体設計・高品質モック | PR0 | **REVIEW** | [設計・モック](docs/design/README.md)・[#10 (Draft)](https://github.com/Ryuta1346/conflingo/pull/10)（方向性承認済み） |
+| PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [Draft PR #10](https://github.com/Ryuta1346/conflingo/pull/10)・[206テスト／画面検証](docs/validation/pr5-b-conference.md) |
 | PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、実結合はPR4/6 | TODO | — |
 | PR6 | AI会話理解・根拠付き回答 | PR1/PR4 | TODO | — |
 | PR7 | 決定・アクション候補管理 | PR6 | TODO | — |
@@ -58,5 +58,5 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-08:** PR5-Aモック方向性を承認、PR5-B実装計画承認後、Conference刷新を実装。206テスト・Debug/Release build・lint成功、非録音ネイティブ操作確認済み。PR5-Aは未マージでREVIEW、Gate Uは未完了。PR3マージ（`6b34a45`）を反映。PR4を計画承認後に実装し、195テスト・build・lint成功、コードレビュー完了。実音声受入は持ち越し。
+- **2026-11-08:** PR5-Aモック方向性を承認、PR5-B実装計画承認後、Conference刷新を実装。206テスト・Debug/Release build・lint成功、非録音ネイティブ操作確認済み。PR5-A/Bは[Draft PR #10](https://github.com/Ryuta1346/conflingo/pull/10)でレビュー、Gate Uは未完了。PR3マージ（`6b34a45`）を反映。PR4を計画承認後に実装し、195テスト・build・lint成功、コードレビュー完了。実音声受入は持ち越し。
 - **2026-11-07:** [詳細計画 v1.1](docs/meeting-copilot-plan.md)確定、UI刷新をPR5-A/B/Cに分割。

@@ -2,7 +2,7 @@
 
 2026-11-08 / `feature/design-system-conference` / **実装・自動検証済み、REVIEW**
 
-ユーザー「進めて」により[実装計画](../design/pr5-b-implementation-plan.md)を承認。主担当によるコード確認と非録音プレビュー検証。独立レビュー・実音声受入・Gate U全体の合格を意味しない。マージ前のレビュー対象。
+ユーザー「進めて」により[実装計画](../design/pr5-b-implementation-plan.md)を承認。主担当によるコード確認と非録音プレビュー検証。独立レビュー・実音声受入・Gate U全体の合格を意味しない。[Draft PR #10](https://github.com/Ryuta1346/conflingo/pull/10)でレビュー。マージは未実施。
 
 ## 実装
 
