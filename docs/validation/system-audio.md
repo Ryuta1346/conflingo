@@ -1,6 +1,6 @@
 # PR3 システム音声キャプチャ 検証記録
 
-2026-11-08。計画承認済み、実装・自動検証完了、レビュー待ち。基点main / da6c7aa、feature/system-audio。コミット・push・PR作成は未実施。
+2026-11-08。計画承認済み、実装・自動検証完了、レビュー待ち。基点main / da6c7aa、feature/system-audio。実装コミット`d71211f`をpushし、[Draft PR #8](https://github.com/Ryuta1346/conflingo/pull/8)を作成済み。
 
 ## 自動受入条件
 

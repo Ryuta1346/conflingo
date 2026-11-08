@@ -18,7 +18,7 @@
 | PR0 | Baseline・検証環境 | — | **DOING** | [#5 (Merged・実機確認待ち)](https://github.com/Ryuta1346/conflingo/pull/5) |
 | PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **DONE** | [#6 (Merged)](https://github.com/Ryuta1346/conflingo/pull/6) |
 | PR2 | 音声入力の共通化 | PR1 | **DONE** | [#7 (Merged)](https://github.com/Ryuta1346/conflingo/pull/7) |
-| PR3 | システム音声キャプチャ | PR2 | **REVIEW** | — |
+| PR3 | システム音声キャプチャ | PR2 | **REVIEW** | [#8 (Draft)](https://github.com/Ryuta1346/conflingo/pull/8) |
 | PR4 | マイク＋内部音声の同時STT | PR3 | TODO | — |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | TODO | — |
 | PR5-B | デザインシステム・Conference刷新 | PR5-A | TODO | — |
@@ -43,7 +43,7 @@
 ## 主な未解決事項
 
 - **PR0:** 実音声試験はユーザー指示で後日実施。起動・専用モード切替は確認済み。Gate Aは未検証を維持。[検証記録](docs/validation/conference-baseline.md)
-- **PR3:** ScreenCaptureKit入力・権限表示・方式比較を実装、自動検証済み。次はレビュー・受入確認。Zoom/Meet/Teamsの実音声・権限操作・配布条件は未検証。実音声試験の延期は継続。
+- **PR3:** Draft PR #8。ScreenCaptureKit入力・権限表示・方式比較を実装、自動検証済み。次はレビュー・受入確認。Zoom/Meet/Teamsの実音声・権限操作・配布条件は未検証。実音声試験の延期は継続。
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
 - **PR4:** 2系統SpeechAnalyzerの性能・精度・遅延
 - **PR5-A:** UIモック未承認（5-B/Cの着手条件）
