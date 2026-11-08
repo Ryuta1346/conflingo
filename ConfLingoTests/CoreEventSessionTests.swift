@@ -5,6 +5,51 @@ import Testing
 @MainActor
 @Suite(.timeLimit(.minutes(1)))
 struct CoreEventSessionTests {
+    @Test func injectedSourceControlsSessionPermissionWithoutOpeningDeniedInput() async {
+        let permission = StubMicrophonePermission(status: .undetermined)
+        permission.decision = false
+        let capture = StubAudioCapture()
+        let source = permission.source(capture: capture)
+        let speech = StubSpeechInput()
+        let controller = SessionController(audioSource: source, speechService: speech)
+        let store = SessionStore()
+        let coordinator = TranslationCoordinator()
+        await controller.start(store: store, coordinator: coordinator, locale: .current)
+        #expect(permission.requests == 1)
+        #expect(source.permissionStatus == .denied)
+        #expect(speech.starts == 0)
+        #expect(capture.starts == 0)
+        #expect(store.phase == .idle)
+        #expect(controller.lastError != nil)
+    }
+
+    @Test func cancelledPermissionWaitDoesNotStartSessionAndRetryCanStart() async {
+        let permission = StubMicrophonePermission(status: .undetermined)
+        permission.hold = true
+        let source = permission.source(capture: StubAudioCapture())
+        let speech = StubSpeechInput()
+        let controller = SessionController(audioSource: source, speechService: speech)
+        let store = SessionStore()
+        let coordinator = TranslationCoordinator()
+        let start = Task { await controller.start(store: store, coordinator: coordinator, locale: .current) }
+        var prompted = permission.prompted.stream.makeAsyncIterator()
+        _ = await prompted.next()
+        // 準備中の二重開始も、権限要求や認識を追加しない。
+        await controller.start(store: store, coordinator: coordinator, locale: .current)
+        start.cancel()
+        permission.release.continuation.yield(())
+        await start.value
+        #expect(store.phase == .idle)
+        #expect(controller.lastError == nil)
+        #expect(speech.starts == 0)
+        #expect(permission.requests == 1)
+        await controller.start(store: store, coordinator: coordinator, locale: .current)
+        #expect(store.phase == .listening)
+        #expect(speech.starts == 1)
+        #expect(permission.requests == 1)
+        await controller.stop(store: store, coordinator: coordinator)
+    }
+
     @Test func glossaryIsReadyWhenInputBegins() async {
         let speech = StubSpeechInput()
         let store = SessionStore()

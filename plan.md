@@ -4,11 +4,11 @@
 
 ## 現在地
 
-- 更新: **2026-11-08**／状態: **PR0実機確認持ち越し／PR1実装・自動検証完了、レビュー待ち**／進捗: **0/12**
+- 更新: **2026-11-08**／状態: **PR0実機確認持ち越し／PR1完了／PR2実装・自動検証完了、レビュー待ち**／進捗: **1/12**
 - **持ち越し:** PR0の実音声・翻訳・保存操作の確認（音声試験はユーザー指示で延期）
 - **PR0後に並行:** PR5-A（Conference含む全体UI/UXモック設計）
 - 概算: PoC 2〜3週間、実用MVP 6〜10週間（着手日・期限は未設定）
-- **確認済み:** Debugビルド、137テスト、lint（40ファイル・違反0）。[PR1検証記録](docs/validation/core-events.md)
+- **確認済み:** Debugビルド、152テスト、lint（43ファイル・違反0）。[PR2検証記録](docs/validation/audio-abstraction.md)
 - **未検証:** 実音声・実翻訳、内部音声取得、2入力STT
 
 ## PR進捗
@@ -16,8 +16,8 @@
 | ID | 作業 | 依存 | 状態 | PR |
 |---|---|---|---|---|
 | PR0 | Baseline・検証環境 | — | **DOING** | [#5 (Merged・実機確認待ち)](https://github.com/Ryuta1346/conflingo/pull/5) |
-| PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **REVIEW** | [#6 (Draft)](https://github.com/Ryuta1346/conflingo/pull/6) |
-| PR2 | 音声入力の共通化 | PR1 | TODO | — |
+| PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **DONE** | [#6 (Merged)](https://github.com/Ryuta1346/conflingo/pull/6) |
+| PR2 | 音声入力の共通化 | PR1 | **REVIEW** | — |
 | PR3 | システム音声キャプチャ | PR2 | TODO | — |
 | PR4 | マイク＋内部音声の同時STT | PR3 | TODO | — |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | TODO | — |
@@ -43,7 +43,7 @@
 ## 主な未解決事項
 
 - **PR0:** 実音声試験はユーザー指示で後日実施。起動・専用モード切替は確認済み。Gate Aは未検証を維持。[検証記録](docs/validation/conference-baseline.md)
-- **PR1:** Draft PR #6。レビュー指摘の字幕なしClearを修正し、137テスト・lint成功。次は受入確認後にPR2（音声入力の共通化）。実入力での認識範囲・時刻・終了処理は未検証。
+- **PR2:** 音声入力の共通化を実装し、152テスト・build・lint成功。次はレビュー・受入確認。実音声試験の延期は継続。
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
 - **PR4:** 2系統SpeechAnalyzerの性能・精度・遅延
 - **PR5-A:** UIモック未承認（5-B/Cの着手条件）
@@ -58,5 +58,5 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-08:** PR0マージ確認（`b2a8993`）。持ち越し承認のもとPR1を実装、137テスト・build・lint成功。レビュー待ち。
+- **2026-11-08:** PR1マージ確認（`8812ae0`）、ユーザーの完了確認を反映。PR2を実装、152テスト・build・lint成功。レビュー待ち。PR0実機確認は持ち越し。
 - **2026-11-07:** [詳細計画 v1.1](docs/meeting-copilot-plan.md)確定、UI刷新をPR5-A/B/Cに分割。

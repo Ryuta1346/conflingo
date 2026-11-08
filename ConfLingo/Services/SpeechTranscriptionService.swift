@@ -14,7 +14,7 @@ enum TranscriptionError: LocalizedError {
     }
 }
 
-/// OSの認識結果と終了を差し替える境界。音声入力の共通化はPR2で行う。
+/// OSの認識結果と終了を差し替える境界。
 @MainActor
 protocol SpeechTranscribing: AnyObject {
     func start(
@@ -28,9 +28,17 @@ protocol SpeechTranscribing: AnyObject {
 
 @MainActor
 final class SpeechTranscriptionService: SpeechTranscribing {
-    private let audioService = AudioCaptureService()
+    private let audioSource: any AudioSource
     private var analyzer: SpeechAnalyzer?
     private var resultsTask: Task<Void, any Error>?
+
+    init(audioSource: any AudioSource = MicrophoneAudioSource()) {
+        self.audioSource = audioSource
+    }
+
+    func startAudioInput(targetFormat: AVAudioFormat) throws -> AsyncMapSequence<AsyncStream<AudioFrame>, AnalyzerInput> {
+        try audioSource.start(targetFormat: targetFormat).map { AnalyzerInput(buffer: $0.buffer) }
+    }
 
     nonisolated static func reportingOptions(fastResults: Bool) -> Set<SpeechTranscriber.ReportingOption> {
         fastResults ? [.volatileResults, .fastResults] : [.volatileResults]
@@ -71,7 +79,7 @@ final class SpeechTranscriptionService: SpeechTranscribing {
                 throw TranscriptionError.audioFormatUnavailable
             }
             try Task.checkCancellation()
-            let audioStream = try audioService.start(targetFormat: format)
+            let audioStream = try startAudioInput(targetFormat: format)
             onInputStarted()
             resultsTask = Task {
                 do {
@@ -96,7 +104,7 @@ final class SpeechTranscriptionService: SpeechTranscribing {
 
     /// 終了時に生成されるfinalも、購読側へ発行し終えるまで待つ。
     func stop() async throws {
-        audioService.stop()
+        audioSource.stop()
         guard let analyzer else { return }
         do {
             try await analyzer.finalizeAndFinishThroughEndOfInput()
@@ -110,7 +118,7 @@ final class SpeechTranscriptionService: SpeechTranscribing {
     }
 
     private func cancel(_ analyzer: SpeechAnalyzer) async {
-        audioService.stop()
+        audioSource.stop()
         resultsTask?.cancel()
         await analyzer.cancelAndFinishNow()
         _ = await resultsTask?.result
