@@ -21,12 +21,13 @@ final class SessionController {
     private var stopTask: Task<Void, Never>?
 
     init(
-        speechService: any SpeechTranscribing = SpeechTranscriptionService(),
-        requestPermission: @escaping @MainActor () async -> Bool = { await AudioCaptureService.requestPermission() },
+        audioSource: any AudioSource = MicrophoneAudioSource(),
+        speechService: (any SpeechTranscribing)? = nil,
+        requestPermission: (@MainActor () async -> Bool)? = nil,
         timeline: MeetingTimeline = MeetingTimeline()
     ) {
-        self.speechService = speechService
-        self.requestPermission = requestPermission
+        self.speechService = speechService ?? SpeechTranscriptionService(audioSource: audioSource)
+        self.requestPermission = requestPermission ?? { await audioSource.requestPermission() }
         self.timeline = timeline
         meetingStore = MeetingSessionStore(sessionID: timeline.sessionID)
     }
@@ -38,11 +39,16 @@ final class SessionController {
         glossary: [KeywordParser.GlossaryEntry] = [],
         fastResults: Bool = false
     ) async {
-        guard store.phase == .idle else { return }
+        guard store.phase == .idle, !Task.isCancelled else { return }
         store.phase = .preparing
         lastError = nil
         runFailure = nil
-        guard await requestPermission() else {
+        let permitted = await requestPermission()
+        guard !Task.isCancelled else {
+            store.phase = .idle
+            return
+        }
+        guard permitted else {
             lastError = "マイクへのアクセスが許可されていません。システム設定 > プライバシーとセキュリティ > マイク で ConfLingo を許可してください。"
             store.phase = .idle
             return

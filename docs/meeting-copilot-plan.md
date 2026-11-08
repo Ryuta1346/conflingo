@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・PR0マージ済み／PR1実装・自動検証完了、レビュー待ち**（2026-11-08：持ち越し承認のもと会話イベント・Event Hubを追加。137テスト・build・lint成功。Gate Aは未検証。[PR1検証記録](validation/core-events.md)）
+- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1完了／PR2実装・自動検証完了、レビュー待ち**（2026-11-08：PR1マージ `8812ae0` とユーザーの完了確認を反映。PR2は152テスト・build・lint成功。[PR2検証記録](validation/audio-abstraction.md)。Gate Aは未検証。[PR1検証記録](validation/core-events.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -89,6 +89,16 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
 - 音声コールバックで重い処理をしない。音声バッファを低負荷で受け渡し、サンプルレート/チャンネル変換は専用処理系で行う。
 - マイクと内部音声にそれぞれ認識インスタンスを割り当てる。2つの`SpeechAnalyzer`を同時に安定動作させられるか早期に検証する。
 - 自分のスピーカー出力がマイクに回り込む場合の重複抑制を検討。ヘッドフォン利用を推奨し、無理に高精度話者分離を約束しない。
+
+#### PR2の実装契約（2026-11-08承認・自動検証済み）
+
+- `AudioSource`はMainActor上で入力元、権限状態、ライフサイクル状態、権限要求、指定フォーマットでの開始、冪等な停止を公開する。
+- `MicrophoneAudioSource`が既存キャプチャを包む。権限の参照はダイアログを出さず、未許可での開始は拒否する。権限待ち中の重複要求をまとめ、キャンセルされた呼び出しから入力を開始しない。
+- 状態はidle→starting→running→stopping→idle。二重開始は既存ストリームを保持してエラー、開始失敗は後始末してidle、再開は新しいストリームとする。
+- 共通境界はSpeechに依存しないPCMフレームを流す。コールバックのバッファは所有権を確保してから渡し、渡した後は変更しない。AnalyzerInputへの変換は認識サービスで行う。
+- SessionControllerの既定構成は権限要求とSpeechTranscriptionServiceで同じ入力源を使う。停止順は入力停止→認識finalize・最終結果取り込み→Hub終了を維持する。
+- 自動受入は権限、PCM内容・順序、二重開始・停止、開始失敗・再開、旧入力混入防止、既存Conference回帰、build/test/lint。結果は[PR2検証記録](validation/audio-abstraction.md)へ記載する。
+- 実音声試験の延期を継続する。実デバイスのリソース解放・認識結果の同等性は未検証として扱う。
 
 ### 2.2 会話イベントモデル
 

@@ -1,6 +1,5 @@
 import AVFAudio
 import Foundation
-import Speech
 
 enum AudioCaptureError: LocalizedError {
     case converterUnavailable
@@ -13,28 +12,20 @@ enum AudioCaptureError: LocalizedError {
     }
 }
 
-/// AVAudioEngine のマイク入力を SpeechAnalyzer 用フォーマットへ変換し、
-/// AsyncStream<AnalyzerInput> として供給する。
 @MainActor
-final class AudioCaptureService {
+protocol AudioCapturing: AnyObject {
+    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame>
+    func stop()
+}
+
+/// AVAudioEngine のマイク入力を指定PCMフォーマットへ変換するOS境界。
+@MainActor
+final class AudioCaptureService: AudioCapturing {
     private let engine = AVAudioEngine()
-    private var continuation: AsyncStream<AnalyzerInput>.Continuation?
+    private var continuation: AsyncStream<AudioFrame>.Continuation?
 
-    static func requestPermission() async -> Bool {
-        switch AVAudioApplication.shared.recordPermission {
-        case .granted:
-            return true
-        case .denied:
-            return false
-        case .undetermined:
-            return await AVAudioApplication.requestRecordPermission()
-        @unknown default:
-            return await AVAudioApplication.requestRecordPermission()
-        }
-    }
-
-    /// マイク入力を開始し、targetFormat に変換済みの AnalyzerInput ストリームを返す。
-    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AnalyzerInput> {
+    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame> {
+        guard continuation == nil else { throw AudioSourceError.alreadyRunning }
         let inputNode = engine.inputNode
         let hardwareFormat = inputNode.outputFormat(forBus: 0)
 
@@ -42,14 +33,14 @@ final class AudioCaptureService {
             throw AudioCaptureError.converterUnavailable
         }
 
-        let (stream, newContinuation) = AsyncStream.makeStream(of: AnalyzerInput.self)
+        let (stream, newContinuation) = AsyncStream.makeStream(of: AudioFrame.self)
         continuation = newContinuation
 
         // tap コールバックは音声スレッドで呼ばれる。@Sendable を明示しないと
         // @MainActor コンテキストの隔離を継承し、実行時の隔離アサーションでクラッシュする。
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: hardwareFormat) { @Sendable buffer, _ in
-            if let converted = converter.convert(buffer) {
-                newContinuation.yield(AnalyzerInput(buffer: converted))
+            if let converted = converter.convert(buffer), let frame = AudioFrame(copying: converted) {
+                newContinuation.yield(frame)
             }
         }
 
@@ -58,6 +49,7 @@ final class AudioCaptureService {
             try engine.start()
         } catch {
             inputNode.removeTap(onBus: 0)
+            engine.stop()
             newContinuation.finish()
             continuation = nil
             throw error
