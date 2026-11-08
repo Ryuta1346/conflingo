@@ -12,6 +12,8 @@ final class SystemAudioProbeController {
     private(set) var level: Double = 0
 
     private let source: any AudioSource
+    let activity: AudioInputUse
+    private var usageToken: UUID?
     private let now: @MainActor () -> TimeInterval
     private var runID: UUID?
     private var consumer: Task<Void, Never>?
@@ -19,10 +21,11 @@ final class SystemAudioProbeController {
     @ObservationIgnored private var receivedFrames = 0
     @ObservationIgnored private var lastMeterTime = -Double.infinity
 
-    init(source: any AudioSource = SystemAudioSource(), now: @escaping @MainActor () -> TimeInterval = {
+    init(source: any AudioSource = SystemAudioSource(), activity: AudioInputUse = AudioInputUse(), now: @escaping @MainActor () -> TimeInterval = {
         ProcessInfo.processInfo.systemUptime
     }) {
         self.source = source
+        self.activity = activity
         self.now = now
         permission = source.permissionStatus
     }
@@ -31,6 +34,7 @@ final class SystemAudioProbeController {
 
     func requestAccess() async {
         guard phase == .idle else { return }
+        guard acquireInputUse() else { return }
         let currentRun = UUID()
         runID = currentRun
         phase = .starting
@@ -41,10 +45,12 @@ final class SystemAudioProbeController {
         if !allowed { lastError = Self.permissionGuidance }
         runID = nil
         phase = .idle
+        releaseInputUse()
     }
 
     func start() async {
         guard phase == .idle, !Task.isCancelled else { return }
+        guard acquireInputUse() else { return }
         let currentRun = UUID()
         runID = currentRun
         phase = .starting
@@ -104,6 +110,7 @@ final class SystemAudioProbeController {
             do {
                 try await source.stop()
                 phase = .idle
+                releaseInputUse()
             } catch {
                 lastError = "停止を完了できませんでした。停止を再試行してください: \(error.localizedDescription)"
             }
@@ -129,6 +136,20 @@ final class SystemAudioProbeController {
         var squares = 0.0
         for index in 0..<count { squares += Double(samples[index]) * Double(samples[index]) }
         level = min(1, sqrt(squares / Double(count)))
+    }
+
+    private func acquireInputUse() -> Bool {
+        guard let token = activity.acquire(.systemAudioProbe) else {
+            lastError = activity.busyMessage
+            return false
+        }
+        usageToken = token
+        return true
+    }
+
+    private func releaseInputUse() {
+        activity.release(usageToken)
+        usageToken = nil
     }
 
     private static let permissionGuidance = "システム設定 > プライバシーとセキュリティ > 画面収録とシステムオーディオ録音でConfLingoを許可してください。変更後はアプリの再起動が必要な場合があります。"

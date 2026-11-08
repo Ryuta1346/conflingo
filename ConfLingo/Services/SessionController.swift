@@ -8,6 +8,10 @@ import os
 final class SessionController {
     private static let logger = Logger(subsystem: "com.gavrri.conflingo", category: "session")
     private let speechService: any SpeechTranscribing
+    private let audioSource: any AudioSource
+    let activity: AudioInputUse
+    private var usageToken: UUID?
+    var isStopping: Bool { stopTask != nil }
     private let requestPermission: @MainActor () async -> Bool
     private let timeline: MeetingTimeline
     let meetingStore: MeetingSessionStore
@@ -24,8 +28,11 @@ final class SessionController {
         audioSource: any AudioSource = MicrophoneAudioSource(),
         speechService: (any SpeechTranscribing)? = nil,
         requestPermission: (@MainActor () async -> Bool)? = nil,
-        timeline: MeetingTimeline = MeetingTimeline()
+        timeline: MeetingTimeline = MeetingTimeline(),
+        activity: AudioInputUse = AudioInputUse()
     ) {
+        self.audioSource = audioSource
+        self.activity = activity
         self.speechService = speechService ?? SpeechTranscriptionService(audioSource: audioSource)
         self.requestPermission = requestPermission ?? { await audioSource.requestPermission() }
         self.timeline = timeline
@@ -40,17 +47,24 @@ final class SessionController {
         fastResults: Bool = false
     ) async {
         guard store.phase == .idle, !Task.isCancelled else { return }
+        guard let token = activity.acquire(.conference) else {
+            lastError = activity.busyMessage
+            return
+        }
+        usageToken = token
         store.phase = .preparing
         lastError = nil
         runFailure = nil
         let permitted = await requestPermission()
         guard !Task.isCancelled else {
             store.phase = .idle
+            releaseInputUse()
             return
         }
         guard permitted else {
             lastError = "マイクへのアクセスが許可されていません。システム設定 > プライバシーとセキュリティ > マイク で ConfLingo を許可してください。"
             store.phase = .idle
+            releaseInputUse()
             return
         }
 
@@ -102,7 +116,7 @@ final class SessionController {
             try? await speechService.stop()
             runID = nil
             await finishEvents(store: store, coordinator: coordinator)
-            store.phase = .idle
+            finishInputUse(store: store)
         }
     }
 
@@ -111,7 +125,7 @@ final class SessionController {
             await stopTask.value
             return
         }
-        guard store.phase == .listening else { return }
+        guard store.phase == .listening || store.phase == .stopping else { return }
         store.phase = .stopping
         let task = Task {
             do {
@@ -122,7 +136,7 @@ final class SessionController {
             runID = nil
             await finishEvents(store: store, coordinator: coordinator)
             stopTask = nil
-            store.phase = .idle
+            finishInputUse(store: store)
         }
         stopTask = task
         await task.value
@@ -134,6 +148,21 @@ final class SessionController {
         meetingStore.reset(sessionID: timeline.sessionID)
         store.reset()
         lastError = nil
+    }
+
+    private func finishInputUse(store: SessionStore) {
+        if audioSource.state == .idle {
+            releaseInputUse()
+            store.phase = .idle
+        } else {
+            store.phase = .stopping
+            lastError = "音声入力の停止を完了できませんでした。停止を再試行してください。"
+        }
+    }
+
+    private func releaseInputUse() {
+        activity.release(usageToken)
+        usageToken = nil
     }
 
     private func consume(
