@@ -28,10 +28,17 @@ struct ConferenceLiveView: View {
                 Group {
                     if targetLanguage == nil {
                         sourcePane
-                    } else if geometry.size.width >= 820 {
-                        HSplitView { sourcePane; translationPane }
                     } else {
-                        VStack(spacing: 0) { sourcePane; Divider(); translationPane }
+                        let horizontal = geometry.size.width >= 820
+                        let layout = horizontal
+                            ? AnyLayout(HStackLayout(spacing: 0))
+                            : AnyLayout(VStackLayout(spacing: 0))
+                        layout {
+                            sourcePane
+                            Rectangle().fill(DesignTokens.border)
+                                .frame(width: horizontal ? 1 : nil, height: horizontal ? nil : 1)
+                            translationPane
+                        }
                     }
                 }
                 .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radius))

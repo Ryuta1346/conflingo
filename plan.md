@@ -6,9 +6,9 @@
 
 - 更新: **2026-11-08**／状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4実装・自動検証・コードレビュー済み／PR5-A方向性承認済み／PR5-B実装・自動検証済み**／進捗: **2/12**
 - **持ち越し:** PR0の実音声・翻訳・保存操作、PR3の内部音声・権限・配布条件の確認（音声試験はユーザー指示で延期）
-- **次の作業:** [PR5-Bネイティブ画面と検証記録](docs/validation/pr5-b-conference.md)のレビュー。実音声受入は引き続き延期
+- **次の作業:** [PR5-Bレビュー指摘2件の修正・検証記録](docs/validation/pr5-b-conference.md)の確認。実音声受入は引き続き延期
 - 概算: PoC 2〜3週間、実用MVP 6〜10週間（着手日・期限は未設定）
-- **確認済み:** Debugビルド、195テスト、lint（58ファイル・違反0）、2入力検証画面の表示。[PR4検証記録](docs/validation/dual-transcription.md)
+- **確認済み:** PR5-Bレビュー指摘2件を修正。Debug/Releaseビルド、211テスト、lint（76ファイル・違反0）、幅変更後の字幕読み返し保持。[PR5-B検証記録](docs/validation/pr5-b-conference.md)
 - **未検証:** 実音声・実翻訳、内部音声取得、2入力STT
 
 ## PR進捗
@@ -21,7 +21,7 @@
 | PR3 | システム音声キャプチャ | PR2 | **REVIEW** | [#8 (Merged・実機受入待ち)](https://github.com/Ryuta1346/conflingo/pull/8) |
 | PR4 | マイク＋内部音声の同時STT | PR3（実機確認持ち越し承認済み） | **REVIEW** | [#9 (Draft)](https://github.com/Ryuta1346/conflingo/pull/9) |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | **REVIEW** | [設計・モック](docs/design/README.md)・[#10 (Draft)](https://github.com/Ryuta1346/conflingo/pull/10)（方向性承認済み） |
-| PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [Draft PR #10](https://github.com/Ryuta1346/conflingo/pull/10)・[206テスト／画面検証](docs/validation/pr5-b-conference.md) |
+| PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [Draft PR #10](https://github.com/Ryuta1346/conflingo/pull/10)・[211テスト／レビュー修正検証](docs/validation/pr5-b-conference.md) |
 | PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、実結合はPR4/6 | TODO | — |
 | PR6 | AI会話理解・根拠付き回答 | PR1/PR4 | TODO | — |
 | PR7 | 決定・アクション候補管理 | PR6 | TODO | — |

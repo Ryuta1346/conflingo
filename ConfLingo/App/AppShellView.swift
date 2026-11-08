@@ -8,31 +8,34 @@ struct AppShellView<Content: View>: View {
 
     var body: some View {
         GeometryReader { geometry in
-            if geometry.size.width >= 900 {
-                HStack(spacing: 0) {
-                    sidebar
-                        .frame(width: 184)
-                    Divider()
-                    content.frame(maxWidth: .infinity, maxHeight: .infinity)
+            let wide = geometry.size.width >= 900
+            let layout = wide
+                ? AnyLayout(HStackLayout(spacing: 0))
+                : AnyLayout(VStackLayout(spacing: 0))
+            layout {
+                Group {
+                    if wide { sidebar } else { compactNavigation }
                 }
-            } else {
-                VStack(spacing: 0) {
-                    HStack(spacing: 8) {
-                        navigationButton("ホーム", symbol: "house", target: .home)
-                        navigationButton("Conference", symbol: "captions.bubble", target: .setup)
-                        Spacer(minLength: 0)
-                        navigationButton("設定", symbol: "gearshape", target: .settings)
-                    }
-                    .padding(12)
-                    .background(DesignTokens.sidebar)
-                    Divider()
-                    content.frame(maxWidth: .infinity, maxHeight: .infinity)
-                }
+                .frame(width: wide ? 184 : nil)
+                Rectangle().fill(DesignTokens.border)
+                    .frame(width: wide ? 1 : nil, height: wide ? nil : 1)
+                content.frame(maxWidth: .infinity, maxHeight: .infinity)
             }
         }
         .background(DesignTokens.canvas)
         .foregroundStyle(DesignTokens.text)
         .tint(DesignTokens.accent)
+    }
+
+    private var compactNavigation: some View {
+        HStack(spacing: 8) {
+            navigationButton("ホーム", symbol: "house", target: .home)
+            navigationButton("Conference", symbol: "captions.bubble", target: .setup)
+            Spacer(minLength: 0)
+            navigationButton("設定", symbol: "gearshape", target: .settings)
+        }
+        .padding(12)
+        .background(DesignTokens.sidebar)
     }
 
     private var sidebar: some View {

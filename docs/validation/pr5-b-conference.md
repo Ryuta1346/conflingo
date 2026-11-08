@@ -85,3 +85,35 @@ UI確認はボタン・選択操作中心。⌘Rは疑似停止で確認。全�
 VoiceOver、全対応言語、長時間利用、高コントラスト、複数画面、画面共有、通常起動でのモデル取得/権限拒否/復旧表示、実保存失敗のUI表示も未検証。準備・停止失敗の遷移契約はfakeテストで確認したが、ネイティブの全失敗状態画像を揃えたわけではない。Gate A/Uの全条件を合格とせず、PR5-BはREVIEWで扱う。
 
 参考API: Apple [dismissWindow](https://developer.apple.com/documentation/swiftui/environmentvalues/dismisswindow)、[onScrollPhaseChange](https://developer.apple.com/documentation/swiftui/view/onscrollphasechange(_:))。Context7経由で公式資料を確認。
+
+## レビュー指摘2件の修正検証（2026-11-08）
+
+ユーザー「修正進めて」を受けて、モデル準備競合とリサイズ時の字幕状態消失を修正。以下は初回実装の206テストに対する追加検証記録。
+
+- モデル準備に要求IDとキャンセル確認を追加。旧要求の成功・エラー・進捗を破棄し、認識localeは最新の準備完了時に設定する。呼出し元も失効/キャンセルした要求から翻訳設定を作らない。
+- OSのモデル操作を`ModelPreparing`で分離し、実ダウンロードなしで完了順とエラーを制御するテストを追加。対応言語取得・locale解決・モデル準備・翻訳対応確認の5段階で旧要求とキャンセルを検証。非対応/ダウンロード失敗からの再試行も検証。
+- App Shellと字幕ペインを`AnyLayout`へ変更。サイドバー/上部ナビゲーション、左右/上下字幕の切替でスクロールビューを再生成しない。左右字幕は等分表示になり、旧HSplitViewの境界ドラッグは使用しない。
+- 実際の`NSHostingView`で80件の原文/訳文を表示し、スクロールイベントで読み返し状態に移動。1100→700→1100ptの幅変更後も同じスクロールビューと履歴位置を維持し、新しい原文/訳文の到着で追従が再開しないことを、字幕単体とApp Shell込みで検証。
+
+| 検証 | 結果 | ログ |
+|---|---|---|
+| 回帰テストRed | 旧モデル結果/キャンセル結果の反映、字幕ビュー再生成と末尾への移動で失敗を確認 | `/private/tmp/conflingo-fixes-red.log` |
+| App Shell境界のRed | 字幕単体修正後もShell込みでは再生成/末尾移動が残ることを確認。その後Shellも修正 | 作業時のテスト出力で確認 |
+| 幅変更後の字幕追加 | 読み返し状態を保持し、追従が再開しない | `/private/tmp/conflingo-fixes-follow-test.log` |
+| 最終Debug build/test | **211テスト・28スイート成功**（既存206＋新規5、引数別ケースを含む） | `/private/tmp/conflingo-fixes-tests.log` |
+| Release build | 成功 | `/private/tmp/conflingo-fixes-release.log` |
+| SwiftLint strict | **76ファイル・違反0** | `/private/tmp/conflingo-fixes-lint.log` |
+| git diff --check | 成功 | 最終差分確認 |
+
+実行コマンド（今回のDerivedData: `/private/tmp/conflingo-review-617a33e-build`）:
+
+```sh
+xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Debug -destination 'platform=macOS,arch=arm64' -derivedDataPath /private/tmp/conflingo-review-617a33e-build
+xcodebuild build -project ConfLingo.xcodeproj -scheme ConfLingo -configuration Release -destination 'platform=macOS,arch=arm64' -derivedDataPath /private/tmp/conflingo-review-617a33e-build
+/private/tmp/conflingo-swiftlint-0.65.1/swiftlint lint --strict --no-cache
+git diff --check
+```
+
+実音声・実モデルダウンロード・実翻訳は未実施。ネイティブUIはホスティングテストによる検証で、VoiceOver・手動実機受入全体の合格を意味しない。Releaseには既存のDEBUGプレビュー分岐に関する到達不能コード警告が残る。修正差分は主担当が確認し、今回の修正に対する独立レビューは未実施。コミット・PR投稿は行っていない。
+
+参考: 状態を保持した配置切替はApple [AnyLayout](https://developer.apple.com/documentation/swiftui/anylayout)の公式資料をContext7で確認。

@@ -101,14 +101,15 @@ struct ContentView: View {
             guard !isPreview else { return }
             // 起動時・言語ペア変更時・文字起こしのみモード切替時に利用可能性を再チェックする
             translationConfiguration = nil
-            await availability.checkAndPrepare(
+            let ready = await availability.checkAndPrepare(
                 sourceLocaleID: sourceLocaleID,
                 targetLanguageID: transcriptionOnly ? nil : targetLanguageID
             )
+            guard ready, !Task.isCancelled else { return }
             if transcriptionOnly {
                 // 消費されないキューにバッファが溜まらないよう finish し、以降の enqueue を no-op にする
                 coordinator.finish()
-            } else if availability.state == .ready {
+            } else {
                 translationConfiguration = TranslationSession.Configuration(
                     source: (availability.speechLocale ?? Locale(identifier: sourceLocaleID)).language,
                     target: Locale.Language(identifier: targetLanguageID)
