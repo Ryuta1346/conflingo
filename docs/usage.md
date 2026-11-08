@@ -1,7 +1,7 @@
 ---
 title: ConfLingo Usage Guide
 created: 2026-06-10
-updated: 2026-11-08
+updated: 2026-11-09
 status: active
 type: user-guide
 ---
@@ -37,6 +37,8 @@ Transcripts remain in memory until the app exits. Audio files and transcripts ar
 The initial model is Gemini 3.1 Flash-Lite, billed to your API project. Errors are not retried automatically and turn automatic suggestions off; retry manually after checking the connection or key. Local transcripts continue on AI failures. Other providers, managed AI, and subscription-based authentication are future work.
 
 Real-audio acceptance remains postponed. See the [validation record](validation/pr6-insights.md) for the opt-in synthetic-text Gemini evaluation after registering a key.
+
+If the AI status asks you to pause and resume the meeting, automatic suggestions cannot be enabled until recovery. Pause and resume the meeting, then enable automatic suggestions again. Local transcripts and manual Ask AI remain available while automatic suggestions are unavailable.
 
 
 Acceptance tests with real Zoom/Meet/Teams audio remain deferred. See the [PR5-C validation record](validation/pr5-c-meeting.md) for automated and non-recording checks.

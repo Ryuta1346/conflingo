@@ -29,7 +29,7 @@ struct MeetingAIControls: View {
                 Toggle("自動提案を使う（追加のAPI利用が発生）", isOn: Binding(
                     get: { meeting.ai.automaticEnabled }, set: { meeting.setAutomaticAI($0) }
                 ))
-                .disabled(!meeting.ai.permitted || meeting.page == .review || meeting.phase == .stopping)
+                .disabled(!meeting.ai.permitted || meeting.ai.subscriptionFailed || meeting.page == .review || meeting.phase == .stopping)
                 if meeting.page == .live {
                     TextField("会話について質問する", text: $question, axis: .vertical)
                         .textFieldStyle(.roundedBorder).lineLimit(2...4)

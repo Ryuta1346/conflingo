@@ -71,4 +71,22 @@ TEST_RUNNER_CONFLINGO_LIVE_AI=1 xcodebuild test \
 
 ## 残る受入
 
-実Gemini接続・品質・取消・使用量、実音声/2入力STT、VoiceOver、文字拡大と全キーボード操作、画面共有、長時間性能、独立コードレビューは未実施。Gate A/B/C/U/D全体は未検証を維持する。API通信取消は、Googleへ既に送った内容の撤回・課金取消を保証しない。
+実Gemini接続・品質・取消・使用量、実音声/2入力STT、VoiceOver、文字拡大と全キーボード操作、画面共有、長時間性能は未実施。独立コードレビューと指摘修正は下記のとおり実施済み。Gate A/B/C/U/D全体は未検証を維持する。API通信取消は、Googleへ既に送った内容の撤回・課金取消を保証しない。
+
+## 2026-11-09 レビュー指摘修正
+
+`6f31555`を基点に、ユーザー「修正進めて」の指示で[修正計画](../design/pr6-review-fixes.md)を実施。
+
+- 起動中に受け取る対象確定発話を最大30件・12,000文字で保持し、開始成功時に新しい発話を優先して既存の頻度制限内で処理。許可取消、自動提案オフ、停止・開始失敗では破棄する。
+- AI購読障害後の自動提案切替を無効にし、「一時停止→再開」の案内を表示。許可の切替や手動質問成功でも障害状態を消さず、再購読後に利用者が自動提案を明示的にオンにする。
+- `InsightRecoveryTests`の5テスト（パラメータ化ケースを含む）を追加。修正前は4テストで計8件の期待不一致、修正後は関連17テストが成功。
+- 独立レビュアーが両指摘の解消を確認。追加の不具合指摘なし。合計12,000文字・30件の境界と新しい発話優先の専用テストは未追加で、コードレビューにより確認。単一の過大発話の除外は自動テスト済み。
+
+| 検証 | 結果・証跡 |
+|---|---|
+| Red | 意図した起動中の取りこぼし・復旧しないオン表示を再現。`/private/tmp/conflingo-fix-red.log` |
+| 関連テスト | 17 tests / 3 suites成功。`/private/tmp/conflingo-fix-green.log` |
+| 全Debugテスト・ビルド | 267 tests / 39 suites成功。実Gemini評価は明示除外。`/private/tmp/conflingo-fix-tests.log` |
+| SwiftLint strict / no-cache | 101ファイル・違反0。`/private/tmp/conflingo-fix-lint.log` |
+
+xcresult: `/private/tmp/conflingo-review-build/Logs/Test/Test-ConfLingo-2026.11.09_00-07-01-+0900.xcresult`。証跡はローカル一時ファイル。今回の修正後のReleaseビルド・ネイティブUI操作は未実施。実API・実音声も実行していない。

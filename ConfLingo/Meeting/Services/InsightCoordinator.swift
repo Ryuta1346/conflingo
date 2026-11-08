@@ -8,6 +8,7 @@ final class InsightCoordinator {
 
     private(set) var permitted = false
     private(set) var automaticEnabled = false
+    private(set) var subscriptionFailed = false
     private(set) var state: State = .off
     var insights: [MeetingInsight] = []
     private(set) var lastUsage: InsightUsage?
@@ -17,6 +18,8 @@ final class InsightCoordinator {
     private let now: () -> TimeInterval
     private let timeout: Duration
     private var active = false
+    private var preparing = false
+    private var startupEvents: [TranscriptEvent] = []
     private var allowedAfter = TimeInterval.infinity
     private var automaticAfter = TimeInterval.infinity
     private var seen: Set<UUID> = []
@@ -39,18 +42,22 @@ final class InsightCoordinator {
 
     var canAsk: Bool { active && permitted && request?.trigger != .manual }
     var statusText: String {
-        switch state {
+        let status = switch state {
         case .off: "AIオフ・外部送信なし"
         case .ready: automaticEnabled ? "AI許可済み・自動提案オン" : "AI許可済み・手動質問のみ"
         case .paused: "AI一時停止・新規送信なし"
         case .sending: "確定発話をAIへ送信中"
         case .failed(let error): error.localizedDescription
         }
+        return subscriptionFailed
+            ? "\(status) · 自動提案を再開するには会議を一時停止して再開してください。"
+            : status
     }
 
     func setPermission(_ value: Bool, after offset: TimeInterval) {
         guard permitted != value else { return }
         cancelRequest()
+        startupEvents = []
         permitted = value
         allowedAfter = value ? offset : .infinity
         automaticEnabled = false
@@ -59,19 +66,26 @@ final class InsightCoordinator {
     }
 
     func setAutomatic(_ value: Bool, after offset: TimeInterval) {
-        automaticEnabled = value && permitted
+        automaticEnabled = value && permitted && !subscriptionFailed
         automaticAfter = automaticEnabled ? offset : .infinity
+        if !automaticEnabled { startupEvents = [] }
         if !automaticEnabled, request?.trigger == .automatic { cancelRequest() }
         if request == nil { state = permitted ? (active ? .ready : .paused) : .off }
     }
 
     func resume() {
         active = true
+        preparing = false
         state = permitted ? .ready : .off
+        let pending = startupEvents.sorted { $0.startOffset > $1.startOffset }
+        startupEvents = []
+        for event in pending { receive(event) }
     }
 
     func suspend() {
         active = false
+        preparing = false
+        startupEvents = []
         cancelRequest()
         consumer?.cancel()
         consumer = nil
@@ -83,6 +97,7 @@ final class InsightCoordinator {
         suspend()
         permitted = false
         automaticEnabled = false
+        subscriptionFailed = false
         allowedAfter = .infinity
         automaticAfter = .infinity
         insights = []
@@ -97,6 +112,13 @@ final class InsightCoordinator {
         let id = UUID()
         subscriptionID = id
         let subscription = await hub.subscribe()
+        guard subscriptionID == id, !Task.isCancelled else {
+            await subscription.cancel()
+            return
+        }
+        subscriptionFailed = false
+        preparing = !active
+        startupEvents = []
         consumer = Task { [weak self] in
             do {
                 while let event = try await subscription.next() {
@@ -107,6 +129,8 @@ final class InsightCoordinator {
                 guard let self, self.subscriptionID == id, !Task.isCancelled else { return }
                 self.cancelRequest()
                 self.automaticEnabled = false
+                self.subscriptionFailed = true
+                self.startupEvents = []
                 self.state = .failed(.queueOverflow)
             }
             await subscription.cancel()
@@ -126,10 +150,15 @@ final class InsightCoordinator {
 
     @discardableResult
     func receive(_ event: TranscriptEvent) -> Task<Void, Never>? {
-        guard active, permitted, automaticEnabled, request == nil,
+        guard permitted, automaticEnabled, request == nil,
               event.sessionID == store.sessionID, event.isFinal,
-              event.startOffset >= max(allowedAfter, automaticAfter), seen.insert(event.id).inserted,
+              event.startOffset.isFinite, event.startOffset >= max(allowedAfter, automaticAfter),
               ConversationEventDetector.isCandidate(event.text) else { return nil }
+        guard active else {
+            if preparing { bufferStartup(event) }
+            return nil
+        }
+        guard seen.insert(event.id).inserted else { return nil }
         let time = now()
         recentTriggers.removeAll { time - $0.time >= 60 }
         let normalized = Self.normalized(event.text)
@@ -142,6 +171,15 @@ final class InsightCoordinator {
               next.events.contains(where: { $0.id == event.id }) else { return nil }
         recentTriggers.append((time, normalized))
         return launch(next)
+    }
+
+    private func bufferStartup(_ event: TranscriptEvent) {
+        guard event.text.count <= 12_000, !startupEvents.contains(where: { $0.id == event.id }) else { return }
+        startupEvents.append(event)
+        startupEvents.sort { $0.startOffset < $1.startOffset }
+        while startupEvents.count > 30 || startupEvents.reduce(0, { $0 + $1.text.count }) > 12_000 {
+            startupEvents.removeFirst()
+        }
     }
 
     private func launch(_ next: InsightRequest) -> Task<Void, Never> {
