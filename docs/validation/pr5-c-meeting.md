@@ -1,6 +1,6 @@
 # PR5-C — Meeting UI・フローティングUI 検証記録
 
-2026-11-08 / `feature/meeting-ui` / **実装・自動検証済み、REVIEW。未コミット・PR未作成。**
+2026-11-08 / `feature/meeting-ui` / **実装・自動検証済み、REVIEW。** 実装コミット: `fa5f515` / [Draft PR #11](https://github.com/Ryuta1346/conflingo/pull/11)
 
 ユーザー「進めて」により[実装計画](../design/pr5-c-implementation-plan.md)を承認。基点main `c34ddd1`。PR4の実機受入を持ち越し、接続コードとfake結合検証を先行する方針を含む。実音声試験の延期は継続している。
 

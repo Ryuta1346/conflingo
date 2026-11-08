@@ -102,8 +102,8 @@ PR6のLLM/ネットワーク/手動質問の実処理、PR7の候補確認・却
 
 実行予定: `xcodebuild test`（Debug、macOS arm64、専用DerivedData）、`xcodebuild build`（Release）、SwiftLint `lint --strict --no-cache`、`git diff --check`。色/余白だけをなぞる単体テストは追加しない。ログと非録音スクリーンショットを検証記録へリンクする。
 
-実音声・実モデル取得・実AI・Zoom/Meet/Teams・画面共有・長時間性能は未検証として残す。VoiceOver/複数モニター等は実施できた項目だけ結果を記録する。PR5-Cはマージと必要な受入の証跡が揃うまでDONEにしない。コミット・push・PR投稿は今回実行しない。
+実音声・実モデル取得・実AI・Zoom/Meet/Teams・画面共有・長時間性能は未検証として残す。VoiceOver/複数モニター等は実施できた項目だけ結果を記録する。PR5-Cはマージと必要な受入の証跡が揃うまでDONEにしない。実装時点ではコミット・push・PR投稿を対象外とした。2026-11-08、ユーザー「コミットして PR作成」により追加承認。
 
 ## 実施結果（2026-11-08）
 
-承認範囲を実装し、229テスト・Debug/Release build・lint（86ファイル、違反0）成功。主画面/小窓の非録音操作、読み返し保持、停止失敗からの復帰を確認した。[検証記録と画像](../validation/pr5-c-meeting.md)を参照。実音声/実AIの延期、Gate A/B/U未完了は継続。独立レビュー・コミット・PR投稿は未実施。
+承認範囲を実装し、229テスト・Debug/Release build・lint（86ファイル、違反0）成功。主画面/小窓の非録音操作、読み返し保持、停止失敗からの復帰を確認した。[検証記録と画像](../validation/pr5-c-meeting.md)を参照。実音声/実AIの延期、Gate A/B/U未完了は継続。独立レビューは未実施。実装を`fa5f515`にコミットし、[Draft PR #11](https://github.com/Ryuta1346/conflingo/pull/11)を作成した。

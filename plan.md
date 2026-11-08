@@ -6,7 +6,7 @@
 
 - 更新: **2026-11-08**／状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3マージ済み、実機受入待ち／PR4・PR5-A/Bマージ済み、残る受入待ち／PR5-C実装・自動検証済み**／進捗: **2/12**
 - **持ち越し:** PR0の実音声・翻訳・保存操作、PR3の内部音声・権限・配布条件の確認（音声試験はユーザー指示で延期）
-- **次の作業:** PR5-Cの差分・[検証記録と画像](docs/validation/pr5-c-meeting.md)をレビュー。実音声受入は引き続き延期
+- **次の作業:** [PR5-C（Draft #11）](https://github.com/Ryuta1346/conflingo/pull/11)の差分・[検証記録と画像](docs/validation/pr5-c-meeting.md)をレビュー。実音声受入は引き続き延期
 - 概算: PoC 2〜3週間、実用MVP 6〜10週間（着手日・期限は未設定）
 - **確認済み:** PR5-CのMeeting準備/Live/Review・小窓・PR4接続を実装。Debug/Releaseビルド、229テスト、lint（86ファイル・違反0）、非録音操作・読み返し保持。[PR5-C検証記録](docs/validation/pr5-c-meeting.md)
 - **未検証:** 実音声・実翻訳、内部音声取得、2入力STT
@@ -22,7 +22,7 @@
 | PR4 | マイク＋内部音声の同時STT | PR3（実機確認持ち越し承認済み） | **REVIEW** | [#9 (Merged・実機受入待ち)](https://github.com/Ryuta1346/conflingo/pull/9) |
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | **REVIEW** | [設計・モック](docs/design/README.md)・[#10 (Merged)](https://github.com/Ryuta1346/conflingo/pull/10)（方向性承認済み） |
 | PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [PR #10 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/10)・[211テスト／レビュー修正検証](docs/validation/pr5-b-conference.md) |
-| PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、PR4実機受入持ち越し承認済み／AIはPR6 | **REVIEW** | [実装計画](docs/design/pr5-c-implementation-plan.md)・[検証記録](docs/validation/pr5-c-meeting.md)（PR未作成） |
+| PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、PR4実機受入持ち越し承認済み／AIはPR6 | **REVIEW** | [実装計画](docs/design/pr5-c-implementation-plan.md)・[検証記録](docs/validation/pr5-c-meeting.md)・[Draft #11](https://github.com/Ryuta1346/conflingo/pull/11) |
 | PR6 | AI会話理解・根拠付き回答 | PR1/PR4 | TODO | — |
 | PR7 | 決定・アクション候補管理 | PR6 | TODO | — |
 | PR8 | ローカル資料検索・RAG | PR6 | TODO | — |
@@ -59,5 +59,5 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-08:** PR4（#9、`c714f9c`）とPR5-A/B（#10、`c34ddd1`）のマージを反映。PR5-B修正後211テスト・Debug/Release build・lint成功。PR5-Cは`feature/meeting-ui`で計画承認後、実装・229テスト・build/lint・非録音操作確認を完了。未コミット・PR未作成。実音声受入とGate A/B/Uは未完了を維持。
+- **2026-11-08:** PR4（#9、`c714f9c`）とPR5-A/B（#10、`c34ddd1`）のマージを反映。PR5-B修正後211テスト・Debug/Release build・lint成功。PR5-Cは`feature/meeting-ui`で計画承認後、実装・229テスト・build/lint・非録音操作確認を完了。実装を`fa5f515`にコミットし、[Draft PR #11](https://github.com/Ryuta1346/conflingo/pull/11)を作成。実音声受入とGate A/B/Uは未完了を維持。
 - **2026-11-07:** [詳細計画 v1.1](docs/meeting-copilot-plan.md)確定、UI刷新をPR5-A/B/Cに分割。
