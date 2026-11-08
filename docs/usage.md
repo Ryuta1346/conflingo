@@ -24,7 +24,20 @@ The timeline identifies input sources, not individual participants. Reading olde
 
 **小さく表示** hides the main window and opens the floating panel. **展開** restores the main window. Hiding or closing the panel does not stop capture. Restore it through **Window → Meetingの小窓を表示**. Use Pause or End to stop capture. The panel is not guaranteed to be excluded from screen sharing.
 
-Transcripts remain in memory until the app exits. Audio files and transcripts are not saved automatically, and no content is sent to an AI service. AI assistance, candidate confirmation/rejection, and Meeting save/export are not available yet. Text can be selected and copied. Starting a new meeting asks before discarding existing speech. Conference Markdown export is a separate feature.
+Transcripts remain in memory until the app exits. Audio files and transcripts are not saved automatically. AI requests require explicit permission for each meeting. Candidate confirmation/rejection and Meeting save/export are not available yet. Text can be selected and copied. Starting a new meeting asks before discarding existing speech. Conference Markdown export is a separate feature.
+
+### Meeting AI assistance (Gemini)
+
+1. Register your own Gemini API key in Settings or **APIキー設定**. It is stored in this Mac's Keychain. Replacing or deleting the key revokes AI sharing permission.
+2. Review the data-sharing explanation and Google's data terms, then enable **確定発話と質問文のGeminiへの送信を許可** for this meeting. Check your own Google project's free/paid data terms.
+3. During capture, enter a question and choose **Ask AI**. The request includes your question and up to 30 recent final utterances (12,000 characters total), including earlier utterances from before permission was granted. Audio and documents are not sent. Evidence links open the original utterance. Suggestions remain unconfirmed candidates.
+4. Automatic suggestions start off for each meeting. Enable them only when needed: at most twice per minute, at least 12 seconds apart, using post-permission speech. This creates additional API usage.
+5. **AI送信を停止** stops AI in either window without stopping capture. Pause, End, and input failures also cancel AI work. Cancellation cannot retract data already sent or charges already incurred.
+
+The initial model is Gemini 3.1 Flash-Lite, billed to your API project. Errors are not retried automatically and turn automatic suggestions off; retry manually after checking the connection or key. Local transcripts continue on AI failures. Other providers, managed AI, and subscription-based authentication are future work.
+
+Real-audio acceptance remains postponed. See the [validation record](validation/pr6-insights.md) for the opt-in synthetic-text Gemini evaluation after registering a key.
+
 
 Acceptance tests with real Zoom/Meet/Teams audio remain deferred. See the [PR5-C validation record](validation/pr5-c-meeting.md) for automated and non-recording checks.
 

@@ -61,13 +61,14 @@ struct MeetingWorkspaceView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("音声は保存・外部送信しません", systemImage: "checkmark.shield")
                             .font(.headline)
-                        Text("AI支援はまだ接続されていません。発話はアプリ終了までメモリ内に保持し、自動保存しません。")
+                        Text("発話はアプリ終了までメモリ内に保持し、自動保存しません。AI送信は下で明示的に許可した場合だけ行います。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                         ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
                             Text("\(origin.label)：\(permission(origin))").font(.caption)
                         }
                     }
                 }
+                MeetingAIControls(meeting: meeting)
                 if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
             }
             .padding(24)
@@ -96,13 +97,14 @@ struct MeetingWorkspaceView: View {
             VStack(alignment: .leading, spacing: 16) {
                 Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
                     .font(.headline).accessibilityAddTraits(.isHeader)
+                if meeting.page == .live { MeetingAIControls(meeting: meeting) }
                 if meeting.insights.isEmpty {
                     Surface {
                         VStack(alignment: .leading, spacing: 14) {
                             Image(systemName: "sparkles").font(.title2).foregroundStyle(DesignTokens.accent)
                             Text("会話の流れを確認できます")
                                 .font(.title3.weight(.semibold))
-                            Text("AI支援は未接続です。認識した発話は「会話の流れ」で確認できます。")
+                            Text("送信を許可するとAsk AIで質問できます。認識した発話は「会話の流れ」で確認できます。")
                                 .foregroundStyle(DesignTokens.secondary)
                             if meeting.page == .review {
                                 Text("確定した発話 \(meeting.store.finals.count)件。必要な文章は選択してコピーできます。")
@@ -111,7 +113,7 @@ struct MeetingWorkspaceView: View {
                         .font(.callout)
                     }
                 }
-                ForEach(meeting.insights) { insight in
+                ForEach(meeting.insights.reversed()) { insight in
                     MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
                 }
                 Label(meeting.aiStatus, systemImage: "cloud")
@@ -150,9 +152,9 @@ struct MeetingInsightCard: View {
         Surface {
             VStack(alignment: .leading, spacing: 14) {
                 HStack {
-                    Label(insight.kind, systemImage: "sparkles").foregroundStyle(DesignTokens.accent)
+                    Label(insight.kind.label, systemImage: "sparkles").foregroundStyle(DesignTokens.accent)
                     Spacer()
-                    StatusLabel(text: "要確認", symbol: "questionmark.circle", color: DesignTokens.warning)
+                    StatusLabel(text: insight.status == .generating ? "生成中・未検証" : insight.status == .interrupted ? "中断" : "要確認", symbol: "questionmark.circle", color: DesignTokens.warning)
                 }
                 .font(.caption)
                 Text(insight.text).font(.system(size: fontSize, weight: .medium)).textSelection(.enabled)
@@ -166,6 +168,9 @@ struct MeetingInsightCard: View {
                     } else {
                         Text("根拠の発話を参照できません").font(.caption).foregroundStyle(DesignTokens.warning)
                     }
+                }
+                if insight.hasInvalidEvidence {
+                    Text("応答に確認できない根拠が含まれます・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
                 }
                 if insight.evidenceIDs.isEmpty {
                     Text("発話の根拠なし・要確認").font(.caption).foregroundStyle(DesignTokens.warning)

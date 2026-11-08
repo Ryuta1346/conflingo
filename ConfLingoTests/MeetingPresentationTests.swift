@@ -109,9 +109,9 @@ struct MeetingPresentationTests {
     }
 
     @Test func floatingSelectsNewestOfHighestPriorityAndDoesNotConfirmCandidates() {
-        let low = MeetingInsight(kind: "質問候補", text: "low", priority: 0, evidenceIDs: [])
-        let high = MeetingInsight(kind: "決定候補", text: "first high", priority: 2, evidenceIDs: [])
-        let latest = MeetingInsight(kind: "リスク", text: "latest high", priority: 2, evidenceIDs: [])
+        let low = MeetingInsight(kind: .followUpQuestion, text: "low", priority: 0, evidenceIDs: [])
+        let high = MeetingInsight(kind: .decisionCandidate, text: "first high", priority: 2, evidenceIDs: [])
+        let latest = MeetingInsight(kind: .risk, text: "latest high", priority: 2, evidenceIDs: [])
         #expect(MeetingInsight.featured(in: [high, low, latest])?.id == latest.id)
         #expect(MeetingInsight.featured(in: []) == nil)
     }

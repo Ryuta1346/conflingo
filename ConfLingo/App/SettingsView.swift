@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Binding var fontSize: Double
     @Binding var alwaysOnTop: Bool
     @Binding var appearance: String
+    let credentials: GeminiCredentials
     let editDictionary: () -> Void
     let prepare: () -> Void
 
@@ -40,6 +41,7 @@ struct SettingsView: View {
                         LabeledContent("文字を拡大 / 縮小", value: "⌘ ＋ / −")
                     }
                 }
+                Surface { GeminiKeySettingsView(credentials: credentials) }
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("データの扱い").font(.headline)

@@ -57,6 +57,7 @@ flowchart LR
 
 - **5-B:** App Shell、Conference準備/字幕、既存設定・辞書・保存。Homeは実装済みConference開始のみ。Sessions一覧の新規永続化は含めない。
 - **5-C:** Meeting準備/Live/ReviewのUI、コンパクト/展開/非表示。モックイベントから着手し、承認済み[PR5-C計画](pr5-c-implementation-plan.md)に従ってPR4接続コードとfake結合検証を先行する。実音声受入は延期、AI結合はPR6の受入後。Reviewの保存/候補確定はPR7に残す。
+- **6（実装・モック検証済み、実API受入待ち）:** Geminiへの直接接続、利用者のAPIキーのKeychain保存、手動Ask AI、初期オフの自動提案。将来は複数Provider/運営Proxyを選べる設計にするが、今回は未実装の接続先を選択肢として出さない。詳細は[PR6計画](pr6-implementation-plan.md)・[検証記録](../validation/pr6-insights.md)。
 - **7:** 候補確認・却下とMeeting書き出し。ローカルSessions一覧の保存形式/削除境界はPR7の実装計画で確定する提案（現行計画の担当未確定部分）。5-Bへ混入させない。
 - **8:** ローカル資料の取り込み・検索・資料根拠・会議ごとの送信許可。
 

@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3・PR4マージ済み、実機受入待ち／PR5-A/Bマージ済み、残る受入待ち／PR5-C実装・自動検証済み**（2026-11-08：ローカルmain `c34ddd1`で確認。PR4 #9: `c714f9c`、PR5-A/B #10: `c34ddd1`。PR5-B修正後211テスト・build・lint成功の既存記録あり。Gate A/B/U未完了。[PR4検証](validation/dual-transcription.md)・[PR5-B検証](validation/pr5-b-conference.md)）
+- 状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3・PR4マージ済み、実機受入待ち／PR5-A/B/Cマージ済み、残る受入待ち／PR6実装・自動検証済み、実API受入待ち**（2026-11-08：ローカルmain `e167765`で確認。PR4 #9: `c714f9c`、PR5-A/B #10: `c34ddd1`、PR5-C #11: `e167765`。PR5-C修正後236テスト・build・lint成功の既存記録あり。Gate A/B/U未完了。[PR4検証](validation/dual-transcription.md)・[PR5-B検証](validation/pr5-b-conference.md)・[PR5-C検証](validation/pr5-c-meeting.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -75,7 +75,9 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
              AI Insight Coordinator
              ├─ Local rules / throttling
              ├─ Knowledge Retrieval (local FTS5 first)
-             └─ Remote LLM via Hono API (明示的許可時のみ)
+             └─ InsightClient (明示的許可時のみ)
+                  ├─ Gemini直接接続 / 利用者のキー (PR6)
+                  └─ 他社直接接続 / 運営Proxy (後続)
                        ▼
           MeetingCopilotView + MeetingExporter
 ```
@@ -113,7 +115,7 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
 
 #### PR4の実装契約（2026-11-08承認、実装・自動検証済み）
 
-- 次の作業はPR3レビュー→PR4というユーザー指示に従う。PR0/3の実音声試験延期を継続し、PR3のマージと実機受入を区別する。
+- PR3レビュー→PR4というユーザー指示に従って実装・マージ済み。PR0/3の実音声試験延期を継続し、PR3のマージと実機受入を区別する。
 - 計画の保存先: `~/.coding-agents/docs/conflingo/feature-dual-transcription/000_pr4-dual-transcription-plan.md`。ユーザー承認済み（「進めて」）。TDDで実装し、[検証記録](validation/dual-transcription.md)に結果を記録した。
 - 2入力に独立した認識系統・入力別言語を割り当て、共通Timeline・Hub・MeetingSessionStoreへ接続する。入力開始通知を時刻基準とするため、サンプル時刻の厳密同期と時刻誤差は実機検証が必要。
 - 発話ID/revisionによる重複除外と時刻順の安定整列を行う。別入力の同じ発話内容は保持する。片系失敗時は両入力を停止し、停止失敗の再試行・最後のfinalの取り込みを保証する。
@@ -172,8 +174,10 @@ enum InsightStatus: String, Codable, Sendable {
 
 ### 2.3 AI支援パイプライン
 
+PR6の具体化は[実装計画](design/pr6-implementation-plan.md)と[ヒアリング記録](design/pr6-hearing.md)を参照。2026-11-08のインタビューでGemini BYOK直接接続、合成会話による先行検証、低コスト優先・自動提案初期オフを確認済み。PR4実機受入の持ち越しはPR6について別途承認済み。実装計画全体はユーザー「OK」により承認後、Geminiアダプタ・Keychain・手動質問・自動提案・停止連動を実装し、263テストとモックUI操作を確認した。[PR6検証記録](validation/pr6-insights.md)。実API受入は未実施。以下の検索・要約・専門モードは後続段階を含む目標仕様。
+
 1. 文字起こしイベントを発話単位に正規化し、直近の会話履歴と要約状態を更新する。
-2. **手動質問**は即実行。**自動提案**は質問検出・重要な矛盾・決定候補等でトリガーする。
+2. **手動質問**は送信許可後に利用者の操作で実行。**自動提案**は初期オフとし、会議ごとにオンにした場合だけ質問検出・重要な矛盾・決定候補等でトリガーする。
 3. 類似したイベントはdebounce/dedupし、提案の連続表示を抑制する。初期値は自動提案最大2件/分、最短間隔12秒（実測調整）。
 4. 必要なときだけナレッジ検索し、直近の発言・要約・検索結果をLLMへ渡す。
 5. ストリーミングでカードを表示する。提案の種類・発話根拠ID・資料根拠・根拠不足を構造化する。
@@ -188,15 +192,15 @@ enum InsightStatus: String, Codable, Sendable {
 - 自動提案は控えめに。手動`Ask AI`を最優先する。
 - 会議モード（General / Engineering / Sales）ごとに検出ルールとプロンプトを切り替える。
 
-### 2.4 AIバックエンドの分割
+### 2.4 AI接続方式の分離
 
-- 最初はHonoの**最小API**としてLLM呼び出し、認証、レート制限、APIキー秘匿を担当。
-- 音声PCMは送らず、**外部送信が有効なときのみ**必要な確定テキストと検索スニペットを送る。
-- `POST /v1/insights`などの短いリクエスト + ストリーミングレスポンス（SSE等）を第一候補にする。音声自体を常時WebSocket転送する必要はない。
-- クライアントが送るデータは `sessionId`、`mode`、`trigger`、直近セグメント、会話の短い要約、許可済み資料スニペット、匿名化された参照ID。
-- 返却は`insight.created` / `insight.updated` / `analysis.finished` / `error`等の型付きイベント。
-- 製品化時にはユーザー認証・アクセス制御・利用上限・支出上限・監査ログと保持期間ポリシーを追加。
-- 個別のAPIキーをデスクトップに直書きしない。クラウド提供では秘密情報はサーバーに置く。ローカルPoCのBYOKを許す場合はKeychainのみ。
+- **PR6の個人PoC:** 利用者のGemini APIキーをKeychainに保存し、アプリから直接接続する。従来の「PR6でHono Proxyを実装」案はインタビュー回答により変更。運営Proxyは今回作らない。
+- **本番の目標:** 利用者自身のキーによる直接接続と、ConfLingo運営Proxy経由のAI提供を利用者が選択できる。OpenAI/Anthropic/GeminiほかのProviderを追加可能にする。
+- UIと会議処理は共通の`InsightClient`境界を使用し、認証・HTTP・ストリーム変換をProvider/接続経路ごとのアダプタへ置く。今回はGeminiとモックだけを実装する。
+- 音声PCMは送らず、**外部送信が有効なときのみ**質問文と必要な確定発話・参照IDを送る。資料スニペットはPR8以降。会議ID/要求IDの照合はローカルで行い、不要な識別情報は送らない。
+- Geminiの応答を生成中/本文更新/完了/失敗の内部イベントへ変換する。外部APIが独自の`insight.created`形式を返す前提にはしない。
+- 初期モデルは低コストのGemini 3.1 Flash-Liteを使用し、料金・終了予定・保持条件を[PR6計画](design/pr6-implementation-plan.md)に記録。高額モデルへ自動切替せず、自動提案初期オフ、文脈/出力上限で費用を抑える。
+- 運営Proxyは後続で認証・利用/支出上限・運営キー秘匿・保持条件を具体化する。Hono最小APIはその段階の候補。利用者のサブスク連携は公式に提供・許可される手段の有無を別途調査し、未確認のまま実装可能としない。
 
 ### 2.5 ナレッジ検索
 
@@ -215,7 +219,7 @@ PR5を単発のMeeting画面追加にはしない。**デザイン設計（5-A�
 - [レビュー入口・画面一覧](design/README.md)から9画面の操作モック、ライト/ダーク・狭幅画像を確認できる。
 - [情報設計](design/app-information-architecture.md)、[デザインシステム](design/design-system.md)、[状態・フロー・受入仕様](design/ux-states-and-flows.md)を作成。現行コードの観察と将来仕様を区別した。
 - [検証記録](design/validation.md): 主要操作24項目、拡大表示368ケース、構文・lint確認。製品Swiftコード・音声経路は未変更。モックの操作試験はネイティブ受入の代替ではない。
-- 主要4画面の画像提示後、ユーザー「OK」によりモック方向性を承認。PR5-A/BはPR #10でマージ済み。個別受入の残項目があるためREVIEWを維持。PR5-Cは実装・自動検証済み（REVIEW）。Gate U全体は未完了。ローカルSessionsの永続化担当とAI接続先・保持表示は後続実装計画で確定する。
+- 主要4画面の画像提示後、ユーザー「OK」によりモック方向性を承認。PR5-A/BはPR #10、PR5-CはPR #11（`e167765`）でマージ済み。個別受入の残項目があるためREVIEWを維持。Gate U全体は未完了。ローカルSessionsの永続化担当とAI接続先・保持表示は後続実装計画で確定する。
 - [PR5-B実装計画](design/pr5-b-implementation-plan.md)を作成済み。共通デザイン部品とConference刷新を対象とし、ユーザー「進めて」により計画承認後に実装。レビュー修正後211テスト・Debug/Release build・lint成功、非録音の画面/操作を確認。マージ済み、実機受入待ちのためREVIEW。[PR5-B検証記録](validation/pr5-b-conference.md)。
 
 #### PR5-Cの実装計画（2026-11-08承認・実装/自動検証済み）
@@ -301,7 +305,7 @@ AppShell
 | **PR5-A: UX/UI Design** | P1 | 既存ConferenceのUX監査、全体画面マップ、情報階層、高品質モック・状態別プロトタイプ | 必須画面・状態・操作フローのモック承認、UI受入仕様確定 | 2–3日 |
 | **PR5-B: Design System & Conference** | P1 | SwiftUIデザイントークン/共通部品、App Shell、Conference全面リデザイン、設定/保存の整流化 | 既存Conference機能を落とさず、承認モックに合わせた画面・操作が動く | 3–5日 |
 | **PR5-C: Meeting Copilot UI** | P1 | Preparation/Live/Review、Insight/根拠カード、コンパクト・展開フローティングUI | モックイベントと実データで全状態を操作でき、会議中の認知負荷を抑えられる | 3–5日 |
-| **PR6: Insight Engine** | P0 | 会話イベント検出、手動質問、自動提案、LLM Proxy、ストリーミング | 質問に対し会議文脈を使った提案、失敗時縮退 | 3–5日 |
+| **PR6: Insight Engine** | P0 | 手動質問、自動提案（初期オフ）、Gemini BYOK直接接続、将来の接続切替境界、ストリーミング | 質問に対し会議文脈を使った提案、失敗時縮退 | 3–5日 |
 | **PR7: Meeting State** | P1 | 決定候補・アクション候補、確認/却下、要約、Markdown出力 | 誤って自動確定しない・根拠が追える | 2–3日 |
 | **PR8: Local RAG** | P1 | ファイル取り込み、全文検索、根拠参照、資料送信制御 | 登録資料の該当箇所を根拠として提示 | 3–5日 |
 | **PR9: Hardening** | P1 | 60分試験、入力切断/再接続、権限/プライバシー、ログ・テスト・CI | 下記受入基準を満たす | 3–5日 |
@@ -453,7 +457,7 @@ docs/
     AudioCaptureService.swift          # 既存を段階的にAdapter化
     SpeechTranscriptionService.swift   # 既存をイベント発行型へ
     TranslationCoordinator.swift       # 維持
-server/                              # PR6以降、必要になった時点で追加
+server/                              # PR6対象外。運営Proxyを実装する後続段階で追加
   src/
     index.ts
     routes/insights.ts
@@ -488,7 +492,7 @@ ConfLingoTests/
 6. PR5-AをPR1〜4と並行して開始する。Conference/Meeting/Home/Sessions/Settingsの情報設計と主要状態モックを作成し、**UI承認をPR5-B/Cの着手条件にする**。
 7. PR5-Bで共通デザインシステムとConference画面を刷新する。従来の翻訳・辞書・履歴・ショートカット・保存形式の無回帰を確認。
 8. PR5-CでMeeting Preparation/Live/Reviewおよびコンパクト/展開フローティングUIを実装する。まずモックデータで表示/操作、次に実会話イベントへ結合。
-9. PR6は最初にモックイベント・モックAIでE2Eを完成させ、次に実LLMバックエンドへ差し替える。
+9. PR6は最初にモックイベント・モックAIでE2Eを完成させ、次にGemini直接接続アダプタへ差し替える。実音声試験は延期し、実AIも合成会話テキストで検証する。
 10. PRごとに変更点・回帰テスト・測定結果・残課題を記録する。実機テストが必要な項目を自動テスト合格と混同しない。
 
 ## 10. 成果物とGo/No-Go

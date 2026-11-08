@@ -218,6 +218,7 @@ struct ContentView: View {
             Color.clear
         case .settings:
             SettingsView(fontSize: $fontSize, alwaysOnTop: $alwaysOnTop, appearance: $appearance,
+                         credentials: meeting.credentials,
                          editDictionary: { showDictionary = true }, prepare: { navigate(.setup) })
         }
     }
