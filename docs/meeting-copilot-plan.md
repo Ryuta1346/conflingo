@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3実装・自動検証完了、レビュー待ち**（2026-11-08：PR2マージ `da6c7aa` とユーザーの完了確認を反映。PR3は175テスト・build・lint成功。[PR3検証記録](validation/system-audio.md)。Gate A/Bは未検証。[PR2検証記録](validation/audio-abstraction.md)）
+- 状態: **実装計画 v1.1・PR0実機確認持ち越し／PR1・PR2完了／PR3実装・自動検証完了、レビュー待ち**（2026-11-08：PR2マージ `da6c7aa` とユーザーの完了確認を反映。PR3は同時停止のレビュー修正後、176テスト・build・lint成功。[PR3検証記録](validation/system-audio.md)。Gate A/Bは未検証。[PR2検証記録](validation/audio-abstraction.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -103,6 +103,7 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
 #### PR3の実装契約（2026-11-08承認、実装・自動検証済み）
 
 - AudioSourceの開始・停止を非同期化し、PCMストリームに開始後のエラーを伝達できるようにする。開始中キャンセル・同時停止・再開の世代分離を検証する。
+- 同時停止の各呼び出し元へは状態・タスク参照の後処理完了後に返す。正常停止直後の再開と、停止失敗直後の再試行を保証する。
 - ScreenCaptureKitでMacの出力音声を取得し、自プロセス音声を除外する。マイクと画面サンプルは取得せず、音声ファイル保存は行わない。
 - 明示操作のみで権限要求・入力開始を行う。許可のBool値だけから未決定／拒否を断定しない。
 - 独立した検証ウィンドウで権限、入力レベル、フレーム数、開始停止、エラーを確認する。2入力STT・Meeting UIは後続PR。

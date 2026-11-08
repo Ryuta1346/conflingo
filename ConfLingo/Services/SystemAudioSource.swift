@@ -80,21 +80,15 @@ final class SystemAudioSource: AudioSource {
         state = .stopping
         let pendingStart = startTask
         let task = Task {
+            defer { stopTask = nil }
             // SCStream may complete a start after cancellation. Wait before disposing it.
             _ = await pendingStart?.result
             try await capture.stop()
-        }
-        stopTask = task
-        do {
-            try await task.value
             state = .idle
             runID = nil
             startTask = nil
-            stopTask = nil
-        } catch {
-            // Keep the capture and stopping state so the caller can retry cleanup.
-            stopTask = nil
-            throw error
         }
+        stopTask = task
+        try await task.value
     }
 }

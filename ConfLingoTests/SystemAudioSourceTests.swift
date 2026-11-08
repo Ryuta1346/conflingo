@@ -102,6 +102,59 @@ struct SystemAudioSourceTests {
         #expect(capture.stops == 2)
     }
 
+    @Test(arguments: [false, true])
+    func concurrentStopCallerCanImmediatelyRestartOrRetry(failStop: Bool) async throws {
+        for _ in 0..<100 {
+            try await checkImmediateRestartOrRetry(failStop: failStop)
+        }
+    }
+
+    private func checkImmediateRestartOrRetry(failStop: Bool) async throws {
+        let capture = StubSystemCapture()
+        let source = makeSource(capture)
+        let format = try makeFormat()
+        _ = try await source.start(targetFormat: format)
+        capture.holdStop = true
+        capture.failStop = failStop
+        let first = Task { try await source.stop() }
+        await capture.stopping.next()
+        let entered = TestSignal()
+        let second = Task {
+            entered.signal()
+            if failStop {
+                do {
+                    try await source.stop()
+                    Issue.record("Stop unexpectedly succeeded")
+                } catch {
+                    #expect(error as? StubSystemCapture.Failure == .stop)
+                }
+                capture.failStop = false
+                capture.holdStop = false
+                try await source.stop()
+                #expect(capture.stops == 2)
+            } else {
+                try await source.stop()
+                #expect(capture.stops == 1)
+            }
+            #expect(source.state == .idle)
+            _ = try await source.start(targetFormat: format)
+        }
+        await entered.next()
+        capture.releaseStop.signal()
+        let secondResult = await second.result
+        if failStop {
+            await #expect(throws: StubSystemCapture.Failure.stop) { try await first.value }
+        } else {
+            try await first.value
+        }
+        try secondResult.get()
+        #expect(source.state == .running)
+        #expect(capture.starts == 2)
+        capture.holdStop = false
+        try await source.stop()
+        #expect(source.state == .idle)
+    }
+
     @Test func runtimeFailureIsDeliveredToConsumer() async throws {
         let capture = StubSystemCapture()
         let source = makeSource(capture)
