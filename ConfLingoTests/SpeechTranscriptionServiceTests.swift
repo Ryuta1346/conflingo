@@ -4,17 +4,30 @@ import Testing
 @testable import ConfLingo
 
 struct SpeechTranscriptionServiceTests {
+    @Test @MainActor func runtimeInputErrorReachesAnalyzerSequenceConsumer() async throws {
+        let capture = StubSystemCapture()
+        let source = SystemAudioSource(capture: capture, permissionStatus: { .granted })
+        let service = SpeechTranscriptionService(audioSource: source)
+        let input = try await service.startAudioInput(targetFormat: makeFormat())
+        capture.continuation?.finish(throwing: StubSystemCapture.Failure.runtime)
+        await #expect(throws: StubSystemCapture.Failure.runtime) {
+            for try await _ in input {}
+        }
+        try await service.stop()
+        #expect(source.state == .idle)
+    }
+
     @Test @MainActor func audioSourceFeedsAnalyzerInputsInOrderAndStopEndsInput() async throws {
         let capture = StubAudioCapture()
         let source = StubMicrophonePermission().source(capture: capture)
         let service = SpeechTranscriptionService(audioSource: source)
         let format = try makeFormat()
-        let inputs = try service.startAudioInput(targetFormat: format)
+        let inputs = try await service.startAudioInput(targetFormat: format)
         try capture.emit([0.25, -0.5], format: format)
         try capture.emit([0.75], format: format)
         try await service.stop()
         var values: [[Float]] = []
-        for await input in inputs {
+        for try await input in inputs {
             #expect(input.buffer.format == format)
             values.append(samples(input.buffer))
         }
@@ -30,14 +43,14 @@ struct SpeechTranscriptionServiceTests {
         let source = StubMicrophonePermission().source(capture: capture)
         let service = SpeechTranscriptionService(audioSource: source)
         let format = try makeFormat()
-        #expect(throws: StubAudioCapture.Failure.start) { try service.startAudioInput(targetFormat: format) }
+        await #expect(throws: StubAudioCapture.Failure.start) { try await service.startAudioInput(targetFormat: format) }
         #expect(source.state == .idle)
         capture.failStart = false
-        let inputs = try service.startAudioInput(targetFormat: format)
+        let inputs = try await service.startAudioInput(targetFormat: format)
         try capture.emit([0.5], format: format)
         try await service.stop()
         var values: [Float] = []
-        for await input in inputs { values += samples(input.buffer) }
+        for try await input in inputs { values += samples(input.buffer) }
         #expect(values == [0.5])
     }
 

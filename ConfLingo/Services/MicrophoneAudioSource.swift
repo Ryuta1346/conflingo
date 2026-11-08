@@ -44,7 +44,7 @@ final class MicrophoneAudioSource: AudioSource {
         return granted && !Task.isCancelled
     }
 
-    func start(targetFormat: AVAudioFormat) throws -> AsyncStream<AudioFrame> {
+    func start(targetFormat: AVAudioFormat) async throws -> AudioFrameStream {
         try Task.checkCancellation()
         guard state == .idle else { throw AudioSourceError.alreadyRunning }
         guard permissionStatus == .granted else { throw AudioSourceError.permissionDenied }
@@ -61,7 +61,7 @@ final class MicrophoneAudioSource: AudioSource {
         }
     }
 
-    func stop() {
+    func stop() async throws {
         guard state == .running else { return }
         state = .stopping
         capture.stop()

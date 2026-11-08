@@ -36,8 +36,8 @@ final class SpeechTranscriptionService: SpeechTranscribing {
         self.audioSource = audioSource
     }
 
-    func startAudioInput(targetFormat: AVAudioFormat) throws -> AsyncMapSequence<AsyncStream<AudioFrame>, AnalyzerInput> {
-        try audioSource.start(targetFormat: targetFormat).map { AnalyzerInput(buffer: $0.buffer) }
+    func startAudioInput(targetFormat: AVAudioFormat) async throws -> AsyncMapSequence<AudioFrameStream, AnalyzerInput> {
+        try await audioSource.start(targetFormat: targetFormat).map { AnalyzerInput(buffer: $0.buffer) }
     }
 
     nonisolated static func reportingOptions(fastResults: Bool) -> Set<SpeechTranscriber.ReportingOption> {
@@ -79,7 +79,7 @@ final class SpeechTranscriptionService: SpeechTranscribing {
                 throw TranscriptionError.audioFormatUnavailable
             }
             try Task.checkCancellation()
-            let audioStream = try startAudioInput(targetFormat: format)
+            let audioStream = try await startAudioInput(targetFormat: format)
             onInputStarted()
             resultsTask = Task {
                 do {
@@ -97,32 +97,37 @@ final class SpeechTranscriptionService: SpeechTranscribing {
             }
             try await analyzer.start(inputSequence: audioStream)
         } catch {
-            await cancel(analyzer)
+            try await cancel(analyzer)
             throw error
         }
     }
 
     /// 終了時に生成されるfinalも、購読側へ発行し終えるまで待つ。
     func stop() async throws {
-        audioSource.stop()
-        guard let analyzer else { return }
+        guard let analyzer else {
+            try await audioSource.stop()
+            return
+        }
         do {
+            try await audioSource.stop()
             try await analyzer.finalizeAndFinishThroughEndOfInput()
             try await resultsTask?.value
             resultsTask = nil
             self.analyzer = nil
         } catch {
-            await cancel(analyzer)
+            try await cancel(analyzer)
             throw error
         }
     }
 
-    private func cancel(_ analyzer: SpeechAnalyzer) async {
-        audioSource.stop()
+    private func cancel(_ analyzer: SpeechAnalyzer) async throws {
+        var stopError: (any Error)?
+        do { try await audioSource.stop() } catch { stopError = error }
         resultsTask?.cancel()
         await analyzer.cancelAndFinishNow()
         _ = await resultsTask?.result
         resultsTask = nil
         self.analyzer = nil
+        if let stopError { throw stopError }
     }
 }
