@@ -125,4 +125,4 @@ PR7の候補確認/却下・要約保存・Meeting Markdown出力、Sessions永�
 
 [ヒアリング記録](pr6-hearing.md)の主要事項は回答済み。最終計画を提示し、ユーザー「OK」により実装承認を得た。実APIアクセス、キー登録、合成会話での品質・使用量は実装後の検証事項。将来の運営Proxy認証/課金/保持、他社モデル、サブスク連携は後続計画で具体化する。
 
-計画承認後、TDDで実装。263テスト/39 suites成功（実API評価1件スキップ）、Debug/Releaseビルド成功、SwiftLintは100ファイル・違反0。モックによるネイティブUIの質問・ストリーム・根拠移動・小窓AI停止・Pauseを確認した。LLM実接続・実音声試験・独立レビュー・コミット・PR作成は未実施。PR6はREVIEW、Gate A/B/C/U/D全体は従来の未検証を維持する。[検証記録](../validation/pr6-insights.md)
+計画承認後、TDDで実装。263テスト/39 suites成功（実API評価1件スキップ）、Debug/Releaseビルド成功、SwiftLintは100ファイル・違反0。モックによるネイティブUIの質問・ストリーム・根拠移動・小窓AI停止・Pauseを確認した。実装コミット`a512255`、[Draft PR #12](https://github.com/Ryuta1346/conflingo/pull/12)を作成済み。LLM実接続・実音声試験・独立レビュー・マージは未実施。PR6はREVIEW、Gate A/B/C/U/D全体は従来の未検証を維持する。[検証記録](../validation/pr6-insights.md)

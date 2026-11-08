@@ -2,7 +2,7 @@
 
 2026-11-08 / `feature/insight-engine` / 基点 `e167765`
 
-状態は **REVIEW**。ユーザーが[実装計画](../design/pr6-implementation-plan.md)を承認した後、TDDで実装した。Gemini直接接続のコードとモックでの操作・障害処理を検証済み。実際のGeminiへの通信、品質・遅延・費用、実音声受入は未検証。マージ・コミット・PR作成は行っていない。
+状態は **REVIEW**。ユーザーが[実装計画](../design/pr6-implementation-plan.md)を承認した後、TDDで実装した。Gemini直接接続のコードとモックでの操作・障害処理を検証済み。実際のGeminiへの通信、品質・遅延・費用、実音声受入は未検証。実装コミットは`a512255`。[Draft PR #12](https://github.com/Ryuta1346/conflingo/pull/12)を作成済み。マージは未実施。
 
 ## 実装した範囲
 
