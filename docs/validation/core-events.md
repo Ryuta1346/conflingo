@@ -1,6 +1,6 @@
 # PR1 会話イベント・Event Hub 検証記録
 
-2026-11-08。計画承認済み、実装・自動検証完了、レビュー待ち。基点はmain / b2a899306a29a4dad90868f70c164166d1162e6f、ブランチはfeature/core-events。未コミット・PR未作成。
+2026-11-08。計画承認済み、実装・自動検証完了、レビュー待ち。基点はmain / b2a899306a29a4dad90868f70c164166d1162e6f、ブランチはfeature/core-events。実装コミットはfe81426。[Draft PR #6](https://github.com/Ryuta1346/conflingo/pull/6)を作成済み。
 
 ## 受け入れ条件
 

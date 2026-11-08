@@ -16,7 +16,7 @@
 | ID | 作業 | 依存 | 状態 | PR |
 |---|---|---|---|---|
 | PR0 | Baseline・検証環境 | — | **DOING** | [#5 (Merged・実機確認待ち)](https://github.com/Ryuta1346/conflingo/pull/5) |
-| PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **REVIEW** | — |
+| PR1 | 会話イベント・Event Hub | PR0（実機確認持ち越し承認済み） | **REVIEW** | [#6 (Draft)](https://github.com/Ryuta1346/conflingo/pull/6) |
 | PR2 | 音声入力の共通化 | PR1 | TODO | — |
 | PR3 | システム音声キャプチャ | PR2 | TODO | — |
 | PR4 | マイク＋内部音声の同時STT | PR3 | TODO | — |
@@ -43,7 +43,7 @@
 ## 主な未解決事項
 
 - **PR0:** 実音声試験はユーザー指示で後日実施。起動・専用モード切替は確認済み。Gate Aは未検証を維持。[検証記録](docs/validation/conference-baseline.md)
-- **PR1:** レビュー・PR作成前。次はPR1レビュー後にPR2（音声入力の共通化）。実入力での認識範囲・時刻・終了処理は未検証。
+- **PR1:** Draft PR #6でレビュー待ち。次はPR1レビュー後にPR2（音声入力の共通化）。実入力での認識範囲・時刻・終了処理は未検証。
 - **PR0/3:** ScreenCaptureKitとProcess Tap、権限・Sandbox・配布の検証
 - **PR4:** 2系統SpeechAnalyzerの性能・精度・遅延
 - **PR5-A:** UIモック未承認（5-B/Cの着手条件）
