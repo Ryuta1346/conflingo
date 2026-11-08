@@ -17,9 +17,11 @@ final class DualTranscriptionController {
     private(set) var startedInputs: Set<AudioOrigin> = []
     let store: MeetingSessionStore
     let activity: AudioInputUse
+    var isStopping: Bool { stopTask != nil }
 
     private let inputs: [Input]
     private let timeline: MeetingTimeline
+    private let owner: AudioInputUse.Owner
     private let prepareModel: @MainActor (Locale) async throws -> Locale
     private var usageToken: UUID?
     private var runID: UUID?
@@ -30,6 +32,7 @@ final class DualTranscriptionController {
     private var consumer: Task<Void, Never>?
     private var startTask: Task<Void, Never>?
     private var stopTask: Task<Void, Never>?
+    private var stopFailureMessage: String?
 
     init(
         microphone: any AudioSource = MicrophoneAudioSource(),
@@ -38,6 +41,7 @@ final class DualTranscriptionController {
         systemSpeech: (any SpeechTranscribing)? = nil,
         timeline: MeetingTimeline = MeetingTimeline(),
         activity: AudioInputUse = AudioInputUse(),
+        owner: AudioInputUse.Owner = .dualTranscription,
         prepareModel: @escaping @MainActor (Locale) async throws -> Locale = ModelAvailabilityService.prepareForTranscription
     ) {
         inputs = [
@@ -46,6 +50,7 @@ final class DualTranscriptionController {
         ]
         self.timeline = timeline
         self.activity = activity
+        self.owner = owner
         self.prepareModel = prepareModel
         store = MeetingSessionStore(sessionID: timeline.sessionID)
         refreshPermissions()
@@ -66,7 +71,7 @@ final class DualTranscriptionController {
         systemLocale: Locale = Locale(identifier: "en-US"), fastResults: Bool = false
     ) async {
         guard phase == .idle, !Task.isCancelled else { return }
-        guard let token = activity.acquire(.dualTranscription) else {
+        guard let token = activity.acquire(owner) else {
             lastError = activity.busyMessage
             return
         }
@@ -75,6 +80,7 @@ final class DualTranscriptionController {
         runID = run
         failed = false
         lastError = nil
+        stopFailureMessage = nil
         phase = .preparing
         let task = Task {
             await prepareAndStart(
@@ -104,6 +110,8 @@ final class DualTranscriptionController {
         pendingStart?.cancel()
         let task = Task {
             await pendingStart?.value
+            if let stopFailureMessage, lastError == stopFailureMessage { lastError = nil }
+            stopFailureMessage = nil
             await finishInputs()
             runID = nil
             await hub?.finish()
@@ -206,7 +214,9 @@ final class DualTranscriptionController {
                     try await input.speech.stopInput()
                     return true
                 } catch {
-                    lastError = "\(input.origin.label)：停止を完了できませんでした。停止を再試行してください: \(error.localizedDescription)"
+                    let message = "\(input.origin.label)：停止を完了できませんでした。停止を再試行してください: \(error.localizedDescription)"
+                    stopFailureMessage = message
+                    lastError = message
                     await input.speech.cancelRecognition()
                     return false
                 }

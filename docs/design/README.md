@@ -1,6 +1,6 @@
 # ConfLingo — PR5-A Design Review
 
-2026-11-08 / v0.1 / **モックの方向性はユーザー承認済み**。PR5-Bは実装・自動検証済み（REVIEW）、PR5-Cは未着手。
+2026-11-08 / v0.1 / **モックの方向性はユーザー承認済み**。PR5-A/BはPR #10でマージ済み、残る受入待ち（REVIEW）。PR5-Cは実装・自動検証済み（REVIEW）。
 
 ## 操作モック
 
@@ -53,4 +53,6 @@ Conferenceでは字幕を最優先にし、Meetingでは提案を主領域・発
 
 2026-11-08、チャットでMeeting / Conference / Floating / Reviewの4画像を提示した後、ユーザーから「OK」を受領。これをモックの方向性の承認として記録します。個別状態・全操作・実機受入をユーザーが検証したという意味ではありません。
 
-[PR5-B実装計画](pr5-b-implementation-plan.md)は承認済み。実装したConferenceの[ネイティブ画像・検証結果](../validation/pr5-b-conference.md)を確認できます。PR5-Aは未マージのためREVIEWを維持し、Gate U合格やDONEとは扱いません。画像は承認時の版として保持しているため、画像内の「承認待ち」は撮影時の表示です。
+[PR5-B実装計画](pr5-b-implementation-plan.md)は承認済み。実装したConferenceの[ネイティブ画像・検証結果](../validation/pr5-b-conference.md)を確認できます。PR5-A/BはPR #10でマージ済みです。個別状態・全操作の受入記録は未完了のためREVIEWを維持し、Gate U合格やDONEとは扱いません。画像は承認時の版として保持しているため、画像内の「承認待ち」は撮影時の表示です。
+
+[PR5-C実装計画](pr5-c-implementation-plan.md)を承認後、Meeting UI・小窓・PR4接続を実装しました。[検証記録・ネイティブ画像](../validation/pr5-c-meeting.md)を参照してください。実音声受入は延期中です。

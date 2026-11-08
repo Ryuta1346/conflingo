@@ -1,0 +1,103 @@
+#if DEBUG
+import AVFAudio
+import Foundation
+
+@MainActor
+enum MeetingPreview {
+    static var defaults: UserDefaults {
+        UserDefaults(suiteName: "com.gavrri.conflingo.meeting-preview") ?? .standard
+    }
+
+    static var scenario: String {
+        ProcessInfo.processInfo.arguments.first { $0.hasPrefix("--meeting-state=") }?
+            .replacingOccurrences(of: "--meeting-state=", with: "") ?? "setup"
+    }
+
+    static func make(activity: AudioInputUse, scenario: String = "setup") -> MeetingWorkspace {
+        let microphone = PreviewAudioSource(origin: .microphone)
+        let system = PreviewAudioSource(origin: .systemAudio, denied: scenario == "permission-denied")
+        let controller = DualTranscriptionController(
+            microphone: microphone, systemAudio: system,
+            microphoneSpeech: PreviewSpeech(), systemSpeech: PreviewSpeech(failStopOnce: scenario == "stop-failed"),
+            activity: activity, owner: .meeting, prepareModel: { locale in
+                try await Task.sleep(for: .milliseconds(100))
+                return locale
+            }
+        )
+        return MeetingWorkspace(controller: controller)
+    }
+
+    static func prepare(_ meeting: MeetingWorkspace, scenario: String) async {
+        guard scenario != "setup" else { return }
+        meeting.name = "プロダクト定例"
+        meeting.consentConfirmed = true
+        await meeting.start()
+        guard meeting.phase == .listening else { return }
+        populate(meeting)
+        if scenario == "review" || scenario == "stop-failed" { await meeting.end() }
+        if scenario == "offline" { meeting.aiStatus = "プレビュー：AIオフライン・外部送信なし" }
+        if scenario == "sending" { meeting.aiStatus = "プレビュー：AI送信中の表示（実通信なし）" }
+    }
+
+    static func populate(_ meeting: MeetingWorkspace, count: Int = 12) {
+        let lines = ["まずは少人数のパイロットで、実際の利用状況を確認したいですね。",
+                     "The security review is still in progress. We should have an update by Wednesday.",
+                     "Can we launch the pilot next Friday, or do we need more time for the security review?",
+                     "レビューの担当者と、完了条件を確認しましょう。"]
+        var ids: [UUID] = []
+        for index in 0..<count {
+            let id = UUID()
+            ids.append(id)
+            meeting.store.receive(TranscriptEvent(
+                id: id, sessionID: meeting.store.sessionID, origin: index.isMultiple(of: 2) ? .microphone : .systemAudio,
+                languageCode: index.isMultiple(of: 2) ? "ja-JP" : "en-US", startOffset: Double(index * 12),
+                endOffset: Double(index * 12 + 8), text: lines[index % lines.count], isFinal: true,
+                revision: 1, sourceStartTime: Double(index * 12)
+            ))
+        }
+        meeting.insights = [
+            MeetingInsight(kind: "回答のヒント", text: "来週金曜は、セキュリティレビューの完了を条件に。日程を確約する前に、担当者と完了予定を確認しましょう。",
+                           priority: 2, evidenceIDs: Array(ids.dropFirst().prefix(1))),
+            MeetingInsight(kind: "確認質問の候補", text: "レビューの担当者は決まっていますか？", priority: 1,
+                           evidenceIDs: Array(ids.suffix(1)))
+        ]
+        meeting.aiStatus = "プレビュー：架空の提案・外部送信なし"
+    }
+}
+
+@MainActor
+private final class PreviewAudioSource: AudioSource {
+    let origin: AudioOrigin
+    let denied: Bool
+    var permissionStatus: AudioPermissionStatus { denied ? .denied : .granted }
+    var state: AudioSourceState { .idle }
+    init(origin: AudioOrigin, denied: Bool = false) { self.origin = origin; self.denied = denied }
+    func requestPermission() async -> Bool { !denied }
+    func start(targetFormat: AVAudioFormat) async throws -> AudioFrameStream {
+        AudioFrameStream { $0.finish() }
+    }
+    func stop() async throws {}
+}
+
+@MainActor
+private final class PreviewSpeech: SpeechTranscribing {
+    private var failStopOnce: Bool
+    init(failStopOnce: Bool = false) { self.failStopOnce = failStopOnce }
+    func start(
+        locale: Locale, contextKeywords: [String], fastResults: Bool,
+        onInputStarted: @escaping @MainActor () -> Void,
+        receive: @escaping @MainActor (SpeechResult) async throws -> Void,
+        onFailure: @escaping @MainActor (any Error) -> Void
+    ) async throws { onInputStarted() }
+    func stopInput() async throws {
+        if failStopOnce {
+            failStopOnce = false
+            throw NSError(domain: "MeetingPreview", code: 1,
+                          userInfo: [NSLocalizedDescriptionKey: "停止失敗のプレビュー"])
+        }
+    }
+    func finishRecognition() async throws {}
+    func cancelRecognition() async {}
+    func stop() async throws { try await stopInput() }
+}
+#endif

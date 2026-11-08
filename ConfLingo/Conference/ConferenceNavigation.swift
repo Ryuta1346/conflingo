@@ -4,7 +4,7 @@ import Observation
 @Observable
 final class ConferenceNavigation {
     enum Destination: String, CaseIterable, Identifiable {
-        case home, setup, live, settings
+        case home, setup, live, settings, meeting
         var id: Self { self }
     }
 
@@ -17,8 +17,8 @@ final class ConferenceNavigation {
         self.destination = destination
     }
 
-    func request(_ target: Destination, phase: SessionPhase) {
-        guard !isTransitioning, target != destination else { return }
+    func request(_ target: Destination, phase: SessionPhase, forceConfirmation: Bool = false) {
+        guard !isTransitioning, target != destination || forceConfirmation else { return }
         switch phase {
         case .idle:
             destination = target
@@ -35,7 +35,16 @@ final class ConferenceNavigation {
         pendingDestination = nil
     }
 
+    func requestMeetingExpansion(conferencePhase: SessionPhase) -> Bool {
+        request(.meeting, phase: conferencePhase)
+        return destination == .meeting && !isTransitioning
+    }
+
     func confirmNavigation(store: SessionStore, stop: () async -> Void) async {
+        await confirmNavigation(phase: { store.phase }, stop: stop)
+    }
+
+    func confirmNavigation(phase: () -> SessionPhase, stop: () async -> Void) async {
         guard !isTransitioning, let target = pendingDestination else { return }
         showsStopConfirmation = false
         isTransitioning = true
@@ -43,8 +52,8 @@ final class ConferenceNavigation {
             isTransitioning = false
             pendingDestination = nil
         }
-        if store.phase == .listening { await stop() }
-        guard store.phase == .idle else { return }
+        if phase() == .listening { await stop() }
+        guard phase() == .idle else { return }
         destination = target
     }
 }

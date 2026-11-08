@@ -2,7 +2,7 @@
 
 2026-11-08 / `feature/design-system-conference` / **実装・自動検証済み、REVIEW**
 
-ユーザー「進めて」により[実装計画](../design/pr5-b-implementation-plan.md)を承認。主担当によるコード確認と非録音プレビュー検証。独立レビュー・実音声受入・Gate U全体の合格を意味しない。[Draft PR #10](https://github.com/Ryuta1346/conflingo/pull/10)でレビュー。マージは未実施。
+ユーザー「進めて」により[実装計画](../design/pr5-b-implementation-plan.md)を承認。主担当によるコード確認と非録音プレビュー検証。独立レビュー・実音声受入・Gate U全体の合格を意味しない。[PR #10](https://github.com/Ryuta1346/conflingo/pull/10)でレビュー後、修正`aa3f35f`を含めmainへマージ済み（`c34ddd1`、2026-11-08にローカル履歴確認）。実機受入は未完了。
 
 ## 実装
 
@@ -114,6 +114,6 @@ xcodebuild build -project ConfLingo.xcodeproj -scheme ConfLingo -configuration R
 git diff --check
 ```
 
-実音声・実モデルダウンロード・実翻訳は未実施。ネイティブUIはホスティングテストによる検証で、VoiceOver・手動実機受入全体の合格を意味しない。Releaseには既存のDEBUGプレビュー分岐に関する到達不能コード警告が残る。修正差分は主担当が確認し、今回の修正に対する独立レビューは未実施。コミット・PR投稿は行っていない。
+実音声・実モデルダウンロード・実翻訳は未実施。ネイティブUIはホスティングテストによる検証で、VoiceOver・手動実機受入全体の合格を意味しない。Releaseには既存のDEBUGプレビュー分岐に関する到達不能コード警告が残る。修正差分は主担当が確認し、今回の修正に対する独立レビューは未実施。この検証記録作成時点ではコミット・PR投稿は未実施。その後`aa3f35f`としてPR #10に含まれ、mainへマージ済み（`c34ddd1`）。
 
 参考: 状態を保持した配置切替はApple [AnyLayout](https://developer.apple.com/documentation/swiftui/anylayout)の公式資料をContext7で確認。
