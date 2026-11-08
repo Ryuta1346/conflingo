@@ -31,9 +31,9 @@ struct ControlBar: View {
             .disabled(store.segments.isEmpty)
 
             Button("Clear") {
-                store.reset()
+                controller.reset(store: store)
             }
-            .disabled(store.phase != .idle || store.segments.isEmpty)
+            .disabled(store.phase != .idle)
 
             Spacer()
 

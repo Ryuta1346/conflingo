@@ -3,7 +3,7 @@
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **実装計画 v1.1・PR0着手**（2026-11-08：停止処理の最小修正と自動検証を実施。実音声の回帰確認は未完了。Meeting機能・UI刷新は未実装。[検証記録](validation/conference-baseline.md)）
+- 状態: **実装計画 v1.1・PR0マージ済み／PR1実装・自動検証完了、レビュー待ち**（2026-11-08：持ち越し承認のもと会話イベント・Event Hubを追加。137テスト・build・lint成功。Gate Aは未検証。[PR1検証記録](validation/core-events.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -126,6 +126,20 @@ enum InsightStatus: String, Codable, Sendable {
 - 途中結果は同じ発話IDに対するrevisionとして更新。**確定結果だけ**判断・アクション候補の確定入力にする。
 - `EventHub`は複数Consumerにファンアウト。遅いAI通信によって音声や字幕を止めない。
 - UI用のpartialイベントは古いものを破棄可能。finalイベントは重要データとして保持し、容量上限時はエラー通知/縮退（無制限キューにしない）。
+
+#### PR1の実装契約（2026-11-08承認・自動検証済み）
+
+- 同一発話のpartial→finalは同じIDと増加するrevisionを使う。空文字、古いrevision、確定後のpartialは履歴を更新しない。別入力・別発話は同じテキストでも保持する。
+- PR1の正規化は認識範囲の開始位置で発話を識別し、終了位置が伸びるpartial更新ではIDを維持する。final後は次のIDへ切り替える。実SpeechTranscriberの範囲更新挙動は実音声試験で確認する。
+- 会議時刻は単調増加時計を基準にし、停止中も含む経過時間を再開時の認識時刻へ加算する。Clearで会議IDと時計を初期化する。既存Conferenceの保存時刻は従来どおり各入力開始からの時刻を保つ。
+- Hubは購読先ごとにfinal待機256件と入力元ごとの最新partialを保持する。partialがfinalを追い出さない。final超過は送信側・購読側へ通知し、該当購読先を終了する。他の購読先は継続する。過去履歴は再送しない。
+- Conferenceの必須購読失敗は既存エラー表示と入力停止へつなぐ。将来の任意AI購読失敗はConferenceを止めない。
+- LegacyTranslationAdapterが既存の文境界・4秒タイムアウト・翻訳キューを維持する。認識結果の読取完了→Hub終了→購読処理完了→残りの翻訳flushの順で停止する。
+- 辞書は入力開始時に適用する。自動停止中のstop呼び出しも同じ終了処理の完了を待ち、最後の翻訳を確定してからidleへ戻る。
+- 開始失敗・認識失敗・停止で購読とタイマーを解放する。再開で会議IDと履歴を維持し、Clearで既存・Meetingストアをまとめて初期化する。
+- Clearはidleであれば字幕が空でも利用できること。字幕なしで停止したセッションでも会議IDと時計を初期化でき、preparing / listening / stoppingでは利用できないこと。
+- 実入力はマイクのみ。内部音声、2入力同期、UI刷新、AI、永続化は後続PR。合成入力による検証と実機回帰は区別する。
+- 自動受入は発話更新、複数配信、容量上限、購読取消、停止直前final、失敗・再開・Clear、既存字幕・翻訳・辞書・Markdown回帰、build/test/lint。結果は[PR1検証記録](validation/core-events.md)へ記載する。
 
 ### 2.3 AI支援パイプライン
 
