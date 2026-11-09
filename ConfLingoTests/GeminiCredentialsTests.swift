@@ -30,6 +30,61 @@ struct GeminiCredentialsTests {
         #expect(settings.configured)
         #expect(settings.statusText == "APIキー登録済み")
     }
+
+    @Test(arguments: [true, false])
+    func failedSaveKeepsPendingRegistrationCheck(hasExistingKey: Bool) async {
+        let store = DeferredReadAPIKeyStore()
+        store.value = hasExistingKey ? "existing-key" : nil
+        store.failWrites = true
+        let settings = GeminiCredentials(store: store)
+        let refresh = Task { await settings.refresh() }
+        await store.gate.entered.next()
+
+        settings.save("replacement-key")
+        #expect(settings.statusText == "APIキーを確認しています…")
+        #expect(settings.message == InsightFailure.keyStorage.localizedDescription)
+        store.gate.release()
+        await refresh.value
+
+        #expect(settings.configured == hasExistingKey)
+        #expect(settings.statusText == (hasExistingKey ? "APIキー登録済み" : "APIキー未登録"))
+        #expect(settings.message == InsightFailure.keyStorage.localizedDescription)
+    }
+
+    @Test func failedDeleteKeepsPendingRegistrationCheck() async {
+        let store = DeferredReadAPIKeyStore()
+        let settings = GeminiCredentials(store: store)
+        settings.save("existing-key")
+        store.failWrites = true
+        let refresh = Task { await settings.refresh() }
+        await store.gate.entered.next()
+
+        settings.delete()
+        #expect(settings.statusText == "APIキーを確認しています…")
+        store.gate.release()
+        await refresh.value
+
+        #expect(settings.configured)
+        #expect(settings.statusText == "APIキー登録済み")
+        #expect(settings.message == InsightFailure.keyStorage.localizedDescription)
+    }
+
+    @Test func oldRefreshCannotOverwriteACompletedDelete() async {
+        let store = DeferredReadAPIKeyStore()
+        let settings = GeminiCredentials(store: store)
+        settings.save("existing-key")
+        let refresh = Task { await settings.refresh() }
+        await store.gate.entered.next()
+
+        settings.delete()
+        store.gate.release()
+        await refresh.value
+
+        #expect(!settings.configured)
+        #expect(settings.statusText == "APIキー未登録")
+        #expect(settings.message == "APIキーを削除しました。")
+    }
+
     @Test func registrationReplacementDeletionAndFailureAreTruthful() throws {
         let store = MemoryAPIKeyStore()
         let settings = GeminiCredentials(store: store)
@@ -66,9 +121,21 @@ struct GeminiCredentialsTests {
 @MainActor
 private final class DeferredReadAPIKeyStore: APIKeyStore {
     let gate = TestGate()
-    func read() async throws -> String? { await gate.wait(); return nil }
-    func save(_ key: String) throws {}
-    func delete() throws {}
+    var value: String?
+    var failWrites = false
+    func read() async throws -> String? {
+        let snapshot = value
+        await gate.wait()
+        return snapshot
+    }
+    func save(_ key: String) throws {
+        if failWrites { throw InsightFailure.keyStorage }
+        value = key
+    }
+    func delete() throws {
+        if failWrites { throw InsightFailure.keyStorage }
+        value = nil
+    }
 }
 
 @MainActor

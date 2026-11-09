@@ -87,13 +87,13 @@ final class GeminiCredentials {
         refreshVersion += 1
         let version = refreshVersion
         checking = true
+        message = ""
         defer { if refreshVersion == version { checking = false } }
         do {
             let exists = try await store.read() != nil
             guard refreshVersion == version, !Task.isCancelled else { return }
             configured = exists
             readFailed = false
-            message = ""
         } catch {
             guard refreshVersion == version, !Task.isCancelled else { return }
             configured = false
@@ -109,10 +109,10 @@ final class GeminiCredentials {
             return
         }
         onChange?()
-        refreshVersion += 1
-        checking = false
         do {
             try store.save(key)
+            refreshVersion += 1
+            checking = false
             configured = true
             readFailed = false
             message = "APIキーをKeychainへ保存しました。"
@@ -121,10 +121,10 @@ final class GeminiCredentials {
 
     func delete() {
         onChange?()
-        refreshVersion += 1
-        checking = false
         do {
             try store.delete()
+            refreshVersion += 1
+            checking = false
             configured = false
             readFailed = false
             message = "APIキーを削除しました。"

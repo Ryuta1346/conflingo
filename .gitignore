@@ -3,13 +3,25 @@ build/
 DerivedData/
 xcuserdata/
 *.xcuserstate
+*.xcresult/
+*.xcarchive/
+
+# Swift Package Manager
+.build/
 
 # 配布物
 dist/
 
 # macOS
 .DS_Store
-.claude/temp
 
-.env.development
-.env.production
+# ローカルのAIエージェント設定・生成物
+.claude/settings.local.json
+.claude/agent-memory/
+.claude/temp/
+
+# 環境変数・APIキー（共有テンプレートは管理対象）
+.env
+.env.*
+!.env.example
+!.env.*.example
