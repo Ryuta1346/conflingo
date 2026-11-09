@@ -111,8 +111,8 @@ struct GeminiLiveEvaluationTests {
     @Test(.enabled(if: ProcessInfo.processInfo.environment["CONFLINGO_LIVE_AI"] == "1"))
     func syntheticCorpusOnly() async throws {
         let store = KeychainAPIKeyStore()
-        guard try store.read() != nil else { throw InsightFailure.missingKey }
-        let client = GeminiInsightClient(key: { try store.read() })
+        guard try await store.read() != nil else { throw InsightFailure.missingKey }
+        let client = GeminiInsightClient(key: { try await store.read() })
         var measurements: [[String: Any]] = []
         for sample in InsightEvaluationCase.all {
             let event = sample.makeEvent()

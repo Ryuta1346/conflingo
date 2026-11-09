@@ -1,0 +1,415 @@
+{
+  "date": "2026-11-10",
+  "appCdhash": "bb14dba86c6ba1e19b7c04689b249d590c1501c3",
+  "mode": "synthetic transcript + production Keychain/Gemini; no real audio",
+  "status": "REVIEW",
+  "liveCorpus": {
+    "summary": {
+      "caseCount": 28,
+      "kindAccepted": 28,
+      "validEvidence": 28,
+      "meanSeconds": 1.241325793160026,
+      "p95Seconds": 1.7172946250066161,
+      "inputTokens": 29359,
+      "outputTokens": 2245,
+      "thinkingTokens": 0
+    },
+    "measurements": [
+      {
+        "case": "ja-question",
+        "evidenceCount": 1,
+        "inputTokens": 1047,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 76,
+        "seconds": 1.0968588749528863,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-ambiguous",
+        "evidenceCount": 1,
+        "inputTokens": 1039,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 89,
+        "seconds": 1.5667950416682288,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-missing",
+        "evidenceCount": 1,
+        "inputTokens": 1044,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 70,
+        "seconds": 1.0621816249913536,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-risk",
+        "evidenceCount": 1,
+        "inputTokens": 1045,
+        "invalidEvidence": false,
+        "kind": "risk",
+        "kindAccepted": true,
+        "outputTokens": 56,
+        "seconds": 0.9020382916787639,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-decision",
+        "evidenceCount": 1,
+        "inputTokens": 1049,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 79,
+        "seconds": 1.0431515833479352,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-action",
+        "evidenceCount": 1,
+        "inputTokens": 1046,
+        "invalidEvidence": false,
+        "kind": "actionCandidate",
+        "kindAccepted": true,
+        "outputTokens": 78,
+        "seconds": 1.3577026249840856,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-chat",
+        "evidenceCount": 1,
+        "inputTokens": 1044,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 79,
+        "seconds": 1.7172946250066161,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-repeat",
+        "evidenceCount": 1,
+        "inputTokens": 1048,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 81,
+        "seconds": 1.5787465833127499,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-injection",
+        "evidenceCount": 1,
+        "inputTokens": 1051,
+        "invalidEvidence": false,
+        "kind": "risk",
+        "kindAccepted": true,
+        "outputTokens": 97,
+        "seconds": 1.5735512499813922,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-conflict",
+        "evidenceCount": 1,
+        "inputTokens": 1053,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 82,
+        "seconds": 1.036094041657634,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-question",
+        "evidenceCount": 1,
+        "inputTokens": 1039,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 84,
+        "seconds": 1.0455994583899155,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-ambiguous",
+        "evidenceCount": 1,
+        "inputTokens": 1039,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 71,
+        "seconds": 1.3716008333140053,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-missing",
+        "evidenceCount": 1,
+        "inputTokens": 1046,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 74,
+        "seconds": 1.7860505833523348,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-risk",
+        "evidenceCount": 1,
+        "inputTokens": 1045,
+        "invalidEvidence": false,
+        "kind": "risk",
+        "kindAccepted": true,
+        "outputTokens": 54,
+        "seconds": 1.261969749990385,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-decision",
+        "evidenceCount": 1,
+        "inputTokens": 1046,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 76,
+        "seconds": 0.9742524999892339,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-action",
+        "evidenceCount": 1,
+        "inputTokens": 1050,
+        "invalidEvidence": false,
+        "kind": "actionCandidate",
+        "kindAccepted": true,
+        "outputTokens": 78,
+        "seconds": 0.9412587083643302,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-chat",
+        "evidenceCount": 1,
+        "inputTokens": 1046,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 90,
+        "seconds": 1.0022434166749008,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-repeat",
+        "evidenceCount": 1,
+        "inputTokens": 1042,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 89,
+        "seconds": 1.5875428750296123,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-injection",
+        "evidenceCount": 1,
+        "inputTokens": 1047,
+        "invalidEvidence": false,
+        "kind": "risk",
+        "kindAccepted": true,
+        "outputTokens": 90,
+        "seconds": 1.554073958308436,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-conflict",
+        "evidenceCount": 1,
+        "inputTokens": 1041,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 88,
+        "seconds": 1.0313674166682176,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-explicit-conflict",
+        "evidenceCount": 1,
+        "inputTokens": 1065,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 94,
+        "seconds": 1.4279427499859594,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-explicit-conflict",
+        "evidenceCount": 1,
+        "inputTokens": 1056,
+        "invalidEvidence": false,
+        "kind": "followUpQuestion",
+        "kindAccepted": true,
+        "outputTokens": 89,
+        "seconds": 1.1784500833018683,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-question-en-context",
+        "evidenceCount": 1,
+        "inputTokens": 1048,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 72,
+        "seconds": 1.137884000025224,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-question-ja-context",
+        "evidenceCount": 1,
+        "inputTokens": 1046,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 72,
+        "seconds": 0.992690000042785,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-date-correction",
+        "evidenceCount": 1,
+        "inputTokens": 1064,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 83,
+        "seconds": 1.1895002500386909,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-date-correction",
+        "evidenceCount": 1,
+        "inputTokens": 1055,
+        "invalidEvidence": false,
+        "kind": "answerSuggestion",
+        "kindAccepted": true,
+        "outputTokens": 75,
+        "seconds": 0.9229662083671428,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "ja-date-proposal",
+        "evidenceCount": 1,
+        "inputTokens": 1060,
+        "invalidEvidence": false,
+        "kind": "decisionCandidate",
+        "kindAccepted": true,
+        "outputTokens": 82,
+        "seconds": 1.0534017083700746,
+        "thinkingTokens": 0
+      },
+      {
+        "case": "en-date-proposal",
+        "evidenceCount": 1,
+        "inputTokens": 1058,
+        "invalidEvidence": false,
+        "kind": "decisionCandidate",
+        "kindAccepted": true,
+        "outputTokens": 97,
+        "seconds": 1.3639131666859612,
+        "thinkingTokens": 0
+      }
+    ],
+    "checks": [
+      "structure",
+      "kind",
+      "evidence IDs"
+    ],
+    "languageAndSemanticChecksAutomated": false,
+    "xcresult": "/private/tmp/conflingo-pr6-key-corrected-live.xcresult"
+  },
+  "uiAttempts": [
+    {
+      "attempt": 1,
+      "operation": "manual-before-key-correction",
+      "result": "http-error",
+      "httpStatus": 400
+    },
+    {
+      "attempt": 2,
+      "operation": "manual-ja",
+      "result": "completed",
+      "inputTokens": 1841,
+      "outputTokensIncludingThinking": 188,
+      "answerLanguageMatchesQuestion": true,
+      "evidenceJumpVerified": true
+    },
+    {
+      "attempt": 3,
+      "operation": "main-stop",
+      "result": "interrupted",
+      "networkPhaseAtCancellation": "unobserved"
+    },
+    {
+      "attempt": 4,
+      "operation": "resume-after-main-stop-en",
+      "result": "completed",
+      "inputTokens": 1830,
+      "outputTokensIncludingThinking": 191,
+      "answerLanguageMatchesQuestion": true
+    },
+    {
+      "attempt": 5,
+      "operation": "pause",
+      "result": "interrupted",
+      "networkPhaseAtCancellation": "unobserved"
+    },
+    {
+      "attempt": 6,
+      "operation": "resume-after-pause-ja",
+      "result": "completed",
+      "inputTokens": 1834,
+      "outputTokensIncludingThinking": 142,
+      "answerLanguageMatchesQuestion": true,
+      "semanticFinding": "unknown-feasibility-described-as-undecided"
+    },
+    {
+      "attempt": 7,
+      "operation": "floating-stop",
+      "result": "completed-before-stop",
+      "inputTokens": 1834,
+      "outputTokensIncludingThinking": 125,
+      "answerLanguageMatchesQuestion": false,
+      "toolError": "noWindowsAvailable",
+      "stopAfterCompletionVerified": true
+    },
+    {
+      "attempt": 8,
+      "operation": "end",
+      "result": "interrupted",
+      "networkPhaseAtCancellation": "unobserved"
+    }
+  ],
+  "requestAccounting": {
+    "uiAttempts": 8,
+    "uiInterruptedNetworkPhaseUnknown": 3,
+    "corpusCompleted": 28,
+    "priorCorpusRejected": 1,
+    "baselineDiagnosticCompleted": 1,
+    "errorDiagnosticRejected": 1,
+    "totalClientInitiationsUpperBound": 39,
+    "actualNetworkRequestCountNotFullyObserved": true
+  },
+  "billingVerified": false,
+  "remaining": [
+    "mixed-language multi-segment answer language regression",
+    "unknown versus undecided wording",
+    "UI cancellation correlation with in-flight network",
+    "floating cancellation before completion",
+    "deferred real audio and normal-startup acceptance"
+  ]
+}

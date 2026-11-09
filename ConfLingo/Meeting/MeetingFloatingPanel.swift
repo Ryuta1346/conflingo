@@ -112,6 +112,12 @@ private struct MeetingFloatingView: View {
             Divider()
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
+                    #if DEBUG
+                    if meeting.previewUsesLiveAI {
+                        Text("実API検証：合成発話・音声取得なし・Geminiへ実通信")
+                            .font(.caption).foregroundStyle(DesignTokens.warning)
+                    }
+                    #endif
                     Label(meeting.aiStatus, systemImage: "cloud").font(.caption)
                     if meeting.ai.permitted {
                         Button("AI送信を停止") { meeting.setAIAllowed(false) }

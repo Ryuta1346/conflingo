@@ -13,7 +13,11 @@ enum MeetingPreview {
             .replacingOccurrences(of: "--meeting-state=", with: "") ?? "setup"
     }
 
-    static func make(activity: AudioInputUse, scenario: String = "setup") -> MeetingWorkspace {
+    static func liveAIEnabled(arguments: [String]) -> Bool {
+        arguments.contains("--meeting-preview") && arguments.contains("--meeting-live-ai")
+    }
+
+    static func make(activity: AudioInputUse, scenario: String = "setup", liveAI: Bool = false) -> MeetingWorkspace {
         let microphone = PreviewAudioSource(origin: .microphone)
         let system = PreviewAudioSource(origin: .systemAudio, denied: scenario == "permission-denied")
         let controller = DualTranscriptionController(
@@ -24,8 +28,12 @@ enum MeetingPreview {
                 return locale
             }
         )
-        return MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
-                                credentials: GeminiCredentials(store: PreviewAPIKeyStore()))
+        let meeting = liveAI
+            ? MeetingWorkspace(controller: controller)
+            : MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
+                               credentials: GeminiCredentials(store: PreviewAPIKeyStore()))
+        meeting.previewUsesLiveAI = liveAI
+        return meeting
     }
 
     static func prepare(_ meeting: MeetingWorkspace, scenario: String) async {
@@ -36,6 +44,7 @@ enum MeetingPreview {
         guard meeting.phase == .listening else { return }
         populate(meeting)
         if scenario == "review" || scenario == "stop-failed" { await meeting.end() }
+        guard !meeting.previewUsesLiveAI else { return }
         if scenario == "offline" { meeting.previewAIStatus = "プレビュー：AIオフライン・外部送信なし" }
         if scenario == "sending" { meeting.previewAIStatus = "プレビュー：AI送信中の表示（実通信なし）" }
     }
@@ -56,6 +65,7 @@ enum MeetingPreview {
                 revision: 1, sourceStartTime: Double(index * 12)
             ))
         }
+        guard !meeting.previewUsesLiveAI else { return }
         meeting.insights = [
             MeetingInsight(kind: .answerSuggestion, text: "来週金曜は、セキュリティレビューの完了を条件に。日程を確約する前に、担当者と完了予定を確認しましょう。",
                            priority: 2, evidenceIDs: Array(ids.dropFirst().prefix(1))),

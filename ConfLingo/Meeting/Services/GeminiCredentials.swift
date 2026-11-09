@@ -5,7 +5,7 @@ import Security
 
 @MainActor
 protocol APIKeyStore {
-    func read() throws -> String?
+    func read() async throws -> String?
     func save(_ key: String) throws
     func delete() throws
 }
@@ -13,15 +13,30 @@ protocol APIKeyStore {
 @MainActor
 struct KeychainAPIKeyStore: APIKeyStore {
     var service = "com.gavrri.conflingo.gemini-api"
-    private var query: [String: Any] {
+    private nonisolated static let readLock = NSLock()
+    private var query: [String: Any] { Self.query(service: service) }
+
+    private nonisolated static func query(service: String) -> [String: Any] {
         let context = LAContext()
         context.interactionNotAllowed = true
         return [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
                 kSecAttrAccount as String: "user-api-key", kSecUseAuthenticationContext as String: context]
     }
 
-    func read() throws -> String? {
-        var attributes = query
+    func read() async throws -> String? {
+        let service = service
+        return try await Task.detached { try Self.readSynchronously(service: service) }.value
+    }
+
+    private nonisolated static func readSynchronously(service: String) throws -> String? {
+        // Existing file-based Keychain items ignore LAContext's UI prohibition.
+        readLock.lock()
+        defer { readLock.unlock() }
+        var interactionAllowed: DarwinBoolean = false
+        guard SecKeychainGetUserInteractionAllowed(&interactionAllowed) == errSecSuccess,
+              SecKeychainSetUserInteractionAllowed(false) == errSecSuccess else { throw InsightFailure.keyStorage }
+        defer { SecKeychainSetUserInteractionAllowed(interactionAllowed.boolValue) }
+        var attributes = query(service: service)
         attributes[kSecReturnData as String] = true
         attributes[kSecMatchLimit as String] = kSecMatchLimitOne
         var result: CFTypeRef?
@@ -54,14 +69,37 @@ struct KeychainAPIKeyStore: APIKeyStore {
 final class GeminiCredentials {
     private(set) var configured = false
     private(set) var message = ""
+    private var checking = false
+    private var readFailed = false
+    private var refreshVersion = 0
     let store: any APIKeyStore
     var onChange: (() -> Void)?
 
     init(store: any APIKeyStore = KeychainAPIKeyStore()) { self.store = store }
 
-    func refresh() {
-        do { configured = try store.read() != nil }
-        catch { message = InsightFailure.keyStorage.localizedDescription }
+    var statusText: String {
+        if checking { return "APIキーを確認しています…" }
+        if readFailed { return "APIキーの登録状態を確認できません" }
+        return configured ? "APIキー登録済み" : "APIキー未登録"
+    }
+
+    func refresh() async {
+        refreshVersion += 1
+        let version = refreshVersion
+        checking = true
+        message = ""
+        defer { if refreshVersion == version { checking = false } }
+        do {
+            let exists = try await store.read() != nil
+            guard refreshVersion == version, !Task.isCancelled else { return }
+            configured = exists
+            readFailed = false
+        } catch {
+            guard refreshVersion == version, !Task.isCancelled else { return }
+            configured = false
+            readFailed = true
+            message = InsightFailure.keyStorage.localizedDescription
+        }
     }
 
     func save(_ value: String) {
@@ -73,7 +111,10 @@ final class GeminiCredentials {
         onChange?()
         do {
             try store.save(key)
+            refreshVersion += 1
+            checking = false
             configured = true
+            readFailed = false
             message = "APIキーをKeychainへ保存しました。"
         } catch { message = InsightFailure.keyStorage.localizedDescription }
     }
@@ -82,7 +123,10 @@ final class GeminiCredentials {
         onChange?()
         do {
             try store.delete()
+            refreshVersion += 1
+            checking = false
             configured = false
+            readFailed = false
             message = "APIキーを削除しました。"
         } catch { message = InsightFailure.keyStorage.localizedDescription }
     }

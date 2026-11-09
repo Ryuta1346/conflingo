@@ -30,7 +30,8 @@ struct ConfLingoApp: App {
         _dualTranscription = State(initialValue: DualTranscriptionController(activity: activity))
         #if DEBUG
         _meeting = State(initialValue: isPreview
-                         ? MeetingPreview.make(activity: activity, scenario: MeetingPreview.scenario)
+                         ? MeetingPreview.make(activity: activity, scenario: MeetingPreview.scenario,
+                                               liveAI: MeetingPreview.liveAIEnabled(arguments: ProcessInfo.processInfo.arguments))
                          : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting)))
         #else
         _meeting = State(initialValue: MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting)))

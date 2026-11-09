@@ -5,6 +5,25 @@ import Testing
 @MainActor
 @Suite(.timeLimit(.minutes(1)))
 struct GeminiInsightClientTests {
+    @Test func cancelledCredentialLookupCannotStartHTTP() async throws {
+        let gate = TestGate()
+        let transport = FakeInsightHTTP()
+        let client = GeminiInsightClient(key: {
+            await gate.wait()
+            return "synthetic-key"
+        }, transport: transport)
+        let request = try InsightRequest(sessionID: UUID(), question: "Explain", trigger: .manual, events: [])
+        let operation = Task { try await client.generate(request) { _ in } }
+        await gate.entered.next()
+        operation.cancel()
+        gate.release()
+        do {
+            _ = try await operation.value
+            Issue.record("Expected cancellation")
+        } catch { #expect(error is CancellationError) }
+        #expect(transport.requests.isEmpty)
+    }
+
     @Test func streamingHandlesEveryUTF8ByteAndStructuredEvidence() async throws {
         let event = insightEvent(text: "合成の会話です")
         let request = try InsightRequest(sessionID: event.sessionID, question: "次は？", trigger: .manual, events: [event])
@@ -55,15 +74,42 @@ struct GeminiInsightClientTests {
         let body = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
         let contents = try #require(body["contents"] as? [[String: Any]])
         let parts = try #require(contents.first?["parts"] as? [[String: Any]])
+        let questionText = try #require(parts.last?["text"] as? String)
+        let question = try #require(JSONSerialization.jsonObject(with: Data(questionText.utf8)) as? [String: Any])
+        #expect(parts.count == 2)
+        #expect(question["question"] as? String == sample.question)
+        #expect(Set(question.keys) == ["question"])
         let text = try #require(parts.first?["text"] as? String)
         let context = try #require(JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any])
-        #expect(context["question"] as? String == sample.question)
-        #expect(Set(context.keys) == ["question", "segments"])
+        #expect(Set(context.keys) == ["segments"])
         let segments = try #require(context["segments"] as? [[String: Any]])
         #expect(segments.count == 1)
         #expect(segments.first?["text"] as? String == sample.text)
         #expect(segments.first?["language"] as? String == sample.languageCode)
         #expect(segments.first?["id"] as? String == event.id.uuidString)
+    }
+
+    @Test(arguments: MixedContextEvaluationCase.all)
+    func multipleSegmentsStayQuotedBeforeTheFinalQuestion(sample: MixedContextEvaluationCase) async throws {
+        let request = try sample.request()
+        let transport = FakeInsightHTTP()
+        transport.chunks = [try geminiSSE(payload: "{\"text\":\"Synthetic\",\"kind\":\"answerSuggestion\",\"evidenceIDs\":[]}")]
+        _ = try await GeminiInsightClient(key: { "synthetic-key" }, transport: transport).generate(request) { _ in }
+        let data = try #require(transport.requests.first?.httpBody)
+        let body = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let contents = try #require(body["contents"] as? [[String: Any]])
+        let parts = try #require(contents.first?["parts"] as? [[String: String]])
+        #expect(parts.count == 2)
+        let contextData = Data(try #require(parts.first?["text"]).utf8)
+        let questionData = Data(try #require(parts.last?["text"]).utf8)
+        let context = try #require(JSONSerialization.jsonObject(with: contextData) as? [String: Any])
+        let question = try #require(JSONSerialization.jsonObject(with: questionData) as? [String: String])
+        #expect(question == ["question": sample.question])
+        #expect(Set(context.keys) == ["segments"])
+        let segments = try #require(context["segments"] as? [[String: Any]])
+        #expect(segments.compactMap { $0["text"] as? String } == request.events.map(\.text))
+        #expect(segments.compactMap { $0["id"] as? String } == request.events.map { $0.id.uuidString })
+        #expect(segments.compactMap { $0["language"] as? String } == request.events.map(\.languageCode))
     }
 
     @Test(arguments: ["MAX_TOKENS", "SAFETY", "RECITATION"])
