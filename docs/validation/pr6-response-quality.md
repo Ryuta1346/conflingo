@@ -2,7 +2,7 @@
 
 2026-11-09 / `codex/pr6-response-quality` / 基点 `85253db`
 
-**実装・自動検証済み。品質受入は未完了（最終23/24件）。PR6はREVIEW。** 実装コミット`df47a25`。[Draft PR #13](https://github.com/Ryuta1346/conflingo/pull/13)を作成済み。
+**本書は`df47a25`時点の検証記録（23/24件）。** 後続の日程レビュー修正では合成28/28件に合格。[最新の検証記録](pr6-date-correction.md)。PR6全体はREVIEWを維持する。[Draft PR #13](https://github.com/Ryuta1346/conflingo/pull/13)を作成済み。
 
 承認済みの`docs/design/pr6-response-quality-plan.md`に基づき、Geminiのシステム指示と評価テストを修正した。手動質問の言語、未知と未決定の区別、指示語、種別、日程の曖昧さを明示した。モデル・思考設定・応答スキーマ・Keychain・アプリのdotenv非対応は変更していない。
 

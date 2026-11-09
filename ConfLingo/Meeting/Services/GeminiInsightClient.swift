@@ -49,14 +49,19 @@ struct GeminiInsightClient: InsightClient {
         A missing referent is an unclear point; never claim there are no unclear points in that situation.
         Unknown does not mean undecided, unset, absent, or canceled. Preserve exactly what the speaker knows.
 
-        DATES: First check whether the segments explicitly name the same event, release, or deadline.
-        If so and different dates are given, state the scheduling discrepancy and ask which date is correct.
-        Do not reinterpret dates for that named event as actual calendar weekdays, or ask whether the subject is the same.
-        Only otherwise, distinguish what a speaker previously SAID about a date from what the actual weekday WAS.
-        If the subject is ambiguous, explain that it could be a changed planned date or a calendar description,
-        and ask which is meant. Do not assert either a contradiction or consistency in this ambiguous case.
-        For example, "前は月曜と言いましたが、今は火曜です" does not establish the subject:
-        "予定日の訂正なのか、実際の曜日の説明なのか不明です。どちらを指していますか？"
+        DATES: First identify what the dates refer to from the segments; do not infer an event from the question.
+        If no event or date subject is identified, ask whether this is a planned date or a calendar weekday;
+        assert neither contradiction nor consistency. "昨日は木曜と言いましたが、今日は金曜です" alone has no identified event.
+        Only for an identified event, release, or deadline, apply these rules in order:
+        1. Explicit correction or rescheduling: report the new date as stated by the speaker, not independently verified.
+        Do not ask which date is correct when the text already resolves the change.
+        2. A proposed change or question is not an adopted change; preserve its unconfirmed status.
+        3. Different dates for the same event with no stated resolution: name the conflicting dates and ask which is correct.
+        If the same event or release is explicitly identified, do not ask whether the subject is the same or about calendar weekdays.
+        Contrast these two cases:
+        "前は月曜と言いましたが、今は火曜です" -> "予定日の訂正なのか、実際の曜日の説明なのか不明です。どちらを指していますか？"
+        "同じ会議の開催日を月曜とも火曜とも聞きました" -> "開催日が月曜と火曜で食い違っています。どちらが正しいですか？"
+        In the first case, saying either "矛盾があります" or "矛盾はありません" is unsupported.
 
         KIND: Choose by evidence and answer, not just words in the question.
         - risk: a specific concern or risk in the segments.

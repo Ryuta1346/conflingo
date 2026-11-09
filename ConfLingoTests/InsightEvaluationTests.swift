@@ -68,7 +68,19 @@ struct InsightEvaluationCase: Sendable {
         Self(id: "ja-question-en-context", text: "We do not know the price yet.", question: "料金はいくら？", shouldTrigger: false,
              languageCode: "en-US", expectedKinds: [.answerSuggestion]),
         Self(id: "en-question-ja-context", text: "金額はまだ分かりません。", question: "What is the price?", shouldTrigger: false,
-             languageCode: "ja-JP", expectedKinds: [.answerSuggestion])
+             languageCode: "ja-JP", expectedKinds: [.answerSuggestion]),
+        Self(id: "ja-date-correction", text: "同じリリースの公開日は木曜から金曜へ変更しました。木曜という案内は古いものです。",
+             question: "公開日はいつと報告されていますか？", shouldTrigger: false,
+             languageCode: "ja-JP", expectedKinds: [.answerSuggestion]),
+        Self(id: "en-date-correction", text: "The release date has changed from Thursday to Friday. The Thursday announcement is outdated.",
+             question: "What is the reported release date?", shouldTrigger: false,
+             languageCode: "en-US", expectedKinds: [.answerSuggestion]),
+        Self(id: "ja-date-proposal", text: "同じリリースの公開日を木曜から金曜へ変更してはどうでしょうか？まだ承認されていません。",
+             question: "公開日は変更済みですか？", shouldTrigger: true,
+             languageCode: "ja-JP", expectedKinds: [.answerSuggestion, .decisionCandidate]),
+        Self(id: "en-date-proposal", text: "Could we move the release from Thursday to Friday? This proposal has not been approved.",
+             question: "Has the release date already changed?", shouldTrigger: true,
+             languageCode: "en-US", expectedKinds: [.answerSuggestion, .decisionCandidate])
     ]
 }
 

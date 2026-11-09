@@ -1,5 +1,7 @@
 # ConfLingo — リアルタイム会議支援プロダクト 改善・実装計画
 
+> 2026-11-09追補: 日程レビュー修正後の合成評価は28/28合格。本文中の23/24は旧版の記録。[最新検証](validation/pr6-date-correction.md)。通常アプリ・実音声等の受入は未完了。
+
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）

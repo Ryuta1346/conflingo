@@ -2,7 +2,7 @@
 
 2026-11-09 / 調査基点: `main`、`85253db`
 
-**状態: 2026-11-09、計画提示後のユーザー「進めて」により承認され、実装・自動検証済み。品質受入は未完了（最終23/24、Q05残件あり）。** 各版24要求で、修正理由を記録して8版・計192要求を評価。結果は`docs/validation/pr6-response-quality.md`へ記録。
+**状態: 2026-11-09、計画提示後のユーザー「進めて」により承認され、実装・自動検証済み。** 本計画の初回改善は23/24でQ05残件あり。各版24要求、8版・計192要求の記録は`docs/validation/pr6-response-quality.md`。後続の日程レビュー修正で合成28/28件に合格し、[最新の検証](../validation/pr6-date-correction.md)へ記録した。PR6全体の受入は未完了。
 
 保存先: `~/.coding-agents/docs/conflingo/codex-pr6-response-quality/001_pr6-response-quality-plan.md`。リポジトリ版は`docs/design/pr6-response-quality-plan.md`。実装ブランチは`codex/pr6-response-quality`。
 
@@ -15,6 +15,8 @@
 最小の変更として`GeminiInsightClient`のシステム指示を明確化する。モデルによる回答の言語・意味を、固定文言への置換やキーワード判定で後処理しない。既存の種別・応答スキーマと根拠ID検証を利用する。
 
 ## 提案する回答契約
+
+2026-11-09追補: レビュー指摘に対する修正を承認。[日程変更の修正計画](pr6-date-correction-fix.md)によりQ05へ明示的な訂正・変更を優先する条件を追加し、評価セットを28件へ拡張する。以下の24件・23/24という結果は追補前の記録。
 
 | ID | 契約・期待例 | 合格基準 |
 |---|---|---|
