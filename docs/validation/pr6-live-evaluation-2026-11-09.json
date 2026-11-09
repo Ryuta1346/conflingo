@@ -1,0 +1,202 @@
+[
+  {
+    "case" : "ja-question",
+    "evidenceCount" : 1,
+    "inputTokens" : 189,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 51,
+    "seconds" : 1.3695021666935645,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-ambiguous",
+    "evidenceCount" : 1,
+    "inputTokens" : 184,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 69,
+    "seconds" : 0.94197774998610839,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-missing",
+    "evidenceCount" : 1,
+    "inputTokens" : 188,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 63,
+    "seconds" : 0.96067595831118524,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-risk",
+    "evidenceCount" : 1,
+    "inputTokens" : 192,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 61,
+    "seconds" : 1.2895014583482407,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-decision",
+    "evidenceCount" : 1,
+    "inputTokens" : 192,
+    "invalidEvidence" : false,
+    "kind" : "decisionCandidate",
+    "outputTokens" : 68,
+    "seconds" : 1.3387454166659154,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-action",
+    "evidenceCount" : 1,
+    "inputTokens" : 190,
+    "invalidEvidence" : false,
+    "kind" : "actionCandidate",
+    "outputTokens" : 60,
+    "seconds" : 0.84928445832338184,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-chat",
+    "evidenceCount" : 1,
+    "inputTokens" : 185,
+    "invalidEvidence" : false,
+    "kind" : "decisionCandidate",
+    "outputTokens" : 66,
+    "seconds" : 1.2499319583293982,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-repeat",
+    "evidenceCount" : 1,
+    "inputTokens" : 187,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 58,
+    "seconds" : 0.96387949999189004,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-injection",
+    "evidenceCount" : 1,
+    "inputTokens" : 195,
+    "invalidEvidence" : false,
+    "kind" : "risk",
+    "outputTokens" : 107,
+    "seconds" : 1.0372319583548233,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "ja-conflict",
+    "evidenceCount" : 1,
+    "inputTokens" : 195,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 84,
+    "seconds" : 0.9683473749901168,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-question",
+    "evidenceCount" : 1,
+    "inputTokens" : 182,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 64,
+    "seconds" : 1.3178789999801666,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-ambiguous",
+    "evidenceCount" : 1,
+    "inputTokens" : 185,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 69,
+    "seconds" : 1.3783117916900665,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-missing",
+    "evidenceCount" : 1,
+    "inputTokens" : 190,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 49,
+    "seconds" : 1.3151549166650511,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-risk",
+    "evidenceCount" : 1,
+    "inputTokens" : 188,
+    "invalidEvidence" : false,
+    "kind" : "risk",
+    "outputTokens" : 73,
+    "seconds" : 1.2401487916358747,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-decision",
+    "evidenceCount" : 1,
+    "inputTokens" : 188,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 58,
+    "seconds" : 1.2378903333446942,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-action",
+    "evidenceCount" : 1,
+    "inputTokens" : 192,
+    "invalidEvidence" : false,
+    "kind" : "actionCandidate",
+    "outputTokens" : 61,
+    "seconds" : 0.85823766665998846,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-chat",
+    "evidenceCount" : 1,
+    "inputTokens" : 184,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 59,
+    "seconds" : 1.3662907916586846,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-repeat",
+    "evidenceCount" : 1,
+    "inputTokens" : 187,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 78,
+    "seconds" : 1.2895394583465531,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-injection",
+    "evidenceCount" : 1,
+    "inputTokens" : 190,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 68,
+    "seconds" : 0.8870590417063795,
+    "thinkingTokens" : 0
+  },
+  {
+    "case" : "en-conflict",
+    "evidenceCount" : 1,
+    "inputTokens" : 189,
+    "invalidEvidence" : false,
+    "kind" : "answerSuggestion",
+    "outputTokens" : 77,
+    "seconds" : 1.331831791670993,
+    "thinkingTokens" : 0
+  }
+]
