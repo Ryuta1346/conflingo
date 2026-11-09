@@ -39,6 +39,33 @@ struct GeminiInsightClientTests {
         #expect(transport.requests.isEmpty)
     }
 
+    @Test(arguments: InsightEvaluationCase.all.filter { $0.id.contains("-context") })
+    func mixedLanguageRequestsPreserveQuestionAndQuotedEvidence(sample: InsightEvaluationCase) async throws {
+        let event = sample.makeEvent()
+        let request = try InsightRequest(sessionID: event.sessionID, question: sample.question, trigger: .manual, events: [event])
+        let transport = FakeInsightHTTP()
+        transport.chunks = [try geminiSSE(payload: "{\"text\":\"Unspecified\",\"kind\":\"answerSuggestion\",\"evidenceIDs\":[]}")]
+        let client = GeminiInsightClient(key: { "test-key-not-real" }, transport: transport)
+
+        _ = try await client.generate(request) { _ in }
+
+        #expect(transport.requests.count == 1)
+        let sent = try #require(transport.requests.first)
+        let data = try #require(sent.httpBody)
+        let body = try #require(JSONSerialization.jsonObject(with: data) as? [String: Any])
+        let contents = try #require(body["contents"] as? [[String: Any]])
+        let parts = try #require(contents.first?["parts"] as? [[String: Any]])
+        let text = try #require(parts.first?["text"] as? String)
+        let context = try #require(JSONSerialization.jsonObject(with: Data(text.utf8)) as? [String: Any])
+        #expect(context["question"] as? String == sample.question)
+        #expect(Set(context.keys) == ["question", "segments"])
+        let segments = try #require(context["segments"] as? [[String: Any]])
+        #expect(segments.count == 1)
+        #expect(segments.first?["text"] as? String == sample.text)
+        #expect(segments.first?["language"] as? String == sample.languageCode)
+        #expect(segments.first?["id"] as? String == event.id.uuidString)
+    }
+
     @Test(arguments: ["MAX_TOKENS", "SAFETY", "RECITATION"])
     func nonSuccessfulFinishCannotBecomeAnswer(reason: String) async throws {
         let transport = FakeInsightHTTP()

@@ -10,3 +10,6 @@ dist/
 # macOS
 .DS_Store
 .claude/temp
+
+.env.development
+.env.production
