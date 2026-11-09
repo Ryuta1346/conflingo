@@ -1,11 +1,11 @@
 # ConfLingo — リアルタイム会議支援プロダクト 改善・実装計画
 
-> 2026-11-09追補: 日程レビュー修正後の合成評価は28/28合格。本文中の23/24は旧版の記録。[最新検証](validation/pr6-date-correction.md)。通常アプリ・実音声等の受入は未完了。
+> 2026-11-10追補: 混在文脈の品質修正後52要求に合格し、[修正後UI/Keychain・実受信後停止](validation/pr6-stop-acceptance.md)も確認。本文中の旧評価値は各時点の記録。通常起動全体・実音声等の受入は未完了。
 
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
 - 確認した基準: `main` / `b1a20319bc5eec5717d7840a2fc67547c0556fc7`（2026-06-18）
-- 状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3・PR4マージ済み、実機受入待ち／PR5-A/B/Cマージ済み、残る受入待ち／PR6実装・自動検証済み、実API受入待ち**（2026-11-08：ローカルmain `e167765`で確認。PR4 #9: `c714f9c`、PR5-A/B #10: `c34ddd1`、PR5-C #11: `e167765`。PR5-C修正後236テスト・build・lint成功の既存記録あり。Gate A/B/U未完了。[PR4検証](validation/dual-transcription.md)・[PR5-B検証](validation/pr5-b-conference.md)・[PR5-C検証](validation/pr5-c-meeting.md)）
+- 状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3・PR4マージ済み、実機受入待ち／PR5-A/B/Cマージ済み、残る受入待ち／PR6品質修正・合成実API・修正後UI・公開停止操作の受入確認済み、残る受入待ち**（2026-11-08：ローカルmain `e167765`で確認。PR4 #9: `c714f9c`、PR5-A/B #10: `c34ddd1`、PR5-C #11: `e167765`。PR5-C修正後236テスト・build・lint成功の既存記録あり。Gate A/B/U未完了。[PR4検証](validation/dual-transcription.md)・[PR5-B検証](validation/pr5-b-conference.md)・[PR5-C検証](validation/pr5-c-meeting.md)）
 - 前提: macOS 26+、Apple Silicon、Swift 6 / SwiftUI、既存のSpeech.frameworkとTranslation.frameworkを生かす
 
 ## 0. 結論・プロダクト戦略
@@ -176,7 +176,7 @@ enum InsightStatus: String, Codable, Sendable {
 
 ### 2.3 AI支援パイプライン
 
-PR6の具体化は[実装計画](design/pr6-implementation-plan.md)と[ヒアリング記録](design/pr6-hearing.md)を参照。2026-11-08のインタビューでGemini BYOK直接接続、合成会話による先行検証、低コスト優先・自動提案初期オフを確認済み。PR4実機受入の持ち越しはPR6について別途承認済み。実装計画全体はユーザー「OK」により承認後、Geminiアダプタ・Keychain・手動質問・自動提案・停止連動を実装し、263テストとモックUI操作を確認した。[PR6検証記録](validation/pr6-insights.md)。実API受入は未実施。以下の検索・要約・専門モードは後続段階を含む目標仕様。
+PR6の具体化は[実装計画](design/pr6-implementation-plan.md)と[ヒアリング記録](design/pr6-hearing.md)を参照。2026-11-08のインタビューでGemini BYOK直接接続、合成会話による先行検証、低コスト優先・自動提案初期オフを確認済み。PR4実機受入の持ち越しはPR6について別途承認済み。実装計画全体はユーザー「OK」により承認後、Geminiアダプタ・Keychain・手動質問・自動提案・停止連動を実装し、263テストとモックUI操作を確認した。[PR6検証記録](validation/pr6-insights.md)。その後の実API受入は冒頭の最新記録を参照。以下の検索・要約・専門モードは後続段階を含む目標仕様。
 
 1. 文字起こしイベントを発話単位に正規化し、直近の会話履歴と要約状態を更新する。
 2. **手動質問**は送信許可後に利用者の操作で実行。**自動提案**は初期オフとし、会議ごとにオンにした場合だけ質問検出・重要な矛盾・決定候補等でトリガーする。
@@ -527,3 +527,5 @@ ConfLingoTests/
 - Apple `SCStreamConfiguration.capturesAudio`: https://developer.apple.com/documentation/screencapturekit/scstreamconfiguration/capturesaudio
 - Apple Core Audio taps: https://developer.apple.com/documentation/coreaudio/capturing-system-audio-with-core-audio-taps
 - Apple `SpeechAnalyzer`: https://developer.apple.com/documentation/speech/speechanalyzer
+
+2026-11-10: 実UIの複数発話で回答言語と不明/未定の逸脱を確認。ユーザー「修正して」により[混在文脈の品質修正](design/pr6-mixed-context-quality-fix.md)を承認。質問を末尾の独立partへ置き、複数発話の回帰評価を追加する。修正後280テスト・build/lint成功、新規24＋既存28要求の実API品質評価に合格。後続の[6要求の受入](validation/pr6-stop-acceptance.md)で修正後UI/Keychain、実受信後の公開停止操作3経路と再開を確認。ネイティブクリックの時刻相関・通常起動全体等は残り、PR6/Gate Cは未完了。

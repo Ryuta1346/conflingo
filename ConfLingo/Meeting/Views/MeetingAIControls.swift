@@ -9,6 +9,12 @@ struct MeetingAIControls: View {
     var body: some View {
         Surface {
             VStack(alignment: .leading, spacing: 12) {
+                #if DEBUG
+                if meeting.previewUsesLiveAI {
+                    Text("実API検証：合成発話・音声取得なし・Geminiへ実通信（API利用料金が発生）")
+                        .font(.caption).foregroundStyle(DesignTokens.warning)
+                }
+                #endif
                 HStack {
                     Label("Gemini / 自分のAPIキー", systemImage: "sparkles").font(.headline)
                     Spacer()
@@ -82,7 +88,7 @@ struct GeminiKeySettingsView: View {
             Text("ご自身のAPIキーでGoogleへ直接接続します。キーはこのMacのKeychainに保存します。APIの利用料金はご自身のGoogleプロジェクトに発生します。")
                 .font(.callout).foregroundStyle(DesignTokens.secondary)
             Text("モデル：\(GeminiInsightClient.model)").font(.caption)
-            Text(credentials.configured ? "APIキー登録済み" : "APIキー未登録").font(.callout)
+            Text(credentials.statusText).font(.callout)
             SecureField("Gemini APIキー", text: $key).textFieldStyle(.roundedBorder)
             HStack {
                 Button("Keychainへ保存") {
@@ -97,7 +103,7 @@ struct GeminiKeySettingsView: View {
             Link("Gemini APIの料金を見る", destination: URL(string: "https://ai.google.dev/gemini-api/docs/pricing")!)
                 .font(.caption)
         }
-        .onAppear { credentials.refresh() }
+        .task { await credentials.refresh() }
         .onDisappear { key = "" }
         .alert("Gemini APIキーを削除しますか？", isPresented: $confirmsDeletion) {
             Button("キャンセル", role: .cancel) {}

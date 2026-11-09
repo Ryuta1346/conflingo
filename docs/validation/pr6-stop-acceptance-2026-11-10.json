@@ -1,0 +1,85 @@
+{
+  "date": "2026-11-10",
+  "appPath": "/private/tmp/conflingo-pr6-quality-build/Build/Products/Debug/ConfLingo.app",
+  "appCDHash": "9a20486f03cbcae8e2601d656b8bcbe4c2ffaf44",
+  "authorizedRequestLimit": 8,
+  "requests": {
+    "ui": 2,
+    "stop": 3,
+    "resume": 1,
+    "total": 6,
+    "unused": 2,
+    "retries": 0
+  },
+  "realAudioCaptured": false,
+  "keychainReadStatus": 0,
+  "integration": [
+    {
+      "cardInterrupted": true,
+      "mode": "revoke",
+      "page": "live",
+      "passed": true,
+      "receivedChunks": 1,
+      "state": "off",
+      "transportCancelled": true,
+      "transportReturnedNormally": false
+    },
+    {
+      "cardInterrupted": true,
+      "mode": "pause",
+      "page": "live",
+      "passed": true,
+      "receivedChunks": 1,
+      "state": "paused",
+      "transportCancelled": true,
+      "transportReturnedNormally": false
+    },
+    {
+      "inputTokens": 2005,
+      "mode": "resume",
+      "outputTokens": 90,
+      "passed": true,
+      "receivedChunks": 12,
+      "thinkingTokens": 0
+    },
+    {
+      "cardInterrupted": true,
+      "mode": "end",
+      "page": "review",
+      "passed": true,
+      "receivedChunks": 1,
+      "state": "paused",
+      "transportCancelled": true,
+      "transportReturnedNormally": false
+    }
+  ],
+  "integrationDurationSeconds": 4.536,
+  "ui": [
+    {
+      "case": "review-completion-ja",
+      "languagePassed": true,
+      "meaningPassed": true,
+      "inputTokens": 1997,
+      "outputIncludingThinkingTokens": 160
+    },
+    {
+      "case": "launch-feasibility-ja",
+      "languagePassed": true,
+      "meaningPassed": true,
+      "inputTokens": 1998,
+      "outputIncludingThinkingTokens": 131
+    }
+  ],
+  "uiEvidenceNavigationObserved": true,
+  "nativeClickDuringReceiptVerified": false,
+  "finalUI": {
+    "page": "review",
+    "aiAllowed": false,
+    "automaticSuggestions": false,
+    "inputsStopped": true
+  },
+  "serverCancellationOrBillingVerified": false,
+  "testSourceSHA256": "3fb2efe2b6d587809716f6218ed37426aa0a126cd8f61e98653f9d90cbc51d27",
+  "resultBundle": "/private/tmp/conflingo-pr6-stop-acceptance/StopAcceptance.xcresult",
+  "pr6Status": "REVIEW"
+}

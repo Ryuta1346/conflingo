@@ -21,6 +21,7 @@ final class MeetingWorkspace {
     }
     #if DEBUG
     var previewAIStatus: String?
+    var previewUsesLiveAI = false
     #endif
     var aiStatus: String {
         #if DEBUG
@@ -40,7 +41,7 @@ final class MeetingWorkspace {
         self.controller = controller
         let credentials = credentials ?? GeminiCredentials()
         self.credentials = credentials
-        let client = insightClient ?? GeminiInsightClient(key: { try credentials.store.read() })
+        let client = insightClient ?? GeminiInsightClient(key: { try await credentials.store.read() })
         let ai = InsightCoordinator(store: controller.store, client: client)
         self.ai = ai
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
