@@ -23,7 +23,7 @@
 | PR5-A | UI/UX全体設計・高品質モック | PR0 | **REVIEW** | [設計・モック](docs/design/README.md)・[#10 (Merged)](https://github.com/Ryuta1346/conflingo/pull/10)（方向性承認済み） |
 | PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [PR #10 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/10)・[211テスト／レビュー修正検証](docs/validation/pr5-b-conference.md) |
 | PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、PR4実機受入持ち越し承認済み／AIはPR6 | **REVIEW** | [実装計画](docs/design/pr5-c-implementation-plan.md)・[検証記録](docs/validation/pr5-c-meeting.md)・[#11 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/11) |
-| PR6 | AI会話理解・根拠付き回答 | PR1/PR4、実機受入持ち越し承認済み | **REVIEW** | [PR #12 (Merged・実API受入待ち)](https://github.com/Ryuta1346/conflingo/pull/12)・[検証記録](docs/validation/pr6-insights.md) |
+| PR6 | AI会話理解・根拠付き回答 | PR1/PR4、実機受入持ち越し承認済み | **REVIEW** | [PR #12 (Merged)](https://github.com/Ryuta1346/conflingo/pull/12)・[品質改善 #13 (Draft)](https://github.com/Ryuta1346/conflingo/pull/13)・[検証記録](docs/validation/pr6-response-quality.md) |
 | PR7 | 決定・アクション候補管理 | PR6 | TODO | — |
 | PR8 | ローカル資料検索・RAG | PR6 | TODO | — |
 | PR9 | 結合・性能・安全性検証 | 全PR | TODO | — |
