@@ -63,4 +63,4 @@ Red/Greenと最終ログは`/private/tmp/conflingo-pr8-quality-{red,green,final-
 
 ## 残る受入
 
-今回の合成16ケースは合格。実音声、VoiceOver全経路、長時間耐久、配布署名の受入、PR6/7の残課題は今回の成功で完了扱いにしない。PR8全体はREVIEWを維持する。ユーザー「コミットしてPR作成」により提出作業を実施する。
+今回の合成16ケースは合格。実音声、VoiceOver全経路、長時間耐久、配布署名の受入、PR6/7の残課題は今回の成功で完了扱いにしない。PR8全体はREVIEWを維持する。ユーザー「コミットしてPR作成」によりコミット・pushを実施し、[Draft PR #19](https://github.com/Ryuta1346/conflingo/pull/19)を作成。マージは未実施。
