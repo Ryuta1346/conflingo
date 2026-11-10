@@ -1,0 +1,252 @@
+{
+  "date": "2026-11-10",
+  "head": "f2baff9ce57033ba8276dbdf23778127b09b6807",
+  "host_cdhash": "9a20486f03cbcae8e2601d656b8bcbe4c2ffaf44",
+  "harness_sha256": "cc03602f404e13b147a680603bc30143ce6792d6556222670de190aefc9aaa0f",
+  "authorized_request_cap": 44,
+  "semantic_requests": 36,
+  "native_requests": 8,
+  "total_requests": 44,
+  "recording": false,
+  "new_authentication": "skipped_per_user",
+  "clock": "systemUptime and NSEvent.timestamp, seconds since boot",
+  "metadata": {
+    "allowed": false,
+    "cards": [
+      "complete",
+      "interrupted",
+      "interrupted",
+      "interrupted",
+      "interrupted",
+      "complete",
+      "interrupted",
+      "complete"
+    ],
+    "clicks": [
+      {
+        "type": "mouseUp",
+        "uptime": 353290.162924291,
+        "window": 4659
+      },
+      {
+        "type": "keyDown",
+        "uptime": 353290.215636375,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353387.536085291,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353411.619959166,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353412.3936885,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353460.244290791,
+        "window": 4704
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353472.210692916,
+        "window": 4704
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353503.293910666,
+        "window": 4704
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353513.213170291,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353514.088892166,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353578.84611075,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353580.460505208,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353629.52162975,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353630.529360375,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353715.678412875,
+        "window": 4659
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 353717.527710958,
+        "window": 4659
+      }
+    ],
+    "page": "review",
+    "phase": "idle",
+    "requests": [
+      {
+        "chunks": 20,
+        "end": 353301.1960645834,
+        "firstChunk": 353300.669503625,
+        "normalCompletion": true,
+        "number": 1,
+        "start": 353299.616359875
+      },
+      {
+        "cancelled": true,
+        "chunks": 0,
+        "end": 353325.4387511667,
+        "failure": "interrupted",
+        "number": 2,
+        "start": 353324.99244500004
+      },
+      {
+        "cancelled": true,
+        "chunks": 0,
+        "end": 353412.41754645837,
+        "failure": "interrupted",
+        "number": 3,
+        "start": 353411.6544865417
+      },
+      {
+        "cancelled": true,
+        "chunks": 14,
+        "end": 353472.22839762503,
+        "failure": "interrupted",
+        "firstChunk": 353471.846692625,
+        "number": 4,
+        "start": 353470.64285141666
+      },
+      {
+        "cancelled": true,
+        "chunks": 0,
+        "end": 353514.12169183337,
+        "failure": "interrupted",
+        "number": 5,
+        "start": 353513.261664625
+      },
+      {
+        "chunks": 20,
+        "end": 353580.4192237917,
+        "firstChunk": 353579.8152235,
+        "normalCompletion": true,
+        "number": 6,
+        "start": 353578.89388700004
+      },
+      {
+        "cancelled": true,
+        "chunks": 6,
+        "end": 353630.5493122084,
+        "failure": "interrupted",
+        "firstChunk": 353630.32802575,
+        "number": 7,
+        "start": 353629.57970825
+      },
+      {
+        "chunks": 20,
+        "end": 353717.1634966667,
+        "firstChunk": 353716.55704258336,
+        "normalCompletion": true,
+        "number": 8,
+        "start": 353715.7296285417
+      }
+    ]
+  },
+  "assessments": [
+    {
+      "request": 1,
+      "action": "main_ai_stop",
+      "receive_then_click_cancellation": "completed_before_action"
+    },
+    {
+      "request": 2,
+      "action": "main_ai_stop_ax",
+      "receive_then_click_cancellation": "before_first_chunk_no_mouse_timestamp"
+    },
+    {
+      "request": 3,
+      "action": "main_ai_stop",
+      "receive_then_click_cancellation": "before_first_chunk",
+      "mouse_up_uptime": 353412.3936885,
+      "click_to_transport_end_ms": 23.858
+    },
+    {
+      "request": 4,
+      "action": "floating_ai_stop",
+      "receive_then_click_cancellation": "pass",
+      "mouse_up_uptime": 353472.210692916,
+      "click_to_transport_end_ms": 17.705,
+      "first_chunk_to_click_ms": 364.0
+    },
+    {
+      "request": 5,
+      "action": "main_ai_stop",
+      "receive_then_click_cancellation": "before_first_chunk",
+      "mouse_up_uptime": 353514.088892166,
+      "click_to_transport_end_ms": 32.8
+    },
+    {
+      "request": 6,
+      "action": "pause",
+      "receive_then_click_cancellation": "completed_before_action",
+      "mouse_up_uptime": 353580.460505208,
+      "click_to_transport_end_ms": -41.281,
+      "first_chunk_to_click_ms": 645.282
+    },
+    {
+      "request": 7,
+      "action": "main_ai_stop_after_resume",
+      "receive_then_click_cancellation": "pass",
+      "mouse_up_uptime": 353630.529360375,
+      "click_to_transport_end_ms": 19.952,
+      "first_chunk_to_click_ms": 201.335
+    },
+    {
+      "request": 8,
+      "action": "end",
+      "receive_then_click_cancellation": "completed_before_action",
+      "mouse_up_uptime": 353717.527710958,
+      "click_to_transport_end_ms": -364.214,
+      "first_chunk_to_click_ms": 970.668
+    }
+  ],
+  "quality_observations": [
+    {
+      "request": 1,
+      "status": "fail",
+      "criterion": "answer_language_matches_question",
+      "question_language": "ja",
+      "answer_language": "en",
+      "source": "native UI observation; outside the 36 fixed semantic cases"
+    }
+  ],
+  "limitations": [
+    "Transport cancellation does not establish server-side inference termination or zero billing.",
+    "Pause and End happened after response completion; in-flight cancellation remains unverified.",
+    "Resume followed by fresh received output was observed; full completion after resume was not tested.",
+    "Temporary host integration XCTest success is not a pass for every acceptance criterion."
+  ]
+}

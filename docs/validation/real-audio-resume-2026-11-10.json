@@ -1,0 +1,73 @@
+{
+  "date": "2026-11-10",
+  "status": "partial_pass_final_status_display_failed",
+  "hostBundleIdentifier": "com.gavrri.conflingo.keyboardreview",
+  "screen": "dual-transcription-probe",
+  "realInputScreen": true,
+  "settings": {
+    "microphoneLocale": "ja-JP",
+    "systemLocale": "en-US",
+    "fastResults": false
+  },
+  "permissionsDisplayed": "both granted after OS authentication and isolated-copy restart",
+  "initialHardware": {
+    "os": "26.5.2",
+    "input": "MacBook Proのマイク",
+    "inputRate": 48000,
+    "inputChannels": 1,
+    "output": "MacBook Proのスピーカー",
+    "outputRate": 48000,
+    "outputChannels": 2
+  },
+  "fixture": {
+    "path": "/private/tmp/conflingo-benchmark/conference-en.aiff",
+    "sha256": "db7a7177d502fa9b64d71e71f8fc63b9413993968d15957bce751c720a9c74d4",
+    "seconds": 23.289478
+  },
+  "captureStarted": true,
+  "playbackStarted": true,
+  "permissionsGrantedThisRun": true,
+  "apiRequests": 0,
+  "productChanges": false,
+  "environmentReadinessConfirmedByUser": true,
+  "captureStopped": true,
+  "playbackStopped": true,
+  "testHardware": {
+    "input": "Bose QC Ultra Headphones",
+    "output": "Bose QC Ultra Headphones"
+  },
+  "trials": [
+    {
+      "number": 1,
+      "result": "permission_denied_before_capture",
+      "origin": "systemAudio"
+    },
+    {
+      "number": 2,
+      "result": "both_inputs_observed_and_stopped_with_stale_or_unfinalized_system_labels",
+      "englishPlaybackCount": 1,
+      "englishDisplayedSentences": 9,
+      "englishFinalLabels": 1,
+      "englishRecognizingLabelsAfterStop": 8,
+      "microphoneFinalEntries": 1,
+      "microphoneExpectedFourSentencesObserved": true,
+      "numericValues200And100PreservedBothOrigins": true,
+      "unexpectedCrossOriginTextObserved": false,
+      "stopErrorDisplayed": false,
+      "unchangedAfterStopAndWindowReopen": true
+    }
+  ],
+  "limitations": [
+    "Displayed labels do not prove underlying model events were unfinalized.",
+    "No event metadata instrumentation in this run.",
+    "User microphone text began after English fixture; overlapping speech and synchronization not established.",
+    "No restart trial after failed final-state display criterion.",
+    "No latency/WER measurement or Gate A/B/D/U completion."
+  ],
+  "dylibSHA256": "68359040fb80160ab4524836c2739496ab58cdd9024b76a4f0adc02ff9a0d56a",
+  "followup": {
+    "displayFix": "verified_with_synthetic_events",
+    "report": "dual-transcription-final-status.md",
+    "realAudioRetested": false
+  }
+}

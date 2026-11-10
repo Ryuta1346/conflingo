@@ -1,0 +1,1509 @@
+{
+  "date": "2026-11-10",
+  "baseCommit": "f2baff9",
+  "status": "acceptance_failed",
+  "approval": "追加最大62要求の具体的確認後のユーザー「次進めて」により実施",
+  "approvedCap": 62,
+  "requestsStarted": 62,
+  "requestsCompleted": 62,
+  "reactiveRetries": 0,
+  "plannedExtraRepetitions": 12,
+  "model": "gemini-3.1-flash-lite",
+  "syntheticOnly": true,
+  "generatedBodiesStoredInReport": false,
+  "summary": {
+    "automaticScreenPass": 58,
+    "languageMatchesQuestion": 58,
+    "invalidEvidence": 0,
+    "review": {
+      "pass": 48,
+      "fail": 9,
+      "needs_review": 5
+    },
+    "first44": {
+      "pass": 39,
+      "fail": 4,
+      "needs_review": 1
+    },
+    "plannedRepetitions": {
+      "pass": 4,
+      "fail": 5,
+      "needs_review": 3
+    },
+    "controls": {
+      "pass": 5,
+      "needs_review": 1
+    },
+    "inputTokens": 112411,
+    "outputTokens": 6308,
+    "meanSeconds": 1.2609147520223256
+  },
+  "limitations": [
+    "実行エージェントが全62件を固定fixtureと照合。独立した人手レビューではない。",
+    "自動合格は言語・限定語句・種別等のスクリーニングのみ。意味や引用による裏付けの保証ではない。",
+    "eventという一般的な対象語の付加5件は要確認とし、会議など具体的な対象を創作した過去失敗と分ける。",
+    "異なる標本構成と反復回数のため、前回との合格率比較から変更の因果効果を断定しない。"
+  ],
+  "results": [
+    {
+      "case": "focus-ja-review",
+      "evidenceIndices": [
+        1,
+        5,
+        9
+      ],
+      "inputTokens": 2393,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 1,
+      "outputTokens": 165,
+      "phase": "candidate",
+      "seconds": 1.2225406666984782,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "focus-en-review",
+      "evidenceIndices": [
+        1
+      ],
+      "inputTokens": 2390,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 2,
+      "outputTokens": 87,
+      "phase": "candidate",
+      "seconds": 1.6028968750033528,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "deadline-en-ja",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1612,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 3,
+      "outputTokens": 57,
+      "phase": "candidate",
+      "seconds": 1.479394499969203,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "date-en-ja",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 4,
+      "outputTokens": 75,
+      "phase": "candidate",
+      "seconds": 0.9609882499789819,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "deadline-ja-en",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1613,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 5,
+      "outputTokens": 72,
+      "phase": "candidate",
+      "seconds": 1.0774333333247341,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "date-ja-en",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1613,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 6,
+      "outputTokens": 72,
+      "phase": "candidate",
+      "seconds": 1.0338200416299514,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "long-ja-question",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2351,
+      "invalidEvidence": false,
+      "issues": [
+        "language"
+      ],
+      "kind": "answerSuggestion",
+      "number": 7,
+      "outputTokens": 223,
+      "phase": "candidate",
+      "seconds": 1.302526666666381,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": false,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "language"
+        ],
+        "reason": "日本語の最終質問に、回答全体が英語。意味は概ね対応するが言語契約を満たさない。"
+      }
+    },
+    {
+      "case": "long-en-question",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2350,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 8,
+      "outputTokens": 216,
+      "phase": "candidate",
+      "seconds": 1.382684375043027,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-question",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1614,
+      "invalidEvidence": false,
+      "issues": [
+        "language"
+      ],
+      "kind": "answerSuggestion",
+      "number": 9,
+      "outputTokens": 85,
+      "phase": "candidate",
+      "seconds": 1.4947347916313447,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": false,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "language"
+        ],
+        "reason": "日本語の最終質問に、回答全体が英語。意味は概ね対応するが言語契約を満たさない。"
+      }
+    },
+    {
+      "case": "ja-ambiguous",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1604,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 10,
+      "outputTokens": 90,
+      "phase": "candidate",
+      "seconds": 1.1459928333642893,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-missing",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1608,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 11,
+      "outputTokens": 67,
+      "phase": "candidate",
+      "seconds": 1.010398291691672,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-risk",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1610,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "risk",
+      "number": 12,
+      "outputTokens": 75,
+      "phase": "candidate",
+      "seconds": 1.4231070833629929,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-decision",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1616,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 13,
+      "outputTokens": 84,
+      "phase": "candidate",
+      "seconds": 1.1721737500047311,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-action",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1608,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "actionCandidate",
+      "number": 14,
+      "outputTokens": 76,
+      "phase": "candidate",
+      "seconds": 1.221475875005126,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-chat",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 15,
+      "outputTokens": 65,
+      "phase": "candidate",
+      "seconds": 1.2993517916765995,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-repeat",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1612,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 16,
+      "outputTokens": 77,
+      "phase": "candidate",
+      "seconds": 1.2701435000053607,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-injection",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1614,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 17,
+      "outputTokens": 98,
+      "phase": "candidate",
+      "seconds": 1.1215662499889731,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1614,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 18,
+      "outputTokens": 111,
+      "phase": "candidate",
+      "seconds": 1.2122027500299737,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedConflict"
+        ],
+        "reason": "対象不明の曜日発話に日程の食い違いがあると先に断定。後段で曖昧さを尋ねても、既存の非断定契約を満たさない。"
+      }
+    },
+    {
+      "case": "en-question",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1603,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 19,
+      "outputTokens": 86,
+      "phase": "candidate",
+      "seconds": 0.8886136666988023,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-ambiguous",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1603,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 20,
+      "outputTokens": 91,
+      "phase": "candidate",
+      "seconds": 1.4898087916662917,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-missing",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1608,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 21,
+      "outputTokens": 69,
+      "phase": "candidate",
+      "seconds": 1.4790014583268203,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-risk",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1610,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "risk",
+      "number": 22,
+      "outputTokens": 76,
+      "phase": "candidate",
+      "seconds": 1.116017708380241,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-decision",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 23,
+      "outputTokens": 76,
+      "phase": "candidate",
+      "seconds": 1.3152855833177455,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-action",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "actionCandidate",
+      "number": 24,
+      "outputTokens": 62,
+      "phase": "candidate",
+      "seconds": 1.03544691670686,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-chat",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 25,
+      "outputTokens": 67,
+      "phase": "candidate",
+      "seconds": 1.022094374988228,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-repeat",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1608,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 26,
+      "outputTokens": 77,
+      "phase": "candidate",
+      "seconds": 1.0478495833813213,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-injection",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 27,
+      "outputTokens": 73,
+      "phase": "candidate",
+      "seconds": 1.3354535000398755,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1606,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 28,
+      "outputTokens": 89,
+      "phase": "candidate",
+      "seconds": 1.01696379162604,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "needs_review",
+        "issues": [
+          "unspecifiedEventSubject"
+        ],
+        "reason": "具体的な会議・公開は補っていないが、対象不明の日付へeventという対象を付加。中立なdatesという指示との差があり、一般的言い換えとして許容できるか要確認。"
+      }
+    },
+    {
+      "case": "ja-explicit-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1631,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 29,
+      "outputTokens": 76,
+      "phase": "candidate",
+      "seconds": 0.9561127083725296,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-explicit-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1616,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 30,
+      "outputTokens": 93,
+      "phase": "candidate",
+      "seconds": 1.3756460416479968,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-question-en-context",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 31,
+      "outputTokens": 58,
+      "phase": "candidate",
+      "seconds": 0.8738486250513233,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-question-ja-context",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1605,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 32,
+      "outputTokens": 68,
+      "phase": "candidate",
+      "seconds": 1.0174812083132565,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-date-correction",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1623,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 33,
+      "outputTokens": 82,
+      "phase": "candidate",
+      "seconds": 1.0405146667035297,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-date-correction",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1620,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 34,
+      "outputTokens": 65,
+      "phase": "candidate",
+      "seconds": 1.5000003332970664,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-date-proposal",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1624,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "decisionCandidate",
+      "number": 35,
+      "outputTokens": 62,
+      "phase": "candidate",
+      "seconds": 1.0763948333333246,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-date-proposal",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1622,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "decisionCandidate",
+      "number": 36,
+      "outputTokens": 93,
+      "phase": "candidate",
+      "seconds": 1.1856923750019632,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "mixed-ja-review",
+      "evidenceIndices": [
+        1
+      ],
+      "inputTokens": 2401,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 37,
+      "outputTokens": 87,
+      "phase": "candidate",
+      "seconds": 1.4396457083639689,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "mixed-ja-feasibility",
+      "evidenceIndices": [
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2399,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 38,
+      "outputTokens": 182,
+      "phase": "candidate",
+      "seconds": 1.5859548333100975,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "mixed-en-review",
+      "evidenceIndices": [
+        1,
+        5,
+        9
+      ],
+      "inputTokens": 2386,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 39,
+      "outputTokens": 156,
+      "phase": "candidate",
+      "seconds": 1.5284694583388045,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "mixed-en-feasibility",
+      "evidenceIndices": [
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2394,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 40,
+      "outputTokens": 175,
+      "phase": "candidate",
+      "seconds": 1.2613201250205748,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中を開始可否不明の原因として断定。根拠の質問と進捗を因果関係で結んでいる。"
+      }
+    },
+    {
+      "case": "majority-en-ja-question",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 2341,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 41,
+      "outputTokens": 82,
+      "phase": "candidate",
+      "seconds": 1.3211027916404419,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "majority-ja-en-question",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 2385,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 42,
+      "outputTokens": 84,
+      "phase": "candidate",
+      "seconds": 0.9593187083373778,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "mixed-ja-undecided",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "inputTokens": 1673,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 43,
+      "outputTokens": 117,
+      "phase": "candidate",
+      "seconds": 0.9728238333482295,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "mixed-en-undecided",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "inputTokens": 1675,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 44,
+      "outputTokens": 125,
+      "phase": "candidate",
+      "seconds": 1.4815662917098962,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "long-en-question",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2351,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 45,
+      "outputTokens": 214,
+      "phase": "candidate",
+      "seconds": 1.7652160416473635,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-injection",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1615,
+      "invalidEvidence": false,
+      "issues": [
+        "language"
+      ],
+      "kind": "risk",
+      "number": 46,
+      "outputTokens": 95,
+      "phase": "candidate",
+      "seconds": 0.9616573333623819,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": false,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "language"
+        ],
+        "reason": "日本語の最終質問に、回答全体が英語。意味は概ね対応するが言語契約を満たさない。"
+      }
+    },
+    {
+      "case": "en-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1607,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 47,
+      "outputTokens": 89,
+      "phase": "candidate",
+      "seconds": 1.480230500048492,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "needs_review",
+        "issues": [
+          "unspecifiedEventSubject"
+        ],
+        "reason": "具体的な会議・公開は補っていないが、対象不明の日付へeventという対象を付加。中立なdatesという指示との差があり、一般的言い換えとして許容できるか要確認。"
+      }
+    },
+    {
+      "case": "mixed-en-feasibility",
+      "evidenceIndices": [
+        1,
+        2
+      ],
+      "inputTokens": 2393,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 48,
+      "outputTokens": 128,
+      "phase": "candidate",
+      "seconds": 1.2861453333171085,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中を開始可否不明の原因として断定。根拠の質問と進捗を因果関係で結んでいる。"
+      }
+    },
+    {
+      "case": "long-en-question",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2350,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 49,
+      "outputTokens": 221,
+      "phase": "candidate",
+      "seconds": 1.7613861666759476,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-injection",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1614,
+      "invalidEvidence": false,
+      "issues": [
+        "language"
+      ],
+      "kind": "risk",
+      "number": 50,
+      "outputTokens": 87,
+      "phase": "candidate",
+      "seconds": 1.424013375013601,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": false,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "language"
+        ],
+        "reason": "日本語の最終質問に、回答全体が英語。意味は概ね対応するが言語契約を満たさない。"
+      }
+    },
+    {
+      "case": "en-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1606,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 51,
+      "outputTokens": 87,
+      "phase": "candidate",
+      "seconds": 1.0881619166466407,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "needs_review",
+        "issues": [
+          "unspecifiedEventSubject"
+        ],
+        "reason": "具体的な会議・公開は補っていないが、対象不明の日付へeventという対象を付加。中立なdatesという指示との差があり、一般的言い換えとして許容できるか要確認。"
+      }
+    },
+    {
+      "case": "mixed-en-feasibility",
+      "evidenceIndices": [
+        1,
+        2
+      ],
+      "inputTokens": 2394,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 52,
+      "outputTokens": 130,
+      "phase": "candidate",
+      "seconds": 1.8563777499948628,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中を開始可否不明の原因として断定。根拠の質問と進捗を因果関係で結んでいる。"
+      }
+    },
+    {
+      "case": "long-en-question",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "inputTokens": 2351,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 53,
+      "outputTokens": 220,
+      "phase": "candidate",
+      "seconds": 1.7781425000284798,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "ja-injection",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1615,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "risk",
+      "number": 54,
+      "outputTokens": 96,
+      "phase": "candidate",
+      "seconds": 1.2472367083537392,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "en-conflict",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1607,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "followUpQuestion",
+      "number": 55,
+      "outputTokens": 83,
+      "phase": "candidate",
+      "seconds": 1.5132720000110567,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "needs_review",
+        "issues": [
+          "unspecifiedEventSubject"
+        ],
+        "reason": "具体的な会議・公開は補っていないが、対象不明の日付へeventという対象を付加。中立なdatesという指示との差があり、一般的言い換えとして許容できるか要確認。"
+      }
+    },
+    {
+      "case": "mixed-en-feasibility",
+      "evidenceIndices": [
+        1,
+        2
+      ],
+      "inputTokens": 2393,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 56,
+      "outputTokens": 125,
+      "phase": "candidate",
+      "seconds": 1.298995291639585,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中を開始可否不明の原因として断定。根拠の質問と進捗を因果関係で結んでいる。更新後に確認するという順序も追加。"
+      }
+    },
+    {
+      "case": "dependency-unstated",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "inputTokens": 1674,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 57,
+      "outputTokens": 125,
+      "phase": "candidate",
+      "seconds": 1.1034172916552052,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "dependency-explicit",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "inputTokens": 1677,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 58,
+      "outputTokens": 122,
+      "phase": "candidate",
+      "seconds": 1.2488200416555628,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "subject-unstated",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 59,
+      "outputTokens": 96,
+      "phase": "candidate",
+      "seconds": 1.1092057916685008,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "needs_review",
+        "issues": [
+          "unspecifiedEventSubject"
+        ],
+        "reason": "具体的な会議・公開は補っていないが、対象不明の日付へeventという対象を付加。中立なdatesという指示との差があり、一般的言い換えとして許容できるか要確認。"
+      }
+    },
+    {
+      "case": "subject-explicit",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1613,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 60,
+      "outputTokens": 77,
+      "phase": "candidate",
+      "seconds": 1.0134870000183582,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "update-expected",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 61,
+      "outputTokens": 75,
+      "phase": "candidate",
+      "seconds": 1.5314148333272897,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    },
+    {
+      "case": "update-scheduled",
+      "evidenceIndices": [
+        0
+      ],
+      "inputTokens": 1609,
+      "invalidEvidence": false,
+      "issues": [],
+      "kind": "answerSuggestion",
+      "number": 62,
+      "outputTokens": 72,
+      "phase": "candidate",
+      "seconds": 0.9536752083222382,
+      "thinkingTokens": 0,
+      "type": "result",
+      "languageMatchesQuestion": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "質問言語・根拠対応・回答範囲・時間と確度を照合し、逸脱なし。"
+      }
+    }
+  ],
+  "sourceHashes": {
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingo/Meeting/Services/GeminiInsightClient.swift": "9a91e71215cec2a90b78bcb79d849e5d3c1d1d9581151a585d485136fe1b44aa",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/MixedContextEvaluation.swift": "a8f1ed93c316eefdafdfa96061cbebdb5c7be4f434ad93641e73c54cf9239d51",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/FocusedResponseEvaluation.swift": "79fec1d0626a0b328fb211a9dd456c517b29f288565773180872c831f7854217",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/InsightEvaluationTests.swift": "3df3e54767246c52cf7d9c49f4e45fd3d325bb387537ad997f419aac8f05fdfb",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/GroundingControlEvaluation.swift": "89442af00fd6cbfd4ebbdf07a223238602cbaef93739cb6e4087c8033a70dfbb"
+  },
+  "host": {
+    "path": "/private/tmp/conflingo-review-20261110/Build/Products/Debug/ConfLingo.app",
+    "cdhash": "e7e3305abf7d862450cbddceb8b8d6267aa94d0d",
+    "candidateClientCompiledIntoTestBundle": true,
+    "candidateAppUIOrKeychainAcceptance": false
+  },
+  "localChecks": {
+    "tests": 287,
+    "suites": 42,
+    "debugBuild": "pass",
+    "releaseBuild": "pass",
+    "swiftLintFiles": 107,
+    "swiftLintViolations": 0,
+    "rerunThisEvaluationTurn": false,
+    "sourceHashesUnchanged": true
+  },
+  "executionEvidence": {
+    "xcresult": "/private/tmp/conflingo-grounding-quality/Live.xcresult",
+    "log": "/private/tmp/conflingo-grounding-quality/live.log",
+    "xctestDurationSeconds": 78.344,
+    "xctestSucceeded": true,
+    "xctestSuccessDoesNotMeanQualityPass": true
+  }
+}

@@ -1,0 +1,428 @@
+{
+  "date": "2026-11-10",
+  "head": "f2baff9ce57033ba8276dbdf23778127b09b6807",
+  "host_cdhash": "e7e3305abf7d862450cbddceb8b8d6267aa94d0d",
+  "authorization": {
+    "additional_cap": 12,
+    "quality_cap": 4,
+    "native_cap": 8,
+    "quality_sent": 4,
+    "native_sent": 6,
+    "additional_sent": 10,
+    "unused": 2,
+    "prior_sent": 44,
+    "cumulative_sent": 54
+  },
+  "fixture_lines": [
+    "まずは少人数のパイロットで、実際の利用状況を確認したいですね。",
+    "The security review is still in progress. We should have an update by Wednesday.",
+    "Can we launch the pilot next Friday, or do we need more time for the security review?",
+    "レビューの担当者と、完了条件を確認しましょう。"
+  ],
+  "fixture_repetitions": 3,
+  "quality": [
+    {
+      "id": "mixed-en-review",
+      "question": "Has the security review been confirmed complete?",
+      "language": "en",
+      "status": "needs_review",
+      "evidence_indices": [
+        1,
+        2
+      ],
+      "input_tokens": 1998,
+      "output_tokens": 137,
+      "reason": "レビュー進行中と完了未確認は正しく回答したが、質問外の金曜開始可否と依存関係まで付加。質問への集中を要確認。",
+      "language_pass": true,
+      "invalid_evidence": false
+    },
+    {
+      "id": "ja-short",
+      "question": "セキュリティレビューは完了していますか？",
+      "language": "ja",
+      "status": "pass",
+      "evidence_indices": [
+        1
+      ],
+      "input_tokens": 1997,
+      "output_tokens": 73,
+      "reason": "進行中・未完了、水曜日までの更新予定を保持。",
+      "language_pass": true,
+      "invalid_evidence": false
+    },
+    {
+      "id": "ja-long",
+      "question": "この会話のセキュリティレビューについて、現在分かっている進捗、水曜日の更新予定、来週金曜日のパイロット開始が可能かどうか、担当者と完了条件の確認提案を区別して説明してください。確認されていない内容は断定せず、日本語で回答してください。",
+      "language": "ja",
+      "status": "needs_review",
+      "evidence_indices": [
+        1,
+        2,
+        3
+      ],
+      "input_tokens": 2054,
+      "output_tokens": 194,
+      "reason": "事実・可否不明・確認提案は区別。ただし根拠のby Wednesdayを水曜日にと表し、期限を時点へ狭めた。質問自体も水曜日の更新予定と表現しており、入力設計と回答精度を切り分ける必要がある。",
+      "language_pass": true,
+      "invalid_evidence": false
+    },
+    {
+      "id": "en-long",
+      "question": "Explain the stated progress of the security review, the expected Wednesday update, whether the pilot can start next Friday, and the proposed clarification of the owner and completion criteria. Separate known facts from unknown feasibility and proposals.",
+      "language": "en",
+      "status": "pass",
+      "evidence_indices": [
+        1,
+        2,
+        3
+      ],
+      "input_tokens": 2023,
+      "output_tokens": 196,
+      "reason": "レビュー進行中、水曜日までの更新、開始可否不明と担当・条件確認の提案を区別。",
+      "language_pass": true,
+      "invalid_evidence": false
+    }
+  ],
+  "native_question": "この会話のレビュー進捗、更新時期、パイロット開始の可否、確認すべき担当者と完了条件を、事実と不明点と提案に分けて日本語で詳しく説明してください。会話にない事実は加えず、根拠となる発話に忠実に回答してください。",
+  "native_metadata": {
+    "allowed": false,
+    "cards": [
+      "complete",
+      "complete",
+      "complete",
+      "complete",
+      "interrupted",
+      "interrupted"
+    ],
+    "clicks": [
+      {
+        "type": "mouseUp",
+        "uptime": 356895.167227708,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356895.240525541,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356895.282694958,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356895.31741675,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356895.328779583,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356901.578148375,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356909.221335625,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356909.241736458,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356909.253980458,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356909.259801541,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356909.268072416,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356914.361211625,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356925.7682325,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356956.6639915,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.684459083,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.7083445,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.724499875,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.735984375,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.744294166,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.757683708,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356979.7818415,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356986.73930425,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.672094708,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.690020625,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.703447666,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.7118545,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.718996166,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.73244825,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.756200708,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356992.77375775,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 356999.638486416,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 357005.825376125,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 357018.636250583,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357043.202756666,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357089.837940041,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357091.652349625,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357118.659221333,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357120.250739708,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357135.768449458,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357137.158250916,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357157.565088083,
+        "window": 4782
+      },
+      {
+        "type": "mouseUp",
+        "uptime": 357158.957062375,
+        "window": 4782
+      },
+      {
+        "type": "keyDown",
+        "uptime": 357251.405975625,
+        "window": 4902
+      }
+    ],
+    "page": "review",
+    "phase": "idle",
+    "requests": [
+      {
+        "chunks": 18,
+        "end": 357044.81566595833,
+        "firstChunk": 357044.3629108333,
+        "normalCompletion": true,
+        "number": 1,
+        "start": 357043.2462385
+      },
+      {
+        "chunks": 18,
+        "end": 357064.39323720837,
+        "firstChunk": 357063.88895862503,
+        "normalCompletion": true,
+        "number": 2,
+        "start": 357062.4758934167
+      },
+      {
+        "chunks": 18,
+        "end": 357090.99580537505,
+        "firstChunk": 357090.58820375,
+        "normalCompletion": true,
+        "number": 3,
+        "start": 357089.88082625
+      },
+      {
+        "chunks": 20,
+        "end": 357120.19444425,
+        "firstChunk": 357119.751631,
+        "normalCompletion": true,
+        "number": 4,
+        "start": 357118.70862650004
+      },
+      {
+        "cancelled": true,
+        "chunks": 10,
+        "end": 357137.1970536667,
+        "failure": "interrupted",
+        "firstChunk": 357136.95778654166,
+        "number": 5,
+        "start": 357135.8163152917
+      },
+      {
+        "cancelled": true,
+        "chunks": 4,
+        "end": 357159.0047055833,
+        "failure": "interrupted",
+        "firstChunk": 357158.86522000004,
+        "number": 6,
+        "start": 357157.617145375
+      }
+    ]
+  },
+  "native_assessments": [
+    {
+      "request": 1,
+      "action": "baseline_completion",
+      "pass_receive_then_click": false
+    },
+    {
+      "request": 2,
+      "action": "pause_observation_window_ended_early",
+      "pass_receive_then_click": false
+    },
+    {
+      "request": 3,
+      "action": "pause_after_completion",
+      "pass_receive_then_click": false,
+      "mouse_up": 357091.652349625,
+      "receive_to_click_ms": 1064.146,
+      "click_to_end_ms": -656.544
+    },
+    {
+      "request": 4,
+      "action": "pause_after_completion",
+      "pass_receive_then_click": false,
+      "mouse_up": 357120.250739708,
+      "receive_to_click_ms": 499.109,
+      "click_to_end_ms": -56.295
+    },
+    {
+      "request": 5,
+      "action": "pause",
+      "pass_receive_then_click": true,
+      "mouse_up": 357137.158250916,
+      "receive_to_click_ms": 200.464,
+      "click_to_end_ms": 38.803
+    },
+    {
+      "request": 6,
+      "action": "end",
+      "pass_receive_then_click": true,
+      "mouse_up": 357158.957062375,
+      "receive_to_click_ms": 91.842,
+      "click_to_end_ms": 47.643
+    }
+  ],
+  "offline_summary": {
+    "allowed": false,
+    "phase": "idle",
+    "page": "review",
+    "cards": [
+      "complete",
+      "complete"
+    ],
+    "requests": []
+  },
+  "source_sha256": {
+    "/private/tmp/conflingo-pr6-final-acceptance/SemanticAcceptance.swift": "5fbdaa837b5330dd494f5beae691d5db667419d3890c16c856b50ebcc64c4a7a",
+    "/private/tmp/conflingo-pr6-final-acceptance/NativeStopAcceptance.swift": "f3d717fb3fe94675c9074eea91053695dfabf64c11e64b62d84ee5bbda1d0a6c",
+    "/private/tmp/conflingo-pr6-offline-acceptance/NativeStopAcceptance.swift": "f58612ee9a8a22891582e3ee41a1dc88910fc1eb51f17d38281cf1a5a4af0b5e"
+  }
+}

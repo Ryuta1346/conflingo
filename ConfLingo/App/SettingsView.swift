@@ -4,6 +4,7 @@ struct SettingsView: View {
     @Binding var fontSize: Double
     @Binding var alwaysOnTop: Bool
     @Binding var appearance: String
+    @Binding var answerLanguage: AnswerLanguage
     let credentials: GeminiCredentials
     let editDictionary: () -> Void
     let prepare: () -> Void
@@ -41,7 +42,20 @@ struct SettingsView: View {
                         LabeledContent("文字を拡大 / 縮小", value: "⌘ ＋ / −")
                     }
                 }
-                Surface { GeminiKeySettingsView(credentials: credentials) }
+                Surface {
+                    VStack(alignment: .leading, spacing: 18) {
+                        Text("AI会話支援").font(.headline)
+                        Picker("AIの回答言語", selection: $answerLanguage) {
+                            ForEach(AnswerLanguage.allCases, id: \.self) { language in
+                                Text(language.label).tag(language)
+                            }
+                        }
+                        Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
+                            .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        Divider()
+                        GeminiKeySettingsView(credentials: credentials)
+                    }
+                }
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("データの扱い").font(.headline)

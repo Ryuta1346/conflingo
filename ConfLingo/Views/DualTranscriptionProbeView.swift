@@ -58,8 +58,9 @@ struct DualTranscriptionProbeView: View {
                         Text("認識した発話を、入力元と会議の経過時刻付きで表示します。")
                             .foregroundStyle(.secondary)
                     }
-                    ForEach(controller.store.finals) { event in transcript(event) }
-                    ForEach(controller.store.partials) { event in transcript(event) }
+                    ForEach(controller.store.finals + controller.store.partials) { event in
+                        transcript(event)
+                    }
                 }
                 .frame(maxWidth: .infinity, alignment: .leading)
             }

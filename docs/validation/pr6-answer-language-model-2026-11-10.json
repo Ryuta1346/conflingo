@@ -1,0 +1,2173 @@
+{
+  "date": "2026-11-10",
+  "baseCommit": "f2baff9",
+  "status": "model_comparison_complete",
+  "approval": "ユーザー「両方を承認する」",
+  "requests": 72,
+  "maxRequests": 72,
+  "estimatedCostStopUSD": 2,
+  "reactiveRetries": 0,
+  "syntheticOnly": true,
+  "comparison": {
+    "rounds": 2,
+    "casesPerRound": 12,
+    "conditions": 3,
+    "maxOutputTokens": 8192,
+    "productionMaxOutputTokens": 1024,
+    "requestTimeoutSeconds": 30,
+    "conditionOrder": "rotated by case and round",
+    "productionModelChanged": false
+  },
+  "reviewer": "実行エージェントによる全件照合。独立した人手レビューではない。",
+  "summary": {
+    "lite-minimal": {
+      "requests": 24,
+      "pass": 19,
+      "semanticFailures": 4,
+      "executionFailures": 1,
+      "languageMatches": 23,
+      "meanFirstTextSeconds": 1.0877141557967938,
+      "meanSuccessfulCompletionSeconds": 1.3119102409489087,
+      "meanAllAttemptSeconds": 2.5083035434096623,
+      "knownUsageCostUSD": 0.012761000000000002,
+      "conservativeEstimatedCostUSD": 0.025798999999999992,
+      "inputTokens": 37994,
+      "outputTokens": 2175,
+      "thinkingTokens": 0
+    },
+    "lite-high": {
+      "requests": 24,
+      "pass": 22,
+      "semanticFailures": 2,
+      "executionFailures": 0,
+      "languageMatches": 24,
+      "meanFirstTextSeconds": 3.243820503477764,
+      "meanSuccessfulCompletionSeconds": 3.5131152916680244,
+      "meanAllAttemptSeconds": 3.5131152916680244,
+      "knownUsageCostUSD": 0.044642249999999994,
+      "conservativeEstimatedCostUSD": 0.044642249999999994,
+      "inputTokens": 40281,
+      "outputTokens": 2144,
+      "thinkingTokens": 20904
+    },
+    "flash-medium": {
+      "requests": 24,
+      "pass": 24,
+      "semanticFailures": 0,
+      "executionFailures": 0,
+      "languageMatches": 24,
+      "meanFirstTextSeconds": 5.584608807291564,
+      "meanSuccessfulCompletionSeconds": 6.06504527777967,
+      "meanAllAttemptSeconds": 6.06504527777967,
+      "knownUsageCostUSD": 0.07965299999999999,
+      "conservativeEstimatedCostUSD": 0.07965299999999999,
+      "inputTokens": 40279,
+      "outputTokens": 2102,
+      "thinkingTokens": 11083
+    }
+  },
+  "results": [
+    {
+      "answerLanguage": "en",
+      "case": "long-en-question",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "firstTextSeconds": 1.5512074583093636,
+      "inputTokens": 2288,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 1,
+      "outputTokens": 225,
+      "round": 1,
+      "seconds": 2.0348498333478346,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.0009095,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "独立した発話をレビュー未完了による開始可否不明という因果へ変更。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "long-en-question",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "firstTextSeconds": 4.5025659166276455,
+      "inputTokens": 2287,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 2,
+      "outputTokens": 221,
+      "round": 1,
+      "seconds": 5.065240166615695,
+      "thinkingLevel": "high",
+      "thinkingTokens": 1450,
+      "type": "result",
+      "estimatedCostUSD": 0.00307825,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "long-en-question",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "firstTextSeconds": 10.989502041658852,
+      "inputTokens": 2287,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 3,
+      "outputTokens": 195,
+      "round": 1,
+      "seconds": 12.050061249989085,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 1228,
+      "type": "result",
+      "estimatedCostUSD": 0.0070515,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "mixed-en-feasibility",
+      "config": "lite-high",
+      "evidenceIndices": [
+        1,
+        2
+      ],
+      "firstTextSeconds": 2.397914541652426,
+      "inputTokens": 2318,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 4,
+      "outputTokens": 127,
+      "round": 1,
+      "seconds": 2.739616249979008,
+      "thinkingLevel": "high",
+      "thinkingTokens": 661,
+      "type": "result",
+      "estimatedCostUSD": 0.0017615,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中・更新見込みから開始可否不明をsoで結び、根拠にない因果を付加。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "mixed-en-feasibility",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        2,
+        6,
+        10
+      ],
+      "firstTextSeconds": 9.815251958323643,
+      "inputTokens": 2318,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 5,
+      "outputTokens": 172,
+      "round": 1,
+      "seconds": 10.801322041661479,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 1231,
+      "type": "result",
+      "estimatedCostUSD": 0.00699975,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "mixed-en-feasibility",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        1,
+        2
+      ],
+      "firstTextSeconds": 1.050976583326701,
+      "inputTokens": 2318,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 6,
+      "outputTokens": 129,
+      "round": 1,
+      "seconds": 1.367425500007812,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.000773,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中を開始可否不明の原因として断定。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "ja-conflict",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 5.681544375023805,
+      "inputTokens": 1545,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 7,
+      "outputTokens": 65,
+      "round": 1,
+      "seconds": 6.0414732083445415,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 548,
+      "type": "result",
+      "estimatedCostUSD": 0.0034575,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "ja-conflict",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.7767905833316036,
+      "inputTokens": 1545,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 8,
+      "outputTokens": 79,
+      "round": 1,
+      "seconds": 0.9689641250297427,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00050475,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "ja-conflict",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.829189000010956,
+      "inputTokens": 1545,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 9,
+      "outputTokens": 85,
+      "round": 1,
+      "seconds": 3.069605708355084,
+      "thinkingLevel": "high",
+      "thinkingTokens": 712,
+      "type": "result",
+      "estimatedCostUSD": 0.00158175,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "en-conflict",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.9691715416847728,
+      "inputTokens": 1539,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 10,
+      "outputTokens": 101,
+      "round": 1,
+      "seconds": 1.1970708750304766,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00053625,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "en-conflict",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.02776750002522,
+      "inputTokens": 1539,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 11,
+      "outputTokens": 67,
+      "round": 1,
+      "seconds": 4.284071125031915,
+      "thinkingLevel": "high",
+      "thinkingTokens": 1160,
+      "type": "result",
+      "estimatedCostUSD": 0.00222525,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "en-conflict",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 5.177040041657165,
+      "inputTokens": 1539,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 12,
+      "outputTokens": 67,
+      "round": 1,
+      "seconds": 5.620955916645471,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 372,
+      "type": "result",
+      "estimatedCostUSD": 0.0028005,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-unstated",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 3.1391071249963716,
+      "inputTokens": 1602,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 13,
+      "outputTokens": 119,
+      "round": 1,
+      "seconds": 3.4486915832967497,
+      "thinkingLevel": "high",
+      "thinkingTokens": 789,
+      "type": "result",
+      "estimatedCostUSD": 0.0017625,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-unstated",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 3.9266091249883175,
+      "inputTokens": 1601,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 14,
+      "outputTokens": 97,
+      "round": 1,
+      "seconds": 4.41951045836322,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 295,
+      "type": "result",
+      "estimatedCostUSD": 0.00267075,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-unstated",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 0.8165117500466295,
+      "inputTokens": 1602,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 15,
+      "outputTokens": 123,
+      "round": 1,
+      "seconds": 1.1076615000492893,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.000585,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-explicit",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 5.969788999995217,
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 16,
+      "outputTokens": 101,
+      "round": 1,
+      "seconds": 6.319284166675061,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 463,
+      "type": "result",
+      "estimatedCostUSD": 0.00332325,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-explicit",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 1.005163875001017,
+      "inputTokens": 1612,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 17,
+      "outputTokens": 126,
+      "round": 1,
+      "seconds": 1.3953294166713022,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.000592,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-explicit",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 4.3253693750011735,
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 18,
+      "outputTokens": 124,
+      "round": 1,
+      "seconds": 4.685616333328653,
+      "thinkingLevel": "high",
+      "thinkingTokens": 1412,
+      "type": "result",
+      "estimatedCostUSD": 0.00270675,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-unstated",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.1512760416953824,
+      "inputTokens": 1535,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 19,
+      "outputTokens": 84,
+      "round": 1,
+      "seconds": 1.4172987916972488,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00050975,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-unstated",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.6420754583668895,
+      "inputTokens": 1535,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 20,
+      "outputTokens": 53,
+      "round": 1,
+      "seconds": 2.8209718333673663,
+      "thinkingLevel": "high",
+      "thinkingTokens": 598,
+      "type": "result",
+      "estimatedCostUSD": 0.00136025,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-unstated",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 6.597455166629516,
+      "inputTokens": 1535,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 21,
+      "outputTokens": 61,
+      "round": 1,
+      "seconds": 6.857362791663036,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 533,
+      "type": "result",
+      "estimatedCostUSD": 0.00337875,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-explicit",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.1929828749853186,
+      "inputTokens": 1544,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 22,
+      "outputTokens": 74,
+      "round": 1,
+      "seconds": 2.423054916667752,
+      "thinkingLevel": "high",
+      "thinkingTokens": 574,
+      "type": "result",
+      "estimatedCostUSD": 0.001358,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-explicit",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.3088559582829475,
+      "inputTokens": 1544,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 23,
+      "outputTokens": 55,
+      "round": 1,
+      "seconds": 3.6219719583168626,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 170,
+      "type": "result",
+      "estimatedCostUSD": 0.00200175,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-explicit",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.2921281666494906,
+      "inputTokens": 1544,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 24,
+      "outputTokens": 96,
+      "round": 1,
+      "seconds": 1.5657857916667126,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00053,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedAmbiguity"
+        ],
+        "reason": "ワークショップの変更済み日程が明示されているのに、予定訂正か実曜日か不明という留保を付加。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-expected",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.07641787501052,
+      "inputTokens": 1542,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 25,
+      "outputTokens": 56,
+      "round": 1,
+      "seconds": 4.5009200416971,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 309,
+      "type": "result",
+      "estimatedCostUSD": 0.00252525,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-expected",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.8233228750177659,
+      "inputTokens": 1542,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 26,
+      "outputTokens": 58,
+      "round": 1,
+      "seconds": 0.965082083363086,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.0004725,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-expected",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.0313988749985583,
+      "inputTokens": 1542,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 27,
+      "outputTokens": 55,
+      "round": 1,
+      "seconds": 2.222943208354991,
+      "thinkingLevel": "high",
+      "thinkingTokens": 485,
+      "type": "result",
+      "estimatedCostUSD": 0.0011955,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-scheduled",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.8186119999736547,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 28,
+      "outputTokens": 70,
+      "round": 1,
+      "seconds": 0.9852496666717343,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.0004895,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-scheduled",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.1961023750482127,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 29,
+      "outputTokens": 69,
+      "round": 1,
+      "seconds": 2.3888024166808464,
+      "thinkingLevel": "high",
+      "thinkingTokens": 612,
+      "type": "result",
+      "estimatedCostUSD": 0.001406,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-scheduled",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.3939661249751225,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 30,
+      "outputTokens": 50,
+      "round": 1,
+      "seconds": 4.662724666646682,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 188,
+      "type": "result",
+      "estimatedCostUSD": 0.002046,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "setting-en-ja-input",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.4814636249793693,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 31,
+      "outputTokens": 70,
+      "round": 1,
+      "seconds": 3.721427833312191,
+      "thinkingLevel": "high",
+      "thinkingTokens": 873,
+      "type": "result",
+      "estimatedCostUSD": 0.001799,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "setting-en-ja-input",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 6.6819412499899045,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 32,
+      "outputTokens": 52,
+      "round": 1,
+      "seconds": 6.934466500009876,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 199,
+      "type": "result",
+      "estimatedCostUSD": 0.00209475,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "setting-en-ja-input",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.9201129583525471,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 33,
+      "outputTokens": 70,
+      "round": 1,
+      "seconds": 1.1007110833306797,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.0004895,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "setting-ja-en-input",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.046776541683357,
+      "inputTokens": 1541,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 34,
+      "outputTokens": 55,
+      "round": 1,
+      "seconds": 4.4153584583546035,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 335,
+      "type": "result",
+      "estimatedCostUSD": 0.00261825,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "setting-ja-en-input",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.9849200833705254,
+      "inputTokens": 1541,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 35,
+      "outputTokens": 58,
+      "round": 1,
+      "seconds": 1.0839687500265427,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00047225,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "setting-ja-en-input",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.866150000016205,
+      "inputTokens": 1541,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 36,
+      "outputTokens": 62,
+      "round": 1,
+      "seconds": 3.064706208300777,
+      "thinkingLevel": "high",
+      "thinkingTokens": 638,
+      "type": "result",
+      "estimatedCostUSD": 0.00143525,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "long-en-question",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 7.635105166700669,
+      "inputTokens": 2287,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 37,
+      "outputTokens": 119,
+      "round": 2,
+      "seconds": 8.090306875004899,
+      "thinkingLevel": "high",
+      "thinkingTokens": 2534,
+      "type": "result",
+      "estimatedCostUSD": 0.00455125,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "missingRequestedTopics"
+        ],
+        "reason": "広い質問のうち開始可否の不明点と確認提案を回答せず、進捗と更新見込みだけに短縮。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "long-en-question",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0,
+        1,
+        2,
+        3
+      ],
+      "firstTextSeconds": 9.681202374980785,
+      "inputTokens": 2287,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 38,
+      "outputTokens": 193,
+      "round": 2,
+      "seconds": 10.784309124981519,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 1048,
+      "type": "result",
+      "estimatedCostUSD": 0.006369,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "long-en-question",
+      "config": "lite-minimal",
+      "error": "AIへの接続がタイムアウトしました。字幕は継続します。",
+      "model": "gemini-3.1-flash-lite",
+      "number": 39,
+      "round": 2,
+      "seconds": 30.025349500006996,
+      "thinkingLevel": "minimal",
+      "type": "result",
+      "estimatedCostUSD": 0.013038,
+      "costUsesActualUsage": false,
+      "review": {
+        "status": "execution_failed",
+        "issues": [
+          "timeout"
+        ],
+        "reason": "30秒の接続タイムアウト。本文・使用量なし、再送なし。モデル品質の失敗と分ける。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "mixed-en-feasibility",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        2,
+        6,
+        10
+      ],
+      "firstTextSeconds": 8.147995500010438,
+      "inputTokens": 2318,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 40,
+      "outputTokens": 174,
+      "round": 2,
+      "seconds": 9.104489749995992,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 864,
+      "type": "result",
+      "estimatedCostUSD": 0.005631,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "mixed-en-feasibility",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        1,
+        10
+      ],
+      "firstTextSeconds": 1.1864086666610092,
+      "inputTokens": 2318,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 41,
+      "outputTokens": 117,
+      "round": 2,
+      "seconds": 1.5063742499914952,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.000755,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "fail",
+        "issues": [
+          "unsupportedDependency"
+        ],
+        "reason": "レビュー進行中・更新見込みを開始可否不明の理由として付加。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "mixed-en-feasibility",
+      "config": "lite-high",
+      "evidenceIndices": [
+        1,
+        2
+      ],
+      "firstTextSeconds": 4.164689375029411,
+      "inputTokens": 2318,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 42,
+      "outputTokens": 112,
+      "round": 2,
+      "seconds": 4.433801791688893,
+      "thinkingLevel": "high",
+      "thinkingTokens": 1125,
+      "type": "result",
+      "estimatedCostUSD": 0.002435,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "ja-conflict",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.352231250028126,
+      "inputTokens": 1545,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 43,
+      "outputTokens": 85,
+      "round": 2,
+      "seconds": 1.4872513333684765,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00051375,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "ja-conflict",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.103740499995183,
+      "inputTokens": 1545,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 44,
+      "outputTokens": 85,
+      "round": 2,
+      "seconds": 3.3638439583592117,
+      "thinkingLevel": "high",
+      "thinkingTokens": 851,
+      "type": "result",
+      "estimatedCostUSD": 0.00179025,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "ja-conflict",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 8.07290458335774,
+      "inputTokens": 1545,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 45,
+      "outputTokens": 72,
+      "round": 2,
+      "seconds": 8.468044833338354,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 841,
+      "type": "result",
+      "estimatedCostUSD": 0.0045825,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "en-conflict",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.813918708299752,
+      "inputTokens": 1539,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 46,
+      "outputTokens": 81,
+      "round": 2,
+      "seconds": 5.07498795830179,
+      "thinkingLevel": "high",
+      "thinkingTokens": 1242,
+      "type": "result",
+      "estimatedCostUSD": 0.00236925,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "en-conflict",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.672796124999877,
+      "inputTokens": 1539,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 47,
+      "outputTokens": 85,
+      "round": 2,
+      "seconds": 5.175789333356079,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 326,
+      "type": "result",
+      "estimatedCostUSD": 0.0026955,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "en-conflict",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.0056317083071917,
+      "inputTokens": 1539,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 48,
+      "outputTokens": 76,
+      "round": 2,
+      "seconds": 1.1967216666671447,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00049875,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-unstated",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 4.1912207916611806,
+      "inputTokens": 1602,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 49,
+      "outputTokens": 96,
+      "round": 2,
+      "seconds": 4.766643583308905,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 358,
+      "type": "result",
+      "estimatedCostUSD": 0.002904,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-unstated",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 1.560053874971345,
+      "inputTokens": 1601,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 50,
+      "outputTokens": 119,
+      "round": 2,
+      "seconds": 1.8658947499934584,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00057875,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-unstated",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 3.7298097083112225,
+      "inputTokens": 1602,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 51,
+      "outputTokens": 107,
+      "round": 2,
+      "seconds": 4.0013288333429955,
+      "thinkingLevel": "high",
+      "thinkingTokens": 992,
+      "type": "result",
+      "estimatedCostUSD": 0.002049,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-explicit",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 1.4627520416397601,
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 52,
+      "outputTokens": 124,
+      "round": 2,
+      "seconds": 1.7101080416468903,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00058875,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-explicit",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 2.2645369166857563,
+      "inputTokens": 1612,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 53,
+      "outputTokens": 124,
+      "round": 2,
+      "seconds": 2.580523041659035,
+      "thinkingLevel": "high",
+      "thinkingTokens": 660,
+      "type": "result",
+      "estimatedCostUSD": 0.001579,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "dependency-explicit",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0,
+        1
+      ],
+      "firstTextSeconds": 4.033720166655257,
+      "inputTokens": 1611,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 54,
+      "outputTokens": 102,
+      "round": 2,
+      "seconds": 4.575474624987692,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 287,
+      "type": "result",
+      "estimatedCostUSD": 0.002667,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-unstated",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.1545624583377503,
+      "inputTokens": 1535,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 55,
+      "outputTokens": 72,
+      "round": 2,
+      "seconds": 2.35872708336683,
+      "thinkingLevel": "high",
+      "thinkingTokens": 369,
+      "type": "result",
+      "estimatedCostUSD": 0.00104525,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-unstated",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 5.08195966668427,
+      "inputTokens": 1535,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 56,
+      "outputTokens": 65,
+      "round": 2,
+      "seconds": 5.4316763750393875,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 368,
+      "type": "result",
+      "estimatedCostUSD": 0.002775,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-unstated",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.9862397916731425,
+      "inputTokens": 1535,
+      "invalidEvidence": false,
+      "kind": "followUpQuestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 57,
+      "outputTokens": 88,
+      "round": 2,
+      "seconds": 1.2565649999887682,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00051575,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-explicit",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.180548208358232,
+      "inputTokens": 1544,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 58,
+      "outputTokens": 77,
+      "round": 2,
+      "seconds": 3.5686407916946337,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 187,
+      "type": "result",
+      "estimatedCostUSD": 0.002148,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-explicit",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.8513918749522418,
+      "inputTokens": 1544,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 59,
+      "outputTokens": 76,
+      "round": 2,
+      "seconds": 0.9760127916233614,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.0005,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "subject-explicit",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.177869333361741,
+      "inputTokens": 1544,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 60,
+      "outputTokens": 59,
+      "round": 2,
+      "seconds": 2.3594907500082627,
+      "thinkingLevel": "high",
+      "thinkingTokens": 459,
+      "type": "result",
+      "estimatedCostUSD": 0.001163,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-expected",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.007778250030242,
+      "inputTokens": 1542,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 61,
+      "outputTokens": 76,
+      "round": 2,
+      "seconds": 1.1990450833691284,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.0004995,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-expected",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.543078124988824,
+      "inputTokens": 1542,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 62,
+      "outputTokens": 61,
+      "round": 2,
+      "seconds": 2.7778325416729786,
+      "thinkingLevel": "high",
+      "thinkingTokens": 664,
+      "type": "result",
+      "estimatedCostUSD": 0.001473,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-expected",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.7106600417173468,
+      "inputTokens": 1542,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 63,
+      "outputTokens": 55,
+      "round": 2,
+      "seconds": 3.959325958334375,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 239,
+      "type": "result",
+      "estimatedCostUSD": 0.002259,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-scheduled",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.294792833388783,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 64,
+      "outputTokens": 64,
+      "round": 2,
+      "seconds": 2.539705708331894,
+      "thinkingLevel": "high",
+      "thinkingTokens": 321,
+      "type": "result",
+      "estimatedCostUSD": 0.000962,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-scheduled",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.055926083354279,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 65,
+      "outputTokens": 50,
+      "round": 2,
+      "seconds": 4.275577375025023,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 170,
+      "type": "result",
+      "estimatedCostUSD": 0.0019785,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "update-scheduled",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 0.7792901666252874,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 66,
+      "outputTokens": 69,
+      "round": 2,
+      "seconds": 0.9699418332893401,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.000488,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "setting-en-ja-input",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.580206791695673,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 67,
+      "outputTokens": 52,
+      "round": 2,
+      "seconds": 3.834260291652754,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 213,
+      "type": "result",
+      "estimatedCostUSD": 0.00214725,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "setting-en-ja-input",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.1163804999669082,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 68,
+      "outputTokens": 55,
+      "round": 2,
+      "seconds": 1.2328251249855384,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.000467,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "en",
+      "case": "setting-en-ja-input",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 2.4017892083502375,
+      "inputTokens": 1538,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 69,
+      "outputTokens": 60,
+      "round": 2,
+      "seconds": 2.586256416689139,
+      "thinkingLevel": "high",
+      "thinkingTokens": 433,
+      "type": "result",
+      "estimatedCostUSD": 0.001124,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "setting-ja-en-input",
+      "config": "lite-minimal",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 1.5490735417115502,
+      "inputTokens": 1541,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 70,
+      "outputTokens": 71,
+      "round": 2,
+      "seconds": 1.5837982500088401,
+      "thinkingLevel": "minimal",
+      "thinkingTokens": 0,
+      "type": "result",
+      "estimatedCostUSD": 0.00049175,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "setting-ja-en-input",
+      "config": "lite-high",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 3.9357130833086558,
+      "inputTokens": 1541,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.1-flash-lite",
+      "number": 71,
+      "outputTokens": 74,
+      "round": 2,
+      "seconds": 4.213214458315633,
+      "thinkingLevel": "high",
+      "thinkingTokens": 1290,
+      "type": "result",
+      "estimatedCostUSD": 0.00243125,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    },
+    {
+      "answerLanguage": "ja",
+      "case": "setting-ja-en-input",
+      "config": "flash-medium",
+      "evidenceIndices": [
+        0
+      ],
+      "firstTextSeconds": 4.956321583304089,
+      "inputTokens": 1541,
+      "invalidEvidence": false,
+      "kind": "answerSuggestion",
+      "languageMatches": true,
+      "model": "gemini-3.8-flash",
+      "number": 72,
+      "outputTokens": 55,
+      "round": 2,
+      "seconds": 5.371443166630343,
+      "thinkingLevel": "medium",
+      "thinkingTokens": 311,
+      "type": "result",
+      "estimatedCostUSD": 0.00252825,
+      "costUsesActualUsage": true,
+      "review": {
+        "status": "pass",
+        "issues": [],
+        "reason": "指定言語・質問への充足・根拠・対象・関係・確度を固定fixtureと照合し、合格。"
+      }
+    }
+  ],
+  "sourceHashes": {
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingo/Meeting/AnswerLanguage.swift": "caa09b063a2e89d873f05c5f94e7b13db70690c1f02ed379bc8264d331c5f27d",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingo/Meeting/Services/InsightClient.swift": "778e4a302bbef6146cbf95f73f9586dc7f90f35bea590672485ab751fdfb813f",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingo/Meeting/Services/GeminiInsightClient.swift": "701d3f6939301b645d21c86ec1fdbbbe9c39aae8f088e914de5863dfa1751ad8",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/InsightEvaluationTests.swift": "ffdec20732586cf1f85a72bc0e1bd0dc42f78519f67aa0938bd5f1442ed2366b",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/MixedContextEvaluation.swift": "78c1a72fe520652bbacfa077b7e11a720d6719fde3dc6cb5cd5be012162fdeb3",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/FocusedResponseEvaluation.swift": "79fec1d0626a0b328fb211a9dd456c517b29f288565773180872c831f7854217",
+    "/Users/ryuta/Projects/gavrri/conflingo/ConfLingoTests/GroundingControlEvaluation.swift": "89442af00fd6cbfd4ebbdf07a223238602cbaef93739cb6e4087c8033a70dfbb"
+  },
+  "cost": {
+    "estimatedCostUSD": 0.15009424999999998,
+    "knownUsageCostUSD": 0.13705625,
+    "unknownUsageReservationsUSD": 0.013038,
+    "actualInvoiceVerified": false
+  },
+  "host": {
+    "path": "/private/tmp/conflingo-review-20261110/Build/Products/Debug/ConfLingo.app",
+    "cdhash": "e7e3305abf7d862450cbddceb8b8d6267aa94d0d",
+    "newRequestAndClientCompiledIntoTestBundle": true,
+    "productionModelChanged": false
+  },
+  "localChecks": {
+    "tests": 290,
+    "suites": 43,
+    "debugBuild": "pass",
+    "releaseBuild": "pass",
+    "swiftLintFiles": 109,
+    "swiftLintViolations": 0,
+    "tddRed": "3 tests failed with 7 expected issues",
+    "targetedGreen": "11 tests passed"
+  },
+  "ui": {
+    "build": "/private/tmp/conflingo-language-model-build/Build/Products/Debug/ConfLingo.app",
+    "mode": "non-network synthetic preview",
+    "preparationToSettingsEnglish": "pass",
+    "settingsToPreparationJapanese": "pass",
+    "captureStarted": false,
+    "extraAPIRequests": 0,
+    "restartPersistence": "verified by new workspace from injected UserDefaults, not by relaunch UI",
+    "realKeychainForNewBuild": "not tested"
+  },
+  "limitations": [
+    "12 cases repeated twice per condition, not 24 independent cases. General quality not guaranteed.",
+    "All conditions use explicit answerLanguage and maxOutputTokens 8192; earlier prompt/default1024 trials are not an isolated model comparison.",
+    "One minimal timeout has unknown usage; conservative budget reservation 0.013038 USD is not actual billed cost.",
+    "Per-claim evidence schema and production model default remain unchanged.",
+    "Each result body was reviewed in memory/tool output, not saved in work files."
+  ]
+}

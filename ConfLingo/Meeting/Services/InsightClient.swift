@@ -5,15 +5,18 @@ struct InsightRequest: Sendable {
     let id = UUID()
     let sessionID: UUID
     let question: String
+    let answerLanguage: AnswerLanguage
     let trigger: Trigger
     let events: [TranscriptEvent]
     let omittedCount: Int
 
-    init(sessionID: UUID, question: String, trigger: Trigger, events: [TranscriptEvent]) throws {
+    init(sessionID: UUID, question: String, trigger: Trigger, events: [TranscriptEvent],
+         answerLanguage: AnswerLanguage = .japanese) throws {
         let question = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !question.isEmpty, question.count <= 2_000 else { throw InsightFailure.invalidQuestion }
         self.sessionID = sessionID
         self.question = question
+        self.answerLanguage = answerLanguage
         self.trigger = trigger
         var seen: Set<UUID> = []
         let finals = events.filter {

@@ -17,7 +17,8 @@ enum MeetingPreview {
         arguments.contains("--meeting-preview") && arguments.contains("--meeting-live-ai")
     }
 
-    static func make(activity: AudioInputUse, scenario: String = "setup", liveAI: Bool = false) -> MeetingWorkspace {
+    static func make(activity: AudioInputUse, scenario: String = "setup", liveAI: Bool = false,
+                     defaults: UserDefaults = MeetingPreview.defaults) -> MeetingWorkspace {
         let microphone = PreviewAudioSource(origin: .microphone)
         let system = PreviewAudioSource(origin: .systemAudio, denied: scenario == "permission-denied")
         let controller = DualTranscriptionController(
@@ -29,9 +30,9 @@ enum MeetingPreview {
             }
         )
         let meeting = liveAI
-            ? MeetingWorkspace(controller: controller)
+            ? MeetingWorkspace(controller: controller, defaults: defaults)
             : MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
-                               credentials: GeminiCredentials(store: PreviewAPIKeyStore()))
+                               credentials: GeminiCredentials(store: PreviewAPIKeyStore()), defaults: defaults)
         meeting.previewUsesLiveAI = liveAI
         return meeting
     }

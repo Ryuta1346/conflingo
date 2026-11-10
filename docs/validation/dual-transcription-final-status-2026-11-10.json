@@ -1,0 +1,40 @@
+{
+  "date": "2026-11-10",
+  "status": "fixed_synthetic_ui_verified",
+  "scope": "dual-transcription-probe presentation only",
+  "red": {
+    "finalData": 10,
+    "partialData": 0,
+    "finalLabels": 0,
+    "recognizingLabels": 10
+  },
+  "green": {
+    "finalData": 10,
+    "partialData": 0,
+    "finalLabels": 10,
+    "recognizingLabels": 0
+  },
+  "resume": {
+    "finalData": 20,
+    "partialData": 0,
+    "finalLabels": 20,
+    "recognizingLabels": 0
+  },
+  "automatedTests": {
+    "count": 295,
+    "suites": 44,
+    "passed": true
+  },
+  "lint": {
+    "files": 109,
+    "violations": 0
+  },
+  "debugBuild": true,
+  "releaseBuild": true,
+  "realAudioRetested": false,
+  "apiRequests": 0,
+  "newPermissions": 0,
+  "committed": false,
+  "viewSHA256": "ba57e2af8fe84e97314e13ed19ba38c7a2cc0386fe7ce15418771372dca8ffae",
+  "fixtureSHA256": "847b70f4f66d3f840d8c8acf7319147250cd3949c5f454ec3f2f5ca8f995b813"
+}

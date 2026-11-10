@@ -8,6 +8,13 @@ final class MeetingWorkspace {
     private enum Completion { case pause, end, cancelPreparation }
 
     let controller: DualTranscriptionController
+    private let defaults: UserDefaults
+    var answerLanguage: AnswerLanguage {
+        didSet {
+            defaults.set(answerLanguage.rawValue, forKey: "aiAnswerLanguage")
+            ai.answerLanguage = answerLanguage
+        }
+    }
     var name = ""
     var microphoneLocaleID = "ja-JP"
     var systemLocaleID = "en-US"
@@ -37,12 +44,16 @@ final class MeetingWorkspace {
     private var pendingCompletion: Completion?
 
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
-         credentials: GeminiCredentials? = nil) {
+         credentials: GeminiCredentials? = nil, defaults: UserDefaults = .standard) {
+        self.defaults = defaults
+        let language = AnswerLanguage(rawValue: defaults.string(forKey: "aiAnswerLanguage") ?? "") ?? .japanese
+        answerLanguage = language
         self.controller = controller
         let credentials = credentials ?? GeminiCredentials()
         self.credentials = credentials
         let client = insightClient ?? GeminiInsightClient(key: { try await credentials.store.read() })
         let ai = InsightCoordinator(store: controller.store, client: client)
+        ai.answerLanguage = language
         self.ai = ai
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
         controller.captureActivityChanged = { [weak ai] active in
