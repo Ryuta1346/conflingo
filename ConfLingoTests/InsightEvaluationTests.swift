@@ -127,7 +127,7 @@ struct InsightEvaluationTests {
 @MainActor
 @Suite(.serialized, .timeLimit(.minutes(10)))
 struct GeminiLiveEvaluationTests {
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["CONFLINGO_LIVE_AI"] == "1"))
+    @Test(.enabled(if: RAGLiveConfiguration.legacyEnabled("CONFLINGO_LIVE_AI")))
     func syntheticCorpusOnly() async throws {
         let store = KeychainAPIKeyStore()
         guard try await store.read() != nil else { throw InsightFailure.missingKey }

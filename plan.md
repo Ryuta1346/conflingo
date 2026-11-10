@@ -5,10 +5,10 @@
 ## 現在地
 
 - 更新: **2026-11-11**／進捗: **2/12**。PR1・2はDONE。PR0は実機確認待ち、PR3〜8はマージ済み・残る受入待ち、PR9は未着手。
-- **次の作業:** PR8の差分レビューと実API引用品質評価のケース・要求数・費用上限を具体化する。利用者が読み上げ可能になったら、停止表示修正版の[短時間実音声再受入](docs/validation/real-audio-fixed-reacceptance.md)を再開する。
-- **確認済み:** PR8時点で331テスト・Debug/Release・lint125ファイル違反0・非録音UI確認。[検証記録](docs/validation/pr8-local-rag.md)。PR6は3.8 Flash/medium・8192で品質52/52合格、Keychain・回答言語保存/復元・実受信後の停止/取消・再開後回答を確認済み。
+- **次の作業:** PR7の実API要約品質評価のケース・要求数・費用上限を具体化する。PR8の2指摘は修正・342テスト・lint・Release検証済み、実APIは16/16合格（計数込み32要求、推定US$0.04850325）。[結果](docs/validation/pr8-quality-acceptance.md)。修正ブランチは提出準備中。実音声再受入は読み上げ準備待ちを維持。
+- **確認済み:** PR8品質対応後342テスト・Debug/Release・lint131ファイル違反0、合成実API16/16合格。PR8初版の非録音UI確認も完了。[検証記録](docs/validation/pr8-local-rag.md)。PR6は3.8 Flash/medium・8192で品質52/52合格、Keychain・回答言語保存/復元・実受信後の停止/取消・再開後回答を確認済み。
 - **確認済みの範囲:** [キーボード主要経路・反復とVoiceOver基本操作](docs/validation/pr6-focus-stability.md)は確認済み。全画面・全状態の受入とは区別する。実音声2入力STTは一部確認済みだが、停止表示修正版の実音声再確認は未実施。
-- **完了条件:** 残る実機受入・品質検証の証跡を記録し、対象PRのマージと受入完了を確認してDONEへ更新する。今回の更新は計画整理のみで、新規の実音声・実API検証は実施していない。
+- **完了条件:** 残る実機受入・品質検証の証跡を記録し、対象PRのマージと受入完了を確認してDONEへ更新する。今回の追加検証は合成資料による実API評価。実音声受入と修正ブランチのマージは未完了。
 
 ## PR進捗
 
@@ -45,20 +45,20 @@
 
 | 完了 | 対象 | 残タスク・確認する結果 | 証跡・手順 |
 |---|---|---|---|
-| [ ] | PR8／レビュー | 固定差分の独立レビュー・必要な修正検証。実API評価ケース・要求数・費用上限を具体化 | [PR8検証](docs/validation/pr8-local-rag.md) |
+| [ ] | PR8／レビュー | 独立レビュー・MEDIUM 2件の修正検証・実API評価は完了。修正ブランチのマージが残る | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
 | [ ] | PR4／Gate B | 停止表示修正版で短時間2入力を再試験。入力元・主旨・数値・partial/final、停止後の認識中行解消、再開後の旧入力混入なしを確認 | [実音声再受入](docs/validation/real-audio-fixed-reacceptance.md) |
 | [ ] | PR0・5-B／Gate A | Conferenceの実翻訳・文字起こし専用・字幕・停止/再開・辞書・言語切替・Clear・Markdown保存・権限拒否/復旧など、回帰表の未実施項目を実機確認 | [Conference回帰表](docs/validation/conference-baseline.md#conference回帰表) |
 | [ ] | PR3・4／Gate B | Zoom/Meet/Teamsそれぞれで内部音声とマイクを識別。入力切替・機器/権限変更・切断/復旧・検証画面閉鎖時の停止、2系統STTの精度・時刻誤差・遅延・CPU/メモリを確認 | [2入力検証](docs/validation/dual-transcription.md)・[詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR5-C・6・7・8／Gate C | 通常Meetingの開始→一時停止/再開→終了→候補確認/却下→要約→Markdown保存を実音声で確認。根拠表示・誤確定防止・提案連発防止、通信断時の音声継続とAIのみの縮退、資料検索との結合を確認 | [PR5-C](docs/validation/pr5-c-meeting.md)・[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-meeting-state.md)・[PR8](docs/validation/pr8-local-rag.md) |
 | [ ] | PR7／Gate C | 実APIの区間別要約について意味品質、長い会議の訂正・矛盾・根拠の扱いを評価。要求数・費用上限は実行前に承認 | [PR7残る受入](docs/validation/pr7-meeting-state.md#残る受入) |
-| [ ] | PR8／Gate C | 実APIで日英の資料回答と引用の意味的一致、命令を含む資料・矛盾資料・不足資料への応答を評価。要求数・費用枠の具体化後に実行 | [PR8残る受入](docs/validation/pr8-local-rag.md#残る受入) |
+| [x] | PR8／合成引用品質 | 日英16/16ケースの意味・言語・引用が合格。命令・矛盾・不足資料を含む。Gate C全体とは区別 | [PR8品質評価](docs/validation/pr8-quality-acceptance.md) |
 | [ ] | PR5-A/B/C・6〜8／Gate U | 承認モックと実装画像の比較、未確認の画面/空・失敗状態、全操作の受入記録を完成。VoiceOver全経路、画面共有・複数画面・高コントラスト等を確認。PR5-Cの独立コード/画像レビューを実施 | [設計検証](docs/design/validation.md)・[PR5-B](docs/validation/pr5-b-conference.md)・[PR5-C](docs/validation/pr5-c-meeting.md)・[確認済み範囲](docs/validation/pr6-focus-stability.md) |
 | [ ] | PR0・3・9／Gate B・D | ScreenCaptureKit/Process Tapの権限・Sandbox・配布条件と配布署名での動作を検証 | [詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR9／Gate D | 60分実会議の耐久、クラッシュ・メモリ増加・処理滞留、入力切断/再接続、APIタイムアウト・連続開始/停止を確認。発話終了→AI完成のp95目標8秒とSTT遅延を実測し、質問検知率・誤提案率・根拠正確性を記録 | [Gate D・テスト計画](docs/meeting-copilot-plan.md#4-フェーズごとの受入基準) |
 | [ ] | PR5-C・6・8・9／Gate D | 参加者への通知・同意、発話/資料の外部送信許可と解除、停止後の取得/送信停止、保持/破棄、ログへの本文/秘密情報非出力を確認 | [詳細計画](docs/meeting-copilot-plan.md)・[PR8検証](docs/validation/pr8-local-rag.md) |
 | [ ] | 費用確認／別工程 | 実API評価・取消分を含む使用量と実請求額を照合。推定予算管理額を実請求額と区別する | [PR6モデル採用](docs/validation/pr6-model-adoption.md)・[小窓停止](docs/validation/pr6-final-ui.md) |
 
-**開始条件・持ち越し:** 実音声再受入は利用者の読み上げ準備待ち。PR7/8の新規実API評価は各検証記録の要求数・費用枠の条件を満たして実行する。既存の52/52合格や合成試験を、実会議・60分耐久の合格に置き換えない。
+**開始条件・持ち越し:** 実音声再受入は利用者の読み上げ準備待ち。PR7の実API評価はケース・要求数・費用枠を具体化して承認後に実行する。PR8の承認枠32要求は使用済み。追加評価は別枠とする。PR6の52/52やPR8の16/16の合成試験を、実会議・60分耐久の合格に置き換えない。
 
 **追加実装として別計画:** Sessionsの永続保存・一覧・再読込・削除。PR8のPDF/OCR、永続資料ライブラリ、資料を使う自動提案/要約は今回の受入対象外で、後続範囲として管理する。
 
@@ -71,4 +71,5 @@
 
 ## 更新履歴（直近のみ）
 
+- **2026-11-11:** PR8独立レビューの2指摘を承認後TDDで修正。342テスト・lint・Release、独立再レビュー合格。新ビルドのKeychain認証後、実API16/16ケース合格、計数込み32要求・推定US$0.04850325。提出準備中、実音声0、PR状態・Gateは維持。
 - **2026-11-11:** 残タスクを実機受入・品質検証の一覧へ整理。確認済みのAI品質・停止操作・キーボード/VoiceOver基本操作を保持し、全状態・実会議・60分耐久との差を明記。古い「実装予定」「PR作成手続き中」を整理。PR8 #17のマージをmain `b7558ac`で確認し反映。PRの受入状態・品質ゲート・進捗2/12は変更なし。

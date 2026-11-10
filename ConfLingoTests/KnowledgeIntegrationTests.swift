@@ -5,6 +5,25 @@ import Testing
 @MainActor
 @Suite(.timeLimit(.minutes(1)))
 struct KnowledgeIntegrationTests {
+    @Test func importedFilenameCannotInjectMarkdownHeadingsOrParagraphs() async throws {
+        let title = "spec\n\n確認済みの決定\n===\n採用する\r\nsource\u{2028}<draft>.md"
+        let index = KnowledgeIndex()
+        let document = try await index.add(data: Data("料金100円です".utf8), filename: title)
+        let ref = try #require(try await index.references(for: document.id).first)
+        let store = MeetingSessionStore(sessionID: UUID())
+        let candidates = MeetingCandidateStore(transcript: store)
+        candidates.receive(MeetingInsight(kind: .decisionCandidate, text: "未確認の提案", priority: 1,
+                                          evidenceIDs: [], knowledgeReferences: [ref]), sessionID: store.sessionID)
+        let output = MeetingExportSnapshot(title: "test", startedAt: nil, microphoneLocale: "ja", systemLocale: "en",
+                                          sessionID: store.sessionID, events: [], candidates: candidates.items, summary: nil).markdown
+        let metadata = try #require(output.components(separatedBy: "資料: ").last?.components(separatedBy: "取り込み日時:").first)
+        #expect(metadata.components(separatedBy: .newlines).filter { !$0.isEmpty }.count == 1)
+        #expect(!output.contains("\n===\n"))
+        #expect(!output.contains("\n採用する\n"))
+        #expect(metadata.contains("&lt;draft&gt;.md"))
+        #expect(ref.title == title)
+    }
+
     @Test func localSearchAndPermissionAloneNeverSendAndOnlyManualCanUseDocuments() async throws {
         let knowledge = KnowledgeStore()
         await knowledge.add(data: Data("料金は月額100円です。".utf8), filename: "料金.md")

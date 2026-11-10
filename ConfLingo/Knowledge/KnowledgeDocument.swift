@@ -16,7 +16,7 @@ struct KnowledgeReference: Identifiable, Equatable, Sendable {
     let characterOffset: Int
     let snippet: String
 
-    var location: String { "\(startLine)行目・\(characterOffset + 1)文字目から" }
+    var location: String { "\(startLine)行目から（文書先頭から\(characterOffset + 1)文字目）" }
 }
 
 enum KnowledgeFailure: Error, LocalizedError, Equatable {

@@ -1,7 +1,7 @@
 # PR8 ローカル資料検索・RAGの検証
 
 2026-11-11。状態: **ローカル実装・自動検証・非録音UI確認完了、REVIEW**。
-[承認済み計画](../design/pr8-implementation-plan.md)を`feature/local-rag`に実装。ユーザー「コミットand PR作成」によりコミット・pushを実施し、[Draft PR #17](https://github.com/Ryuta1346/conflingo/pull/17)を作成済み。マージは未実施。
+[承認済み計画](../design/pr8-implementation-plan.md)を`feature/local-rag`に実装。[PR #17](https://github.com/Ryuta1346/conflingo/pull/17)は`b7558ac`でマージ済み。2026-11-11の[独立レビュー](pr8-independent-review.md)でMEDIUM 2件を確認し、承認後にローカル修正・342テスト・lint・Releaseを完了。[対応・品質評価結果](pr8-quality-acceptance.md)。
 
 ## 結果
 
@@ -56,8 +56,9 @@ CUAで専用コピー`/private/tmp/conflingo-pr8-ui/ConfLingoPR8.app`（bundle I
 
 ## 残る受入
 
-- 実モデルによる日本語／英語の資料回答と引用内容の意味的一致、命令を含む資料・矛盾資料・不足資料の品質。要求数と費用枠を具体化するまで実APIを実行しない。
-- 実音声と組み合わせた動作、60分耐久、VoiceOver全経路、配布署名での動作、独立レビュー・マージ。
+- [承認済みの16ケース](../design/pr8-quality-acceptance-plan.md)による実モデルの日本語／英語回答・引用の意味的一致、命令・矛盾・不足資料の評価は16/16合格。[結果](pr8-quality-acceptance.md)。この固定コーパスを実会議一般の品質保証とは扱わない。
+- 独立レビューのMEDIUM 2件はローカル修正・回帰検証済み。修正ブランチのマージは未実施。
+- 実音声と組み合わせた動作、60分耐久、VoiceOver全経路、配布署名での動作。
 - PDF/OCR、再起動をまたぐ資料ライブラリ、資料による自動提案・会議要約は今回の承認範囲外。
 
 これらをmock成功で受入済みとせず、PR6/7の持ち越しと既存Gate状態を維持する。
