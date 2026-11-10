@@ -1,7 +1,7 @@
 # PR8 ローカル資料検索・RAGの検証
 
 2026-11-11。状態: **ローカル実装・自動検証・非録音UI確認完了、REVIEW**。
-[承認済み計画](../design/pr8-implementation-plan.md)を`feature/local-rag`に実装。ユーザー「コミットand PR作成」によりコミット・push・Draft PR作成を実施する。マージは対象外。
+[承認済み計画](../design/pr8-implementation-plan.md)を`feature/local-rag`に実装。ユーザー「コミットand PR作成」によりコミット・pushを実施し、[Draft PR #17](https://github.com/Ryuta1346/conflingo/pull/17)を作成済み。マージは未実施。
 
 ## 結果
 
