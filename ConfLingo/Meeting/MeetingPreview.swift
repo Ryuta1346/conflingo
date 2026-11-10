@@ -38,13 +38,21 @@ enum MeetingPreview {
     }
 
     static func prepare(_ meeting: MeetingWorkspace, scenario: String) async {
-        guard scenario != "setup" else { return }
+        if scenario == "pr8-setup" || scenario == "pr8-live" || scenario == "pr8-review" {
+            await meeting.knowledge.add(data: Data("# 製品仕様（架空の資料）\n料金は月額100円です。\nAPI rate limit is 50 requests per minute.\n多要素認証を利用できます。".utf8), filename: "製品仕様.md")
+        }
+        guard scenario != "setup", scenario != "pr8-setup" else { return }
         meeting.name = "プロダクト定例"
         meeting.consentConfirmed = true
         await meeting.start()
         guard meeting.phase == .listening else { return }
         populate(meeting, includeCandidates: scenario == "pr7-review")
-        if scenario == "review" || scenario == "pr7-review" || scenario == "stop-failed" { await meeting.end() }
+        if scenario == "pr8-live" || scenario == "pr8-review" {
+            meeting.setAIAllowed(true)
+            meeting.setKnowledgeAllowed(true)
+            await meeting.ai.ask("料金はいくらですか？")
+        }
+        if scenario == "pr8-review" || scenario == "review" || scenario == "pr7-review" || scenario == "stop-failed" { await meeting.end() }
         guard !meeting.previewUsesLiveAI else { return }
         if scenario == "offline" { meeting.previewAIStatus = "プレビュー：AIオフライン・外部送信なし" }
         if scenario == "sending" { meeting.previewAIStatus = "プレビュー：AI送信中の表示（実通信なし）" }
@@ -86,6 +94,10 @@ enum MeetingPreview {
 @MainActor
 private struct PreviewInsightClient: InsightClient {
     func generate(_ request: InsightRequest, update: @escaping @MainActor (String) -> Void) async throws -> InsightResult {
+        if let reference = request.knowledge.first {
+            return InsightResult(kind: .answerSuggestion, text: "資料には月額100円と記載されています。（架空の回答）", evidenceIDs: [],
+                                 knowledgeIDs: [reference.id])
+        }
         for text in ["担当者と", "担当者と完了予定を", "担当者と完了予定を確認しましょう。（架空の回答）"] {
             try await Task.sleep(for: .milliseconds(150))
             update(text)

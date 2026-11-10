@@ -59,7 +59,7 @@ flowchart LR
 - **5-C:** Meeting準備/Live/ReviewのUI、コンパクト/展開/非表示。モックイベントから着手し、承認済み[PR5-C計画](pr5-c-implementation-plan.md)に従ってPR4接続コードとfake結合検証を先行する。実音声受入は延期、AI結合はPR6の受入後。Reviewの保存/候補確定はPR7に残す。
 - **6（実装・モック検証済み、実API受入待ち）:** Geminiへの直接接続、利用者のAPIキーのKeychain保存、手動Ask AI、初期オフの自動提案。将来は複数Provider/運営Proxyを選べる設計にするが、今回は未実装の接続先を選択肢として出さない。詳細は[PR6計画](pr6-implementation-plan.md)・[検証記録](../validation/pr6-insights.md)。
 - **7:** 候補確認・却下・復元、終了後の手動AI要約、Meeting Markdown書き出し。Sessionsの永続保存・一覧・再読込・削除は承認により別計画へ持ち越す。
-- **8:** ローカル資料の取り込み・検索・資料根拠・会議ごとの送信許可。
+- **8（ローカル実装・自動／非録音UI検証済み）:** 準備でMarkdown/Textを取り込み、Live/Reviewで検索・引用閲覧・取り外し。資料の送信許可は会議ごとに初期オフ、手動質問のみ。会議破棄・アプリ終了で資料を破棄し、PDF・永続ライブラリは後続。[検証記録](../validation/pr8-local-rag.md)。
 
 ## 主要な設計判断
 

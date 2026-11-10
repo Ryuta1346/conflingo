@@ -25,6 +25,7 @@ struct MeetingInsight: Identifiable, Equatable, Sendable {
     let evidenceIDs: [UUID]
     var status: Status = .complete
     var hasInvalidEvidence = false
+    var knowledgeReferences: [KnowledgeReference] = []
 
     static func featured(in insights: [Self]) -> Self? {
         insights.reversed().max { $0.priority < $1.priority }

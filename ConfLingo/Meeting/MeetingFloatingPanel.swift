@@ -124,7 +124,10 @@ private struct MeetingFloatingView: View {
                     }
                     if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
                     if let insight = MeetingInsight.featured(in: meeting.insights) {
-                        MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
+                        MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize, revealKnowledge: { reference in
+                            expand()
+                            meeting.selectedKnowledge = reference
+                        })
                         Button("発話をメイン画面で確認", action: expand)
                     } else {
                         Text(meeting.page == .review ? "会議を終了しました" : "AI提案はまだありません")

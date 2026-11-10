@@ -4,9 +4,9 @@
 
 ## 現在地
 
-- 更新: **2026-11-10**／状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3〜PR5マージ済み、残る実機受入待ち／PR6言語設定・3.8 Flash採用済み、品質52/52合格、残るUI等の受入待ち**／PR7実装・非録音検証済み、残る受入待ち／進捗: **2/12**
+- 更新: **2026-11-11**／状態: **PR0実機確認持ち越し／PR1・PR2完了／PR3〜PR5マージ済み、残る実機受入待ち／PR6言語設定・3.8 Flash採用済み、品質52/52合格、残るUI等の受入待ち**／PR7マージ済み、残る受入待ち／PR8実装・ローカル検証済み、実API品質受入待ち／進捗: **2/12**
 - **持ち越し:** PR0の実翻訳・保存操作、PR3の会議アプリ別内部音声・配布条件。短時間実入力試験は再開済み。
-- **次の作業:** ユーザー指示でPR7の候補確認・手動AI要約・Markdown出力を実装し、310テスト・非録音UIを確認。[検証記録](docs/validation/pr7-meeting-state.md)。次は差分レビューと実API要約品質の受入準備。Sessionsは後続。修正版の短時間実音声受入は[発話できる時まで保留](docs/validation/real-audio-fixed-reacceptance.md)、両入力停止済み。通常Meeting・翻訳/保存の受入も残す。60分耐久はPR9、実請求額照合は別工程。API追加0、旧枠11/12・直近枠60/60のまま。
+- **次の作業:** PR8のローカル資料検索・手動質問の資料参照を実装し、331テスト・Debug/Release・lint・非録音UIを確認。[検証記録](docs/validation/pr8-local-rag.md)。次は差分レビューと実APIの引用品質評価の具体化。PR7の実API要約品質、Sessions、[実音声再受入](docs/validation/real-audio-fixed-reacceptance.md)は持ち越す。60分耐久はPR9、実請求額照合は別工程。今回API要求0。
 - 概算: PoC 2〜3週間、実用MVP 6〜10週間（着手日・期限は未設定）
 - **確認済み:** 3.8 Flash/medium・8192へ変更し、290テスト/43 suites・Debug/Release・lint109ファイル違反0。新ビルド自身のKeychain、言語保存/再起動復元、主画面AI停止・一時停止・会議終了の実受信後取消、再開後回答を確認。
 - **追加品質確認:** 製品と同じ設定で52/52ケース合格。指定言語一致・無効ID/通信失敗なし。平均完了5.80秒、p95 10.43秒、最大21.73秒。品質52＋UI8要求で推定予算管理額$0.3084。
@@ -25,8 +25,8 @@
 | PR5-B | デザインシステム・Conference刷新 | PR5-A | **REVIEW** | [PR #10 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/10)・[211テスト／レビュー修正検証](docs/validation/pr5-b-conference.md) |
 | PR5-C | Meeting UI・フローティングUI | PR5-A/PR1、PR4実機受入持ち越し承認済み／AIはPR6 | **REVIEW** | [実装計画](docs/design/pr5-c-implementation-plan.md)・[検証記録](docs/validation/pr5-c-meeting.md)・[#11 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/11) |
 | PR6 | AI会話理解・根拠付き回答 | PR1/PR4、実機受入持ち越し承認済み | **REVIEW** | [PR #12 (Merged)](https://github.com/Ryuta1346/conflingo/pull/12)・[品質改善 #13 (Merged)](https://github.com/Ryuta1346/conflingo/pull/13)・[修正・受入 #14 (Merged)](https://github.com/Ryuta1346/conflingo/pull/14)・[最新品質評価](docs/validation/pr6-answer-language-model.md) |
-| PR7 | 決定・アクション候補管理 | PR6（実機受入持ち越し承認済み） | **REVIEW** | [計画](docs/design/pr7-implementation-plan.md)・[310テスト／非録音UI検証](docs/validation/pr7-meeting-state.md)・`feature/meeting-state` |
-| PR8 | ローカル資料検索・RAG | PR6 | TODO | — |
+| PR7 | 決定・アクション候補管理 | PR6（実機受入持ち越し承認済み） | **REVIEW** | [計画](docs/design/pr7-implementation-plan.md)・[310テスト／非録音UI検証](docs/validation/pr7-meeting-state.md)・[#16 (Merged・受入待ち)](https://github.com/Ryuta1346/conflingo/pull/16) |
+| PR8 | ローカル資料検索・RAG | PR6 | **REVIEW** | [計画](docs/design/pr8-implementation-plan.md)・[331テスト／非録音UI検証](docs/validation/pr8-local-rag.md)・[Draft PR #17](https://github.com/Ryuta1346/conflingo/pull/17) |
 | PR9 | 結合・性能・安全性検証 | 全PR | TODO | — |
 
 **順序:** PR0→1→2→3→4→6。PR5-AはPR0後、PR1〜4と並行可。**PR5-B/CはPR5-Aのモック承認後**、PR7/8はPR6後に着手。
@@ -49,7 +49,7 @@
 - **PR4:** [PR #9](https://github.com/Ryuta1346/conflingo/pull/9)マージ済み（`c714f9c`）、実装・自動検証・コードレビュー完了。2系統SpeechAnalyzerの性能・精度・時刻誤差・遅延は未検証。新検証画面の閉鎖確認はUI取得タイムアウトで持ち越し。
 - **PR5-A:** 9画面・状態別モックと設計資料を作成、ブラウザ検証済み。主要4画面の画像提示後に方向性承認済み。PR #10でマージ済み。個別状態・全操作の受入記録は未完了のためREVIEWを維持。[検証記録](docs/design/validation.md)
 - **PR5-C:** 独立コードレビュー・実音声受入・VoiceOver/画面共有等は未実施。AI通信はPR6で実装。候補確定・Meeting保存は後続PR。
-- **PR6:** Gemini BYOKの個人PoC。回答言語設定と3.8 Flash/medium・8192を実装（未コミット）。[製品回帰52/52合格・停止3操作確認](docs/validation/pr6-model-adoption.md)。[小窓の実受信中停止をAXPressで確認](docs/validation/pr6-final-ui.md)。検証コピーで主要キー経路を確認、反復確認・VoiceOver基本動作の利用者確認まで完了。実機全状態・実音声等は残りREVIEW。
+- **PR6:** Gemini BYOKの個人PoC。回答言語設定と3.8 Flash/medium・8192を実装（PR作成手続き中）。[製品回帰52/52合格・停止3操作確認](docs/validation/pr6-model-adoption.md)。[小窓の実受信中停止をAXPressで確認](docs/validation/pr6-final-ui.md)。検証コピーで主要キー経路を確認、反復確認・VoiceOver基本動作の利用者確認まで完了。実機全状態・実音声等は残りREVIEW。
 - **PR5-C/6/8:** 会議参加者への通知・同意、資料・発話の外部送信制御
 
 ## 更新ルール
