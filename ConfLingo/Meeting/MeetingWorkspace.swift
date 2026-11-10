@@ -21,16 +21,26 @@ final class MeetingWorkspace {
     var consentConfirmed = false
     var showsDiscardConfirmation = false
     let ai: InsightCoordinator
+    let summary: MeetingSummaryCoordinator
+    let export = MeetingExportState()
+    private(set) var startedAt: Date?
+    private var pendingSummaryID: UUID?
+    var candidates: MeetingCandidateStore { ai.candidates }
     let credentials: GeminiCredentials
     var insights: [MeetingInsight] {
         get { ai.insights }
-        set { ai.insights = newValue }
+        set {
+            ai.insights = newValue
+            for card in newValue { candidates.receive(card, sessionID: store.sessionID) }
+        }
     }
     #if DEBUG
     var previewAIStatus: String?
     var previewUsesLiveAI = false
     #endif
+    var canStopAI: Bool { ai.permitted || summary.state == .sending }
     var aiStatus: String {
+        if summary.state == .sending { return "会議の要約をGeminiへ送信中" }
         #if DEBUG
         if let previewAIStatus { return previewAIStatus }
         #endif
@@ -55,14 +65,44 @@ final class MeetingWorkspace {
         let ai = InsightCoordinator(store: controller.store, client: client)
         ai.answerLanguage = language
         self.ai = ai
+        let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
+        self.summary = summary
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
         controller.captureActivityChanged = { [weak ai] active in
             if active { ai?.resume() } else { ai?.suspend() }
         }
-        credentials.onChange = { [weak ai] in ai?.setPermission(false, after: 0) }
+        credentials.onChange = { [weak self] in
+            self?.ai.setPermission(false, after: 0)
+            self?.cancelSummary()
+        }
+    }
+
+    func summaryPlan() throws -> MeetingSummaryPlan {
+        let plan = try MeetingSummaryPlan(sessionID: store.sessionID, events: store.finals, answerLanguage: answerLanguage)
+        pendingSummaryID = plan.id
+        return plan
+    }
+
+    func generateSummary(_ plan: MeetingSummaryPlan, consent: Bool) async {
+        guard consent, page == .review, phase == .idle, !isBusy, pendingSummaryID == plan.id else { return }
+        pendingSummaryID = nil
+        await summary.generate(plan, consent: consent)
+    }
+
+    func cancelSummary() {
+        pendingSummaryID = nil
+        summary.cancel()
+    }
+
+    var exportSnapshot: MeetingExportSnapshot? {
+        guard page == .review, phase == .idle, !isBusy else { return nil }
+        return MeetingExportSnapshot(title: title, startedAt: startedAt, microphoneLocale: microphoneLocaleID,
+                                     systemLocale: systemLocaleID, sessionID: store.sessionID,
+                                     events: store.finals, candidates: candidates.items, summary: summary.completed)
     }
 
     func setAIAllowed(_ allowed: Bool) {
+        if !allowed { cancelSummary() }
         guard !allowed || (page != .review && phase != .stopping) else { return }
         ai.setPermission(allowed, after: controller.elapsedOffset)
     }
@@ -94,6 +134,7 @@ final class MeetingWorkspace {
         isStarting = true
         page = .live
         defer { isStarting = false }
+        if startedAt == nil { startedAt = Date() }
         await controller.start(microphoneLocale: Locale(identifier: microphoneLocaleID),
                                systemLocale: Locale(identifier: systemLocaleID))
     }
@@ -140,6 +181,10 @@ final class MeetingWorkspace {
     }
 
     private func reset() {
+        cancelSummary()
+        summary.reset()
+        export.reset()
+        startedAt = nil
         ai.reset()
         controller.clear()
         name = ""

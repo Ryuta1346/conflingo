@@ -83,7 +83,7 @@ struct MeetingWorkspaceView: View {
                 Text(meeting.page == .review ? "Meeting / 振り返り" : "Meeting / General")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Text(meeting.title).font(.title2.weight(.semibold)).lineLimit(2)
-                Text("未保存 · アプリ終了まで保持")
+                Text("アプリ内は未保存 · 終了後にMarkdownで書き出し")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
             }
             Spacer(minLength: 8)
@@ -98,6 +98,15 @@ struct MeetingWorkspaceView: View {
                 Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
                     .font(.headline).accessibilityAddTraits(.isHeader)
                 if meeting.page == .live { MeetingAIControls(meeting: meeting) }
+                if meeting.page == .review { MeetingReviewControls(meeting: meeting, fontSize: fontSize) }
+                if !meeting.candidates.items.isEmpty {
+                    Text("決定・アクション候補").font(.headline)
+                    Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
+                        .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    ForEach(meeting.candidates.items) { candidate in
+                        MeetingInsightCard(meeting: meeting, insight: candidate.insight, fontSize: fontSize)
+                    }
+                }
                 if meeting.insights.isEmpty {
                     Surface {
                         VStack(alignment: .leading, spacing: 14) {
@@ -113,13 +122,13 @@ struct MeetingWorkspaceView: View {
                         .font(.callout)
                     }
                 }
-                ForEach(meeting.insights.reversed()) { insight in
+                ForEach(meeting.insights.reversed().filter { card in !meeting.candidates.items.contains { $0.id == card.id } }) { insight in
                     MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
                 }
                 Label(meeting.aiStatus, systemImage: "cloud")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 if meeting.page == .review {
-                    Text("候補の確認・却下、要約、会議の保存・書き出しは未対応です。")
+                    Text("Markdownを書き出して残せます。アプリ内の保存一覧・再読込には未対応です。")
                         .font(.callout).foregroundStyle(DesignTokens.secondary)
                 }
             }
@@ -154,7 +163,7 @@ struct MeetingInsightCard: View {
                 HStack {
                     Label(insight.kind.label, systemImage: "sparkles").foregroundStyle(DesignTokens.accent)
                     Spacer()
-                    StatusLabel(text: insight.status == .generating ? "生成中・未検証" : insight.status == .interrupted ? "中断" : "要確認", symbol: "questionmark.circle", color: DesignTokens.warning)
+                    StatusLabel(text: reviewLabel, symbol: "questionmark.circle", color: DesignTokens.warning)
                 }
                 .font(.caption)
                 Text(insight.text).font(.system(size: fontSize, weight: .medium)).textSelection(.enabled)
@@ -172,10 +181,41 @@ struct MeetingInsightCard: View {
                 if insight.hasInvalidEvidence {
                     Text("応答に確認できない根拠が含まれます・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
                 }
+                if let candidate = meeting.candidates.items.first(where: { $0.id == insight.id }) {
+                    ViewThatFits(in: .horizontal) {
+                        HStack { reviewButtons(candidate) }
+                        VStack(alignment: .leading) { reviewButtons(candidate) }
+                    }
+                    if !meeting.candidates.canConfirm(candidate.id) {
+                        Text("有効な根拠が揃っていないため、確認済みにできません。")
+                            .font(.caption).foregroundStyle(DesignTokens.warning)
+                    }
+                }
                 if insight.evidenceIDs.isEmpty {
                     Text("発話の根拠なし・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
                 }
             }
         }
     }
+    private var reviewLabel: String {
+        if let candidate = meeting.candidates.items.first(where: { $0.id == insight.id }) { return candidate.review.label }
+        return insight.status == .generating ? "生成中・未検証" : insight.status == .interrupted ? "中断" : "要確認"
+    }
+
+    @ViewBuilder private func reviewButtons(_ candidate: MeetingCandidate) -> some View {
+        if candidate.review != .confirmed {
+            Button("確認済みにする") { meeting.candidates.setReview(.confirmed, for: candidate.id) }
+                .disabled(!meeting.candidates.canConfirm(candidate.id))
+                .accessibilityIdentifier("candidate-\(candidate.id)-confirm")
+        }
+        if candidate.review != .rejected {
+            Button("却下する") { meeting.candidates.setReview(.rejected, for: candidate.id) }
+                .accessibilityIdentifier("candidate-\(candidate.id)-reject")
+        }
+        if candidate.review != .unreviewed {
+            Button("未確認に戻す") { meeting.candidates.setReview(.unreviewed, for: candidate.id) }
+                .accessibilityIdentifier("candidate-\(candidate.id)-restore")
+        }
+    }
+
 }

@@ -12,6 +12,7 @@ final class InsightCoordinator {
     private(set) var state: State = .off
     var answerLanguage: AnswerLanguage = .japanese
     var insights: [MeetingInsight] = []
+    let candidates: MeetingCandidateStore
     private(set) var lastUsage: InsightUsage?
     private(set) var contextDescription = "手動質問では、許可前を含む直近の確定発話を最大30件送ります。"
     private let store: MeetingSessionStore
@@ -34,6 +35,7 @@ final class InsightCoordinator {
     init(store: MeetingSessionStore, client: any InsightClient,
          now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, timeout: Duration = .seconds(30)) {
         self.store = store
+        candidates = MeetingCandidateStore(transcript: store)
         self.client = client
         self.now = now
         self.timeout = timeout
@@ -102,6 +104,7 @@ final class InsightCoordinator {
         allowedAfter = .infinity
         automaticAfter = .infinity
         insights = []
+        candidates.reset()
         seen = []
         recentTriggers = []
         lastUsage = nil
@@ -215,6 +218,7 @@ final class InsightCoordinator {
                     self.insights.removeAll { $0.id == next.id }
                 } else if let index = self.insights.firstIndex(where: { $0.id == next.id }) {
                     self.insights[index] = card
+                    self.candidates.receive(card, sessionID: next.sessionID)
                 }
                 self.lastUsage = result.usage
                 self.finishRequest()
