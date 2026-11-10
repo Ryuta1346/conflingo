@@ -15,6 +15,7 @@ final class DualTranscriptionController {
     private(set) var preparation = ""
     private(set) var permissions: [AudioOrigin: AudioPermissionStatus] = [:]
     private(set) var startedInputs: Set<AudioOrigin> = []
+    private(set) var startedAt: Date?
     let store: MeetingSessionStore
     let activity: AudioInputUse
     var prepareOptionalConsumer: (@MainActor (TranscriptEventHub) async -> Void)?
@@ -140,6 +141,7 @@ final class DualTranscriptionController {
     func clear() {
         guard phase == .idle else { return }
         timeline.reset()
+        startedAt = nil
         store.reset(sessionID: timeline.sessionID)
         lastError = nil
     }
@@ -184,6 +186,7 @@ final class DualTranscriptionController {
                     onInputStarted: { [weak self] in
                         guard let self, self.runID == run, self.phase == .preparing else { return }
                         self.startedInputs.insert(input.origin)
+                        if self.startedAt == nil { self.startedAt = Date() }
                         self.normalizers[input.origin] = TranscriptEventNormalizer(
                             sessionID: self.timeline.sessionID, origin: input.origin,
                             languageCode: locale.identifier, inputOffset: self.timeline.beginInput()

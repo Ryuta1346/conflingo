@@ -119,7 +119,7 @@ private struct MeetingFloatingView: View {
                     }
                     #endif
                     Label(meeting.aiStatus, systemImage: "cloud").font(.caption)
-                    if meeting.ai.permitted {
+                    if meeting.canStopAI {
                         Button("AI送信を停止") { meeting.setAIAllowed(false) }
                     }
                     if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }

@@ -551,3 +551,7 @@ ConfLingoTests/
 - Apple `SpeechAnalyzer`: https://developer.apple.com/documentation/speech/speechanalyzer
 
 2026-11-10: 実UIの複数発話で回答言語と不明/未定の逸脱を確認。ユーザー「修正して」により[混在文脈の品質修正](design/pr6-mixed-context-quality-fix.md)を承認。質問を末尾の独立partへ置き、複数発話の回帰評価を追加する。修正後280テスト・build/lint成功、新規24＋既存28要求の実API品質評価に合格。後続の[6要求の受入](validation/pr6-stop-acceptance.md)で修正後UI/Keychain、実受信後の公開停止操作3経路と再開を確認。ネイティブクリックの時刻相関・通常起動全体等は残り、PR6/Gate Cは未完了。
+
+## PR7 承認済み実装範囲（2026-11-10）
+
+ユーザー「進めて」によりPR7を先行する。候補の確認／却下／未確認への復元、終了後に送信対象と予定要求数を確認して開始する手動AI要約、Meeting Markdown出力を実装する。AIは確認状態を変更しない。アプリ内Sessionsの永続保存・一覧・再読込・削除は別計画へ持ち越す。実音声受入と各Gateは未完了を維持する。PR7のローカル実装と自動・非録音UI確認は完了（310テスト／48 suites）。実API要約品質・実音声・マージは未完了。検証結果は`docs/validation/pr7-meeting-state.md`に記録。

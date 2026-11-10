@@ -33,6 +33,7 @@ struct MeetingWorkspaceTests {
         #expect(meeting.phase == .idle)
         #expect(meeting.controller.lastError != nil)
         #expect(fixture.microphone.starts == 0)
+        #expect(meeting.startedAt == nil)
         meeting.editPreparation()
         #expect(meeting.page == .setup)
         fixture.microphonePermission.decision = true
@@ -160,6 +161,67 @@ struct MeetingWorkspaceTests {
         #expect(meeting.page == .setup)
         #expect(meeting.phase == .idle)
         #expect(fixture.microphone.starts + fixture.system.starts == 0)
+        #expect(meeting.startedAt == nil)
+    }
+
+    @Test func startDateTracksFirstInputAndSurvivesResumeUntilDiscard() async throws {
+        let fixture = DualFixture()
+        let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
+                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+        var firstInputBoundary = Date.distantFuture
+        var secondInputBoundary = Date.distantFuture
+        fixture.microphone.beforeInput = { firstInputBoundary = Date() }
+        fixture.system.beforeInput = { secondInputBoundary = Date() }
+        meeting.consentConfirmed = true
+        await meeting.start()
+        let startedAt = try #require(meeting.startedAt)
+        #expect(startedAt >= firstInputBoundary)
+        #expect(startedAt <= secondInputBoundary)
+        await meeting.pause()
+        await meeting.start()
+        #expect(meeting.startedAt == startedAt)
+        fixture.microphone.finalOnStop = "Synthetic final"
+        await meeting.end()
+        #expect(meeting.exportSnapshot?.startedAt == startedAt)
+        meeting.requestDiscard()
+        meeting.confirmDiscard()
+        #expect(meeting.startedAt == nil)
+    }
+
+    @Test func retryAfterPermissionDenialRecordsActualInputStart() async throws {
+        let fixture = DualFixture()
+        fixture.microphonePermission.status = .undetermined
+        fixture.microphonePermission.decision = false
+        let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
+                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+        meeting.consentConfirmed = true
+        await meeting.start()
+        #expect(meeting.startedAt == nil)
+        fixture.microphonePermission.decision = true
+        fixture.microphonePermission.status = .granted
+        var inputBoundary = Date.distantFuture
+        fixture.microphone.beforeInput = { inputBoundary = Date() }
+        await meeting.start()
+        #expect(try #require(meeting.startedAt) >= inputBoundary)
+        await meeting.end()
+    }
+
+    @Test func partialInputStartFailureRetainsActualStartOnRetry() async throws {
+        let fixture = DualFixture()
+        fixture.system.startError = .start
+        let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
+                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+        var inputBoundary = Date.distantFuture
+        fixture.microphone.beforeInput = { inputBoundary = Date() }
+        meeting.consentConfirmed = true
+        await meeting.start()
+        #expect(meeting.phase == .idle)
+        let startedAt = try #require(meeting.startedAt)
+        #expect(startedAt >= inputBoundary)
+        fixture.system.startError = nil
+        await meeting.start()
+        #expect(meeting.startedAt == startedAt)
+        await meeting.end()
     }
 
     @Test func inputFailureDoesNotPretendUserEndedMeeting() async throws {

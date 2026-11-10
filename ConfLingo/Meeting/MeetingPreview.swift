@@ -43,14 +43,14 @@ enum MeetingPreview {
         meeting.consentConfirmed = true
         await meeting.start()
         guard meeting.phase == .listening else { return }
-        populate(meeting)
-        if scenario == "review" || scenario == "stop-failed" { await meeting.end() }
+        populate(meeting, includeCandidates: scenario == "pr7-review")
+        if scenario == "review" || scenario == "pr7-review" || scenario == "stop-failed" { await meeting.end() }
         guard !meeting.previewUsesLiveAI else { return }
         if scenario == "offline" { meeting.previewAIStatus = "プレビュー：AIオフライン・外部送信なし" }
         if scenario == "sending" { meeting.previewAIStatus = "プレビュー：AI送信中の表示（実通信なし）" }
     }
 
-    static func populate(_ meeting: MeetingWorkspace, count: Int = 12) {
+    static func populate(_ meeting: MeetingWorkspace, count: Int = 12, includeCandidates: Bool = false) {
         let lines = ["まずは少人数のパイロットで、実際の利用状況を確認したいですね。",
                      "The security review is still in progress. We should have an update by Wednesday.",
                      "Can we launch the pilot next Friday, or do we need more time for the security review?",
@@ -73,6 +73,12 @@ enum MeetingPreview {
             MeetingInsight(kind: .followUpQuestion, text: "レビューの担当者は決まっていますか？", priority: 1,
                            evidenceIDs: Array(ids.suffix(1)))
         ]
+        if includeCandidates {
+            meeting.insights += [
+                MeetingInsight(kind: .decisionCandidate, text: "少人数のパイロットで利用状況を確認する案（架空の候補）", priority: 1, evidenceIDs: Array(ids.prefix(1))),
+                MeetingInsight(kind: .actionCandidate, text: "レビュー担当者と完了条件を確認する案（架空の候補）", priority: 1, evidenceIDs: Array(ids.suffix(1)))
+            ]
+        }
         meeting.previewAIStatus = "プレビュー：架空の提案・外部送信なし"
     }
 }

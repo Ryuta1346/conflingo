@@ -74,7 +74,7 @@ struct ContentView: View {
                 ZStack {
                     page
                     MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
-                                         compact: { floatingPanel.show(meeting: meeting, compactMain: true) })
+                                         compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) })
                         .opacity(navigation.destination == .meeting ? 1 : 0)
                         .allowsHitTesting(navigation.destination == .meeting)
                         .disabled(navigation.destination != .meeting)
@@ -93,6 +93,12 @@ struct ContentView: View {
                 openWindow(id: "main")
                 return navigation.requestMeetingExpansion(conferencePhase: store.phase)
             }
+        }
+        .onChange(of: navigation.destination) { _, destination in
+            if destination != .meeting { meeting.cancelSummary() }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
+            meeting.cancelSummary()
         }
         .background(WindowCloseGuard(shouldClose: shouldCloseWindow))
         .background(MeetingWindowAttachment(floating: floatingPanel))
@@ -274,6 +280,7 @@ struct ContentView: View {
     private func shouldCloseWindow(_: NSWindow) -> Bool {
         switch activePhase {
         case .idle:
+            meeting.cancelSummary()
             return true
         case .listening:
             closeRequested = true
@@ -285,6 +292,7 @@ struct ContentView: View {
     }
 
     private func navigate(_ destination: ConferenceNavigation.Destination) {
+        if destination != .meeting { meeting.cancelSummary() }
         navigation.request(destination, phase: activePhase)
     }
 
