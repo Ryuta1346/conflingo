@@ -32,7 +32,7 @@ struct MeetingAIControls: View {
                 ))
                 .disabled(meeting.page == .review || meeting.phase == .stopping)
                 DisclosureGroup("送信する内容・データの扱い", isExpanded: $showsDataDetails) {
-                Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は参照しません。")
+                Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は別の許可をオンにした手動質問だけで参照します。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Text("無料枠では入出力が製品改善に利用され得ます。有料枠でも限定的な保持があります。ご自身のGoogleプロジェクトの条件をご確認ください。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
@@ -44,7 +44,7 @@ struct MeetingAIControls: View {
                 ))
                 .disabled(!meeting.ai.permitted || meeting.ai.subscriptionFailed || meeting.page == .review || meeting.phase == .stopping)
                 if meeting.page == .live {
-                    TextField("会話について質問する", text: $question, axis: .vertical)
+                    TextField("会話や資料について質問する", text: $question, axis: .vertical)
                         .textFieldStyle(.roundedBorder).lineLimit(2...4)
                         .accessibilityLabel("AIへの質問")
                     HStack {

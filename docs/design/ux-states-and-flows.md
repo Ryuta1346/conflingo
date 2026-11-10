@@ -29,7 +29,11 @@
 | offline / オフライン | AI停止、ローカル字幕継続 | 再接続、AIを使わず継続 | Live |
 | reconnecting / 再接続中 | AI接続確認、字幕継続 | AI停止、終了 | Live |
 | AI-disabled / AIオフ | 外部送信なし、字幕継続 | 送信対象を確認して許可 | Live |
-| no-knowledge / 資料なし | 発話のみ参照、資料根拠なし | 発話の根拠を開く | Live |
+| no-knowledge / 資料なし | 発話のみ参照、資料根拠なし | 準備で資料追加、発話の根拠を開く | Preparation/Live/Review |
+| knowledge-local / 資料送信オフ | ローカル検索・閲覧のみ、資料送信なし | 検索、引用閲覧、会議ごとの資料許可 | Preparation/Live/Review |
+| knowledge-empty / 一致なし | 検索に一致する箇所なし | 別の単語で検索 | Preparation/Live/Review |
+| knowledge-failed / 検索失敗 | ローカル検索失敗、手動質問の資料検索失敗では送信中止 | 明示的に再検索 | Preparation/Live/Review |
+| knowledge-cited / 資料引用あり | 取り込んだ版の文書名・位置・日時・抜粋 | 引用を開く。小窓から主画面の引用へ | Live/Review/Floating |
 | no-insights / 提案なし | 提案待ち、音声収集は継続 | Ask AI | Live |
 | translation-failed / 翻訳失敗 | 原文は継続、対象訳文に失敗表示 | 原文確認、停止後設定確認 | Conference |
 | saved / 保存済み | 保存先と結果 | Sessionsで閲覧、書き出し | Review |
@@ -42,7 +46,7 @@ PR6のヒアリング反映（実装・モック検証済み、実API受入待�
 
 上部「画面」「状態」「配色」「文字」で閲覧。主要フローは画面内ボタンで実行できる。データは架空、リロードで初期化。ダウンロードはレビュー用のサンプルMarkdownのみ。権限要求、音声取得、外部AI送信、ファイル取り込み、OS最前面制御、Keychain、実セッション永続化はシミュレーション。
 
-保存済みセッションと資料参照の画面は後続PR向け設計。製品コードが対応済みという意味ではない。共有画面への映り込みは未検証。
+保存済みセッションの画面は後続PR向け設計。資料参照はPR8でローカル実装・非録音検証済み。共有画面への映り込みは未検証。
 
 ## PR5-Aレビュー項目
 

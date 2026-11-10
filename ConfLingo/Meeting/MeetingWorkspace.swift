@@ -20,6 +20,8 @@ final class MeetingWorkspace {
     var systemLocaleID = "en-US"
     var consentConfirmed = false
     var showsDiscardConfirmation = false
+    var knowledge: KnowledgeStore { ai.knowledge }
+    var selectedKnowledge: KnowledgeReference?
     let ai: InsightCoordinator
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
@@ -107,6 +109,16 @@ final class MeetingWorkspace {
         ai.setPermission(allowed, after: controller.elapsedOffset)
     }
 
+    func setKnowledgeAllowed(_ allowed: Bool) {
+        guard !allowed || (ai.permitted && page != .review && phase != .stopping) else { return }
+        knowledge.setPermission(allowed)
+    }
+
+    func importKnowledge(_ url: URL) async {
+        guard page == .setup, phase == .idle, !isBusy else { return }
+        await knowledge.add(url: url)
+    }
+
     func setAutomaticAI(_ allowed: Bool) {
         ai.setAutomatic(allowed, after: controller.elapsedOffset)
     }
@@ -117,8 +129,8 @@ final class MeetingWorkspace {
     }
     var phase: SessionPhase { controller.phase }
     var isBusy: Bool { isStarting || isTransitioning || controller.isStopping }
-    var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && page != .review }
-    var canDiscard: Bool { phase == .idle && !isBusy }
+    var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && page != .review }
+    var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy }
     var title: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "名前のない会議" : name }
 
     func evidence(for id: UUID) -> TranscriptEvent? { store.finals.first { $0.id == id } }
@@ -151,7 +163,7 @@ final class MeetingWorkspace {
 
     func requestDiscard() {
         guard canDiscard else { return }
-        if store.finals.isEmpty && store.partials.isEmpty && insights.isEmpty {
+        if store.finals.isEmpty && store.partials.isEmpty && insights.isEmpty && knowledge.documents.isEmpty {
             reset()
         } else {
             showsDiscardConfirmation = true
@@ -188,6 +200,7 @@ final class MeetingWorkspace {
         name = ""
         insights = []
         selectedEvidence = nil
+        selectedKnowledge = nil
         consentConfirmed = false
         showsDiscardConfirmation = false
         page = .setup

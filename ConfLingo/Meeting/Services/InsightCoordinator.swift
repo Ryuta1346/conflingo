@@ -13,6 +13,8 @@ final class InsightCoordinator {
     var answerLanguage: AnswerLanguage = .japanese
     var insights: [MeetingInsight] = []
     let candidates: MeetingCandidateStore
+    let knowledge: KnowledgeStore
+    private var lookupID: UUID?
     private(set) var lastUsage: InsightUsage?
     private(set) var contextDescription = "手動質問では、許可前を含む直近の確定発話を最大30件送ります。"
     private let store: MeetingSessionStore
@@ -33,23 +35,32 @@ final class InsightCoordinator {
     private var subscriptionID = UUID()
 
     init(store: MeetingSessionStore, client: any InsightClient,
-         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, timeout: Duration = .seconds(30)) {
+         now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, timeout: Duration = .seconds(30), knowledge: KnowledgeStore? = nil) {
         self.store = store
         candidates = MeetingCandidateStore(transcript: store)
         self.client = client
         self.now = now
         self.timeout = timeout
+        let knowledge = knowledge ?? KnowledgeStore()
+        self.knowledge = knowledge
+        knowledge.onChange = { [weak self] in
+            guard let self else { return }
+            if self.lookupID != nil || self.request?.knowledge.isEmpty == false {
+                self.cancelRequest()
+                self.state = self.permitted ? (self.active ? .ready : .paused) : .off
+            }
+        }
     }
 
     deinit { task?.cancel(); deadline?.cancel(); consumer?.cancel() }
 
-    var canAsk: Bool { active && permitted && request?.trigger != .manual }
+    var canAsk: Bool { active && permitted && lookupID == nil && !knowledge.isBusy && request?.trigger != .manual }
     var statusText: String {
         let status = switch state {
         case .off: "AIオフ・外部送信なし"
         case .ready: automaticEnabled ? "AI許可済み・自動提案オン" : "AI許可済み・手動質問のみ"
         case .paused: "AI一時停止・新規送信なし"
-        case .sending: "確定発話をAIへ送信中"
+        case .sending: "質問と許可された文脈を処理中"
         case .failed(let error): error.localizedDescription
         }
         return subscriptionFailed
@@ -58,6 +69,7 @@ final class InsightCoordinator {
     }
 
     func setPermission(_ value: Bool, after offset: TimeInterval) {
+        if !value { knowledge.setPermission(false) }
         guard permitted != value else { return }
         cancelRequest()
         startupEvents = []
@@ -105,6 +117,7 @@ final class InsightCoordinator {
         automaticAfter = .infinity
         insights = []
         candidates.reset()
+        knowledge.reset()
         seen = []
         recentTriggers = []
         lastUsage = nil
@@ -143,11 +156,24 @@ final class InsightCoordinator {
 
     func ask(_ question: String) async {
         guard canAsk else { return }
+        cancelRequest()
+        let lookup = UUID()
+        lookupID = lookup
+        let sessionID = store.sessionID
+        let language = answerLanguage
+        let events = store.finals
         do {
-            let next = try InsightRequest(sessionID: store.sessionID, question: question, trigger: .manual, events: store.finals,
-                                          answerLanguage: answerLanguage)
+            _ = try InsightRequest(sessionID: sessionID, question: question, trigger: .manual, events: [], answerLanguage: language)
+            state = .sending
+            let references = try await knowledge.retrieve(question)
+            try Task.checkCancellation()
+            guard lookupID == lookup, active, permitted, store.sessionID == sessionID else { return }
+            let next = try InsightRequest(sessionID: sessionID, question: question, trigger: .manual, events: events,
+                                          answerLanguage: language, knowledge: references)
+            lookupID = nil
             await launch(next).value
         } catch {
+            guard lookupID == lookup else { return }
             cancelRequest()
             state = .failed(.sanitized(error))
         }
@@ -155,7 +181,7 @@ final class InsightCoordinator {
 
     @discardableResult
     func receive(_ event: TranscriptEvent) -> Task<Void, Never>? {
-        guard permitted, automaticEnabled, request == nil,
+        guard permitted, automaticEnabled, request == nil, lookupID == nil,
               event.sessionID == store.sessionID, event.isFinal,
               event.startOffset.isFinite, event.startOffset >= max(allowedAfter, automaticAfter),
               ConversationEventDetector.isCandidate(event.text) else { return nil }
@@ -193,6 +219,9 @@ final class InsightCoordinator {
         state = .sending
         lastUsage = nil
         contextDescription = "今回の文脈：確定発話 \(next.events.count)件・上限により除外 \(next.omittedCount)件"
+        contextDescription += next.knowledge.isEmpty
+            ? (knowledge.permitted && next.trigger == .manual ? " · 資料の一致なし" : " · 資料送信なし")
+            : " · 資料 \(next.knowledge.count)箇所を参照"
         insights.append(MeetingInsight(id: next.id, kind: .answerSuggestion, text: "回答を生成しています…",
                                        priority: 1, evidenceIDs: [], status: .generating))
         if insights.count > 100 { insights.removeFirst(insights.count - 100) }
@@ -246,6 +275,7 @@ final class InsightCoordinator {
     }
 
     private func cancelRequest() {
+        lookupID = nil
         if let id = request?.id, let index = insights.firstIndex(where: { $0.id == id }) {
             insights[index].status = .interrupted
         }

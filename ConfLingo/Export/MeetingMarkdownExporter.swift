@@ -52,8 +52,15 @@ struct MeetingExportSnapshot: Equatable {
         guard !values.isEmpty else { return ["なし", ""] }
         return values.flatMap { candidate in
             ["### \(candidate.insight.kind.label) · \(candidate.review.label)", "", Self.quoted(candidate.insight.text), "",
-             references(candidate.evidenceIDs, eventsByID: eventsByID), candidate.insight.hasInvalidEvidence ? "無効な根拠を含むため要確認。" : "", ""]
+             references(candidate.evidenceIDs, eventsByID: eventsByID), knowledgeReferences(candidate.insight.knowledgeReferences), candidate.insight.hasInvalidEvidence ? "無効な根拠を含むため要確認。" : "", ""]
         }
+    }
+
+    private func knowledgeReferences(_ references: [KnowledgeReference]) -> String {
+        references.map { reference in
+            "資料: \(Self.escape(reference.title)) · \(reference.location)\n取り込み日時: \(MarkdownExporter.dateFormatter.string(from: reference.importedAt))\n"
+                + Self.quoted(reference.snippet)
+        }.joined(separator: "\n\n")
     }
 
     private func references(_ ids: [UUID], eventsByID: [UUID: TranscriptEvent]) -> String {

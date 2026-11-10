@@ -30,11 +30,14 @@ struct MeetingWorkspaceView: View {
             Divider()
             MeetingTransport(meeting: meeting)
         }
+        .sheet(item: $meeting.selectedKnowledge) { reference in
+            KnowledgeReferenceView(reference: reference, fontSize: fontSize)
+        }
         .alert("未保存の会議を破棄しますか？", isPresented: $meeting.showsDiscardConfirmation) {
             Button("キャンセル", role: .cancel) {}
             Button("破棄して新しい会議へ", role: .destructive) { meeting.confirmDiscard() }
         } message: {
-            Text("この会議の発話はアプリ内に保存されていません。破棄すると元に戻せません。")
+            Text("この会議の発話・資料・回答はアプリ内に保存されていません。破棄すると元に戻せません。")
         }
     }
 
@@ -69,6 +72,7 @@ struct MeetingWorkspaceView: View {
                     }
                 }
                 MeetingAIControls(meeting: meeting)
+                MeetingKnowledgeControls(meeting: meeting)
                 if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
             }
             .padding(24)
@@ -99,6 +103,7 @@ struct MeetingWorkspaceView: View {
                     .font(.headline).accessibilityAddTraits(.isHeader)
                 if meeting.page == .live { MeetingAIControls(meeting: meeting) }
                 if meeting.page == .review { MeetingReviewControls(meeting: meeting, fontSize: fontSize) }
+                MeetingKnowledgeControls(meeting: meeting)
                 if !meeting.candidates.items.isEmpty {
                     Text("決定・アクション候補").font(.headline)
                     Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
@@ -156,6 +161,7 @@ struct MeetingInsightCard: View {
     @Bindable var meeting: MeetingWorkspace
     let insight: MeetingInsight
     let fontSize: Double
+    var revealKnowledge: ((KnowledgeReference) -> Void)?
 
     var body: some View {
         Surface {
@@ -178,6 +184,11 @@ struct MeetingInsightCard: View {
                         Text("根拠の発話を参照できません").font(.caption).foregroundStyle(DesignTokens.warning)
                     }
                 }
+                ForEach(insight.knowledgeReferences) { reference in
+                    Button("資料：\(reference.title) · \(reference.location)") {
+                        if let revealKnowledge { revealKnowledge(reference) } else { meeting.selectedKnowledge = reference }
+                    }.font(.caption)
+                }
                 if insight.hasInvalidEvidence {
                     Text("応答に確認できない根拠が含まれます・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
                 }
@@ -191,8 +202,8 @@ struct MeetingInsightCard: View {
                             .font(.caption).foregroundStyle(DesignTokens.warning)
                     }
                 }
-                if insight.evidenceIDs.isEmpty {
-                    Text("発話の根拠なし・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
+                if insight.evidenceIDs.isEmpty && insight.knowledgeReferences.isEmpty {
+                    Text("根拠なし・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
                 }
             }
         }

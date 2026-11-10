@@ -9,15 +9,26 @@ struct InsightRequest: Sendable {
     let trigger: Trigger
     let events: [TranscriptEvent]
     let omittedCount: Int
+    let knowledge: [KnowledgeReference]
 
     init(sessionID: UUID, question: String, trigger: Trigger, events: [TranscriptEvent],
-         answerLanguage: AnswerLanguage = .japanese) throws {
+         answerLanguage: AnswerLanguage = .japanese, knowledge: [KnowledgeReference] = []) throws {
         let question = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !question.isEmpty, question.count <= 2_000 else { throw InsightFailure.invalidQuestion }
         self.sessionID = sessionID
         self.question = question
         self.answerLanguage = answerLanguage
         self.trigger = trigger
+        var referenceIDs: Set<UUID> = []
+        var referenceSize = 0
+        self.knowledge = trigger == .manual ? Array(knowledge.filter {
+            guard !$0.snippet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  $0.snippet.count <= 1_200, $0.title.count <= 200,
+                  $0.startLine > 0, $0.characterOffset >= 0,
+                  referenceIDs.insert($0.id).inserted, referenceSize + $0.snippet.count <= 6_000 else { return false }
+            referenceSize += $0.snippet.count
+            return true
+        }.prefix(5)) : []
         var seen: Set<UUID> = []
         let finals = events.filter {
             $0.sessionID == sessionID && $0.isFinal && !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -46,6 +57,7 @@ struct InsightResult: Sendable {
     let text: String
     let evidenceIDs: [UUID]
     var usage: InsightUsage?
+    var knowledgeIDs: [UUID] = []
 
     func card(for request: InsightRequest) throws -> MeetingInsight {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, text.count <= 8_000 else {
@@ -53,9 +65,13 @@ struct InsightResult: Sendable {
         }
         let allowed = Set(request.events.map(\.id))
         var seen: Set<UUID> = []
+        let references = Dictionary(request.knowledge.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
+        var seenReferences: Set<UUID> = []
+        let invalidKnowledge = knowledgeIDs.contains { references[$0] == nil }
         return MeetingInsight(id: request.id, kind: kind, text: text, priority: kind.priority,
                               evidenceIDs: evidenceIDs.filter { allowed.contains($0) && seen.insert($0).inserted },
-                              hasInvalidEvidence: evidenceIDs.contains { !allowed.contains($0) })
+                              hasInvalidEvidence: invalidKnowledge || evidenceIDs.contains { !allowed.contains($0) },
+                              knowledgeReferences: knowledgeIDs.filter { seenReferences.insert($0).inserted }.compactMap { references[$0] })
     }
 }
 
@@ -67,9 +83,11 @@ protocol InsightClient {
 enum InsightFailure: Error, Equatable, LocalizedError {
     case queueOverflow, invalidQuestion, invalidResponse, missingKey, keyStorage, oversized, timeout, offline, interrupted, blocked
     case http(Int)
+    case knowledge
 
     var errorDescription: String? {
         switch self {
+        case .knowledge: "資料を検索できなかったため送信を中止しました。資料の状態を確認してください。"
         case .queueOverflow: "AIの処理が追いつかないため自動提案を停止しました。字幕は継続します。"
         case .invalidQuestion: "質問は1〜2,000文字で入力してください。"
         case .invalidResponse: "AIの応答を確認できませんでした。必要なら手動で再試行してください。"
@@ -89,6 +107,7 @@ enum InsightFailure: Error, Equatable, LocalizedError {
 
     static func sanitized(_ error: any Error) -> Self {
         if let failure = error as? Self { return failure }
+        if error is KnowledgeFailure { return .knowledge }
         if let urlError = error as? URLError {
             if urlError.code == .timedOut { return .timeout }
             if urlError.code == .cancelled { return .interrupted }
