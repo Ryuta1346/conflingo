@@ -53,12 +53,13 @@ final class MeetingSummaryCoordinator {
                     guard self.accepts(id, session: plan.sessionID), !Task.isCancelled else { return }
                     let card = try result.card(for: request)
                     guard !card.hasInvalidEvidence, !card.evidenceIDs.isEmpty,
-                          let first = request.events.first, let last = request.events.last else { throw InsightFailure.invalidResponse }
+                          let first = request.events.first,
+                          let endOffset = request.events.map({ $0.endOffset ?? $0.startOffset }).max() else { throw InsightFailure.invalidResponse }
                     self.deadline?.cancel()
                     self.deadline = nil
                     self.requestID = nil
                     self.draft.append(MeetingSummarySection(id: request.id, text: card.text, evidenceIDs: card.evidenceIDs,
-                                                             startOffset: first.startOffset, endOffset: last.endOffset ?? last.startOffset))
+                                                             startOffset: first.startOffset, endOffset: endOffset))
                     self.partialText = ""
                 } catch {
                     guard self.accepts(id, session: plan.sessionID) else { return }

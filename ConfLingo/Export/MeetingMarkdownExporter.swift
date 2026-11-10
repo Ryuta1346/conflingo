@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-struct MeetingExportSnapshot {
+struct MeetingExportSnapshot: Equatable {
     let title: String
     let startedAt: Date?
     let microphoneLocale: String
@@ -11,16 +11,14 @@ struct MeetingExportSnapshot {
     let candidates: [MeetingCandidate]
     let summary: MeetingSummary?
 
-    private var finals: [TranscriptEvent] {
-        events.filter { $0.sessionID == sessionID && $0.isFinal }.sorted { $0.startOffset < $1.startOffset }
-    }
-
     var filename: String {
         let safe = title.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) || $0 == "-" || $0 == "_" ? String($0) : "-" }.joined()
         return "\(safe.isEmpty ? "Meeting" : String(safe.prefix(80)))-\(sessionID.uuidString.prefix(8)).md"
     }
 
     var markdown: String {
+        let finals = events.filter { $0.sessionID == sessionID && $0.isFinal }.sorted { $0.startOffset < $1.startOffset }
+        let eventsByID = Dictionary(finals.map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         var lines = ["# ConfLingo Meeting: \(Self.escape(title))", "",
                      "- 開始日時: \(startedAt.map { MarkdownExporter.dateFormatter.string(from: $0) } ?? "未取得")",
                      "- マイクの言語: \(Self.escape(microphoneLocale))", "- 内部音声の言語: \(Self.escape(systemLocale))",
@@ -30,16 +28,16 @@ struct MeetingExportSnapshot {
                       "各区間の記述は会議全体の最終合意を表しません。", ""]
             for section in summary.sections {
                 lines += ["### \(Self.time(section.startOffset))–\(Self.time(section.endOffset))", "",
-                          Self.quoted(section.text), "", references(section.evidenceIDs), ""]
+                          Self.quoted(section.text), "", references(section.evidenceIDs, eventsByID: eventsByID), ""]
             }
         }
         for kind in [MeetingInsight.Kind.decisionCandidate, .actionCandidate] {
             lines += [kind == .decisionCandidate ? "## 確認済みの決定" : "## 確認済みのアクション", ""]
-            lines += entries(candidates.filter { $0.review == .confirmed && $0.insight.kind == kind })
+            lines += entries(candidates.filter { $0.review == .confirmed && $0.insight.kind == kind }, eventsByID: eventsByID)
         }
         for review in [MeetingCandidate.Review.unreviewed, .rejected] {
             lines += [review == .unreviewed ? "## 未確認の候補" : "## 却下した候補", ""]
-            lines += entries(candidates.filter { $0.review == review })
+            lines += entries(candidates.filter { $0.review == review }, eventsByID: eventsByID)
         }
         lines += ["## 確定発話", ""]
         for event in finals {
@@ -49,19 +47,19 @@ struct MeetingExportSnapshot {
         return lines.joined(separator: "\n")
     }
 
-    private func entries(_ values: [MeetingCandidate]) -> [String] {
+    private func entries(_ values: [MeetingCandidate], eventsByID: [UUID: TranscriptEvent]) -> [String] {
         let values = values.filter { $0.sessionID == sessionID }
         guard !values.isEmpty else { return ["なし", ""] }
         return values.flatMap { candidate in
             ["### \(candidate.insight.kind.label) · \(candidate.review.label)", "", Self.quoted(candidate.insight.text), "",
-             references(candidate.evidenceIDs), candidate.insight.hasInvalidEvidence ? "無効な根拠を含むため要確認。" : "", ""]
+             references(candidate.evidenceIDs, eventsByID: eventsByID), candidate.insight.hasInvalidEvidence ? "無効な根拠を含むため要確認。" : "", ""]
         }
     }
 
-    private func references(_ ids: [UUID]) -> String {
+    private func references(_ ids: [UUID], eventsByID: [UUID: TranscriptEvent]) -> String {
         guard !ids.isEmpty else { return "根拠なし・要確認" }
         return "根拠: " + ids.map { id in
-            guard let event = finals.first(where: { $0.id == id }) else { return "根拠を参照できません・要確認" }
+            guard let event = eventsByID[id] else { return "根拠を参照できません・要確認" }
             return "[\(Self.time(event.startOffset)) · \(event.origin.label)](#utterance-\(id.uuidString.lowercased()))"
         }.joined(separator: "、")
     }
@@ -89,9 +87,9 @@ struct MeetingExportSnapshot {
 @Observable
 final class MeetingExportState {
     private(set) var message = ""
-    private var lastMarkdown: String?
+    private var lastSnapshot: MeetingExportSnapshot?
 
-    func matches(_ snapshot: MeetingExportSnapshot) -> Bool { lastMarkdown == snapshot.markdown }
+    func matches(_ snapshot: MeetingExportSnapshot) -> Bool { lastSnapshot == snapshot }
 
     func save(_ snapshot: MeetingExportSnapshot, to url: URL?,
               write: (String, URL) throws -> Void = { try $0.write(to: $1, atomically: true, encoding: .utf8) }) {
@@ -99,12 +97,12 @@ final class MeetingExportState {
         let markdown = snapshot.markdown
         do {
             try write(markdown, url)
-            lastMarkdown = markdown
+            lastSnapshot = snapshot
             message = "Markdownを書き出しました。アプリ内への永続保存ではありません。"
         } catch {
             message = "書き出しに失敗しました。保存先のアクセス権と空き容量を確認してください。会議内容は保持されています。"
         }
     }
 
-    func reset() { lastMarkdown = nil; message = "" }
+    func reset() { lastSnapshot = nil; message = "" }
 }

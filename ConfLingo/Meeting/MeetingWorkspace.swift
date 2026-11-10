@@ -23,7 +23,7 @@ final class MeetingWorkspace {
     let ai: InsightCoordinator
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
-    private(set) var startedAt: Date?
+    var startedAt: Date? { controller.startedAt }
     private var pendingSummaryID: UUID?
     var candidates: MeetingCandidateStore { ai.candidates }
     let credentials: GeminiCredentials
@@ -134,7 +134,6 @@ final class MeetingWorkspace {
         isStarting = true
         page = .live
         defer { isStarting = false }
-        if startedAt == nil { startedAt = Date() }
         await controller.start(microphoneLocale: Locale(identifier: microphoneLocaleID),
                                systemLocale: Locale(identifier: systemLocaleID))
     }
@@ -184,7 +183,6 @@ final class MeetingWorkspace {
         cancelSummary()
         summary.reset()
         export.reset()
-        startedAt = nil
         ai.reset()
         controller.clear()
         name = ""

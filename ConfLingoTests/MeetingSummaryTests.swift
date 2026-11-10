@@ -5,6 +5,25 @@ import Testing
 @MainActor
 @Suite(.timeLimit(.minutes(1)))
 struct MeetingSummaryTests {
+    @Test(arguments: [(30.0, 15.0, 30.0), (30.0, nil, 30.0), (nil, nil, 10.0)] as [(Double?, Double?, Double)])
+    func sectionRangeCoversOverlappingUtterancesAndUnknownEnds(longEnd: Double?, shortEnd: Double?, expectedEnd: Double) async throws {
+        let store = MeetingSessionStore(sessionID: UUID())
+        for (origin, start, end) in [(AudioOrigin.microphone, 0.0, longEnd), (.systemAudio, 10.0, shortEnd)] {
+            store.receive(TranscriptEvent(id: UUID(), sessionID: store.sessionID, origin: origin, languageCode: "en-US",
+                                          startOffset: start, endOffset: end, text: "Synthetic overlap", isFinal: true,
+                                          revision: 1, sourceStartTime: start))
+        }
+        let summary = MeetingSummaryCoordinator(store: store, client: FakeInsightClient())
+        let plan = try MeetingSummaryPlan(sessionID: store.sessionID, events: store.finals, answerLanguage: .english)
+        await summary.generate(plan, consent: true)
+        let completed = try #require(summary.completed)
+        #expect(completed.sections.first?.startOffset == 0)
+        #expect(completed.sections.first?.endOffset == expectedEnd)
+        let snapshot = MeetingExportSnapshot(title: "Overlap", startedAt: nil, microphoneLocale: "en", systemLocale: "en",
+                                              sessionID: store.sessionID, events: store.finals, candidates: [], summary: completed)
+        #expect(snapshot.markdown.contains(expectedEnd == 30 ? "00:00:00–00:00:30" : "00:00:00–00:00:10"))
+    }
+
     @Test func planPreservesEntireTimelineAndEnforcesBoundaries() throws {
         let session = UUID()
         let events = (0..<61).map { insightEvent(session: session, text: "line \($0)", offset: Double($0)) }
