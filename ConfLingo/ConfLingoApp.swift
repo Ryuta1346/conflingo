@@ -31,10 +31,11 @@ struct ConfLingoApp: App {
         #if DEBUG
         _meeting = State(initialValue: isPreview
                          ? MeetingPreview.make(activity: activity, scenario: MeetingPreview.scenario,
-                                               liveAI: MeetingPreview.liveAIEnabled(arguments: ProcessInfo.processInfo.arguments))
-                         : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting)))
+                                               liveAI: MeetingPreview.liveAIEnabled(arguments: ProcessInfo.processInfo.arguments),
+                                               defaults: defaults)
+                         : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: defaults))
         #else
-        _meeting = State(initialValue: MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting)))
+        _meeting = State(initialValue: MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: defaults))
         #endif
         _floatingPanel = State(initialValue: MeetingFloatingPanel(defaults: defaults))
     }

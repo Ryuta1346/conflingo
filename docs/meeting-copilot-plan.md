@@ -1,6 +1,26 @@
+> 利用者確認追補（2026-11-10）: VoiceOverの読み上げ・キャプション・Control+Option+Spaceによる設定ボタン操作を利用者確認として記録。[証跡と制約](validation/pr6-focus-stability.md)。基本確認の質問は回答済み。全画面の読み順・実会議等の網羅確認とは区別する。
+
+> 反復確認追補（2026-11-10）: [フォーカス45回・主画面/小窓往復3回が成功](validation/pr6-focus-stability.md)。VoiceOver本体のプロセス起動は確認したが、実読み上げは利用者の観測回答待ち。製品変更・追加API送信なし。
+
+> キーボード追補（2026-11-10）: [一意の識別子を持つ無通信コピー](validation/pr6-keyboard-isolation.md)で、設定・言語選択・開始/停止/再開/終了・小窓の主要キー経路を確認。VoiceOver実操作と一時的なフォーカス停滞の原因は未確定。製品変更・追加API送信なし。
+
+> 最新UI追補（2026-11-10）: [小窓の実受信中停止・取消・部分回答保持](validation/pr6-final-ui.md)をAXPressで確認。旧停止UI枠を1件使用し11/12、直近60/60枠は変更なし。言語メニューの矢印/Enter操作は成功、キーボード網羅・VoiceOver実操作は未確認。以下の小窓未完了記述は追補前の履歴。
+
+> 製品採用結果（2026-11-10）: 3.8 Flash / medium・8192へ変更済み。290テスト・Debug/Release・lint成功。承認済み60要求を実施し品質52/52合格、新ビルドのKeychain・言語復元・主画面AI停止/一時停止/会議終了・再開後回答を確認。小窓の受信中停止・キーボード網羅/VoiceOver等は未完了。平均完了5.80秒、最大21.73秒。[結果](validation/pr6-model-adoption.md)。以下は各時点の履歴。
+
+> 最新方針（2026-11-10）: ユーザー要望によりAI回答言語を事前設定する。その他の意味の誤りは、独自の根拠判定処理より先にモデル/推論量の改善を比較する。[調査・実装/評価計画](design/pr6-answer-language-model-plan.md)。ユーザーが両方を承認。回答言語設定を実装し290テスト・Debug/Release・lint109ファイル違反0、非録音UIの双方向反映を確認。72要求も完了し、minimal 19/24、high 22/24、3.8 Flash/medium 24/24。得られた71応答は指定言語に一致。[結果](validation/pr6-answer-language-model.md)。製品既定の変更と全体回帰は未実施、PR6全体の受入は未完了を維持。
+
+> 継続修正（2026-11-10）: ユーザー「次進めて」により[言語・根拠整合の計画](design/pr6-grounding-language-plan.md)をローカル実装・検証済み。旧28ケースの言語検査、対照6ケース、プロンプトを更新。287テスト・Debug/Release・lint107ファイル違反0。[検証記録](validation/pr6-grounding-language.md)。追加62要求も完了し48合格・9不合格・5要確認。言語不一致4件と因果の補完等が残り、次は要求言語・主張と根拠の契約を設計する。PR6/Gate C未合格を維持。
+
 # ConfLingo — リアルタイム会議支援プロダクト 改善・実装計画
 
-> 2026-11-10追補: 混在文脈の品質修正後52要求に合格し、[修正後UI/Keychain・実受信後停止](validation/pr6-stop-acceptance.md)も確認。本文中の旧評価値は各時点の記録。通常起動全体・実音声等の受入は未完了。
+> 2026-11-10追補: 混在文脈の品質修正後52要求に合格し、[修正後UI/Keychain・実受信後停止](validation/pr6-stop-acceptance.md)も確認。[非録音UIの追加受入](validation/pr6-nonrecording-ui-acceptance.md)では通常起動の準備・設定遷移と主要キーボード操作を確認。別署名ビルドのキー読出しエラー、VoiceOver・通信中クリック等は残る。本文中の旧評価値は各時点の記録。通常起動の開始後・実音声等の受入は未完了。
+> 同日追加: 最新ビルドの追加認証はユーザー指示でスキップ。許可済みビルドで[合成36ケースの根拠](validation/pr6-semantic-acceptance.md)を照合し、35件合格・英語レビュー完了回答1件を要確認とした。[追加8要求の停止UI](validation/pr6-native-stop-acceptance.md)では主画面・小窓の受信後クリックと取消を確認。一時停止/終了は完了後クリックで未確認、日本語質問への英語回答1件を観測。承認枠44/44要求を使用。PR6/Gate Cは未完了を維持する。
+
+> 認証再開後: 最新ビルド自身のKeychain読出し・登録状態の受入は[再検証で合格](validation/pr6-keychain-auth-resume.md)。非対話読出しと製品登録状態の2テスト、および通常起動の設定シート・設定ページで確認した。追加API0件。上記の認証スキップは過去時点の記録。
+> 最新追加: [追加12要求枠の確認](validation/pr6-followup-acceptance.md)で10要求を実行し、一時停止・会議終了の受信後クリックと取消、再開後の新規回答完了を確認。無通信で主要キーボード経路と狭幅・48pt表示も確認。品質4件は言語一致、意味2件合格・2件要確認。過去の言語不一致は未解決、VoiceOver等も残るためREVIEWを維持。
+
+> 最新品質改善: [承認済み計画](design/pr6-focused-answer-quality-plan.md)を実装し68要求を完了。候補60件は54合格・4不合格・2要確認。286テスト・Debug/Release・lint106ファイル違反0。言語不一致・根拠にない依存関係等が残り、PR6/Gate Cは未合格。[全件の評価記録と次の対応](validation/pr6-focused-answer-quality.md)。今回の実API評価は認証済みホスト内の候補クライアントで行い、新ビルド自身のUI/Keychain受入とは区別する。
 
 - 作成日: 2026-11-07
 - 対象: [Ryuta1346/conflingo](https://github.com/Ryuta1346/conflingo)
@@ -201,7 +221,7 @@ PR6の具体化は[実装計画](design/pr6-implementation-plan.md)と[ヒアリ
 - UIと会議処理は共通の`InsightClient`境界を使用し、認証・HTTP・ストリーム変換をProvider/接続経路ごとのアダプタへ置く。今回はGeminiとモックだけを実装する。
 - 音声PCMは送らず、**外部送信が有効なときのみ**質問文と必要な確定発話・参照IDを送る。資料スニペットはPR8以降。会議ID/要求IDの照合はローカルで行い、不要な識別情報は送らない。
 - Geminiの応答を生成中/本文更新/完了/失敗の内部イベントへ変換する。外部APIが独自の`insight.created`形式を返す前提にはしない。
-- 初期モデルは低コストのGemini 3.1 Flash-Liteを使用し、料金・終了予定・保持条件を[PR6計画](design/pr6-implementation-plan.md)に記録。高額モデルへ自動切替せず、自動提案初期オフ、文脈/出力上限で費用を抑える。
+- 採用仕様はGemini 3.8 Flash / medium、出力枠8192（製品反映・品質52件合格）。初期モデルはGemini 3.1 Flash-Liteだった。料金・終了予定・保持条件を[PR6計画](design/pr6-implementation-plan.md)に記録。高額モデルへ自動切替せず、自動提案初期オフ、文脈/出力上限で費用を抑える。
 - 運営Proxyは後続で認証・利用/支出上限・運営キー秘匿・保持条件を具体化する。Hono最小APIはその段階の候補。利用者のサブスク連携は公式に提供・許可される手段の有無を別途調査し、未確認のまま実装可能としない。
 
 ### 2.5 ナレッジ検索
@@ -338,6 +358,8 @@ AppShell
 - 2つのSpeechAnalyzer同時実行の性能・メモリ・認識精度を確認。成立しなければ認識方式を再評価する。
 
 ### Gate C — AI提案が有用
+
+現在の回答言語契約は、利用者が事前選択した日本語/Englishを質問・発話の言語に優先して手動/自動の回答へ適用する。[言語設定計画](design/pr6-answer-language-model-plan.md)。以下は変更前の評価履歴。
 
 2026-11-09承認の[PR6回答品質改善計画](design/pr6-response-quality-plan.md)のQ01〜Q06を追加受入条件とする。質問言語での回答、具体的な不足説明、雑談の候補誤分類防止、曖昧さと矛盾の区別を合成24件で検証した。最終23/24合格、明示された日程を曖昧扱いするQ05残件があり、Gate Cは未合格。[検証記録](validation/pr6-response-quality.md)。
 

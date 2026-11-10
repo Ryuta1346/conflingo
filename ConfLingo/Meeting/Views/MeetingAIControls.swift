@@ -20,6 +20,13 @@ struct MeetingAIControls: View {
                     Spacer()
                     Button("APIキー設定") { showsKeySettings = true }
                 }
+                Picker("AIの回答言語", selection: $meeting.answerLanguage) {
+                    ForEach(AnswerLanguage.allCases, id: \.self) { language in
+                        Text(language.label).tag(language)
+                    }
+                }
+                Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
+                    .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Toggle("確定発話と質問文のGeminiへの送信を許可", isOn: Binding(
                     get: { meeting.ai.permitted }, set: { meeting.setAIAllowed($0) }
                 ))

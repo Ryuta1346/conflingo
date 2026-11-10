@@ -43,6 +43,31 @@ struct DualTranscriptionTests {
         #expect(controller.phase == .idle)
     }
 
+    @Test func successivePartialsFinalizeAcrossBothInputsAndStopDrainsLastUtterance() async throws {
+        let fixture = DualFixture()
+        let controller = fixture.controller(timeline: MeetingTimeline(now: { 0 }))
+        await controller.start()
+        for index in 0..<9 {
+            let text = "System sentence \(index + 1)"
+            try await fixture.system.emit(text, time: Double(index), final: false)
+            if index == 4 {
+                try await fixture.microphone.emit("200ミリ秒、目標100ミリ秒", time: 9, final: false)
+            }
+            try await fixture.system.emit(text, time: Double(index))
+        }
+        fixture.microphone.finalOnStop = "200ミリ秒、目標100ミリ秒"
+        await controller.stop()
+        #expect(controller.store.finals.filter { $0.origin == .systemAudio }.map(\.text)
+                == (1...9).map { "System sentence \($0)" })
+        #expect(controller.store.finals.filter { $0.origin == .microphone }.map(\.text)
+                == ["200ミリ秒、目標100ミリ秒"])
+        #expect(controller.store.finals.allSatisfy { $0.isFinal })
+        #expect(Set(controller.store.finals.map(\.id)).count == 10)
+        #expect(controller.store.partials.isEmpty)
+        #expect(controller.phase == .idle)
+        #expect(controller.lastError == nil)
+    }
+
     @Test func deniedPermissionAndFailedModelNeverStartEitherInput() async {
         let fixture = DualFixture()
         fixture.microphonePermission.decision = false

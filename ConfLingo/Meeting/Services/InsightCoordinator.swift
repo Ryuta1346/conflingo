@@ -10,6 +10,7 @@ final class InsightCoordinator {
     private(set) var automaticEnabled = false
     private(set) var subscriptionFailed = false
     private(set) var state: State = .off
+    var answerLanguage: AnswerLanguage = .japanese
     var insights: [MeetingInsight] = []
     private(set) var lastUsage: InsightUsage?
     private(set) var contextDescription = "手動質問では、許可前を含む直近の確定発話を最大30件送ります。"
@@ -140,7 +141,8 @@ final class InsightCoordinator {
     func ask(_ question: String) async {
         guard canAsk else { return }
         do {
-            let next = try InsightRequest(sessionID: store.sessionID, question: question, trigger: .manual, events: store.finals)
+            let next = try InsightRequest(sessionID: store.sessionID, question: question, trigger: .manual, events: store.finals,
+                                          answerLanguage: answerLanguage)
             await launch(next).value
         } catch {
             cancelRequest()
@@ -167,7 +169,7 @@ final class InsightCoordinator {
         let context = (store.finals + [event]).filter { $0.startOffset >= allowedAfter }
         guard let next = try? InsightRequest(sessionID: store.sessionID,
                                              question: "この発話に関連する回答・確認事項・リスク・未確認候補を短く提案してください。",
-                                             trigger: .automatic, events: context),
+                                             trigger: .automatic, events: context, answerLanguage: answerLanguage),
               next.events.contains(where: { $0.id == event.id }) else { return nil }
         recentTriggers.append((time, normalized))
         return launch(next)

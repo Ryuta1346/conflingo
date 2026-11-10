@@ -1,0 +1,142 @@
+{
+  "date": "2026-11-10",
+  "status": "floating_stop_pass_accessibility_incomplete",
+  "host": {
+    "path": "/private/tmp/conflingo-language-model-build/Build/Products/Debug/ConfLingo.app",
+    "cdhash": "5c9b006725a3c6d50b85220dbaec7c4ea76c85d9"
+  },
+  "sourceHashesMatchPrior": true,
+  "model": "gemini-3.8-flash",
+  "thinkingLevel": "medium",
+  "maxOutputTokens": 8192,
+  "approval": {
+    "source": "previous additional 12 request allowance",
+    "previousUsed": 10,
+    "thisRunUsed": 1,
+    "totalUsed": 11,
+    "remaining": 1,
+    "latest60AllowanceUsed": 60,
+    "latest60AllowanceExtended": false
+  },
+  "cost": {
+    "started": [
+      {
+        "group": "ui",
+        "id": "ui-1",
+        "inputReservation": 10713,
+        "type": "request_start",
+        "reservationUSD": 0.03875475
+      }
+    ],
+    "results": [
+      {
+        "cancelled": true,
+        "group": "ui",
+        "id": "ui-1",
+        "type": "result",
+        "estimatedCostUSD": 0.03875475,
+        "costUsesActualUsage": false
+      }
+    ],
+    "estimatedCostUSD": 0.03875475
+  },
+  "floating": {
+    "activation": "AXPress on production stop button via CUA",
+    "partialObservedBeforeActivation": true,
+    "physicalMouseClickVerified": false,
+    "coordinateFailure": "windowNotFoundAtPosition",
+    "stopSnapshot": {
+      "allowed": false,
+      "cards": [
+        {
+          "characters": 16,
+          "status": "interrupted"
+        }
+      ],
+      "clicks": [
+        {
+          "type": "mouseUp",
+          "uptime": 372420.164712583,
+          "window": 5742
+        },
+        {
+          "type": "keyDown",
+          "uptime": 372420.240463666,
+          "window": 5742
+        }
+      ],
+      "page": "live",
+      "phase": "listening",
+      "requests": [
+        {
+          "cancelled": true,
+          "chunks": 2,
+          "end": 372440.59026612504,
+          "failure": "interrupted",
+          "firstChunk": 372440.5412874583,
+          "number": 1,
+          "start": 372430.15031654167
+        }
+      ]
+    },
+    "finalSnapshot": {
+      "allowed": false,
+      "cards": [
+        {
+          "characters": 16,
+          "status": "interrupted"
+        }
+      ],
+      "clicks": [
+        {
+          "type": "mouseUp",
+          "uptime": 372420.164712583,
+          "window": 5742
+        },
+        {
+          "type": "keyDown",
+          "uptime": 372420.240463666,
+          "window": 5742
+        }
+      ],
+      "page": "review",
+      "phase": "idle",
+      "requests": [
+        {
+          "cancelled": true,
+          "chunks": 2,
+          "end": 372440.59026612504,
+          "failure": "interrupted",
+          "firstChunk": 372440.5412874583,
+          "number": 1,
+          "start": 372430.15031654167
+        }
+      ]
+    },
+    "firstChunkToCancellationMilliseconds": 48.97866671672091
+  },
+  "keyboard": {
+    "osKeyboardNavigationInitiallyOn": true,
+    "osKeyboardNavigationChanged": false,
+    "languageMenuArrowAndReturn": "pass after opening menu by AXPress",
+    "languageRestored": "ja",
+    "tabTraversal": "incomplete; focus repeatedly remained at question field, once moved to data terms link",
+    "rootCause": "not established"
+  },
+  "voiceOver": {
+    "initiallyOn": false,
+    "settingEnabledObserved": true,
+    "appAcquisition": "timeoutReached",
+    "actualReading": "unverified",
+    "restoredOffObserved": true
+  },
+  "validation": {
+    "dryHarness": "passed",
+    "liveHarness": "passed",
+    "ledgerChecks": "passed",
+    "productCodeChangedThisRun": false,
+    "productTestsRerun": false,
+    "priorTests": 290,
+    "priorLintViolations": 0
+  }
+}

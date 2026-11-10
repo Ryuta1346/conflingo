@@ -1,0 +1,136 @@
+{
+  "date": "2026-11-10",
+  "status": "focus_repetition_pass_voiceover_basic_user_confirmed",
+  "hostBundleIdentifier": "com.gavrri.conflingo.keyboardreview",
+  "hostSource": "same product dylib as authenticated host; identity-isolated validation copy",
+  "apiRequests": 0,
+  "productChanges": false,
+  "sourceHashMatches": 67,
+  "focusChecks": {
+    "mainVoiceOverOn": {
+      "forward": [
+        "字幕を大きく",
+        "最前面",
+        "小さく表示",
+        "ホーム",
+        "Conference",
+        "Meeting",
+        "設定",
+        "新しい会議",
+        "字幕を小さく",
+        "字幕を大きく",
+        "最前面",
+        "小さく表示",
+        "ホーム",
+        "Conference",
+        "Meeting",
+        "設定",
+        "新しい会議",
+        "字幕を小さく"
+      ],
+      "reverse": [
+        "新しい会議",
+        "設定",
+        "Meeting",
+        "Conference",
+        "ホーム",
+        "小さく表示",
+        "最前面",
+        "字幕を大きく",
+        "字幕を小さく"
+      ]
+    },
+    "panelVoiceOverOn": {
+      "forward": [
+        "振り返りを開く",
+        "展開",
+        "非表示",
+        "振り返りを開く",
+        "展開",
+        "非表示"
+      ]
+    },
+    "roundTrips": [
+      {
+        "round": 1,
+        "mainFocusRestoredToCompact": true,
+        "panelShown": true,
+        "focusAfterTab": "非表示"
+      },
+      {
+        "round": 2,
+        "mainFocusRestoredToCompact": true,
+        "panelShown": true,
+        "focusAfterTab": "非表示"
+      },
+      {
+        "round": 3,
+        "mainFocusRestoredToCompact": true,
+        "panelShown": true,
+        "focusAfterTab": "非表示"
+      }
+    ],
+    "panelVoiceOverOff": {
+      "reverse": [
+        "展開",
+        "振り返りを開く",
+        "非表示"
+      ]
+    },
+    "mainVoiceOverOff": {
+      "forward": [
+        "ホーム",
+        "Conference",
+        "Meeting",
+        "設定",
+        "新しい会議",
+        "字幕を小さく",
+        "字幕を大きく",
+        "最前面",
+        "小さく表示"
+      ]
+    },
+    "checkedTransitions": 45,
+    "unexpectedTransitions": 0,
+    "axRaiseUsed": false,
+    "scope": "empty synthetic meeting review; not real audio or receiving AI"
+  },
+  "voiceOver": {
+    "processObservedRunning": true,
+    "screenReaderOutputProcessObservedRunning": true,
+    "utilityOpened": true,
+    "captionEnabledInitially": true,
+    "cursorEnabledInitially": true,
+    "muteSpeech": false,
+    "voice": "Kyoko ja-JP",
+    "volume": 0.5,
+    "samplePlaybackStateObserved": true,
+    "voiceOverAppCapture": "timeoutReached",
+    "voCursorOrCaptionMovementObserved": false,
+    "actualAudioObservation": "user confirmed 聞こえた、見えた",
+    "diagnosticErrors": [
+      "voice descriptor lookup errors",
+      "audio buffer zero-size error"
+    ],
+    "diagnosticsProveRootCause": false,
+    "initialEnabled": false,
+    "finalEnabled": false,
+    "voiceSettingsChanged": false,
+    "captionUserConfirmed": true,
+    "controlOptionSpaceViaTool": "no settings navigation observed",
+    "manualActivation": {
+      "question": "Control+Option+Space on Settings button",
+      "userResponse": "設定画面が開いた",
+      "status": "user_confirmed",
+      "independentToolConfirmation": false,
+      "toolObservationAfterResponse": "review screen remained displayed in tool capture; reason not established"
+    }
+  },
+  "final": {
+    "window": "main review",
+    "microphone": "stopped",
+    "systemAudio": "stopped",
+    "aiAllowed": false,
+    "keyboardNavigation": "on; unchanged this run"
+  }
+}

@@ -1,0 +1,76 @@
+{
+  "date": "2026-11-10",
+  "status": "major_keyboard_paths_pass_voiceover_unverified",
+  "userObservation": "何も動いてなく見える",
+  "originalHost": {
+    "path": "/private/tmp/conflingo-language-model-build/Build/Products/Debug/ConfLingo.app",
+    "cdhash": "5c9b006725a3c6d50b85220dbaec7c4ea76c85d9",
+    "sourceHashesMatched": 67
+  },
+  "isolatedHost": {
+    "path": "/private/tmp/conflingo-keyboard-review/ConfLingoKeyboardReview.app",
+    "bundleIdentifier": "com.gavrri.conflingo.keyboardreview",
+    "cdhash": "1f66fb793e04b2c0fbb396972983b17e94d362c1",
+    "productDylibSHA256": "68359040fb80160ab4524836c2739496ab58cdd9024b76a4f0adc02ff9a0d56a",
+    "productDylibIdentical": true,
+    "arguments": [
+      "--meeting-preview",
+      "--meeting-state=setup"
+    ]
+  },
+  "apiRequests": 0,
+  "realAudio": false,
+  "keychainAccess": false,
+  "keyboard": {
+    "navigationSequence": [
+      "字幕を大きく",
+      "最前面",
+      "ホーム",
+      "Conference",
+      "Meeting",
+      "設定"
+    ],
+    "pathsConfirmed": [
+      "settings Space navigation and Shift+Tab return",
+      "meeting preparation controls Tab traversal",
+      "API settings Space open and Escape close with focus returned",
+      "synthetic consent Space toggle",
+      "answer language Space, Down, Enter to English",
+      "answer language Space, Up, Enter restored Japanese",
+      "meeting start Space",
+      "main pause Space",
+      "main resume Space",
+      "compact window Space",
+      "floating pause Space",
+      "floating resume Space",
+      "floating expand Space",
+      "floating end Space",
+      "floating hide Space after meeting ended"
+    ],
+    "floatingRaiseUsed": true,
+    "intermittentFocusNotMoving": true,
+    "rootCause": "not established; three original bundle-ID processes; isolated identity and OS keyboard-navigation reapply improved traversal"
+  },
+  "voiceOver": {
+    "initiallyOn": false,
+    "temporarilyOn": true,
+    "controlOptionRightObservedChange": false,
+    "inventoryReportedRunning": false,
+    "actualReading": "unverified",
+    "restoredOff": true
+  },
+  "keyboardNavigation": {
+    "initiallyOn": true,
+    "reappliedOffThenOn": true,
+    "finalOn": true
+  },
+  "finalState": {
+    "meeting": "review",
+    "microphone": "stopped",
+    "systemAudio": "stopped",
+    "language": "ja",
+    "aiAllowed": false
+  },
+  "productChangesThisRun": false,
+  "commitCreated": false
+}

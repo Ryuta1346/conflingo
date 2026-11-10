@@ -19,7 +19,8 @@ struct MixedContextEvaluationCase: Sendable {
                             startOffset: Double(index * 12), endOffset: Double(index * 12 + 8),
                             text: text, isFinal: true, revision: 1, sourceStartTime: Double(index * 12))
         }
-        return try InsightRequest(sessionID: session, question: question, trigger: .manual, events: events)
+        return try InsightRequest(sessionID: session, question: question, trigger: .manual, events: events,
+                                  answerLanguage: answerLanguage == "en" ? .english : .japanese)
     }
 
     func qualityIssues(in text: String) -> [String] {

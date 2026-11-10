@@ -51,10 +51,10 @@ struct ContentView: View {
         _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: settings)
         _appearance = AppStorage(wrappedValue: "system", "appearance", store: settings)
         #if DEBUG
-        _meeting = State(initialValue: meeting ?? (isPreview ? MeetingPreview.make(activity: activity)
-            : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting))))
+        _meeting = State(initialValue: meeting ?? (isPreview ? MeetingPreview.make(activity: activity, defaults: settings)
+            : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings)))
         #else
-        _meeting = State(initialValue: meeting ?? MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting)))
+        _meeting = State(initialValue: meeting ?? MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings))
         #endif
         _floatingPanel = State(initialValue: floatingPanel ?? MeetingFloatingPanel(defaults: settings))
         _store = State(initialValue: session)
@@ -218,6 +218,7 @@ struct ContentView: View {
             Color.clear
         case .settings:
             SettingsView(fontSize: $fontSize, alwaysOnTop: $alwaysOnTop, appearance: $appearance,
+                         answerLanguage: Binding(get: { meeting.answerLanguage }, set: { meeting.answerLanguage = $0 }),
                          credentials: meeting.credentials,
                          editDictionary: { showDictionary = true }, prepare: { navigate(.setup) })
         }

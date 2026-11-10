@@ -5,9 +5,15 @@ xcuserdata/
 *.xcuserstate
 *.xcresult/
 *.xcarchive/
+*.app/
+*.dSYM/
 
 # Swift Package Manager
 .build/
+
+# ローカルの実行ログ・lintキャッシュ
+*.log
+.swiftlint_cache
 
 # 配布物
 dist/
