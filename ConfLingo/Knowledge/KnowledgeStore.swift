@@ -12,7 +12,7 @@ final class KnowledgeStore {
     private(set) var message = ""
     private(set) var permitted = false
     private var index = KnowledgeIndex()
-    private var revision = UUID()
+    private(set) var revision = UUID()
     private var consentRevision = UUID()
     private var searchID = UUID()
     private var mutationID: UUID?
@@ -22,6 +22,95 @@ final class KnowledgeStore {
         self.lookup = lookup ?? { index, query in try await index.search(query) }
     }
     @ObservationIgnored var onChange: (() -> Void)?
+    @ObservationIgnored var onContentChange: (() -> Void)?
+    @ObservationIgnored private var repositoryTask: Task<[KnowledgeDocument], Error>?
+
+    var hasRepository: Bool { documents.contains { $0.source != nil } }
+
+    func importRepository(_ scan: RepositoryScan, selected: Set<String>) async {
+        guard !isBusy, !hasRepository else { return }
+        invalidate()
+        let mutation = UUID()
+        mutationID = mutation
+        isBusy = true
+        message = "リポジトリを取り込んでいます…"
+        let index = index
+        let task = Task {
+            let snapshot = try await RepositoryImporter.load(scan, selected: selected)
+            try Task.checkCancellation()
+            return try await index.addRepository(snapshot)
+        }
+        repositoryTask = task
+        do {
+            let imported = try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
+            guard mutationID == mutation else { return }
+            documents += imported
+            message = "リポジトリを取り込みました。取り込み時点の作業ツリーをこの会議で参照します。"
+        } catch {
+            guard mutationID == mutation else { return }
+            message = error is CancellationError ? "取り込みを中止しました。" : error.localizedDescription
+        }
+        repositoryTask = nil
+        mutationID = nil
+        isBusy = false
+    }
+
+    func cancelRepositoryImport() { repositoryTask?.cancel() }
+
+    func removeRepository() async {
+        guard !isBusy, hasRepository else { return }
+        invalidate()
+        isBusy = true
+        let mutation = UUID()
+        mutationID = mutation
+        do {
+            try await index.removeRepository()
+            guard mutationID == mutation else { return }
+            documents.removeAll { $0.source != nil }
+            message = "リポジトリを取り外しました。生成済みの引用は会議破棄まで残ります。"
+        } catch {
+            guard mutationID == mutation else { return }
+            message = KnowledgeFailure.search.localizedDescription
+        }
+        mutationID = nil
+        isBusy = false
+    }
+
+    func retrieveForSummary(_ events: [TranscriptEvent]) async throws -> [KnowledgeReference] {
+        try await rankedReferences(events.map(\.text))
+    }
+
+    func retrieveForAutomatic(_ event: TranscriptEvent) async throws -> [KnowledgeReference] {
+        try await rankedReferences([String(event.text.prefix(12_000))])
+    }
+
+    private func rankedReferences(_ texts: [String]) async throws -> [KnowledgeReference] {
+        guard !isBusy else { throw KnowledgeFailure.search }
+        let version = revision
+        var scores: [UUID: Double] = [:]
+        var references: [UUID: KnowledgeReference] = [:]
+        for text in texts {
+            var start = text.startIndex
+            while start < text.endIndex {
+                try Task.checkCancellation()
+                let end = text.index(start, offsetBy: 2_000, limitedBy: text.endIndex) ?? text.endIndex
+                let hits = try await lookup(index, String(text[start..<end]))
+                guard revision == version, !isBusy else { throw CancellationError() }
+                for (rank, reference) in hits.enumerated() {
+                    scores[reference.id, default: 0] += 1 / Double(rank + 1)
+                    references[reference.id] = reference
+                }
+                start = end
+            }
+        }
+        try Task.checkCancellation()
+        return references.values.sorted {
+            let left = scores[$0.id, default: 0], right = scores[$1.id, default: 0]
+            if left != right { return left > right }
+            if $0.displayTitle != $1.displayTitle { return $0.displayTitle < $1.displayTitle }
+            return $0.characterOffset < $1.characterOffset
+        }.prefix(5).map { $0 }
+    }
 
     func setPermission(_ value: Bool) {
         guard permitted != value else { return }
@@ -107,6 +196,8 @@ final class KnowledgeStore {
     }
 
     func reset() {
+        repositoryTask?.cancel()
+        repositoryTask = nil
         invalidate()
         mutationID = nil
         index = KnowledgeIndex()
@@ -118,6 +209,7 @@ final class KnowledgeStore {
 
     private func invalidate() {
         revision = UUID()
+        onContentChange?()
         searchID = UUID()
         results = []
         searchState = .idle

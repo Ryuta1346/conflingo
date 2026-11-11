@@ -6,8 +6,10 @@ struct MeetingSummaryPlan: Identifiable, Sendable {
     let events: [TranscriptEvent]
     let answerLanguage: AnswerLanguage
     let requests: [InsightRequest]
+    let knowledgeRevision: UUID?
 
-    init(sessionID: UUID, events: [TranscriptEvent], answerLanguage: AnswerLanguage) throws {
+    init(sessionID: UUID, events: [TranscriptEvent], answerLanguage: AnswerLanguage,
+         knowledgeBySection: [[KnowledgeReference]] = [], knowledgeRevision: UUID? = nil) throws {
         let finals = events.filter { $0.sessionID == sessionID && $0.isFinal }
             .sorted { $0.startOffset < $1.startOffset }
         guard !finals.isEmpty else { throw PlanError.empty }
@@ -32,11 +34,14 @@ struct MeetingSummaryPlan: Identifiable, Sendable {
         self.sessionID = sessionID
         self.events = finals
         self.answerLanguage = answerLanguage
-        requests = try chunks.map { events in
+        self.knowledgeRevision = knowledgeRevision
+        guard knowledgeBySection.isEmpty || (knowledgeBySection.count == chunks.count && knowledgeRevision != nil) else { throw PlanError.invalid }
+        requests = try chunks.enumerated().map { index, events in
             let request = try InsightRequest(
                 sessionID: sessionID,
                 question: "この区間の会話を簡潔に要約してください。話題、提案、未解決事項と訂正を区別し、根拠発話を示してください。担当者・期限・合意を推測せず、この区間の内容を会議全体の最終決定として扱わないでください。",
-                trigger: .manual, events: events, answerLanguage: answerLanguage, purpose: .summary
+                trigger: .manual, events: events, answerLanguage: answerLanguage,
+                knowledge: knowledgeBySection.isEmpty ? [] : knowledgeBySection[index], purpose: .summary
             )
             guard request.omittedCount == 0, request.events.count == events.count else { throw PlanError.invalid }
             return request
@@ -62,6 +67,8 @@ struct MeetingSummarySection: Identifiable, Equatable, Sendable {
     let evidenceIDs: [UUID]
     let startOffset: TimeInterval
     let endOffset: TimeInterval
+    var supplement = ""
+    var knowledgeReferences: [KnowledgeReference] = []
 }
 
 struct MeetingSummary: Equatable, Sendable {

@@ -24,7 +24,7 @@ struct KnowledgeIntegrationTests {
         #expect(ref.title == title)
     }
 
-    @Test func localSearchAndPermissionAloneNeverSendAndOnlyManualCanUseDocuments() async throws {
+    @Test func localSearchNeverSendsAndAutomaticRequiresSeparatePermission() async throws {
         let knowledge = KnowledgeStore()
         await knowledge.add(data: Data("料金は月額100円です。".utf8), filename: "料金.md")
         await knowledge.search("料金")
@@ -78,9 +78,10 @@ struct KnowledgeIntegrationTests {
         if action == "ai" || action == "reset" { #expect(!knowledge.permitted) }
     }
 
-    @Test func requestBoundsReferencesAndRejectsInventedIDs() throws {
+    @Test(arguments: [InsightRequest.Trigger.manual, .automatic])
+    func requestBoundsReferencesAndRejectsInventedIDs(trigger: InsightRequest.Trigger) throws {
         let refs = (0..<8).map { reference("料金\($0)", snippet: String(repeating: "a", count: 1_200)) }
-        let request = try InsightRequest(sessionID: UUID(), question: "料金", trigger: .manual, events: [], knowledge: refs)
+        let request = try InsightRequest(sessionID: UUID(), question: "料金", trigger: trigger, events: [], knowledge: refs)
         #expect(request.knowledge.count == 5)
         #expect(request.knowledge.reduce(0) { $0 + $1.snippet.count } == 6_000)
         let result = InsightResult(kind: .answerSuggestion, text: "100円", evidenceIDs: [], knowledgeIDs: [refs[0].id, refs[0].id, UUID()])
@@ -88,7 +89,7 @@ struct KnowledgeIntegrationTests {
         #expect(card.knowledgeReferences == [refs[0]])
         #expect(card.hasInvalidEvidence)
         let automatic = try InsightRequest(sessionID: UUID(), question: "料金", trigger: .automatic, events: [], knowledge: refs)
-        #expect(automatic.knowledge.isEmpty)
+        #expect(automatic.knowledge == request.knowledge)
     }
 
     @Test func documentsAloneCannotConfirmCandidateAndMarkdownIncludesQuotedSnapshot() throws {

@@ -30,9 +30,9 @@ actor KnowledgeIndex {
         if body.first == "\u{feff}" { body.removeFirst() }
         body = body.replacingOccurrences(of: "\r\n", with: "\n").replacingOccurrences(of: "\r", with: "\n")
         guard !body.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { throw KnowledgeFailure.empty }
-        guard body.count <= 100_000, documents.count < 20,
-              documents.reduce(0, { $0 + $1.characterCount }) + body.count <= 500_000 else { throw KnowledgeFailure.limit }
-        guard !bodies.values.contains(body) else { throw KnowledgeFailure.duplicate }
+        guard body.count <= 100_000, documents.filter({ $0.source == nil }).count < 20,
+              documents.filter({ $0.source == nil }).reduce(0, { $0 + $1.characterCount }) + body.count <= 500_000 else { throw KnowledgeFailure.limit }
+        guard !documents.filter({ $0.source == nil }).contains(where: { bodies[$0.id] == body }) else { throw KnowledgeFailure.duplicate }
         let document = KnowledgeDocument(id: UUID(), title: String((filename as NSString).lastPathComponent.prefix(200)),
                                          importedAt: Date(), characterCount: body.count)
         let references = Self.split(body, document: document)
@@ -41,8 +41,8 @@ actor KnowledgeIndex {
         do {
             for reference in references {
                 try Task.checkCancellation()
-                try database.execute("INSERT INTO chunks(id, document, words) VALUES (?, ?, ?)",
-                                     [reference.id.uuidString, document.id.uuidString, Self.words(reference.snippet).joined(separator: " ")])
+                try database.execute("INSERT INTO chunks(id, document, paths, words) VALUES (?, ?, ?, ?)",
+                                     [reference.id.uuidString, document.id.uuidString, "", Self.words(reference.snippet).joined(separator: " ")])
             }
             try database.execute("COMMIT")
         } catch {
@@ -53,6 +53,42 @@ actor KnowledgeIndex {
         bodies[document.id] = body
         for reference in references { chunks[reference.id] = reference }
         return document
+    }
+
+    func addRepository(_ snapshot: RepositorySnapshot) throws -> [KnowledgeDocument] {
+        guard !documents.contains(where: { $0.source != nil }) else { throw KnowledgeFailure.duplicate }
+        guard !snapshot.files.isEmpty, snapshot.files.count <= 1_000,
+              snapshot.files.reduce(0, { $0 + $1.body.count }) <= 5_000_000 else { throw RepositoryFailure.limit }
+        var pending: [(KnowledgeDocument, String, [KnowledgeReference])] = []
+        let database = try connection()
+        try database.execute("BEGIN")
+        do {
+            for file in snapshot.files {
+                try Task.checkCancellation()
+                let source = RepositorySource(snapshotID: snapshot.id, name: snapshot.name, path: file.path, contentHash: file.hash)
+                let document = KnowledgeDocument(id: UUID(), title: String((file.path as NSString).lastPathComponent.prefix(200)),
+                                                 importedAt: snapshot.importedAt, characterCount: file.body.count, source: source)
+                let references = Self.split(file.body, document: document)
+                for reference in references {
+                    try Task.checkCancellation()
+                    try database.execute("INSERT INTO chunks(id, document, paths, words) VALUES (?, ?, ?, ?)",
+                                         [reference.id.uuidString, document.id.uuidString, Self.words(file.path).joined(separator: " "),
+                                          Self.words(reference.snippet).joined(separator: " ")])
+                }
+                pending.append((document, file.body, references))
+            }
+            try Task.checkCancellation()
+            try database.execute("COMMIT")
+        } catch {
+            try? database.execute("ROLLBACK")
+            throw error
+        }
+        for (document, body, references) in pending {
+            documents.append(document)
+            bodies[document.id] = body
+            for reference in references { chunks[reference.id] = reference }
+        }
+        return pending.map { $0.0 }
     }
 
     func references(for id: UUID) throws -> [KnowledgeReference] {
@@ -66,13 +102,29 @@ actor KnowledgeIndex {
         chunks = chunks.filter { $0.value.documentID != id }
     }
 
+    func removeRepository() throws {
+        let ids = Set(documents.filter { $0.source != nil }.map(\.id))
+        let database = try connection()
+        try database.execute("BEGIN")
+        do {
+            for id in ids { try database.execute("DELETE FROM chunks WHERE document = ?", [id.uuidString]) }
+            try database.execute("COMMIT")
+        } catch {
+            try? database.execute("ROLLBACK")
+            throw error
+        }
+        documents.removeAll { ids.contains($0.id) }
+        for id in ids { bodies[id] = nil }
+        chunks = chunks.filter { !ids.contains($0.value.documentID) }
+    }
+
     func search(_ query: String) throws -> [KnowledgeReference] {
         try Task.checkCancellation()
         let terms = Self.words(String(query.prefix(2_000))).filter { !Self.stopWords.contains($0) }
         guard !terms.isEmpty else { return [] }
         let expression = Array(Set(terms)).sorted().prefix(32).map { "\"" + $0.replacingOccurrences(of: "\"", with: "\"\"") + "\"" }
             .joined(separator: " OR ")
-        let ids = try connection().query("SELECT id FROM chunks WHERE chunks MATCH ? ORDER BY rank, rowid LIMIT 10", [expression])
+        let ids = try connection().query("SELECT id FROM chunks WHERE chunks MATCH ? ORDER BY bm25(chunks, 0, 0, 5, 1), rowid LIMIT 10", [expression])
         try Task.checkCancellation()
         return ids.compactMap { UUID(uuidString: $0).flatMap { chunks[$0] } }
     }
@@ -85,6 +137,10 @@ actor KnowledgeIndex {
     }
 
     private static func words(_ text: String) -> [String] {
+        let expanded = text.replacingOccurrences(of: "([a-z0-9])([A-Z])", with: "$1 $2", options: .regularExpression)
+            .replacingOccurrences(of: "([A-Z])([A-Z][a-z])", with: "$1 $2", options: .regularExpression)
+            .replacingOccurrences(of: "_", with: " ")
+        let text = text + " " + expanded
         let tokenizer = NLTokenizer(unit: .word)
         tokenizer.string = text
         var words: [String] = []
@@ -115,7 +171,7 @@ actor KnowledgeIndex {
             } else { end = limit }
             let snippet = String(text[start..<end])
             result.append(KnowledgeReference(id: UUID(), documentID: document.id, title: document.title, importedAt: document.importedAt,
-                                             startLine: line, characterOffset: offset, snippet: snippet))
+                                             startLine: line, characterOffset: offset, snippet: snippet, source: document.source))
             offset += snippet.count
             line += snippet.filter { $0 == "\n" }.count
             start = end
@@ -133,7 +189,7 @@ private final class KnowledgeDatabase {
             sqlite3_close(handle)
             throw KnowledgeFailure.search
         }
-        do { try execute("CREATE VIRTUAL TABLE chunks USING fts5(id UNINDEXED, document UNINDEXED, words)") } catch {
+        do { try execute("CREATE VIRTUAL TABLE chunks USING fts5(id UNINDEXED, document UNINDEXED, paths, words)") } catch {
             sqlite3_close(handle)
             throw error
         }

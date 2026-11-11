@@ -185,7 +185,7 @@ struct MeetingInsightCard: View {
                     }
                 }
                 ForEach(insight.knowledgeReferences) { reference in
-                    Button("資料：\(reference.title) · \(reference.location)") {
+                    Button("資料：\(reference.displayTitle) · \(reference.location)") {
                         if let revealKnowledge { revealKnowledge(reference) } else { meeting.selectedKnowledge = reference }
                     }.font(.caption)
                 }

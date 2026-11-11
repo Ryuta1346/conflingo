@@ -12,7 +12,7 @@ struct InsightRequest: Sendable {
     let trigger: Trigger
     let events: [TranscriptEvent]
     let omittedCount: Int
-    let knowledge: [KnowledgeReference]
+    private(set) var knowledge: [KnowledgeReference]
 
     init(sessionID: UUID, question: String, trigger: Trigger, events: [TranscriptEvent],
          answerLanguage: AnswerLanguage = .japanese, knowledge: [KnowledgeReference] = [], purpose: Purpose = .assistance) throws {
@@ -23,16 +23,7 @@ struct InsightRequest: Sendable {
         self.question = question
         self.answerLanguage = answerLanguage
         self.trigger = trigger
-        var referenceIDs: Set<UUID> = []
-        var referenceSize = 0
-        self.knowledge = trigger == .manual ? Array(knowledge.filter {
-            guard !$0.snippet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-                  $0.snippet.count <= 1_200, $0.title.count <= 200,
-                  $0.startLine > 0, $0.characterOffset >= 0,
-                  referenceIDs.insert($0.id).inserted, referenceSize + $0.snippet.count <= 6_000 else { return false }
-            referenceSize += $0.snippet.count
-            return true
-        }.prefix(5)) : []
+        self.knowledge = Self.boundedKnowledge(knowledge)
         var seen: Set<UUID> = []
         let finals = events.filter {
             $0.sessionID == sessionID && $0.isFinal && !$0.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
@@ -48,6 +39,27 @@ struct InsightRequest: Sendable {
         self.events = selected.reversed()
         omittedCount = finals.count - selected.count
     }
+
+    func includingKnowledge(_ references: [KnowledgeReference]) -> Self {
+        var copy = self
+        copy.knowledge = Self.boundedKnowledge(references)
+        return copy
+    }
+
+    private static func boundedKnowledge(_ knowledge: [KnowledgeReference]) -> [KnowledgeReference] {
+        var referenceIDs: Set<UUID> = []
+        var referenceSize = 0
+        return Array(knowledge.filter {
+            guard !$0.snippet.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
+                  $0.snippet.count <= 1_200, $0.title.count <= 200,
+                  $0.startLine > 0, $0.characterOffset >= 0,
+                  ($0.source?.path.count ?? 0) <= 1_024, ($0.source?.name.count ?? 0) <= 128,
+                  referenceIDs.insert($0.id).inserted, referenceSize + $0.snippet.count <= 6_000 else { return false }
+            referenceSize += $0.snippet.count
+            return true
+        }.prefix(5))
+    }
+
 }
 
 struct InsightUsage: Equatable, Sendable {
@@ -62,6 +74,7 @@ struct InsightResult: Sendable {
     let evidenceIDs: [UUID]
     var usage: InsightUsage?
     var knowledgeIDs: [UUID] = []
+    var supplement: String? = nil
 
     func card(for request: InsightRequest) throws -> MeetingInsight {
         guard !text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty, text.count <= 8_000 else {

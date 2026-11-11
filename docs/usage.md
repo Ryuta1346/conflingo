@@ -34,7 +34,7 @@ Transcripts remain in memory until the app exits. Audio files and transcripts ar
 4. Automatic suggestions start off for each meeting. Enable them only when needed: at most twice per minute, at least 12 seconds apart, using post-permission speech. This creates additional API usage.
 5. **AI送信を停止** stops AI in either window without stopping capture. Pause, End, and input failures also cancel AI work. Cancellation cannot retract data already sent or charges already incurred.
 
-The initial model is Gemini 3.1 Flash-Lite, billed to your API project. Errors are not retried automatically and turn automatic suggestions off; retry manually after checking the connection or key. Local transcripts continue on AI failures. Other providers, managed AI, and subscription-based authentication are future work.
+The model is Gemini 3.8 Flash, billed to your API project. Errors are not retried automatically and turn automatic suggestions off; retry manually after checking the connection or key. Local transcripts continue on AI failures. Other providers, managed AI, and subscription-based authentication are future work.
 
 Real-audio acceptance remains postponed. See the [validation record](validation/pr6-insights.md) for the opt-in synthetic-text Gemini evaluation after registering a key.
 
@@ -123,3 +123,15 @@ Cancelling the save dialog or encountering a write failure preserves subtitles. 
 Conference uses microphone input. System audio and dual-input transcription currently live in separate validation windows under the Window menu. Meeting, session history, and AI summaries are not yet available in the Conference interface.
 
 See [README](../README.md#distribution) for distribution builds and [PR5-B validation](validation/pr5-b-conference.md) for the verification scope.
+
+## Repository context in Meeting
+
+In Meeting preparation, open **資料 → リポジトリを追加** and select a local working folder. Review the source, tests, and documents, exclude files or directories, then import. Hidden files, dependencies, generated output, and known credential files are excluded. Full `.gitignore` semantics and detection of secrets embedded in source are not provided.
+
+One repository per meeting supports up to 1,000 files, five million characters, and 20 MiB; each file is limited to 1 MiB and 100,000 characters. Ordinary Markdown/Text documents retain their separate limits. Import and local search send nothing externally.
+
+Manual questions require both meeting AI and document permission; at most five matching excerpts / 6,000 characters plus their names and locations are sent to Gemini. Automatic suggestions can use the same material when **自動提案にも資料を使う** is enabled in AI settings. This defaults off and is independent of manual and summary permissions. The triggering final utterance searches for up to five excerpts / 6,000 characters. No matches means transcript-only generation; a search failure sends nothing and disables automatic suggestions. The existing two-per-minute and 12-second minimum interval remain, with one 30-second deadline covering search and generation. A manual question preempts automatic work. Input token usage may increase. After the meeting, select **この要約では資料も参照する** in summary confirmation to review excerpts and request counts before sending. This choice is independent of the live meeting permission and defaults to transcript only.
+
+Summary output separates spoken content from document/implementation supplements. Citations open the imported snapshot with relative paths, line numbers, and content hashes, and are included in Markdown export. A working-tree snapshot is not a verified Git commit or deployed state. Original files are unchanged; imported material is discarded with the meeting or app exit. Existing answer citations remain until meeting disposal even after a source is removed.
+
+Search uses words, paths, and split identifiers. It does not guarantee cross-language semantic retrieval or complete understanding of dependencies across files.

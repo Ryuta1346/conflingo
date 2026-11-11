@@ -4,11 +4,14 @@
 
 ## 現在地
 
-- 更新: **2026-11-11**／進捗: **2/12**。PR1・2はDONE。PR0は実機確認待ち、PR3〜8はマージ済み・残る受入待ち、PR9は未着手。
-- **次の作業:** 新しい文での再開・通常Meetingの開始→一時停止→再開→終了を確認済み。[実入力受入結果](docs/validation/meeting-real-input-2026-11-11.md)。次はConferenceの未実施回帰と会議アプリ別受入、AI・要約・資料検索との結合受入を準備する。追加APIは既存予算を自動拡張しない。変更の提出先は同一ブランチの[Draft PR #19](https://github.com/Ryuta1346/conflingo/pull/19)。
-- **確認済み:** 最新378テスト／64 suites・Debug/Release・lint144ファイル違反0。PR8の合成実API16/16合格・非録音UI確認は維持。[PR8結果](docs/validation/pr8-quality-acceptance.md)。PR6は3.8 Flash/medium・8192で品質52/52合格、Keychain・回答言語保存/復元・実受信後の停止/取消・再開後回答を確認済み。
-- **確認済みの範囲:** [キーボード主要経路・反復とVoiceOver基本操作](docs/validation/pr6-focus-stability.md)は確認済み。全画面・全状態の受入とは区別する。停止表示修正版と診断2試行で日本語4文・英語9文、確定表示、両入力停止を確認。旧試行も日本語4文が存在し、欠落判定を訂正。
-- **完了条件:** 残る実機受入・品質検証の証跡を記録し、対象PRのマージと受入完了を確認してDONEへ更新する。今回の追加検証は合成資料による実API評価。実音声受入と修正ブランチのマージは未完了。
+- 更新: **2026-11-11／基準main `7efbd3f`、作業ブランチ `feature/local-repository-knowledge`**。PR #19のマージをローカルGit履歴で確認。整理開始時の作業ツリーはクリーン。
+- **実装:** PR0〜8はマージ済み（PR5-A/B/Cを含む11区分）。PR9（結合・性能・安全性検証）は未着手。Sessions永続化などの後続機能は別計画。
+- **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
+- **直近の検証記録:** リポジトリ資料化・自動提案拡張の作業ブランチで406テスト／68 suites成功、Debug/Release成功、lint151ファイル違反0。[追加検証記録](docs/validation/automatic-knowledge.md)。mainの既存378テストの記録とは区別する。
+- **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
+- **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
+- **次の作業:** Conference回帰 → Zoom/Meet/Teams別2入力受入 → 実音声とAI・候補管理・要約・資料検索・Markdown出力の結合受入。UIの残る確認を進め、その後60分耐久・性能・配布条件を検証する。
+- **実施条件:** 実音声は試験環境と参加者同意を確認し、追加実APIは新たな送信範囲・要求上限の承認後に実施する。既存の使用済み評価枠は拡張しない。
 
 ## PR進捗
 
@@ -33,10 +36,10 @@
 
 | Gate | 合格の概要 | 状態 |
 |---|---|---|
-| A | 既存Conference機能の無回帰 | 未検証 |
-| B | Zoom/Meet/Teamsで2入力を識別・認識 | 未検証 |
-| C | AI提案の根拠・誤確定防止・障害時縮退 | 未検証 |
-| U | 全体UI刷新・承認モック整合・操作性 | 未検証 |
+| A | 既存Conference機能の無回帰 | 一部確認済み・実機回帰が残る |
+| B | Zoom/Meet/Teamsで2入力を識別・認識 | 短時間ローカル確認済み・アプリ別受入が残る |
+| C | AI提案の根拠・誤確定防止・障害時縮退 | 合成品質確認済み・実音声結合が残る |
+| U | 全体UI刷新・承認モック整合・操作性 | 主要操作確認済み・全画面/状態の受入が残る |
 | D | 60分耐久・性能・プライバシー・実用判定 | 未検証 |
 
 ## 残る実機受入・品質検証
@@ -45,7 +48,7 @@
 
 | 完了 | 対象 | 残タスク・確認する結果 | 証跡・手順 |
 |---|---|---|---|
-| [ ] | PR8／レビュー | 独立レビュー・MEDIUM 2件の修正検証・実API評価は完了。修正ブランチのマージが残る | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
+| [x] | PR8／レビュー・修正マージ | 独立レビュー・MEDIUM 2件の修正検証・実API評価を完了。PR #19はmain `7efbd3f`でマージ確認済み。PR8全体の受入は継続 | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
 | [x] | PR4（短時間ローカル） | 新しい文による再開と通常Meetingの開始・一時停止・再開・終了を確認。会議アプリ別・Gate B全体は次行で継続 | [実入力受入](docs/validation/meeting-real-input-2026-11-11.md)・[診断結果](docs/validation/microphone-diagnostics.md) |
 | [ ] | PR0・5-B／Gate A | Conferenceの実翻訳・文字起こし専用・字幕・停止/再開・辞書・言語切替・Clear・Markdown保存・権限拒否/復旧など、回帰表の未実施項目を実機確認 | [Conference回帰表](docs/validation/conference-baseline.md#conference回帰表) |
 | [ ] | PR3・4／Gate B | Zoom/Meet/Teamsそれぞれで内部音声とマイクを識別。入力切替・機器/権限変更・切断/復旧・検証画面閉鎖時の停止、2系統STTの精度・時刻誤差・遅延・CPU/メモリを確認 | [2入力検証](docs/validation/dual-transcription.md)・[詳細計画](docs/meeting-copilot-plan.md) |
@@ -58,9 +61,11 @@
 | [ ] | PR5-C・6・8・9／Gate D | 参加者への通知・同意、発話/資料の外部送信許可と解除、停止後の取得/送信停止、保持/破棄、ログへの本文/秘密情報非出力を確認 | [詳細計画](docs/meeting-copilot-plan.md)・[PR8検証](docs/validation/pr8-local-rag.md) |
 | [ ] | 費用確認／別工程 | 実API評価・取消分を含む使用量と実請求額を照合。推定予算管理額を実請求額と区別する | [PR6モデル採用](docs/validation/pr6-model-adoption.md)・[小窓停止](docs/validation/pr6-final-ui.md) |
 
-**開始条件・持ち越し:** 短時間実入力と通常Meeting操作を確認し、両入力・素材再生を停止済み。今回追加API0・本文保存0。PR7合成要約品質は3回の評価を通じ確認済み（合計54要求）。旧2回の不明使用量予約US$0.084528を保持し、累計推定管理額US$0.25228725。追加実APIは自動実行しない。#19の同一ブランチへ重ねる方針は承認済み。PR8の32要求は使用済み。合成試験を実会議・60分耐久・Gate Cの合格に置き換えない。
+**開始条件・持ち越し:** 短時間実入力と通常Meeting操作を確認し、両入力・素材再生を停止済み。今回追加API0・本文保存0。PR7合成要約品質は3回の評価を通じ確認済み（合計54要求）。旧2回の不明使用量予約US$0.084528を保持し、累計推定管理額US$0.25228725。追加実APIは自動実行しない。#19の変更はmainへマージ済み。PR8の32要求は使用済み。合成試験を実会議・60分耐久・Gate Cの合格に置き換えない。
 
-**追加実装として別計画:** Sessionsの永続保存・一覧・再読込・削除。PR8のPDF/OCR、永続資料ライブラリ、資料を使う自動提案/要約は今回の受入対象外で、後続範囲として管理する。
+**追加実装として別計画:** Sessionsの永続保存・一覧・再読込・削除。PR8のPDF/OCR、永続資料ライブラリは今回の受入対象外で、後続範囲として管理する。資料付き要約は次項の新規計画へ具体化した。資料を使う自動提案は[追加計画](docs/design/automatic-knowledge-implementation-plan.md)をユーザー「進めて」で承認後に実装・ローカル検証済み。406テスト／68 suites・lint151ファイル違反0・Debug/Release・無通信UI確認を完了。[検証結果](docs/validation/automatic-knowledge.md)。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ、実API品質・実音声結合は未検証。
+
+**新規機能（ローカル実装・主要検証完了）:** ローカルリポジトリのコード・テスト・文書を取り込み、手動質問と終了後要約に利用する。ユーザーの範囲回答を[ヒアリング](docs/design/repository-knowledge-hearing.md)へ記録し、[実装計画](docs/design/repository-knowledge-implementation-plan.md)を作成。2026-11-11にユーザー「すすめて」で計画承認後、394テスト／67 suites・lint150ファイル違反0・Debug/Release・無通信UI確認を完了。[検証結果](docs/validation/repository-knowledge.md)。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ。実API品質・実音声結合は未実施。既存の受入完了数2/12とGate状態は維持する。
 
 ## 更新ルール
 
@@ -71,15 +76,6 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-11:** PR7要約評価を承認後TDDで実装し361テスト・lint・Release成功。実APIは13/16会議・14/22区間合格、1区間timeoutで停止。30/44要求・予約込み推定US$0.1060725。#19と同じブランチに未コミット、PR状態・Gateは維持。
-
-- **2026-11-11:** PR8独立レビューの2指摘を承認後TDDで修正。342テスト・lint・Release、独立再レビュー合格。新ビルドのKeychain認証後、実API16/16ケース合格、計数込み32要求・推定US$0.04850325。[Draft PR #19](https://github.com/Ryuta1346/conflingo/pull/19)を作成、実音声0、PR状態・Gateは維持。
-- **2026-11-11:** 残タスクを実機受入・品質検証の一覧へ整理。確認済みのAI品質・停止操作・キーボード/VoiceOver基本操作を保持し、全状態・実会議・60分耐久との差を明記。古い「実装予定」「PR作成手続き中」を整理。PR8 #17のマージをmain `b7558ac`で確認し反映。PRの受入状態・品質ゲート・進捗2/12は変更なし。
-
-- **2026-11-11（追加評価）:** 計測をTDDで追加し367テスト・lint141ファイル違反0・Debug/Release成功。新規8要求で3区間合格後、S08-en-1が受信途中に30秒でtimeout。累計17/22区間確認、予約込みUS$0.1835055。要約60秒化と新規16要求の計画を作成。その後の承認・結果は次項。
-
-- **2026-11-11（期限修正）:** 承認後、要約だけ60秒化。372テスト・lint142ファイル・Debug/Release成功。新規16要求で8/8区間合格。3回の評価で固定16会議・22区間確認、旧予約込み累計US$0.25228725。#19と同じブランチで未コミット、実音声・PR7全体・Gate Cは未完了。
-
-- **2026-11-11（実音声・訂正）:** 英語9文・日本語4文・両入力停止・確定表示を確認。初回の「日本語1文のみ」はスクロール末尾の確認漏れで、同じ旧試行に後半3文が存在したため撤回。本文・音声保存なし、追加API0。
-- **2026-11-11（診断完了）:** 承認済み数値計測を追加し378テスト／64 suites・lint144ファイル・Debug/Release成功。2回とも日本語4文・英語9文を確認し、取得→認識→storeの欠落なし。認識ロジックの修正は不要。詳細は診断記録。
-- **2026-11-11（通常Meeting受入）:** 新しい文での専用画面再開、通常Meetingの開始→一時停止→再開→終了を確認。振り返りで英語9行・日本語3文2行の計11確定行を保持。3区間の数値照合成功、追加API0、製品コード変更なし。
+- **2026-11-11（状況整理）:** PR #19のマージをGit履歴で確認し、Draft・未コミット・マージ待ちの現在地を更新。実装状況と受入完了数を分け、品質ゲートの部分確認と残作業を明示。受入完了数2/12と各PRの受入状態は維持。
+- **2026-11-11（実音声）:** 診断2試行で日本語4文・英語9文を確認。欠落の旧判定を撤回。新しい文での再開と通常Meetingの開始→一時停止→再開→終了も確認。追加API0。[診断](docs/validation/microphone-diagnostics.md)・[Meeting受入](docs/validation/meeting-real-input-2026-11-11.md)。
+- **2026-11-11（品質）:** PR8合成引用16/16合格。PR7要約期限を60秒へ変更し、複数回評価を通じ固定16会議・22区間の品質条件を確認。過去timeoutと使用量予約は保持。[PR8結果](docs/validation/pr8-quality-acceptance.md)・[PR7結果](docs/validation/pr7-summary-deadline.md)。

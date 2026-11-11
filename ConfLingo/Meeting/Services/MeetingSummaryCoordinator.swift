@@ -56,11 +56,19 @@ final class MeetingSummaryCoordinator {
                     guard !card.hasInvalidEvidence, !card.evidenceIDs.isEmpty,
                           let first = request.events.first,
                           let endOffset = request.events.map({ $0.endOffset ?? $0.startOffset }).max() else { throw InsightFailure.invalidResponse }
+                    let supplement = result.supplement?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+                    if !request.knowledge.isEmpty {
+                        guard result.supplement != nil, supplement.count <= 8_000,
+                              supplement.isEmpty == card.knowledgeReferences.isEmpty else { throw InsightFailure.invalidResponse }
+                    } else if !supplement.isEmpty || !result.knowledgeIDs.isEmpty {
+                        throw InsightFailure.invalidResponse
+                    }
                     self.deadline?.cancel()
                     self.deadline = nil
                     self.requestID = nil
                     self.draft.append(MeetingSummarySection(id: request.id, text: card.text, evidenceIDs: card.evidenceIDs,
-                                                             startOffset: first.startOffset, endOffset: endOffset))
+                                                             startOffset: first.startOffset, endOffset: endOffset,
+                                                             supplement: supplement, knowledgeReferences: card.knowledgeReferences))
                     self.partialText = ""
                 } catch {
                     guard self.accepts(id, session: plan.sessionID) else { return }

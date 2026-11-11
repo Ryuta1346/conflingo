@@ -44,7 +44,8 @@ struct GeminiStreamDecoder {
         guard ended else { throw InsightFailure.invalidResponse }
         let result = try JSONDecoder().decode(Payload.self, from: Data(content.utf8))
         guard !result.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              result.text.count <= 8_000, result.evidenceIDs.count <= 30, (result.knowledgeIDs?.count ?? 0) <= 5 else { throw InsightFailure.invalidResponse }
+              result.text.count <= 8_000, result.evidenceIDs.count <= 30, (result.knowledgeIDs?.count ?? 0) <= 5,
+              (result.supplement?.count ?? 0) <= 8_000 else { throw InsightFailure.invalidResponse }
         // Invalid UUIDs must make the response fail, never silently disappear.
         let ids = try result.evidenceIDs.map { value in
             guard let id = UUID(uuidString: value) else { throw InsightFailure.invalidResponse }
@@ -54,7 +55,7 @@ struct GeminiStreamDecoder {
             guard let id = UUID(uuidString: value) else { throw InsightFailure.invalidResponse }
             return id
         }
-        return InsightResult(kind: result.kind, text: result.text, evidenceIDs: ids, usage: usage, knowledgeIDs: knowledgeIDs)
+        return InsightResult(kind: result.kind, text: result.text, evidenceIDs: ids, usage: usage, knowledgeIDs: knowledgeIDs, supplement: result.supplement)
     }
 
     private mutating func acceptLine() throws {
@@ -101,6 +102,7 @@ struct GeminiStreamDecoder {
         let kind: MeetingInsight.Kind
         let evidenceIDs: [String]
         let knowledgeIDs: [String]?
+        let supplement: String?
     }
     private struct Chunk: Decodable {
         let candidates: [Candidate]?
