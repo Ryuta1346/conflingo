@@ -10,6 +10,14 @@ A personal macOS app that transcribes MacBook microphone audio in real time at c
 
 📖 **For detailed usage (registering technical terms, on-site tips, troubleshooting), see [docs/usage.md](docs/usage.md).**
 
+## Saved sessions
+
+After stopping Conference or ending a Meeting, choose **Save on this Mac** (「このMacに保存」). The saved sessions page supports name search, read-only viewing after restarting the app, Markdown export, and deletion. Home shows the five most recently saved sessions.
+
+Saved records include final transcripts, available translations, completed AI cards, candidate review states, completed summaries, and cited document excerpts. Changes require an explicit re-save. Audio, complete source documents, API keys, and AI permissions are not included. There is no autosave or cloud sync. Deleting a saved session leaves exported Markdown and source files intact.
+
+Meeting also supports microphone and system audio transcription, optional AI responses and summaries, and document references. See the [progress tracker](plan.md) for outstanding real-meeting acceptance checks and the [Sessions validation record](docs/validation/sessions.md) for verified behavior. The instructions below primarily describe Conference.
+
 ## Requirements
 
 - macOS 26.0 or later / Apple Silicon
@@ -106,10 +114,10 @@ Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad
 
 ## Limitations
 
-- Venue audio is assumed to be captured by the MacBook's built-in microphone. Internal Mac audio (system audio) such as Zoom / YouTube cannot be captured
+- Conference uses microphone input. Meeting also supports system audio; Zoom/Meet/Teams-specific acceptance checks remain outstanding.
 - In-progress (partial) sentences are not translated by design (to avoid unstable translations). Translation lags finalized sentences by roughly 2–5 seconds
 - Languages can only be changed while stopped. Switching languages keeps the existing subtitle history (the Markdown header records the language pair at save time)
-- Speaker diarization, summarization, and audio recording are not supported
+- Speaker identification and audio file recording are not supported. Optional AI summaries are available in Meeting.
 - No code signing / notarization for distribution (intended for personal use with local builds)
 - Recognition accuracy is heavily affected by microphone position and ambient noise. Point the MacBook toward the speakers and sit near the front if possible
 

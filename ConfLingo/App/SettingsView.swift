@@ -59,7 +59,7 @@ struct SettingsView: View {
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
                         Text("データの扱い").font(.headline)
-                        Text("Conferenceの字幕はMarkdownで書き出せます。Meetingの発話も終了後にMarkdownで書き出せます。アプリ内の保存一覧は未対応で、発話はアプリ終了まで保持します。どちらも自動保存せず、音声ファイルは保存しません。")
+                        Text("Conferenceは停止後、Meetingは終了後に「このMacに保存」を選べます。保存したセッションは再起動後も閲覧・削除でき、引用した資料の抜粋も残ります。Markdownは別に書き出せます。自動保存と音声ファイルの保存は行いません。")
                             .foregroundStyle(DesignTokens.secondary)
                     }
                 }

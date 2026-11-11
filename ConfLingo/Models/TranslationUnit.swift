@@ -1,6 +1,6 @@
 import Foundation
 
-enum TranslationState: Equatable, Sendable {
+enum TranslationState: Equatable, Sendable, Codable {
     case pending
     case translating
     case done
@@ -10,7 +10,7 @@ enum TranslationState: Equatable, Sendable {
 /// 翻訳の最小単位。複数の確定セグメントを文末まで結合したもの。
 /// 英語ペインはセグメント単位で即時表示し、翻訳はこの単位で行う
 /// （1リクエスト内に複数文を含めることで翻訳エンジンに文脈を渡す）。
-struct TranslationUnit: Identifiable, Equatable, Sendable {
+struct TranslationUnit: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let index: Int
     /// この unit を構成する確定セグメントの ID（出現順）

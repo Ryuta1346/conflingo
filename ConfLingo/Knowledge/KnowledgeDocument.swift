@@ -9,7 +9,7 @@ struct KnowledgeDocument: Identifiable, Equatable, Sendable {
     var displayTitle: String { source.map { "\($0.name)/\($0.path)" } ?? title }
 }
 
-struct KnowledgeReference: Identifiable, Equatable, Sendable {
+struct KnowledgeReference: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let documentID: UUID
     let title: String

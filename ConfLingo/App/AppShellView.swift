@@ -32,6 +32,7 @@ struct AppShellView<Content: View>: View {
             navigationButton("ホーム", symbol: "house", target: .home)
             navigationButton("Conference", symbol: "captions.bubble", target: .setup)
             navigationButton("Meeting", symbol: "person.2", target: .meeting)
+            navigationButton("保存", symbol: "folder", target: .sessions)
             Spacer(minLength: 0)
             navigationButton("設定", symbol: "gearshape", target: .settings)
         }
@@ -56,6 +57,7 @@ struct AppShellView<Content: View>: View {
             navigationButton("ホーム", symbol: "house", target: .home)
             navigationButton("Conference", symbol: "captions.bubble", target: .setup)
             navigationButton("Meeting", symbol: "person.2", target: .meeting)
+            navigationButton("保存したセッション", symbol: "folder", target: .sessions)
             Spacer()
             navigationButton("設定", symbol: "gearshape", target: .settings)
             Divider().padding(.vertical, 12)

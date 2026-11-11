@@ -2,7 +2,7 @@ import Foundation
 
 /// 音声認識の確定単位。英語ペインの即時表示に使う。
 /// 翻訳状態は持たない（翻訳は文末まで結合した TranslationUnit 単位で行う）。
-struct TranscriptSegment: Identifiable, Equatable, Sendable {
+struct TranscriptSegment: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let index: Int
     let english: String

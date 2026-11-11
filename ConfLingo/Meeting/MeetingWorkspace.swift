@@ -16,6 +16,7 @@ final class MeetingWorkspace {
             cancelSummary()
         }
     }
+    var isSavingSession = false
     var name = ""
     var microphoneLocaleID = "ja-JP"
     var systemLocaleID = "en-US"
@@ -173,7 +174,7 @@ final class MeetingWorkspace {
     var phase: SessionPhase { controller.phase }
     var isBusy: Bool { isStarting || isTransitioning || controller.isStopping }
     var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && page != .review }
-    var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy }
+    var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy && !isSavingSession }
     var title: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "名前のない会議" : name }
 
     func evidence(for id: UUID) -> TranscriptEvent? { store.finals.first { $0.id == id } }

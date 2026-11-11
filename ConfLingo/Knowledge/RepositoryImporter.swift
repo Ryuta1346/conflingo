@@ -10,7 +10,7 @@ struct RepositoryLimits: Sendable {
     var depth = 32
 }
 
-struct RepositorySource: Equatable, Sendable {
+struct RepositorySource: Equatable, Sendable, Codable {
     let snapshotID: UUID
     let name: String
     let path: String

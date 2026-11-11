@@ -1,7 +1,7 @@
 import Foundation
 import Observation
 
-struct MeetingExportSnapshot: Equatable {
+struct MeetingExportSnapshot: Equatable, Codable, Sendable {
     let title: String
     let startedAt: Date?
     let microphoneLocale: String

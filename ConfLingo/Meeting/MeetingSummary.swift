@@ -61,7 +61,7 @@ struct MeetingSummaryPlan: Identifiable, Sendable {
     }
 }
 
-struct MeetingSummarySection: Identifiable, Equatable, Sendable {
+struct MeetingSummarySection: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let text: String
     let evidenceIDs: [UUID]
@@ -71,7 +71,7 @@ struct MeetingSummarySection: Identifiable, Equatable, Sendable {
     var knowledgeReferences: [KnowledgeReference] = []
 }
 
-struct MeetingSummary: Equatable, Sendable {
+struct MeetingSummary: Equatable, Sendable, Codable {
     let sessionID: UUID
     let answerLanguage: AnswerLanguage
     let sections: [MeetingSummarySection]

@@ -16,6 +16,7 @@ final class SessionStore {
     static let maxBufferedCharacters = 400
     static let maxBufferedSegments = 4
 
+    private(set) var sessionID = UUID()
     private(set) var segments: [TranscriptSegment] = []
     /// ID 引きの逆引きインデックス。bufferedSegments が segments を線形探索しないため。
     private var segmentByID: [UUID: TranscriptSegment] = [:]
@@ -127,6 +128,7 @@ final class SessionStore {
     }
 
     func reset() {
+        sessionID = UUID()
         segments = []
         segmentByID = [:]
         units = []
