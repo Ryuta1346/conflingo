@@ -58,7 +58,7 @@ struct MeetingExportSnapshot: Equatable {
 
     private func knowledgeReferences(_ references: [KnowledgeReference]) -> String {
         references.map { reference in
-            "資料: \(Self.escape(reference.title)) · \(reference.location)\n取り込み日時: \(MarkdownExporter.dateFormatter.string(from: reference.importedAt))\n"
+            "資料: \(Self.escape(reference.title.components(separatedBy: .newlines).joined(separator: " "))) · \(reference.location)\n取り込み日時: \(MarkdownExporter.dateFormatter.string(from: reference.importedAt))\n"
                 + Self.quoted(reference.snippet)
         }.joined(separator: "\n\n")
     }

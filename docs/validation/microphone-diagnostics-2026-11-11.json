@@ -1,0 +1,282 @@
+{
+  "date": "2026-11-11",
+  "diagnosticCodeSHA256": "01d6c7d4938d750e200a6bf36f55185498d2df425e0790da276fbaefbc4e8ac2",
+  "bundleID": "com.gavrri.conflingo.audio-diagnostics",
+  "trials": [
+    {
+      "trial": 1,
+      "startedAtJST": "2026-11-11T14:28:57.487357+09:00",
+      "sourceSHA256": "472cb56684a184bfe8f46616e55c76a8b3b6a72962ef244548f0b00c6bb98bc6",
+      "observedJapaneseSentences": 4,
+      "observedEnglishSentences": 9,
+      "userConfirmedAllJapaneseRead": true,
+      "bothInputsStopped": true,
+      "playerStoppedAtEnd": true,
+      "snapshot": {
+        "id": "CB428557-A3FD-4C7E-B53D-CDD427845912",
+        "inputs": {
+          "microphone": {
+            "counts": {
+              "consumed": 227,
+              "converted": 227,
+              "enqueued": 227,
+              "finalResult": 4,
+              "inputStopped": 1,
+              "normalized": 65,
+              "osFinal": 4,
+              "osPartial": 61,
+              "partialResult": 61,
+              "recognitionFinished": 1,
+              "storeAccepted": 65,
+              "tap": 227
+            },
+            "first": {
+              "consumed": 0.4128443750087172,
+              "converted": 0.41278475004946813,
+              "enqueued": 0.4128217917168513,
+              "finalResult": 35.11016579170246,
+              "inputStopped": 58.41775600000983,
+              "normalized": 35.036591833340935,
+              "osFinal": 35.11015729169594,
+              "osPartial": 35.03655720833922,
+              "partialResult": 35.036578708386514,
+              "recognitionFinished": 58.44629145838553,
+              "storeAccepted": 35.03667004167801,
+              "tap": 0.41271637502359226
+            },
+            "formatChanges": {},
+            "formats": {
+              "consumed": {
+                "channels": 1,
+                "sampleRate": 16000
+              },
+              "converted": {
+                "channels": 1,
+                "sampleRate": 16000
+              },
+              "tap": {
+                "channels": 1,
+                "sampleRate": 16000
+              }
+            },
+            "last": {
+              "consumed": 58.27289570833091,
+              "converted": 58.27284512500046,
+              "enqueued": 58.27287612500368,
+              "finalResult": 46.7498525417177,
+              "inputStopped": 58.41775600000983,
+              "normalized": 46.74987262504874,
+              "osFinal": 46.749830250046216,
+              "osPartial": 46.74557879171334,
+              "partialResult": 46.74558883334976,
+              "recognitionFinished": 58.44629145838553,
+              "storeAccepted": 46.74996137502603,
+              "tap": 58.272762166685425
+            },
+            "sampleCounts": {
+              "consumed": 929792,
+              "converted": 929792,
+              "enqueued": 929792,
+              "tap": 929792
+            }
+          },
+          "systemAudio": {
+            "counts": {
+              "consumed": 2907,
+              "finalResult": 9,
+              "inputStopped": 1,
+              "normalized": 94,
+              "osFinal": 9,
+              "osPartial": 85,
+              "partialResult": 85,
+              "recognitionFinished": 1,
+              "storeAccepted": 94
+            },
+            "first": {
+              "consumed": 0.2955610000062734,
+              "finalResult": 8.19978500000434,
+              "inputStopped": 58.434604125039186,
+              "normalized": 8.114826583361719,
+              "osFinal": 8.199770958337467,
+              "osPartial": 8.11478845833335,
+              "partialResult": 8.114808750047814,
+              "recognitionFinished": 58.45428379171062,
+              "storeAccepted": 8.114998083387036
+            },
+            "formatChanges": {},
+            "formats": {
+              "consumed": {
+                "channels": 1,
+                "sampleRate": 16000
+              }
+            },
+            "last": {
+              "consumed": 58.41831633338006,
+              "finalResult": 31.189773791702464,
+              "inputStopped": 58.434604125039186,
+              "normalized": 31.18979741667863,
+              "osFinal": 31.18973250000272,
+              "osPartial": 31.173733875039034,
+              "partialResult": 31.17375737504335,
+              "recognitionFinished": 58.45428379171062,
+              "storeAccepted": 31.18995025003096
+            },
+            "sampleCounts": {
+              "consumed": 929920
+            }
+          }
+        },
+        "stages": {
+          "deliveryFinished": 58.46353516669478,
+          "stopStarted": 58.383900666667614
+        },
+        "startedAt": 816067737.487357
+      }
+    },
+    {
+      "trial": 2,
+      "startedAtJST": "2026-11-11T14:30:20.738467+09:00",
+      "sourceSHA256": "e96b226b116898f2e75fdff25bcfe5dd1e8e44c15c6fd47115429dca55e9cedb",
+      "observedJapaneseSentences": 4,
+      "observedEnglishSentences": 9,
+      "userConfirmedAllJapaneseRead": true,
+      "bothInputsStopped": true,
+      "playerStoppedAtEnd": true,
+      "snapshot": {
+        "id": "51756934-3A49-4171-81A9-535F44EB00F4",
+        "inputs": {
+          "microphone": {
+            "counts": {
+              "consumed": 398,
+              "converted": 398,
+              "enqueued": 398,
+              "finalResult": 4,
+              "inputStopped": 1,
+              "normalized": 65,
+              "osFinal": 4,
+              "osPartial": 61,
+              "partialResult": 61,
+              "recognitionFinished": 1,
+              "storeAccepted": 65,
+              "tap": 398
+            },
+            "first": {
+              "consumed": 0.32819295837543905,
+              "converted": 0.32816066668601707,
+              "enqueued": 0.32817708334187046,
+              "finalResult": 58.057227541692555,
+              "inputStopped": 102.17638516670559,
+              "normalized": 57.98042045836337,
+              "osFinal": 58.05722245835932,
+              "osPartial": 57.98035912500927,
+              "partialResult": 57.98040237504756,
+              "recognitionFinished": 102.20452454168117,
+              "storeAccepted": 57.98058158333879,
+              "tap": 0.3281248333514668
+            },
+            "formatChanges": {},
+            "formats": {
+              "consumed": {
+                "channels": 1,
+                "sampleRate": 16000
+              },
+              "converted": {
+                "channels": 1,
+                "sampleRate": 16000
+              },
+              "tap": {
+                "channels": 1,
+                "sampleRate": 16000
+              }
+            },
+            "last": {
+              "consumed": 101.96827225002926,
+              "converted": 101.96822900004918,
+              "enqueued": 101.96825500001432,
+              "finalResult": 69.61631987500004,
+              "inputStopped": 102.17638516670559,
+              "normalized": 69.616327500029,
+              "osFinal": 69.6163132917136,
+              "osPartial": 69.61216658336343,
+              "partialResult": 69.61217516666511,
+              "recognitionFinished": 102.20452454168117,
+              "storeAccepted": 69.61637241666904,
+              "tap": 101.96816479170229
+            },
+            "sampleCounts": {
+              "consumed": 1630208,
+              "converted": 1630208,
+              "enqueued": 1630208,
+              "tap": 1630208
+            }
+          },
+          "systemAudio": {
+            "counts": {
+              "consumed": 5099,
+              "finalResult": 9,
+              "inputStopped": 1,
+              "normalized": 94,
+              "osFinal": 9,
+              "osPartial": 85,
+              "partialResult": 85,
+              "recognitionFinished": 1,
+              "storeAccepted": 94
+            },
+            "first": {
+              "consumed": 0.22239529166836292,
+              "finalResult": 23.457540333329234,
+              "inputStopped": 102.1922747917124,
+              "normalized": 23.406918833381496,
+              "osFinal": 23.457531583379023,
+              "osPartial": 23.40688279166352,
+              "partialResult": 23.406903333379887,
+              "recognitionFinished": 102.21329212503042,
+              "storeAccepted": 23.40701366669964
+            },
+            "formatChanges": {},
+            "formats": {
+              "consumed": {
+                "channels": 1,
+                "sampleRate": 16000
+              }
+            },
+            "last": {
+              "consumed": 102.17660624999553,
+              "finalResult": 46.482259000011254,
+              "inputStopped": 102.1922747917124,
+              "normalized": 46.482284083380364,
+              "osFinal": 46.48223754169885,
+              "osPartial": 46.46396854170598,
+              "partialResult": 46.46399329166161,
+              "recognitionFinished": 102.21329212503042,
+              "storeAccepted": 46.48244779166998
+            },
+            "sampleCounts": {
+              "consumed": 1631360
+            }
+          }
+        },
+        "stages": {
+          "deliveryFinished": 102.22321491671028,
+          "stopStarted": 102.14214254170656
+        },
+        "startedAt": 816067820.738467
+      }
+    }
+  ],
+  "additionalAPIRequests": 0,
+  "recordedAudioFiles": 0,
+  "originalTrialReinspection": {
+    "pid": 95975,
+    "microphoneFinalRows": 2,
+    "japaneseSentences": 4,
+    "englishFinalRows": 9,
+    "microphoneRowOffsetsSeconds": [
+      41.2,
+      44.1
+    ],
+    "bothInputsStopped": true,
+    "action": "scroll existing stopped transcript to bottom",
+    "result": "previous missing-speech verdict withdrawn; off-screen row was overlooked"
+  }
+}

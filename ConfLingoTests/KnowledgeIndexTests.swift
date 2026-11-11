@@ -4,6 +4,21 @@ import Testing
 
 @Suite(.timeLimit(.minutes(1)))
 struct KnowledgeIndexTests {
+    @Test func citationLocationDistinguishesDocumentOffsetFromLineColumn() async throws {
+        let index = KnowledgeIndex()
+        let body = String(repeating: String(repeating: "あ", count: 599) + "\n", count: 2) + "料金は100円です"
+        let document = try await index.add(data: Data(body.utf8), filename: "lines.md")
+        let chunks = try await index.references(for: document.id)
+        let citation = try #require(chunks.last)
+        #expect(citation.startLine == 3)
+        #expect(citation.snippet == "料金は100円です")
+        #expect(citation.location == "3行目から（文書先頭から1201文字目）")
+
+        let long = try await index.add(data: Data(String(repeating: "長", count: 1_201).utf8), filename: "long.md")
+        let longChunks = try await index.references(for: long.id)
+        #expect(longChunks.last?.location == "1行目から（文書先頭から1201文字目）")
+    }
+
     @Test func searchesJapaneseEnglishAndQuotedSyntaxLocally() async throws {
         let index = KnowledgeIndex()
         let document = try await index.add(data: Data("# 仕様\n料金は月額100円です。\n多要素認証を設定します。\nAPI rate limit is 50.".utf8), filename: "仕様.md")

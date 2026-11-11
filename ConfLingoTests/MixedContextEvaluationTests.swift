@@ -27,7 +27,7 @@ struct MixedContextEvaluationTests {
 }
 
 extension GeminiLiveEvaluationTests {
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["CONFLINGO_LIVE_AI"] == "1"))
+    @Test(.enabled(if: RAGLiveConfiguration.legacyEnabled("CONFLINGO_LIVE_AI")))
     func mixedContextCorpus() async throws {
         let store = KeychainAPIKeyStore()
         let client = GeminiInsightClient(key: { try await store.read() })

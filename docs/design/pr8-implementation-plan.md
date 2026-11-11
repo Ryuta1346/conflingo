@@ -123,4 +123,4 @@ PR7はローカルGit履歴でmainへのマージを確認済み。実API要約�
 - SQLと本文処理はKnowledgeIndex actor内で直列実行。SQLite3はOS同梱モジュールの自動リンクを使い、追加パッケージやXcode projectの手動リンク変更は不要だった。
 - 許可変更でローカル検索が表示待ちのままになる競合をテストで再現し、資料内容と送信許可の変更を別に管理して修正した。
 - 非録音プレビューでOSファイル選択→取り込み、検索、引用、キーボード質問送信、小窓から引用、Review、取り外し、狭幅・拡大文字を確認。
-- 実APIでの引用と回答の意味的な一致、実音声、VoiceOver網羅、長時間負荷、独立レビュー・マージは未完了。詳細は[検証記録](../validation/pr8-local-rag.md)。
+- PR #17はマージ済み。2026-11-11の[独立レビュー](../validation/pr8-independent-review.md)のMEDIUM 2件を承認後に修正し、342テスト・lint・Releaseを確認。[対応・品質評価計画](pr8-quality-acceptance-plan.md)の実API16ケースは意味・言語・引用16/16合格。実音声、VoiceOver網羅、長時間負荷、修正ブランチのマージは未完了。詳細は[検証記録](../validation/pr8-quality-acceptance.md)。

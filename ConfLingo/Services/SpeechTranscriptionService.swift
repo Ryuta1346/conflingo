@@ -32,15 +32,23 @@ protocol SpeechTranscribing: AnyObject {
 @MainActor
 final class SpeechTranscriptionService: SpeechTranscribing {
     private let audioSource: any AudioSource
+    private let diagnostics: AudioDiagnostics?
     private var analyzer: SpeechAnalyzer?
     private var resultsTask: Task<Void, any Error>?
 
-    init(audioSource: any AudioSource = MicrophoneAudioSource()) {
+    init(audioSource: any AudioSource = MicrophoneAudioSource(), diagnostics: AudioDiagnostics? = nil) {
+        self.diagnostics = diagnostics
         self.audioSource = audioSource
     }
 
     func startAudioInput(targetFormat: AVAudioFormat) async throws -> AsyncMapSequence<AudioFrameStream, AnalyzerInput> {
-        try await audioSource.start(targetFormat: targetFormat).map { AnalyzerInput(buffer: $0.buffer) }
+        let diagnostics = self.diagnostics
+        let origin = audioSource.origin
+        return try await audioSource.start(targetFormat: targetFormat).map {
+            diagnostics?.record(.consumed, origin: origin, samples: Int($0.buffer.frameLength),
+                                sampleRate: $0.buffer.format.sampleRate, channels: $0.buffer.format.channelCount)
+            return AnalyzerInput(buffer: $0.buffer)
+        }
     }
 
     nonisolated static func reportingOptions(fastResults: Bool) -> Set<SpeechTranscriber.ReportingOption> {
@@ -88,8 +96,13 @@ final class SpeechTranscriptionService: SpeechTranscribing {
                 do {
                     for try await result in transcriber.results {
                         try Task.checkCancellation()
+                        let text = String(result.text.characters)
+                        diagnostics?.record(result.isFinal ? .osFinal : .osPartial, origin: audioSource.origin)
+                        if text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            diagnostics?.record(.osEmpty, origin: audioSource.origin)
+                        }
                         try await receive(SpeechResult(
-                            text: String(result.text.characters), isFinal: result.isFinal,
+                            text: text, isFinal: result.isFinal,
                             startTime: result.range.start.seconds, endTime: result.range.end.seconds
                         ))
                     }

@@ -23,6 +23,8 @@ final class DualTranscriptionController {
     var elapsedOffset: TimeInterval { timeline.offset }
     var isStopping: Bool { stopTask != nil }
 
+    let diagnostics: AudioDiagnostics?
+    private(set) var diagnosticSaveFailed = false
     private let inputs: [Input]
     private let timeline: MeetingTimeline
     private let owner: AudioInputUse.Owner
@@ -39,18 +41,21 @@ final class DualTranscriptionController {
     private var stopFailureMessage: String?
 
     init(
-        microphone: any AudioSource = MicrophoneAudioSource(),
+        microphone: (any AudioSource)? = nil,
         systemAudio: any AudioSource = SystemAudioSource(),
         microphoneSpeech: (any SpeechTranscribing)? = nil,
         systemSpeech: (any SpeechTranscribing)? = nil,
         timeline: MeetingTimeline = MeetingTimeline(),
         activity: AudioInputUse = AudioInputUse(),
         owner: AudioInputUse.Owner = .dualTranscription,
+        diagnostics: AudioDiagnostics? = AudioDiagnostics.fromEnvironment(),
         prepareModel: @escaping @MainActor (Locale) async throws -> Locale = ModelAvailabilityService.prepareForTranscription
     ) {
+        self.diagnostics = diagnostics
+        let microphone = microphone ?? MicrophoneAudioSource(capture: AudioCaptureService(diagnostics: diagnostics))
         inputs = [
-            Input(source: microphone, speech: microphoneSpeech ?? SpeechTranscriptionService(audioSource: microphone)),
-            Input(source: systemAudio, speech: systemSpeech ?? SpeechTranscriptionService(audioSource: systemAudio))
+            Input(source: microphone, speech: microphoneSpeech ?? SpeechTranscriptionService(audioSource: microphone, diagnostics: diagnostics)),
+            Input(source: systemAudio, speech: systemSpeech ?? SpeechTranscriptionService(audioSource: systemAudio, diagnostics: diagnostics))
         ]
         self.timeline = timeline
         self.activity = activity
@@ -80,6 +85,8 @@ final class DualTranscriptionController {
             return
         }
         usageToken = token
+        diagnostics?.begin()
+        diagnosticSaveFailed = false
         let run = UUID()
         runID = run
         failed = false
@@ -110,6 +117,7 @@ final class DualTranscriptionController {
         }
         guard phase != .idle else { return }
         phase = .stopping
+        diagnostics?.mark(.stopStarted)
         captureActivityChanged?(false)
         let pendingStart = startTask
         pendingStart?.cancel()
@@ -121,6 +129,7 @@ final class DualTranscriptionController {
             runID = nil
             await hub?.finish()
             await consumer?.value
+            diagnostics?.mark(.deliveryFinished)
             hub = nil
             consumer = nil
             normalizers = [:]
@@ -131,6 +140,8 @@ final class DualTranscriptionController {
                 activity.release(usageToken)
                 usageToken = nil
                 phase = .idle
+                diagnostics?.finish()
+                do { try diagnostics?.saveIfRequested() } catch { diagnosticSaveFailed = true }
             }
             stopTask = nil
         }
@@ -167,7 +178,11 @@ final class DualTranscriptionController {
             let subscription = await hub.subscribe()
             consumer = Task { [weak self] in
                 do {
-                    while let event = try await subscription.next() { self?.store.receive(event) }
+                    while let event = try await subscription.next() {
+                        guard let self else { break }
+                        let accepted = self.store.receive(event)
+                        self.diagnostics?.record(accepted ? .storeAccepted : .storeRejected, origin: event.origin)
+                    }
                 } catch {
                     self?.recordFailure(error, origin: nil, run: run)
                 }
@@ -193,9 +208,16 @@ final class DualTranscriptionController {
                         )
                     },
                     receive: { [weak self] result in
-                        guard let self, self.runID == run,
-                              let event = self.normalizers[input.origin]?.makeEvent(result, receivedOffset: self.timeline.offset)
-                        else { return }
+                        guard let self, self.runID == run else { return }
+                        self.diagnostics?.record(result.isFinal ? .finalResult : .partialResult, origin: input.origin)
+                        if result.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty {
+                            self.diagnostics?.record(.emptyResult, origin: input.origin)
+                        }
+                        guard let event = self.normalizers[input.origin]?.makeEvent(result, receivedOffset: self.timeline.offset) else {
+                            self.diagnostics?.record(.normalizationRejected, origin: input.origin)
+                            return
+                        }
+                        self.diagnostics?.record(.normalized, origin: input.origin)
                         let failed = try await hub.publish(event)
                         if failed.contains(subscription.id) { throw TranscriptEventHub.Failure.overflow }
                     },
@@ -221,12 +243,14 @@ final class DualTranscriptionController {
             Task { () -> Bool in
                 do {
                     try await input.speech.stopInput()
+                    diagnostics?.record(.inputStopped, origin: input.origin)
                     return true
                 } catch {
                     let message = "\(input.origin.label)：停止を完了できませんでした。停止を再試行してください: \(error.localizedDescription)"
                     stopFailureMessage = message
                     lastError = message
                     await input.speech.cancelRecognition()
+                    diagnostics?.record(.recognitionCancelled, origin: input.origin)
                     return false
                 }
             }
@@ -237,9 +261,13 @@ final class DualTranscriptionController {
         }
         let finishes = stopped.map { input in
             Task {
-                do { try await input.speech.finishRecognition() } catch {
+                do {
+                    try await input.speech.finishRecognition()
+                    diagnostics?.record(.recognitionFinished, origin: input.origin)
+                } catch {
                     if lastError == nil { lastError = "\(input.origin.label)：認識の終了に失敗しました: \(error.localizedDescription)" }
                     await input.speech.cancelRecognition()
+                    diagnostics?.record(.recognitionCancelled, origin: input.origin)
                 }
                 activeInputs.remove(input.origin)
             }

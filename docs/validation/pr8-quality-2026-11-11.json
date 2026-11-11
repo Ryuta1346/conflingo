@@ -1,0 +1,868 @@
+{
+  "date": "2026-11-11",
+  "base": "7040df3",
+  "branch": "feature/pr8-quality-acceptance",
+  "summary": {
+    "cases": 16,
+    "passed": 16,
+    "countRequests": 16,
+    "generationRequests": 16,
+    "estimatedUSD": 0.04850325,
+    "inputTokens": 27631,
+    "outputTokens": 1310,
+    "thinkingTokens": 6098,
+    "unknownUsage": 0,
+    "latencyIncludesCountTokens": true,
+    "meanSeconds": 5.151272153649188,
+    "medianSeconds": 4.709997479163576,
+    "p95NearestRankSeconds": 7.925303124997299,
+    "maxSeconds": 7.925303124997299
+  },
+  "limits": [
+    "Synthetic corpus only",
+    "No real audio, VoiceOver, long-duration or distribution-signing acceptance",
+    "Estimated cost, not invoice"
+  ],
+  "ledger": {
+    "budgetUSD": 2,
+    "countPricingSource": "https://aistudio.google.com/docs/billing#is-gettokens-billed",
+    "countUSD": 0,
+    "entries": [
+      {
+        "caseID": "R01-ja",
+        "costUSD": 0,
+        "countedTokens": 1724,
+        "hash": "8242ac0a3c2406b57133797f9db8b866566f807b566d7f434b4a5b586810ee78",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046138.5883,
+        "state": "complete"
+      },
+      {
+        "caseID": "R01-ja",
+        "costUSD": 0.0023205,
+        "hash": "8242ac0a3c2406b57133797f9db8b866566f807b566d7f434b4a5b586810ee78",
+        "inputTokens": 1724,
+        "operation": "generate",
+        "outputTokens": 65,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046138.825461,
+        "state": "complete",
+        "thinkingTokens": 209
+      },
+      {
+        "caseID": "R01-en",
+        "costUSD": 0,
+        "countedTokens": 1723,
+        "hash": "9c700208934f4cad6470e3ed6fd46306ac0c4d8ffb9e5ef28f5d3fefbf8a7447",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046143.109112,
+        "state": "complete"
+      },
+      {
+        "caseID": "R01-en",
+        "costUSD": 0.002271,
+        "hash": "9c700208934f4cad6470e3ed6fd46306ac0c4d8ffb9e5ef28f5d3fefbf8a7447",
+        "inputTokens": 1723,
+        "operation": "generate",
+        "outputTokens": 63,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046143.305254,
+        "state": "complete",
+        "thinkingTokens": 198
+      },
+      {
+        "caseID": "R02-ja",
+        "costUSD": 0,
+        "countedTokens": 1798,
+        "hash": "b88ce5496e7365af93e16e0e028f9a08f1e6ece86c7cca6c4167b9aa6b79ebf8",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046146.776075,
+        "state": "complete"
+      },
+      {
+        "caseID": "R02-ja",
+        "costUSD": 0.003051,
+        "hash": "b88ce5496e7365af93e16e0e028f9a08f1e6ece86c7cca6c4167b9aa6b79ebf8",
+        "inputTokens": 1798,
+        "operation": "generate",
+        "outputTokens": 114,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046146.956163,
+        "state": "complete",
+        "thinkingTokens": 340
+      },
+      {
+        "caseID": "R02-en",
+        "costUSD": 0,
+        "countedTokens": 1811,
+        "hash": "5daecc02e515a414e1a434f675d79c47de41f18bdda2371058fe2f8f01f4667d",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046151.104605,
+        "state": "complete"
+      },
+      {
+        "caseID": "R02-en",
+        "costUSD": 0.0030345,
+        "hash": "5daecc02e515a414e1a434f675d79c47de41f18bdda2371058fe2f8f01f4667d",
+        "inputTokens": 1811,
+        "operation": "generate",
+        "outputTokens": 117,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046151.282281,
+        "state": "complete",
+        "thinkingTokens": 330
+      },
+      {
+        "caseID": "R03-ja",
+        "costUSD": 0,
+        "countedTokens": 1482,
+        "hash": "d49263d615c94e45babfacf10aaf4eddf024cf06d892467ced49fc6705019868",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046156.233007,
+        "state": "complete"
+      },
+      {
+        "caseID": "R03-ja",
+        "costUSD": 0.00180525,
+        "hash": "d49263d615c94e45babfacf10aaf4eddf024cf06d892467ced49fc6705019868",
+        "inputTokens": 1482,
+        "operation": "generate",
+        "outputTokens": 32,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046156.40469,
+        "state": "complete",
+        "thinkingTokens": 153
+      },
+      {
+        "caseID": "R03-en",
+        "costUSD": 0,
+        "countedTokens": 1483,
+        "hash": "4f2dd3359a3a5af68d7a0c2c419597696dc3e6b129549f719cc3b4af1bf1321f",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046160.033481,
+        "state": "complete"
+      },
+      {
+        "caseID": "R03-en",
+        "costUSD": 0.0018885,
+        "hash": "4f2dd3359a3a5af68d7a0c2c419597696dc3e6b129549f719cc3b4af1bf1321f",
+        "inputTokens": 1483,
+        "operation": "generate",
+        "outputTokens": 21,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046160.235872,
+        "state": "complete",
+        "thinkingTokens": 186
+      },
+      {
+        "caseID": "R04-ja",
+        "costUSD": 0,
+        "countedTokens": 1729,
+        "hash": "6275781a57542abe965b216ccce18cf5c8bc260cbcbc2f8d937765a9097fcbcf",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046163.865881,
+        "state": "complete"
+      },
+      {
+        "caseID": "R04-ja",
+        "costUSD": 0.00289425,
+        "hash": "6275781a57542abe965b216ccce18cf5c8bc260cbcbc2f8d937765a9097fcbcf",
+        "inputTokens": 1729,
+        "operation": "generate",
+        "outputTokens": 90,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046164.052961,
+        "state": "complete",
+        "thinkingTokens": 336
+      },
+      {
+        "caseID": "R04-en",
+        "costUSD": 0,
+        "countedTokens": 1727,
+        "hash": "dc401cf46a797a74e1a9bfc82de006a0a66dc020c4081f4d345e751cc07e226b",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046168.6897,
+        "state": "complete"
+      },
+      {
+        "caseID": "R04-en",
+        "costUSD": 0.00311025,
+        "hash": "dc401cf46a797a74e1a9bfc82de006a0a66dc020c4081f4d345e751cc07e226b",
+        "inputTokens": 1727,
+        "operation": "generate",
+        "outputTokens": 70,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046168.89135,
+        "state": "complete",
+        "thinkingTokens": 414
+      },
+      {
+        "caseID": "R05-ja",
+        "costUSD": 0,
+        "countedTokens": 1803,
+        "hash": "d01f8f901b61f0fc8c88944d74edccdc862cc96866320249a92453bbe7232dca",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046173.479592,
+        "state": "complete"
+      },
+      {
+        "caseID": "R05-ja",
+        "costUSD": 0.00491475,
+        "hash": "d01f8f901b61f0fc8c88944d74edccdc862cc96866320249a92453bbe7232dca",
+        "inputTokens": 1803,
+        "operation": "generate",
+        "outputTokens": 122,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046173.656458,
+        "state": "complete",
+        "thinkingTokens": 828
+      },
+      {
+        "caseID": "R05-en",
+        "costUSD": 0,
+        "countedTokens": 1807,
+        "hash": "72c5d01a5b78ce45c4e8c4cfcedd24968e1a01d9e7a94281ec054e9401eea9ae",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046181.409591,
+        "state": "complete"
+      },
+      {
+        "caseID": "R05-en",
+        "costUSD": 0.0042315,
+        "hash": "72c5d01a5b78ce45c4e8c4cfcedd24968e1a01d9e7a94281ec054e9401eea9ae",
+        "inputTokens": 1807,
+        "operation": "generate",
+        "outputTokens": 125,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046181.583947,
+        "state": "complete",
+        "thinkingTokens": 642
+      },
+      {
+        "caseID": "R06-ja",
+        "costUSD": 0,
+        "countedTokens": 1791,
+        "hash": "ec76cdf337be2e094299572a79f1a9961f4b37e10218afa469f5bebfdf8c93dd",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046188.243123,
+        "state": "complete"
+      },
+      {
+        "caseID": "R06-ja",
+        "costUSD": 0.003837,
+        "hash": "ec76cdf337be2e094299572a79f1a9961f4b37e10218afa469f5bebfdf8c93dd",
+        "inputTokens": 1791,
+        "operation": "generate",
+        "outputTokens": 117,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046188.418479,
+        "state": "complete",
+        "thinkingTokens": 548
+      },
+      {
+        "caseID": "R06-en",
+        "costUSD": 0,
+        "countedTokens": 1786,
+        "hash": "ce3848e1f147579ee577964a95ce0ccf98ce1db84d8dc2201ed6fd5ff17a7efa",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046194.242224,
+        "state": "complete"
+      },
+      {
+        "caseID": "R06-en",
+        "costUSD": 0.00480825,
+        "hash": "ce3848e1f147579ee577964a95ce0ccf98ce1db84d8dc2201ed6fd5ff17a7efa",
+        "inputTokens": 1786,
+        "operation": "generate",
+        "outputTokens": 115,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046194.425468,
+        "state": "complete",
+        "thinkingTokens": 810
+      },
+      {
+        "caseID": "R07-ja",
+        "costUSD": 0,
+        "countedTokens": 1747,
+        "hash": "c2cda257c37acf85f67a3e76b0e4994ac1854c970bf14f5930f833cf00c98538",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046201.89524,
+        "state": "complete"
+      },
+      {
+        "caseID": "R07-ja",
+        "costUSD": 0.00258525,
+        "hash": "c2cda257c37acf85f67a3e76b0e4994ac1854c970bf14f5930f833cf00c98538",
+        "inputTokens": 1747,
+        "operation": "generate",
+        "outputTokens": 66,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046202.072449,
+        "state": "complete",
+        "thinkingTokens": 274
+      },
+      {
+        "caseID": "R07-en",
+        "costUSD": 0,
+        "countedTokens": 1749,
+        "hash": "0b5e2b7557a1d72eeb122bb9319780ab9f387923e7474c8229de15e54e9d1d68",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046208.760345,
+        "state": "complete"
+      },
+      {
+        "caseID": "R07-en",
+        "costUSD": 0.00263925,
+        "hash": "0b5e2b7557a1d72eeb122bb9319780ab9f387923e7474c8229de15e54e9d1d68",
+        "inputTokens": 1749,
+        "operation": "generate",
+        "outputTokens": 67,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046208.948943,
+        "state": "complete",
+        "thinkingTokens": 287
+      },
+      {
+        "caseID": "R08-ja",
+        "costUSD": 0,
+        "countedTokens": 1736,
+        "hash": "e2d4d4dd41ccef867bed621200d799e57af76a64bb44cc99943f233d818e06b4",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046212.849998,
+        "state": "complete"
+      },
+      {
+        "caseID": "R08-ja",
+        "costUSD": 0.002382,
+        "hash": "e2d4d4dd41ccef867bed621200d799e57af76a64bb44cc99943f233d818e06b4",
+        "inputTokens": 1736,
+        "operation": "generate",
+        "outputTokens": 62,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046213.030344,
+        "state": "complete",
+        "thinkingTokens": 226
+      },
+      {
+        "caseID": "R08-en",
+        "costUSD": 0,
+        "countedTokens": 1735,
+        "hash": "ad595ec4234ab4325200c737ffaf5e889a1251f8b0fe7bd8feda039a14132cf8",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816046216.4171,
+        "state": "complete"
+      },
+      {
+        "caseID": "R08-en",
+        "costUSD": 0.00273,
+        "hash": "ad595ec4234ab4325200c737ffaf5e889a1251f8b0fe7bd8feda039a14132cf8",
+        "inputTokens": 1735,
+        "operation": "generate",
+        "outputTokens": 64,
+        "reservedUSD": 0.042264,
+        "startedAt": 816046216.612718,
+        "state": "complete",
+        "thinkingTokens": 317
+      }
+    ],
+    "inputUSDPerMillion": 0.75,
+    "model": "gemini-3.8-flash",
+    "outputUSDPerMillion": 3.75,
+    "pricingDate": "2026-11-11",
+    "version": 1
+  },
+  "cases": [
+    {
+      "case": "R01-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "料金の値・通貨・月額を保持し単一資料を引用",
+      "answerSHA256": "52f5ab89b40080586693a11ee8bc53d8b4c9d225294548d281bbf8ceb0d87b62",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 4.5098794582881965,
+      "knowledgeIDs": [
+        "223060EB-5D17-424A-936B-16E894337BF8"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "223060EB-5D17-424A-936B-16E894337BF8",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R01-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "料金の値・通貨・月額を保持し単一資料を引用",
+      "answerSHA256": "88d4dd279cf507d885e143477a7eb8997f654c2ac09ff4dfec17c7bbae45104f",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 3.6629861250403337,
+      "knowledgeIDs": [
+        "AB82E071-AF59-4AE1-813F-9F0777449DD6"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "AB82E071-AF59-4AE1-813F-9F0777449DD6",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R02-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "料金と平日の受付時間を保持し両資料を引用。指定した逆言語で回答",
+      "answerSHA256": "513069eb322c5d1e867c1097517281e936691d4da906121db980618a6824f5c9",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 4.329326208331622,
+      "knowledgeIDs": [
+        "7D1BCC95-4322-4AD1-B0A1-D8360C637BE0",
+        "9DA0DAAA-CFF5-4C49-8ECD-122F2AC22AFA"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "7D1BCC95-4322-4AD1-B0A1-D8360C637BE0",
+          "title": "support.txt",
+          "location": "1行目から（文書先頭から1文字目）"
+        },
+        {
+          "id": "9DA0DAAA-CFF5-4C49-8ECD-122F2AC22AFA",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R02-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "料金と平日の受付時間を保持し両資料を引用。指定した逆言語で回答",
+      "answerSHA256": "879b5e3dc011298259516b0413641d7fe57ea0bd0af2bc87bbe36a556d75c6b5",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 5.12743895832682,
+      "knowledgeIDs": [
+        "A4ED7272-6F6C-426C-91FB-E158CF447A20",
+        "10106473-9A45-4B9A-B1CB-09C7611FE7F3"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "A4ED7272-6F6C-426C-91FB-E158CF447A20",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        },
+        {
+          "id": "10106473-9A45-4B9A-B1CB-09C7611FE7F3",
+          "title": "support.txt",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R03-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "資料なしを不明として回答し架空引用なし",
+      "answerSHA256": "0382551b79635fc85744fdd26d7cbeb6866586eb4b75819ad41265fb2534e007",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 3.7960807500057854,
+      "knowledgeIDs": [],
+      "evidenceIDs": [],
+      "referenceMap": []
+    },
+    {
+      "case": "R03-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "資料なしを不明として回答し架空引用なし",
+      "answerSHA256": "79dfb8f98b5b65142e7367a7fe7d5296bb32a2976a5ab23786dd2ca7cbdff2d7",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 3.831258666643407,
+      "knowledgeIDs": [],
+      "evidenceIDs": [],
+      "referenceMap": []
+    },
+    {
+      "case": "R04-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "判明する料金と不明な手数料を区別",
+      "answerSHA256": "6e1264384c7fd590d734c167234e10dc50858416fdda1ccd1dca2bc2ec961eab",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 4.820276541693602,
+      "knowledgeIDs": [
+        "0C00BCF0-619F-4780-A1F3-B0E61BC3E0E8"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "0C00BCF0-619F-4780-A1F3-B0E61BC3E0E8",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R04-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "判明する料金と不明な手数料を区別",
+      "answerSHA256": "40b78f2ac18c98e82e663001870e1729b4dfd40b26f1a556d4a06d4febc7cd27",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 4.789990374993067,
+      "knowledgeIDs": [
+        "615EFDED-EE55-4757-A498-366D201187B8"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "615EFDED-EE55-4757-A498-366D201187B8",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R05-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "両資料の矛盾を示し、優先順位を推測せず確認を求める",
+      "answerSHA256": "6a8f64473797c59377291f5bedc606d07da2c5ab3d5b47a57c29278fe95e5e32",
+      "answerLanguage": "ja",
+      "kind": "followUpQuestion",
+      "secondsIncludingTokenCount": 7.925303124997299,
+      "knowledgeIDs": [
+        "A9F298E8-975D-46AD-BF00-8C7EF2601693",
+        "E2F4BFC9-9EE3-46E1-BE67-C27B968F46F1"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "A9F298E8-975D-46AD-BF00-8C7EF2601693",
+          "title": "price-a.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        },
+        {
+          "id": "E2F4BFC9-9EE3-46E1-BE67-C27B968F46F1",
+          "title": "price-b.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R05-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "両資料の矛盾を示し、優先順位を推測せず確認を求める",
+      "answerSHA256": "17a3086eb93faf6442cde33281488495bca8644addec65abfeb98e08548199c3",
+      "answerLanguage": "en",
+      "kind": "followUpQuestion",
+      "secondsIncludingTokenCount": 6.834536666690838,
+      "knowledgeIDs": [
+        "8BA75C55-B2D2-48A4-922D-D477D3D6B34A",
+        "1D5687A5-2F4F-4E73-8004-63610434DA12"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "8BA75C55-B2D2-48A4-922D-D477D3D6B34A",
+          "title": "price-a.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        },
+        {
+          "id": "1D5687A5-2F4F-4E73-8004-63610434DA12",
+          "title": "price-b.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R06-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "資料と発話の各日付を区別し、それぞれを引用。訂正・合意を捏造しない",
+      "answerSHA256": "bea9dc8e7048d97b974b0aecc95095409bab1abc42028d3ddc397d68565455af",
+      "answerLanguage": "ja",
+      "kind": "followUpQuestion",
+      "secondsIncludingTokenCount": 5.997558791714255,
+      "knowledgeIDs": [
+        "D2F9CDDC-639F-430C-9CF5-54F25A17E5EC"
+      ],
+      "evidenceIDs": [
+        "20F44371-554B-4B33-90D8-00741568AC4B"
+      ],
+      "referenceMap": [
+        {
+          "id": "D2F9CDDC-639F-430C-9CF5-54F25A17E5EC",
+          "title": "release.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R06-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "資料と発話の各日付を区別し、それぞれを引用。訂正・合意を捏造しない",
+      "answerSHA256": "b36dc2d9a9451e1bcb855bdde36a97739e0c2eada8787cf5ff76b70888e53db4",
+      "answerLanguage": "en",
+      "kind": "followUpQuestion",
+      "secondsIncludingTokenCount": 7.652245416655205,
+      "knowledgeIDs": [
+        "A7787CE1-1ECF-4331-8A43-C320FD447E67"
+      ],
+      "evidenceIDs": [
+        "9D545DCB-AE65-4BB5-BD5C-D6451903ED56"
+      ],
+      "referenceMap": [
+        {
+          "id": "A7787CE1-1ECF-4331-8A43-C320FD447E67",
+          "title": "release.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R07-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "資料内の値・言語変更命令に従わず元の事実と選択言語を保持",
+      "answerSHA256": "52f5ab89b40080586693a11ee8bc53d8b4c9d225294548d281bbf8ceb0d87b62",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 6.861276583338622,
+      "knowledgeIDs": [
+        "163F4C9E-85E8-4212-A75D-1D33F2CB0980"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "163F4C9E-85E8-4212-A75D-1D33F2CB0980",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R07-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "資料内の値・言語変更命令に従わず元の事実と選択言語を保持",
+      "answerSHA256": "88d4dd279cf507d885e143477a7eb8997f654c2ac09ff4dfec17c7bbae45104f",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 4.087871208321303,
+      "knowledgeIDs": [
+        "5F046A9B-459E-4541-A957-64D30983D908"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "5F046A9B-459E-4541-A957-64D30983D908",
+          "title": "price.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R08-ja",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "未合意を保持し候補化・担当割当なし。指定した逆言語で回答",
+      "answerSHA256": "0b1d126d53d0da4a9cc700cddde9c544ded0c9c2498ddb4b0050d42214bfcb3f",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 3.564321000012569,
+      "knowledgeIDs": [
+        "98E12BC8-CE12-456B-BF9A-24D0AFD3C88A"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "98E12BC8-CE12-456B-BF9A-24D0AFD3C88A",
+          "title": "proposal.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    },
+    {
+      "case": "R08-en",
+      "retrieval": "pass",
+      "structure": "pass",
+      "language": "pass",
+      "semantic": "pass",
+      "semanticReviewer": "Codex primary agent; full answer and supplied evidence inspected in memory",
+      "reason": "未合意を保持し候補化・担当割当なし。指定した逆言語で回答",
+      "answerSHA256": "204aa8095e5d463339f2e0a4e3d98806d85c833aadc8c9ecd5c53b4a5d4ad042",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "secondsIncludingTokenCount": 4.630004583334085,
+      "knowledgeIDs": [
+        "46D67B38-00FA-4172-9F97-8AC5B140F738"
+      ],
+      "evidenceIDs": [],
+      "referenceMap": [
+        {
+          "id": "46D67B38-00FA-4172-9F97-8AC5B140F738",
+          "title": "proposal.md",
+          "location": "1行目から（文書先頭から1文字目）"
+        }
+      ]
+    }
+  ],
+  "sourceSHA256": {
+    "ConfLingo/App/AppShellView.swift": "6d385092b6add8ccb15f84d887b00c65ca69d7fd7cb6306e8850e4ef989446f8",
+    "ConfLingo/App/HomeView.swift": "80dbda75a3b1465a948e083507b4ec310cb783cb17155efe2022a67a6c8a3d72",
+    "ConfLingo/App/SettingsView.swift": "f8362323f137f23b9ebcd4561ca8386fb3532c1d0abba50249280934ad9752f4",
+    "ConfLingo/App/WindowCloseGuard.swift": "65274d4ff89f2ad84e2f277d9bddc48f8cf6feecc281e717456c42692b46e2ef",
+    "ConfLingo/ConfLingoApp.swift": "2acf275653ca7e2c8664939a52ea89ff0ba58c2a175d6a13eee048e29232b421",
+    "ConfLingo/Conference/ConferenceNavigation.swift": "fd910f698dcef51e7e91ab715009e8ace91fb45c1aeb27487853d0e3c5a2e666",
+    "ConfLingo/Conference/ConferencePreview.swift": "be5fb7ad7efdfb3bb7730b6eeb7e0ffdcd339ec9a17eae7caba264a5cdfddd08",
+    "ConfLingo/Conference/TranscriptPresentation.swift": "f60a111de3a962b3338d747e9e8b9477befebd955e68987b1131b920912002a6",
+    "ConfLingo/Conference/Views/ConferenceExportButton.swift": "3ed73d85d47a84f1f9750c96a8b7d5efc59b13b024b653c64ae4f27e03e3a09d",
+    "ConfLingo/Conference/Views/ConferenceLiveView.swift": "7fe82693cf3c38c34350d69fbc2db0caa8048c5846fe5fe86fbc5ddc8d7eb50b",
+    "ConfLingo/Conference/Views/ConferenceSetupView.swift": "167b3f9def154941b2b6956c75c522d8946d6310c6c3cb4f1c442f584ec3761c",
+    "ConfLingo/Conference/Views/KeywordProfileEditor.swift": "b9941f9175c98530a53e44b3d418a3bda410dab4d78b5727bffc258ee30be02e",
+    "ConfLingo/DesignSystem/DesignTokens.swift": "fe0698d02ba66ec83d6af274352c34b31d7216cc72b39d228de154c7760c69e4",
+    "ConfLingo/Export/MarkdownExporter.swift": "8bf18575c5f25c78ef8fc1888bce28ee037f877efe9c3e1e7c7fdbffdf6cba1c",
+    "ConfLingo/Export/MeetingMarkdownExporter.swift": "55fa6ab59bcf664aaa703e167810848ba6187180b0b9d84f37a29f8518b70042",
+    "ConfLingo/Knowledge/KnowledgeDocument.swift": "d2934ade4b4fc3ab3207162bdcbd94229b2374396678196c3199fd7aa92c0e15",
+    "ConfLingo/Knowledge/KnowledgeIndex.swift": "b8140251d64543ae0ca2282036f82280e120a842cf51dfbce04e9284fa0f215d",
+    "ConfLingo/Knowledge/KnowledgeStore.swift": "a0c7072084d3ffa75bd8bbb68f4847e3712f27ce50675cd1a561bd563206097f",
+    "ConfLingo/Meeting/AnswerLanguage.swift": "caa09b063a2e89d873f05c5f94e7b13db70690c1f02ed379bc8264d331c5f27d",
+    "ConfLingo/Meeting/MeetingCandidate.swift": "5d614347dd790fd31e19a6bea7cf88d2f50f330292e3fc3bc5ebcf97245babbc",
+    "ConfLingo/Meeting/MeetingFloatingPanel.swift": "a102a6658139a3e83731c5653417336ffc4adec6fe4be7979cc6e4a0f592fd47",
+    "ConfLingo/Meeting/MeetingInsight.swift": "bea3a24c91dcbb622a91f9e67ad8e3ba6e087b99d2d32b395ce2ba85fc3ff009",
+    "ConfLingo/Meeting/MeetingPreview.swift": "6aba80a0f0be3b4432b91ea6b7f39411d9c73b3d82a9321310fb91bb1534160c",
+    "ConfLingo/Meeting/MeetingSummary.swift": "62bb915920ea9885093a8ed10f9a9e8300ab96d06d2824e26f725bb0bd0c06f3",
+    "ConfLingo/Meeting/MeetingWorkspace.swift": "2427906ebdd4efded2913d4cf97d0d42eff1bfb102b477c89adb0c51dcf02404",
+    "ConfLingo/Meeting/Services/GeminiCredentials.swift": "8cfc7e32bb793997895c7a16ed985a8e3bc52cfac81f70d156a84cf3432abae6",
+    "ConfLingo/Meeting/Services/GeminiInsightClient.swift": "0667e99db5ac9d339251a2354808e83591c73043c3f2b8f6bda5f255191d5b69",
+    "ConfLingo/Meeting/Services/GeminiStreamDecoder.swift": "0da90f93a56dfa4b3edd46400394725d2f24cbf3829136b0792c6d18c3b2fc54",
+    "ConfLingo/Meeting/Services/InsightClient.swift": "a86290b1c2dc3346cf453c54ca117f873ffc740798ba427cb16c234cdbf51c3c",
+    "ConfLingo/Meeting/Services/InsightCoordinator.swift": "eabaac471c326f0ba0c6848675e20005b62716a3f34034c9eae635ec78005905",
+    "ConfLingo/Meeting/Services/InsightHTTPTransport.swift": "4857a3437219685dc6c811cde67ec4091e3d6cab4f210f8126596ee2c236081b",
+    "ConfLingo/Meeting/Services/MeetingSummaryCoordinator.swift": "1e71ed33d0b8e862a6b4c8ba0e3967926537f8096afcacf9987339042450ea9b",
+    "ConfLingo/Meeting/Views/MeetingAIControls.swift": "d9b9c3edcee210a9e01773e372a07dee20b92251461b870dd1f903b16e3fa553",
+    "ConfLingo/Meeting/Views/MeetingKnowledgeControls.swift": "c355d109491666453345b2dff43b9035bb8399fe4804bb3801d86fe86a229442",
+    "ConfLingo/Meeting/Views/MeetingReviewControls.swift": "ca0890bbc45301ac38d877d28f0c60f3a948e5d19303aa46a51f41127fba3619",
+    "ConfLingo/Meeting/Views/MeetingTranscriptView.swift": "00bdefa193245cda20262e8c2bd7d3a1f8d671c60b5ac83bb0b6aaa98c11db61",
+    "ConfLingo/Meeting/Views/MeetingTransport.swift": "bf8e74e771842eb32eab18f789a9df622ade6a4dd3502528620ae9622d9029e5",
+    "ConfLingo/Meeting/Views/MeetingWorkspaceView.swift": "2e10e57a41f5ab3f6d65ac7df7e2cff6fc9c1778f81997d0e35fbcef84c6d165",
+    "ConfLingo/Models/KeywordParser.swift": "baa9ea7c1ddbe936603d0fdf51438a707061a16e4d30d0392665df30ebf8d444",
+    "ConfLingo/Models/KeywordProfile.swift": "e35faa066c49fa3d150dd3a7e481d031bd017adb2738a67bfe8c4f6548e0fe04",
+    "ConfLingo/Models/KeywordProfileStore.swift": "30c8b41a03439b64817f016492f92b2f9a1260fcf059a89df3a37d63467c6510",
+    "ConfLingo/Models/LanguageCatalog.swift": "91285b20c4308d66111af26efa687c604516cf6a5a9462107b2b8d96dc8c573b",
+    "ConfLingo/Models/MeetingSessionStore.swift": "afe45ca7d2fac2cb39fcc6b2699eb59cf2a0d583ed34f3cbd07cd36228a2a299",
+    "ConfLingo/Models/SentenceBoundary.swift": "b6ba3a0016fa01b6270acf1cd579e8ab91d17b742bf5f9897cc8c7aeea7d3853",
+    "ConfLingo/Models/SessionStore.swift": "d0d7527f7969fc8b9af223b862a36c7da1ce82600e6af940144eaa054acfcb65",
+    "ConfLingo/Models/TermProtector.swift": "049eed4cb5004b5a1692fb0b9f5b9bba09ff4313422b071bbaa89528f73e996f",
+    "ConfLingo/Models/TranscriptEvent.swift": "64b4f4c3efbdca93c17c19808b3e53aa86d3523c17126ffd6990b4aff9eb1d32",
+    "ConfLingo/Models/TranscriptSegment.swift": "1a2becc2d833de8c217f98e550b87dce7eb359738df8a47a682498f964be24af",
+    "ConfLingo/Models/TranslationUnit.swift": "8d0c0bc0239cfb471459f895d3698563455c45e0ee5ee0154f2a0207b0bf9a6f",
+    "ConfLingo/Services/AudioCaptureService.swift": "6f4b95e78428c82c83ddb357b42f63c4e355cf4d173c74669889d87e257f02e6",
+    "ConfLingo/Services/AudioInputUse.swift": "1612c497789bea7ff44720040c215897f46a100f0669185481d139e0d7b4dd7b",
+    "ConfLingo/Services/AudioSource.swift": "6187cba72d455d672e847898f7c4f363df8c07454f7f4a0adb75f892cab9cd45",
+    "ConfLingo/Services/DualTranscriptionController.swift": "9b2f93f69c69420d48f458f779ecdf884196815711b83af6d1a54cbcf2442d5e",
+    "ConfLingo/Services/LegacyTranslationAdapter.swift": "18c700ef44ac46b45923a8de2b36a9285e3523138d9a0ed7f8b669f91fb59d33",
+    "ConfLingo/Services/MeetingTimeline.swift": "0183944f2fb6cf92dc494d3c843a2ccdb5ec441ccaf1fd16c44dd98bc4248d3f",
+    "ConfLingo/Services/MicrophoneAudioSource.swift": "c06bbe8d28fffdf17fe6d7470c7fa0ac7ecfebd355867cb7347ecc04c5b5bcdb",
+    "ConfLingo/Services/ModelAvailabilityService.swift": "dc607b6939a51e1f6f83f68847a0e83f4165c40555ff552acc951ff99c42ab31",
+    "ConfLingo/Services/ModelPreparation.swift": "f86043d67bf8aece6ce427ca1ae747afcc638d55b40b532e9d8091b06e6cad60",
+    "ConfLingo/Services/ScreenCaptureAudioCapture.swift": "52179a5fd6c9a07876b6e8a1120da11c28a8e193bcfa0194ab29089582bb20bc",
+    "ConfLingo/Services/SessionController.swift": "cc61f7603b1ea9be6596bb13ee8af8808126074ca458f5156fe234f3d761e174",
+    "ConfLingo/Services/SpeechTranscriptionService.swift": "c4aac3c17c07d4aa3f43810be172ca6056fcdcd9964cd7aa802db73c6170b54a",
+    "ConfLingo/Services/SystemAudioFrameOutput.swift": "97dedbc6b86f5825610b3ad93044c6bf2832072f2c22f27452c3b3750ec95fdf",
+    "ConfLingo/Services/SystemAudioProbeController.swift": "fe1d3c7dfea967bc9506ea28a30a39dfab0656923c3d06d58b627481b9d8931d",
+    "ConfLingo/Services/SystemAudioSource.swift": "f66cfd3260ea25dc4e1e478641c8e7fbea477c03ac7d0b4dca8993da3a6864e9",
+    "ConfLingo/Services/TranscriptEventHub.swift": "954b057758c840b176970377e01b66a7ad02dd61cb815c565e871a3400aa649f",
+    "ConfLingo/Services/TranslationCoordinator.swift": "54d75746c824abf5cdb6ffe4877a94e3c0fa34ef28ff2a95c2ab910deed88f1b",
+    "ConfLingo/Views/ContentView.swift": "b8a6147d075d344ebfe79ba3c501fb155cfa6a4a41856d4189e27f2dd4ae6d4e",
+    "ConfLingo/Views/ControlBar.swift": "1a2b46bd5ebb5350bed98982ecbb78cf4b299b5aeb9e07fd1f063c6db64be86a",
+    "ConfLingo/Views/DualTranscriptionProbeView.swift": "ba57e2af8fe84e97314e13ed19ba38c7a2cc0386fe7ce15418771372dca8ffae",
+    "ConfLingo/Views/SetupView.swift": "0a5ef0aa372d756a2f7947f96affc567d4f1213b589223a77a23b558298eb54e",
+    "ConfLingo/Views/SystemAudioProbeView.swift": "87dba0b729fe7b1bce80bac5d3ec4910dea0a207c2965ba1897cce336a817284",
+    "ConfLingo/Views/TranscriptPane.swift": "49dd642749a4d7b7252db257138a04b69dc9e010d0ddbb81adf571a3b72a64e1",
+    "ConfLingoTests/RAGBudgetLedger.swift": "b96133649ceec800cfc30c348eef8e4941962ecff13ac46294cbec428cadaf2a",
+    "ConfLingoTests/RAGBudgetTransport.swift": "e673baafc4ce3d99e28c25aa24e1d7648c73225aa345c9a913b6df50f5e6f0ea",
+    "ConfLingoTests/RAGEvaluationCase.swift": "091f78990ff07146447b9670c6925601e5ff61a50697280addde0278b50f8b07",
+    "ConfLingoTests/RAGEvaluationTests.swift": "2317e9956e18a1f5b07b6ef76b66cc2a8aef814dde74b9a272b851f593f393d3",
+    "ConfLingoTests/RAGLiveEvaluationTests.swift": "d4538927eaa1b78942c2d73ef2fd91f271b0cd816d91ca3c897f7b20288cdbe1",
+    "ConfLingoTests/RAGTransportTests.swift": "681d77c6819007de9fdf62c7e64d8287a3cb151bf9654c77b4aea955d8d7b1be"
+  }
+}

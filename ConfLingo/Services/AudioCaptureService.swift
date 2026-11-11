@@ -23,13 +23,16 @@ protocol AudioCapturing: AnyObject {
 final class AudioCaptureService: AudioCapturing {
     private let engine = AVAudioEngine()
     private var continuation: AudioFrameStream.Continuation?
+    private let diagnostics: AudioDiagnostics?
+
+    init(diagnostics: AudioDiagnostics? = nil) { self.diagnostics = diagnostics }
 
     func start(targetFormat: AVAudioFormat) throws -> AudioFrameStream {
         guard continuation == nil else { throw AudioSourceError.alreadyRunning }
         let inputNode = engine.inputNode
         let hardwareFormat = inputNode.outputFormat(forBus: 0)
 
-        guard let converter = BufferConverter(from: hardwareFormat, to: targetFormat) else {
+        guard let converter = BufferConverter(from: hardwareFormat, to: targetFormat, diagnostics: diagnostics) else {
             throw AudioCaptureError.converterUnavailable
         }
 
@@ -38,9 +41,22 @@ final class AudioCaptureService: AudioCapturing {
 
         // tap コールバックは音声スレッドで呼ばれる。@Sendable を明示しないと
         // @MainActor コンテキストの隔離を継承し、実行時の隔離アサーションでクラッシュする。
+        let diagnostics = self.diagnostics
         inputNode.installTap(onBus: 0, bufferSize: 4096, format: hardwareFormat) { @Sendable buffer, _ in
-            if let converted = converter.convert(buffer), let frame = AudioFrame(copying: converted) {
-                newContinuation.yield(frame)
+            diagnostics?.record(.tap, origin: .microphone, samples: Int(buffer.frameLength),
+                                sampleRate: buffer.format.sampleRate, channels: buffer.format.channelCount)
+            guard let converted = converter.convert(buffer) else { return }
+            diagnostics?.record(.converted, origin: .microphone, samples: Int(converted.frameLength),
+                                sampleRate: converted.format.sampleRate, channels: converted.format.channelCount)
+            guard let frame = AudioFrame(copying: converted) else {
+                diagnostics?.record(.copyFailure, origin: .microphone)
+                return
+            }
+            switch newContinuation.yield(frame) {
+            case .enqueued: diagnostics?.record(.enqueued, origin: .microphone, samples: Int(converted.frameLength))
+            case .dropped: diagnostics?.record(.yieldDropped, origin: .microphone)
+            case .terminated: diagnostics?.record(.yieldTerminated, origin: .microphone)
+            @unknown default: break
             }
         }
 
@@ -72,8 +88,10 @@ final class AudioCaptureService: AudioCapturing {
 private final class BufferConverter: @unchecked Sendable {
     private let converter: AVAudioConverter?
     private let targetFormat: AVAudioFormat
+    private let diagnostics: AudioDiagnostics?
 
-    init?(from source: AVAudioFormat, to target: AVAudioFormat) {
+    init?(from source: AVAudioFormat, to target: AVAudioFormat, diagnostics: AudioDiagnostics?) {
+        self.diagnostics = diagnostics
         targetFormat = target
         if source == target {
             converter = nil
@@ -89,6 +107,7 @@ private final class BufferConverter: @unchecked Sendable {
         let ratio = targetFormat.sampleRate / buffer.format.sampleRate
         let capacity = AVAudioFrameCount((Double(buffer.frameLength) * ratio).rounded(.up)) + 16
         guard let output = AVAudioPCMBuffer(pcmFormat: targetFormat, frameCapacity: capacity) else {
+            diagnostics?.record(.conversionFailure, origin: .microphone)
             return nil
         }
 
@@ -106,7 +125,14 @@ private final class BufferConverter: @unchecked Sendable {
             return inputBuffer
         }
 
-        guard status != .error, conversionError == nil, output.frameLength > 0 else { return nil }
+        guard status != .error, conversionError == nil else {
+            diagnostics?.record(.conversionFailure, origin: .microphone)
+            return nil
+        }
+        guard output.frameLength > 0 else {
+            diagnostics?.record(.conversionEmpty, origin: .microphone)
+            return nil
+        }
         return output
     }
 }

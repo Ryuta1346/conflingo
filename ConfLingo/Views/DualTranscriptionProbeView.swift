@@ -51,6 +51,12 @@ struct DualTranscriptionProbeView: View {
             if let error = controller.lastError {
                 Text(error).foregroundStyle(.red).font(.callout).textSelection(.enabled)
             }
+            #if DEBUG
+            if controller.phase == .idle, let snapshot = controller.diagnostics?.snapshot {
+                Text("診断ID: \(snapshot.id.uuidString)").font(.caption).textSelection(.enabled)
+                if controller.diagnosticSaveFailed { Text("診断メタデータを保存できませんでした。").foregroundStyle(.red) }
+            }
+            #endif
             Divider()
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 12) {

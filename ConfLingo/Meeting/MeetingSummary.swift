@@ -36,7 +36,7 @@ struct MeetingSummaryPlan: Identifiable, Sendable {
             let request = try InsightRequest(
                 sessionID: sessionID,
                 question: "この区間の会話を簡潔に要約してください。話題、提案、未解決事項と訂正を区別し、根拠発話を示してください。担当者・期限・合意を推測せず、この区間の内容を会議全体の最終決定として扱わないでください。",
-                trigger: .manual, events: events, answerLanguage: answerLanguage
+                trigger: .manual, events: events, answerLanguage: answerLanguage, purpose: .summary
             )
             guard request.omittedCount == 0, request.events.count == events.count else { throw PlanError.invalid }
             return request

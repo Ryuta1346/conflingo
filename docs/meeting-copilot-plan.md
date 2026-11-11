@@ -1,5 +1,8 @@
 > 利用者確認追補（2026-11-10）: VoiceOverの読み上げ・キャプション・Control+Option+Spaceによる設定ボタン操作を利用者確認として記録。[証跡と制約](validation/pr6-focus-stability.md)。基本確認の質問は回答済み。全画面の読み順・実会議等の網羅確認とは区別する。
 
+> 実音声追補・訂正（2026-11-11）: 短時間2入力で英語9文・日本語4文・停止後の確定表示を確認。旧試行の一覧末尾に後半3文が存在し、初回の欠落判定は確認漏れだったため撤回。診断2試行でも4文・9文と停止／再開を確認。[訂正記録](validation/real-audio-2026-11-11.md)・[診断結果](validation/microphone-diagnostics.md)。その後、新しい文での再開・通常Meetingの開始→一時停止→再開→終了を[実音声で確認](validation/meeting-real-input-2026-11-11.md)。AI結合・会議アプリ別・Gate全体は未完了。
+
+
 > 反復確認追補（2026-11-10）: [フォーカス45回・主画面/小窓往復3回が成功](validation/pr6-focus-stability.md)。VoiceOver本体のプロセス起動は確認したが、実読み上げは利用者の観測回答待ち。製品変更・追加API送信なし。
 
 > キーボード追補（2026-11-10）: [一意の識別子を持つ無通信コピー](validation/pr6-keyboard-isolation.md)で、設定・言語選択・開始/停止/再開/終了・小窓の主要キー経路を確認。VoiceOver実操作と一時的なフォーカス停滞の原因は未確定。製品変更・追加API送信なし。
@@ -554,8 +557,8 @@ ConfLingoTests/
 
 ## PR7 承認済み実装範囲（2026-11-10）
 
-ユーザー「進めて」によりPR7を先行する。候補の確認／却下／未確認への復元、終了後に送信対象と予定要求数を確認して開始する手動AI要約、Meeting Markdown出力を実装する。AIは確認状態を変更しない。アプリ内Sessionsの永続保存・一覧・再読込・削除は別計画へ持ち越す。実音声受入と各Gateは未完了を維持する。PR7のローカル実装と自動・非録音UI確認は完了（310テスト／48 suites）。実API要約品質・実音声・マージは未完了。検証結果は`docs/validation/pr7-meeting-state.md`に記録。
+ユーザー「進めて」によりPR7を先行する。候補の確認／却下／未確認への復元、終了後に送信対象と予定要求数を確認して開始する手動AI要約、Meeting Markdown出力を実装した。AIは確認状態を変更しない。アプリ内Sessionsの永続保存・一覧・再読込・削除は別計画へ持ち越す。PR7は#16でマージ済み、ローカル実装と自動・非録音UI確認、レビュー修正後316テスト／48 suitesを確認。合成要約品質は後続評価で確認済み。実音声・各Gateは未完了。検証結果は[PR7検証記録](validation/pr7-meeting-state.md)を参照。2026-11-11に[承認済み要約品質評価](design/pr7-quality-acceptance-plan.md)を既存#19の同一ブランチで実装。361テスト・lint・Release成功、実APIは13/16会議・14/22区間合格後にS07-en-1の30秒timeoutで停止。計数込み30/44要求・不明分予約込み推定US$0.1060725。全件合格条件は未達。[評価結果](validation/pr7-quality-acceptance.md)。 続く[計測付き評価](validation/pr7-summary-remaining.md)は367テスト・lint141ファイル違反0・Debug/Release成功。追加3区間合格後、受信途中の30秒timeoutで停止。2回で14/16会議・17/22区間を確認、累計38要求・予約込みUS$0.1835055。[終了後要約だけ60秒へ変更する計画](design/pr7-summary-deadline-plan.md)をユーザー「susumete」で承認後に実装。372テスト・lint142ファイル・Debug/Release成功、新規16要求で8/8区間合格。3回の評価を通じ固定16会議・22区間の品質条件を確認した。旧timeout予約込み累計US$0.25228725。[最新結果](validation/pr7-summary-deadline.md)。
 
 ## PR8 承認済み実装範囲（2026-11-11）
 
-ユーザー「承認」により、Markdown/Textの会議内取り込み、ローカル全文検索、資料根拠の表示、会議ごとの明示許可による手動質問への抜粋送信を実装する。資料はReviewまで保持し、会議破棄・アプリ終了で破棄する。PDF、永続ライブラリ、資料を使う自動提案・要約は後続。資料だけで決定・アクション候補を確認済みにしない。[実装計画](design/pr8-implementation-plan.md)の上限・取消・検証契約を適用。ローカル実装・331テスト・Debug/Release・lint・非録音UI確認を完了。[検証記録](validation/pr8-local-rag.md)。実APIの引用品質、PR6/7の残る受入と品質Gateは未完了を維持する。
+ユーザー「承認」により、Markdown/Textの会議内取り込み、ローカル全文検索、資料根拠の表示、会議ごとの明示許可による手動質問への抜粋送信を実装する。資料はReviewまで保持し、会議破棄・アプリ終了で破棄する。PDF、永続ライブラリ、資料を使う自動提案・要約は後続。資料だけで決定・アクション候補を確認済みにしない。[実装計画](design/pr8-implementation-plan.md)の上限・取消・検証契約を適用。ローカル実装・331テスト・Debug/Release・lint・非録音UI確認を完了。[検証記録](validation/pr8-local-rag.md)。後続の承認済み指摘対応で342テスト・lint・Releaseを確認し、実APIの合成引用品質は16/16件合格（計数込み32要求・推定US$0.04850325）。[品質評価結果](validation/pr8-quality-acceptance.md)。実音声、PR6/7の残る受入と品質Gateは未完了を維持する。

@@ -23,7 +23,7 @@ extension MixedContextEvaluationCase {
 }
 
 extension GeminiLiveEvaluationTests {
-    @Test(.enabled(if: ProcessInfo.processInfo.environment["CONFLINGO_GROUNDING_LIVE_AI"] == "1"))
+    @Test(.enabled(if: RAGLiveConfiguration.legacyEnabled("CONFLINGO_GROUNDING_LIVE_AI")))
     func groundingControlsCorpus() async throws {
         let store = KeychainAPIKeyStore()
         let client = GeminiInsightClient(key: { try await store.read() })
