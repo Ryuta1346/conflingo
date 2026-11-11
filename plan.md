@@ -4,13 +4,13 @@
 
 ## 現在地
 
-- 更新: **2026-11-11／ブランチ `feature/session-persistence`**。Sessions実装コミット `e95f8ae`をpushし、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成。ベースmainは`294bd0c`で、リモートも同じコミットと確認済み。
-- **実装:** Sessions永続保存は実装・主要検証済み（[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)、未マージ）。PR0〜8はマージ済み（PR5-A/B/Cを含む11区分）。追加のリポジトリ取り込み・資料付き要約・資料を使う自動提案も[PR #20](https://github.com/Ryuta1346/conflingo/pull/20)でマージ済み。PR9（結合・性能・安全性検証）は未着手。
+- 更新: **2026-11-12／ブランチ `feature/knowledge-library`**。ローカルmain `adfc2c5`でSessions PR #21のマージを確認。
+- **実装:** PR0〜8、追加リポジトリ参照（PR #20）、Sessions（PR #21）はマージ済み。永続資料ライブラリは[計画](docs/design/knowledge-library-implementation-plan.md)に従いローカル実装・主要検証済み（未コミット）。PR9は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** Sessions実装後、**423テスト／70 suites成功、lint159ファイル違反0、Debug/Release成功**。両モードの保存・再起動後の再閲覧・検索・引用・再出力・削除を無通信UIで確認。狭幅・拡大文字・キー網羅・VoiceOverは未確認。[検証記録](docs/validation/sessions.md)。
+- **直近の検証記録:** 資料ライブラリ追加後、444テスト／72 suites、lint166ファイル違反0、Debug/Release成功。保存・再起動後の復元・検索/引用・更新・削除を無通信UIで確認。狭幅・VoiceOver全経路などは未確認。[結果](docs/validation/knowledge-library.md)。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
-- **今回の開発:** [Sessions永続保存](docs/design/sessions-implementation-plan.md)の承認済み範囲を実装。Meeting/Conferenceの明示保存・一覧・名前検索・再閲覧・再出力・削除に対応。全体受入はS12の残るUI確認を継続。次の未実装候補はPDF/OCR・永続資料ライブラリ。
+- **今回の開発:** 永続資料ライブラリ。Markdown/Text・取り込み済みリポジトリの明示保存、一覧/名前検索/本文閲覧、次の会議での選択、更新/削除を実装。使用中の会議と過去の引用は保持。次の未実装候補はPDF/OCR。
 - **持ち越す検証:** Conference回帰 → Zoom/Meet/Teams別2入力受入 → 実音声とAI・候補管理・要約・資料検索・Markdown出力の結合受入。PR #20の品質評価・独立レビュー、UIの残る確認、60分耐久・性能・配布条件も継続する。
 - **実施条件:** 実音声は試験環境と参加者同意を確認し、追加実APIは新たな送信範囲・要求上限の承認後に実施する。既存の使用済み評価枠は拡張しない。
 
@@ -67,7 +67,7 @@
 
 **開始条件・持ち越し:** 短時間実入力と通常Meeting操作を確認し、両入力・素材再生を停止済み。今回追加API0・本文保存0。PR7合成要約品質は3回の評価を通じ確認済み（合計54要求）。旧2回の不明使用量予約US$0.084528を保持し、累計推定管理額US$0.25228725。追加実APIは自動実行しない。#19の変更はmainへマージ済み。PR8の32要求は使用済み。合成試験を実会議・60分耐久・Gate Cの合格に置き換えない。
 
-**後続の未実装機能:** PDF/OCR、永続資料ライブラリ。Sessions初版は読み取り専用で、保存記録の編集・AI再生成・自動保存・クラウド同期は対象外。
+**後続の未実装機能:** PDF/OCR。永続資料ライブラリはローカル実装・主要検証済み。Sessions初版は読み取り専用で、保存記録の編集・AI再生成・自動保存・クラウド同期は対象外。
 
 **PR #20の到達点:** ローカルのコード・テスト・文書を選択して取り込み、手動質問・自動提案・終了後要約で参照できる。引用にはパス・行・内容ハッシュ・snapshot IDを保持。自動提案と要約の資料許可は独立し、初期オフ。実装と無通信UIは確認済みだが、既存PR6/7/8の実API合格を追加機能の品質保証には流用しない。
 

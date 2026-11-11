@@ -3,13 +3,17 @@ import UniformTypeIdentifiers
 
 struct MeetingKnowledgeControls: View {
     @Bindable var meeting: MeetingWorkspace
+    var library: KnowledgeLibrary?
+    var fontSize: Double
     @State private var query = ""
     @State private var showsImporter = false
     @State private var importError = ""
     @State private var removing: KnowledgeDocument?
     @State private var expanded: Bool
 
-    init(meeting: MeetingWorkspace) {
+    init(meeting: MeetingWorkspace, library: KnowledgeLibrary? = nil, fontSize: Double = 16) {
+        self.fontSize = fontSize
+        self.library = library
         self.meeting = meeting
         _expanded = State(initialValue: meeting.page == .setup)
     }
@@ -20,7 +24,7 @@ struct MeetingKnowledgeControls: View {
         Surface {
             DisclosureGroup(isExpanded: $expanded) {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("この会議だけで使う資料です。会議を破棄するかアプリを終了すると消えます。元ファイルは変更しません。")
+                    Text("会議内の資料は、会議破棄・アプリ終了で消えます。「ライブラリに保存」した本文は残り、次の会議で選べます。元ファイルは変更しません。")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
                     if meeting.page == .setup {
                         Button("資料を追加", systemImage: "doc.badge.plus") { showsImporter = true }
@@ -29,6 +33,9 @@ struct MeetingKnowledgeControls: View {
                             .font(.caption).foregroundStyle(DesignTokens.secondary)
                     }
                     RepositoryKnowledgeControls(meeting: meeting)
+                    if meeting.page == .setup, let library {
+                        MeetingLibraryControls(meeting: meeting, library: library, fontSize: fontSize)
+                    }
                     if knowledge.documents.isEmpty {
                         Text("資料なし。準備画面から追加できます。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)

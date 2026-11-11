@@ -1,6 +1,6 @@
 import Foundation
 
-struct KnowledgeDocument: Identifiable, Equatable, Sendable {
+struct KnowledgeDocument: Identifiable, Equatable, Sendable, Codable {
     let id: UUID
     let title: String
     let importedAt: Date

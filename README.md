@@ -18,6 +18,12 @@ Saved records include final transcripts, available translations, completed AI ca
 
 Meeting also supports microphone and system audio transcription, optional AI responses and summaries, and document references. See the [progress tracker](plan.md) for outstanding real-meeting acceptance checks and the [Sessions validation record](docs/validation/sessions.md) for verified behavior. The instructions below primarily describe Conference.
 
+## Knowledge library
+
+In Meeting preparation, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.
+
+Reuse saved material with **ライブラリから追加**. The library supports browsing, name search, replacement and deletion while preserving existing meeting copies and citations. AI consent is not saved. See the [usage guide](docs/usage.md#knowledge-library).
+
 ## Requirements
 
 - macOS 26.0 or later / Apple Silicon

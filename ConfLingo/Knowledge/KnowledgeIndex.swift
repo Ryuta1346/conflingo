@@ -91,6 +91,55 @@ actor KnowledgeIndex {
         return pending.map { $0.0 }
     }
 
+    func archive(documentID: UUID?) throws -> KnowledgeArchive {
+        let selected = documents.filter { doc in documentID.map { doc.id == $0 && doc.source == nil } ?? (doc.source != nil) }
+        let archive = KnowledgeArchive(documents: try selected.map { doc in
+            guard let body = bodies[doc.id] else { throw LibraryFailure.invalid }
+            return .init(document: doc, body: body)
+        })
+        try archive.validate()
+        return archive
+    }
+
+    func restore(_ archive: KnowledgeArchive) throws -> [KnowledgeDocument] {
+        try Task.checkCancellation()
+        try archive.validate()
+        if archive.isRepository {
+            guard !documents.contains(where: { $0.source != nil }) else { throw LibraryFailure.duplicate }
+        } else {
+            let existing = documents.filter { $0.source == nil }
+            guard existing.count < 20, existing.reduce(0, { $0 + $1.characterCount }) + archive.documents[0].body.count <= 500_000 else {
+                throw KnowledgeFailure.limit
+            }
+            guard !existing.contains(where: { bodies[$0.id] == archive.documents[0].body }) else { throw KnowledgeFailure.duplicate }
+        }
+        guard Set(documents.map(\.id)).isDisjoint(with: archive.documents.map { $0.document.id }) else { throw LibraryFailure.duplicate }
+        let pending = archive.documents.map { ($0, Self.split($0.body, document: $0.document)) }
+        let database = try connection()
+        try database.execute("BEGIN")
+        do {
+            for (item, references) in pending {
+                for reference in references {
+                    try Task.checkCancellation()
+                    try database.execute("INSERT INTO chunks(id, document, paths, words) VALUES (?, ?, ?, ?)",
+                        [reference.id.uuidString, item.document.id.uuidString,
+                         Self.words(item.document.source?.path ?? "").joined(separator: " "), Self.words(reference.snippet).joined(separator: " ")])
+                }
+            }
+            try Task.checkCancellation()
+            try database.execute("COMMIT")
+        } catch {
+            try? database.execute("ROLLBACK")
+            throw error
+        }
+        for (item, references) in pending {
+            documents.append(item.document)
+            bodies[item.document.id] = item.body
+            for reference in references { chunks[reference.id] = reference }
+        }
+        return archive.documents.map(\.document)
+    }
+
     func references(for id: UUID) throws -> [KnowledgeReference] {
         chunks.values.filter { $0.documentID == id }.sorted { $0.characterOffset < $1.characterOffset }
     }
