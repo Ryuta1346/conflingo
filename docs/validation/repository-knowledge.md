@@ -1,7 +1,7 @@
 # ローカルリポジトリ資料化・資料付き要約の検証
 
 2026-11-11 / `feature/local-repository-knowledge` / 基準main `7efbd3f`。
-[承認済み計画](../design/repository-knowledge-implementation-plan.md)を実装。**ローカル実装・自動検証・主要な無通信UI操作を確認。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ。**
+[承認済み計画](../design/repository-knowledge-implementation-plan.md)を実装。**ローカル実装・自動検証・主要な無通信UI操作を確認。[PR #20](https://github.com/Ryuta1346/conflingo/pull/20)は2026-11-11にマージ済み（ローカルmain `294bd0c`で確認）。**
 
 本記録は手動質問・終了後要約までの初版の検証結果。自動提案への拡張は[追加検証記録](automatic-knowledge.md)を参照。
 

@@ -1,6 +1,6 @@
 import Foundation
 
-struct MeetingInsight: Identifiable, Equatable, Sendable {
+struct MeetingInsight: Identifiable, Equatable, Sendable, Codable {
     enum Kind: String, Codable, Sendable, CaseIterable {
         case answerSuggestion, followUpQuestion, risk, decisionCandidate, actionCandidate
 
@@ -17,7 +17,7 @@ struct MeetingInsight: Identifiable, Equatable, Sendable {
         var priority: Int { self == .risk ? 2 : 1 }
     }
 
-    enum Status: Sendable { case generating, complete, interrupted }
+    enum Status: String, Codable, Sendable { case generating, complete, interrupted }
     var id = UUID()
     let kind: Kind
     var text: String

@@ -4,7 +4,7 @@ import Observation
 @Observable
 final class ConferenceNavigation {
     enum Destination: String, CaseIterable, Identifiable {
-        case home, setup, live, settings, meeting
+        case home, setup, live, settings, meeting, sessions
         var id: Self { self }
     }
 

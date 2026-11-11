@@ -6,6 +6,10 @@ struct HomeView: View {
     let openTranscript: () -> Void
     var openMeeting: () -> Void = {}
 
+    var sessions: SessionsLibrary?
+    var showSessions: () -> Void = {}
+    var openSession: (UUID) -> Void = { _ in }
+
     var body: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 28) {
@@ -33,7 +37,7 @@ struct HomeView: View {
                         HStack {
                             VStack(alignment: .leading, spacing: 5) {
                                 Text("現在の字幕").font(.headline)
-                                Text("アプリを閉じる前に、必要な内容を書き出してください。")
+                                Text("停止後にこのMacへ保存するか、Markdownを書き出せます。")
                                     .font(.callout).foregroundStyle(DesignTokens.secondary)
                             }
                             Spacer()
@@ -49,6 +53,9 @@ struct HomeView: View {
                         Button("会議を開く", systemImage: "arrow.right", action: openMeeting)
                             .buttonStyle(.bordered).controlSize(.large)
                     }
+                }
+                if let sessions {
+                    RecentSessionsView(library: sessions, showAll: showSessions, open: openSession)
                 }
                 Label("音声は保存せず、認識と翻訳はMacで処理します。", systemImage: "checkmark.shield")
                     .font(.callout).foregroundStyle(DesignTokens.secondary)

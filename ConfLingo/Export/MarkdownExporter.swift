@@ -12,7 +12,7 @@ enum MarkdownExporter {
     /// 翻訳セッションでは翻訳単位（複数セグメントを文末まで結合したもの）で出力する。
     static func render(
         sessionName: String,
-        date: Date,
+        date: Date?,
         segments: [TranscriptSegment],
         units: [TranslationUnit] = [],
         sourceLanguage: String,
@@ -22,7 +22,7 @@ enum MarkdownExporter {
         var lines: [String] = []
         lines.append("# ConfLingo Session: \(name.isEmpty ? "Untitled" : name)")
         lines.append("")
-        lines.append("- Date: \(dateFormatter.string(from: date))")
+        lines.append("- Date: \(date.map { dateFormatter.string(from: $0) } ?? "未取得")")
         lines.append("- Source language: \(sourceLanguage)")
         if let targetLanguage {
             lines.append("- Target language: \(targetLanguage)")

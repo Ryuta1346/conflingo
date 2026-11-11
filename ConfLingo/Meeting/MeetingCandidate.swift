@@ -1,8 +1,8 @@
 import Foundation
 import Observation
 
-struct MeetingCandidate: Identifiable, Equatable, Sendable {
-    enum Review: String, CaseIterable, Sendable {
+struct MeetingCandidate: Identifiable, Equatable, Sendable, Codable {
+    enum Review: String, CaseIterable, Sendable, Codable {
         case unreviewed, confirmed, rejected
         var label: String {
             switch self {

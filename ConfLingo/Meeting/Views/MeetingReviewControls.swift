@@ -5,6 +5,7 @@ import UniformTypeIdentifiers
 struct MeetingReviewControls: View {
     @Bindable var meeting: MeetingWorkspace
     let fontSize: Double
+    var sessions: SessionsLibrary?
     @State private var pendingPlan: MeetingSummaryPlan?
     @State private var preparationError: String?
 
@@ -13,6 +14,11 @@ struct MeetingReviewControls: View {
             Surface {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("会話を振り返る").font(.headline)
+                    if let sessions {
+                        SessionSaveControls(library: sessions, snapshot: meeting.sessionSnapshot) {
+                            Task { await meeting.saveSession(to: sessions) }
+                        }
+                    }
                     Text("要約は任意です。AIを使わず、候補と発話だけを書き出すこともできます。")
                         .font(.callout).foregroundStyle(DesignTokens.secondary)
                     ViewThatFits(in: .horizontal) {

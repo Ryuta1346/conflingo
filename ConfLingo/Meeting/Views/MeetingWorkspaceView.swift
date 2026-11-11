@@ -5,6 +5,8 @@ struct MeetingWorkspaceView: View {
     @Binding var fontSize: Double
     let compact: () -> Void
 
+    var sessions: SessionsLibrary?
+
     var body: some View {
         VStack(spacing: 0) {
             if meeting.page == .setup {
@@ -30,14 +32,15 @@ struct MeetingWorkspaceView: View {
             Divider()
             MeetingTransport(meeting: meeting)
         }
+        .disabled(meeting.isSavingSession)
         .sheet(item: $meeting.selectedKnowledge) { reference in
             KnowledgeReferenceView(reference: reference, fontSize: fontSize)
         }
-        .alert("未保存の会議を破棄しますか？", isPresented: $meeting.showsDiscardConfirmation) {
+        .alert("現在の会議を破棄しますか？", isPresented: $meeting.showsDiscardConfirmation) {
             Button("キャンセル", role: .cancel) {}
             Button("破棄して新しい会議へ", role: .destructive) { meeting.confirmDiscard() }
         } message: {
-            Text("この会議の発話・資料・回答はアプリ内に保存されていません。破棄すると元に戻せません。")
+            Text("現在の会議の未保存の変更と資料全体を破棄します。保存済みセッションと書き出したMarkdownは残ります。")
         }
     }
 
@@ -64,7 +67,7 @@ struct MeetingWorkspaceView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("音声は保存・外部送信しません", systemImage: "checkmark.shield")
                             .font(.headline)
-                        Text("発話はアプリ終了までメモリ内に保持し、自動保存しません。AI送信は下で明示的に許可した場合だけ行います。")
+                        Text("発話はメモリ内に保持し、自動保存しません。終了後に「このMacに保存」を選べます。AI送信は下で明示的に許可した場合だけ行います。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                         ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
                             Text("\(origin.label)：\(permission(origin))").font(.caption)
@@ -87,7 +90,7 @@ struct MeetingWorkspaceView: View {
                 Text(meeting.page == .review ? "Meeting / 振り返り" : "Meeting / General")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Text(meeting.title).font(.title2.weight(.semibold)).lineLimit(2)
-                Text("アプリ内は未保存 · 終了後にMarkdownで書き出し")
+                Text(sessions?.status(for: meeting.sessionSnapshot) ?? "自動保存オフ · 終了後に保存またはMarkdown書き出し")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
             }
             Spacer(minLength: 8)
@@ -102,7 +105,7 @@ struct MeetingWorkspaceView: View {
                 Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
                     .font(.headline).accessibilityAddTraits(.isHeader)
                 if meeting.page == .live { MeetingAIControls(meeting: meeting) }
-                if meeting.page == .review { MeetingReviewControls(meeting: meeting, fontSize: fontSize) }
+                if meeting.page == .review { MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions) }
                 MeetingKnowledgeControls(meeting: meeting)
                 if !meeting.candidates.items.isEmpty {
                     Text("決定・アクション候補").font(.headline)
@@ -133,7 +136,7 @@ struct MeetingWorkspaceView: View {
                 Label(meeting.aiStatus, systemImage: "cloud")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 if meeting.page == .review {
-                    Text("Markdownを書き出して残せます。アプリ内の保存一覧・再読込には未対応です。")
+                    Text("「このMacに保存」で再起動後も振り返れます。Markdownの書き出しとは別の保存です。")
                         .font(.callout).foregroundStyle(DesignTokens.secondary)
                 }
             }

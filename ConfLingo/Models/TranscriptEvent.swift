@@ -5,7 +5,7 @@ enum AudioOrigin: String, Codable, Sendable {
     case systemAudio
 }
 
-struct TranscriptEvent: Identifiable, Sendable, Equatable {
+struct TranscriptEvent: Identifiable, Sendable, Equatable, Codable {
     let id: UUID
     let sessionID: UUID
     let origin: AudioOrigin

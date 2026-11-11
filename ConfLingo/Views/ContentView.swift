@@ -3,6 +3,7 @@ import SwiftUI
 import Translation
 
 struct ContentView: View {
+    @State private var sessions: SessionsLibrary
     @State private var meeting: MeetingWorkspace
     @State private var floatingPanel: MeetingFloatingPanel
     @Environment(\.openWindow) private var openWindow
@@ -29,12 +30,13 @@ struct ContentView: View {
     private let isPreview: Bool
 
     init(activity: AudioInputUse = AudioInputUse(), preview: Bool = false, defaults: UserDefaults = .standard,
-         meeting: MeetingWorkspace? = nil, floatingPanel: MeetingFloatingPanel? = nil, meetingPreview: Bool = false) {
+         meeting: MeetingWorkspace? = nil, floatingPanel: MeetingFloatingPanel? = nil, meetingPreview: Bool = false, sessions: SessionsLibrary? = nil) {
         #if DEBUG
         isPreview = preview
         #else
         isPreview = false
         #endif
+        _sessions = State(initialValue: sessions ?? SessionsLibrary.make(preview: isPreview))
         let session = SessionStore()
         let settings: UserDefaults
         #if DEBUG
@@ -74,7 +76,7 @@ struct ContentView: View {
                 ZStack {
                     page
                     MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
-                                         compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) })
+                                         compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions)
                         .opacity(navigation.destination == .meeting ? 1 : 0)
                         .allowsHitTesting(navigation.destination == .meeting)
                         .disabled(navigation.destination != .meeting)
@@ -85,9 +87,11 @@ struct ContentView: View {
                     ControlBar(phase: store.phase, isStopping: controller.isStopping,
                                canStart: modelState == .ready, hasTranscript: !store.segments.isEmpty,
                                start: startSession, stop: { Task { await stopSession() } })
+                        .disabled(sessions.isBusy)
                 }
             }
         }
+        .task { await sessions.reload() }
         .onAppear {
             floatingPanel.expand = {
                 openWindow(id: "main")
@@ -105,7 +109,7 @@ struct ContentView: View {
         .alert("処理が完了するまでお待ちください", isPresented: $showCloseBlocked) {
             Button("閉じる", role: .cancel) {}
         } message: {
-            Text("開始・停止の処理中です。停止が失敗した場合は「停止を再試行」を操作してください。")
+            Text("開始・停止・保存の処理中です。停止が失敗した場合は「停止を再試行」を操作してください。")
         }
         .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
         .sheet(isPresented: $showDictionary) {
@@ -125,9 +129,9 @@ struct ContentView: View {
         }
         .alert("字幕を消去しますか？", isPresented: $showClearConfirmation) {
             Button("キャンセル", role: .cancel) {}
-            Button("消去", role: .destructive) { controller.reset(store: store) }
+            Button("消去", role: .destructive) { if !sessions.isBusy { controller.reset(store: store) } }
         } message: {
-            Text("現在の字幕を消去します。書き出し済みのMarkdownは削除しません。")
+            Text("現在の字幕を消去します。保存済みセッションと書き出し済みのMarkdownは削除しません。")
         }
         .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)|retry=\(preparationRetry)") {
             guard !isPreview else { return }
@@ -200,7 +204,8 @@ struct ContentView: View {
         case .home:
             HomeView(hasTranscript: !store.segments.isEmpty,
                      prepare: { navigate(.setup) }, openTranscript: { navigate(.live) },
-                     openMeeting: { navigate(.meeting) })
+                     openMeeting: { navigate(.meeting) }, sessions: sessions,
+                     showSessions: { sessions.closeDetail(); navigate(.sessions) }, openSession: openSavedSession)
         case .setup:
             ConferenceSetupView(
                 sessionName: $store.sessionName, sourceLanguage: $sourceLocaleID,
@@ -213,13 +218,22 @@ struct ContentView: View {
                 openTranscript: { navigate(.live) }
             )
         case .live:
-            ConferenceLiveView(
-                store: store, sourceLanguage: sourceLocaleID,
-                targetLanguage: transcriptionOnly ? nil : targetLanguageID,
-                profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
-                editSettings: { navigate(.setup) },
-                clear: { showClearConfirmation = true }
-            )
+            VStack(spacing: 0) {
+                SessionSaveControls(library: sessions, snapshot: conferenceSnapshot) {
+                    guard let snapshot = conferenceSnapshot else { return }
+                    Task { await sessions.save(snapshot) }
+                }.padding([.horizontal, .top], 20)
+                ConferenceLiveView(
+                    store: store, sourceLanguage: sourceLocaleID,
+                    targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                    profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
+                    editSettings: { navigate(.setup) },
+                    clear: { if !sessions.isBusy { showClearConfirmation = true } }
+                )
+                .disabled(sessions.isBusy)
+            }
+        case .sessions:
+            SessionsView(library: sessions, fontSize: fontSize)
         case .meeting:
             Color.clear
         case .settings:
@@ -232,11 +246,11 @@ struct ContentView: View {
 
     private var topBar: some View {
         HStack(spacing: 10) {
-            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .meeting ? "Meeting" : "Conference")
+            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .sessions ? "Sessions" : navigation.destination == .meeting ? "Meeting" : "Conference")
                 .font(.callout.weight(.medium))
                 .foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)
-            if navigation.destination == .live || navigation.destination == .meeting {
+            if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions {
                 Button("A−") { fontSize = max(10, fontSize - 2) }
                     .keyboardShortcut("-", modifiers: .command)
                     .accessibilityLabel("字幕を小さく")
@@ -255,6 +269,16 @@ struct ContentView: View {
         .padding(.horizontal, 22)
         .padding(.vertical, 14)
         .background(DesignTokens.surface)
+    }
+
+    private var conferenceSnapshot: SessionSnapshot? {
+        store.sessionSnapshot(sourceLanguage: sourceLocaleID, targetLanguage: transcriptionOnly ? nil : targetLanguageID)
+    }
+
+    private func openSavedSession(_ id: UUID) {
+        guard !sessions.isBusy, activePhase == .idle else { navigate(.sessions); return }
+        navigate(.sessions)
+        Task { await sessions.open(id) }
     }
 
     private var modelState: ModelAvailabilityService.State { isPreview ? .ready : availability.state }
@@ -278,6 +302,7 @@ struct ContentView: View {
     }
 
     private func shouldCloseWindow(_: NSWindow) -> Bool {
+        if sessions.isBusy { showCloseBlocked = true; return false }
         switch activePhase {
         case .idle:
             meeting.cancelSummary()
@@ -292,12 +317,13 @@ struct ContentView: View {
     }
 
     private func navigate(_ destination: ConferenceNavigation.Destination) {
+        guard !sessions.isBusy else { return }
         if destination != .meeting { meeting.cancelSummary() }
         navigation.request(destination, phase: activePhase)
     }
 
     private func startSession() {
-        guard modelState == .ready, store.phase == .idle else { return }
+        guard !sessions.isBusy, modelState == .ready, store.phase == .idle else { return }
         navigate(.live)
         if isPreview {
             store.phase = .listening

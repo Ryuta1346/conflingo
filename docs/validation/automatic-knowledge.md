@@ -1,7 +1,7 @@
 # 自動提案でのリポジトリ・資料参照 — 検証
 
 2026-11-11 / `feature/local-repository-knowledge` / 基準main `7efbd3f`。
-[追加計画](../design/automatic-knowledge-implementation-plan.md)をユーザー「進めて」で承認後に実装。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ。
+[追加計画](../design/automatic-knowledge-implementation-plan.md)をユーザー「進めて」で承認後に実装。[PR #20](https://github.com/Ryuta1346/conflingo/pull/20)は2026-11-11にマージ済み（ローカルmain `294bd0c`で確認）。
 
 機能コミット: `90408c7`。検証JSONの`committed: false`は検証実行時点の状態であり、現在のPR状態とは区別する。
 
