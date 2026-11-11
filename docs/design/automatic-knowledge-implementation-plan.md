@@ -72,4 +72,4 @@
 
 追加機能の希望は確認済み。ユーザー提示AGENTS.md必須ルール4「実装前に実装計画を `~/.coding-agents/docs/<プロジェクト名>/` 配下に作成し承認を得る」に従い、2026-11-11のユーザー「進めて」で本計画を承認。資料更新・TDD・検証へ進む。
 
-実装結果: [検証記録](../validation/automatic-knowledge.md)。406テスト／68 suites、lint151ファイル違反0、Debug/Release成功。合成・無通信UIで自動提案、コード引用、許可解除、終了を確認。実API品質・実音声結合は未検証。未コミット・未マージ。
+実装結果: [検証記録](../validation/automatic-knowledge.md)。406テスト／68 suites、lint151ファイル違反0、Debug/Release成功。合成・無通信UIで自動提案、コード引用、許可解除、終了を確認。実API品質・実音声結合は未検証。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ。

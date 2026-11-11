@@ -125,4 +125,4 @@
 
 2026-11-11: ユーザー「すすめて」で計画承認。作業ブランチ `feature/local-repository-knowledge` を作成。実装・検証結果は完了後に記録する。
 
-実装結果: [検証記録](../validation/repository-knowledge.md)。394テスト／67 suites、lint150ファイル違反0、Debug/Release成功。非録音・無通信プレビューで取り込み、手動引用、資料付き要約、Markdown、狭幅・主要キー操作を確認。実API・実音声・大規模実リポジトリ性能は未検証。未コミット・未マージ。
+実装結果: [検証記録](../validation/repository-knowledge.md)。394テスト／67 suites、lint150ファイル違反0、Debug/Release成功。非録音・無通信プレビューで取り込み、手動引用、資料付き要約、Markdown、狭幅・主要キー操作を確認。実API・実音声・大規模実リポジトリ性能は未検証。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ。

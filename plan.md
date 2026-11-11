@@ -63,9 +63,9 @@
 
 **開始条件・持ち越し:** 短時間実入力と通常Meeting操作を確認し、両入力・素材再生を停止済み。今回追加API0・本文保存0。PR7合成要約品質は3回の評価を通じ確認済み（合計54要求）。旧2回の不明使用量予約US$0.084528を保持し、累計推定管理額US$0.25228725。追加実APIは自動実行しない。#19の変更はmainへマージ済み。PR8の32要求は使用済み。合成試験を実会議・60分耐久・Gate Cの合格に置き換えない。
 
-**追加実装として別計画:** Sessionsの永続保存・一覧・再読込・削除。PR8のPDF/OCR、永続資料ライブラリは今回の受入対象外で、後続範囲として管理する。資料付き要約は次項の新規計画へ具体化した。資料を使う自動提案は[追加計画](docs/design/automatic-knowledge-implementation-plan.md)をユーザー「進めて」で承認後に実装・ローカル検証済み。406テスト／68 suites・lint151ファイル違反0・Debug/Release・無通信UI確認を完了。[検証結果](docs/validation/automatic-knowledge.md)。未コミット・未マージ、実API品質・実音声結合は未検証。
+**追加実装として別計画:** Sessionsの永続保存・一覧・再読込・削除。PR8のPDF/OCR、永続資料ライブラリは今回の受入対象外で、後続範囲として管理する。資料付き要約は次項の新規計画へ具体化した。資料を使う自動提案は[追加計画](docs/design/automatic-knowledge-implementation-plan.md)をユーザー「進めて」で承認後に実装・ローカル検証済み。406テスト／68 suites・lint151ファイル違反0・Debug/Release・無通信UI確認を完了。[検証結果](docs/validation/automatic-knowledge.md)。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ、実API品質・実音声結合は未検証。
 
-**新規機能（ローカル実装・主要検証完了）:** ローカルリポジトリのコード・テスト・文書を取り込み、手動質問と終了後要約に利用する。ユーザーの範囲回答を[ヒアリング](docs/design/repository-knowledge-hearing.md)へ記録し、[実装計画](docs/design/repository-knowledge-implementation-plan.md)を作成。2026-11-11にユーザー「すすめて」で計画承認後、394テスト／67 suites・lint150ファイル違反0・Debug/Release・無通信UI確認を完了。[検証結果](docs/validation/repository-knowledge.md)。未コミット・未マージ。実API品質・実音声結合は未実施。既存の受入完了数2/12とGate状態は維持する。
+**新規機能（ローカル実装・主要検証完了）:** ローカルリポジトリのコード・テスト・文書を取り込み、手動質問と終了後要約に利用する。ユーザーの範囲回答を[ヒアリング](docs/design/repository-knowledge-hearing.md)へ記録し、[実装計画](docs/design/repository-knowledge-implementation-plan.md)を作成。2026-11-11にユーザー「すすめて」で計画承認後、394テスト／67 suites・lint150ファイル違反0・Debug/Release・無通信UI確認を完了。[検証結果](docs/validation/repository-knowledge.md)。[Draft PR #20](https://github.com/Ryuta1346/conflingo/pull/20)作成済み・未マージ。実API品質・実音声結合は未実施。既存の受入完了数2/12とGate状態は維持する。
 
 ## 更新ルール
 
