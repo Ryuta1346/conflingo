@@ -27,8 +27,13 @@ struct MeetingExportSnapshot: Equatable {
             lines += ["## AIによる区間別要約（未確認）", "", "回答言語: \(summary.answerLanguage.label)",
                       "各区間の記述は会議全体の最終合意を表しません。", ""]
             for section in summary.sections {
-                lines += ["### \(Self.time(section.startOffset))–\(Self.time(section.endOffset))", "",
-                          Self.quoted(section.text), "", references(section.evidenceIDs, eventsByID: eventsByID), ""]
+                lines += ["### \(Self.time(section.startOffset))–\(Self.time(section.endOffset))", ""]
+                if !section.supplement.isEmpty { lines += ["#### 会議の要約", ""] }
+                lines += [Self.quoted(section.text), "", references(section.evidenceIDs, eventsByID: eventsByID), ""]
+                if !section.supplement.isEmpty {
+                    lines += ["#### 資料・実装からの補足", "", Self.quoted(section.supplement), "",
+                              knowledgeReferences(section.knowledgeReferences), ""]
+                }
             }
         }
         for kind in [MeetingInsight.Kind.decisionCandidate, .actionCandidate] {
@@ -58,7 +63,7 @@ struct MeetingExportSnapshot: Equatable {
 
     private func knowledgeReferences(_ references: [KnowledgeReference]) -> String {
         references.map { reference in
-            "資料: \(Self.escape(reference.title.components(separatedBy: .newlines).joined(separator: " "))) · \(reference.location)\n取り込み日時: \(MarkdownExporter.dateFormatter.string(from: reference.importedAt))\n"
+            "資料: \(Self.escape(reference.displayTitle.components(separatedBy: .newlines).joined(separator: " "))) · \(Self.escape(reference.provenance.components(separatedBy: .newlines).joined(separator: " ")))\n取り込み日時: \(MarkdownExporter.dateFormatter.string(from: reference.importedAt))\n"
                 + Self.quoted(reference.snippet)
         }.joined(separator: "\n\n")
     }

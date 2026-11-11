@@ -4,9 +4,10 @@ import Testing
 
 @MainActor
 struct KnowledgeTransportTests {
-    @Test func sendsOnlyReferenceSnapshotAndValidatesReturnedIDs() async throws {
+    @Test(arguments: [InsightRequest.Trigger.manual, .automatic])
+    func sendsOnlyReferenceSnapshotAndValidatesReturnedIDs(trigger: InsightRequest.Trigger) async throws {
         let ref = reference("料金.md")
-        let request = try InsightRequest(sessionID: UUID(), question: "料金？", trigger: .manual, events: [], knowledge: [ref])
+        let request = try InsightRequest(sessionID: UUID(), question: "料金？", trigger: trigger, events: [], knowledge: [ref])
         let transport = FakeInsightHTTP()
         let payload = "{\"text\":\"100円\",\"kind\":\"answerSuggestion\",\"evidenceIDs\":[],\"knowledgeIDs\":[\"\(ref.id)\"]}"
         transport.chunks = [try geminiSSE(payload: payload)]

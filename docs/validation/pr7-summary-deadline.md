@@ -1,6 +1,6 @@
 # PR7 終了後要約の期限修正・再評価
 
-2026-11-11 / `feature/pr8-quality-acceptance` / Draft PR #19と同じブランチ、未コミット。
+2026-11-11 / 実施ブランチ `feature/pr8-quality-acceptance`。変更はコミット `7ce3ab5` に含まれ、PR #19でマージ済み（main `7efbd3f`）。
 ユーザー「susumete」で[計画](../design/pr7-summary-deadline-plan.md)を承認。**ローカル検証成功、実APIは3/3会議・8/8区間合格。**
 
 ## 変更と検証

@@ -32,7 +32,7 @@ struct MeetingAIControls: View {
                 ))
                 .disabled(meeting.page == .review || meeting.phase == .stopping)
                 DisclosureGroup("送信する内容・データの扱い", isExpanded: $showsDataDetails) {
-                Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は別の許可をオンにした手動質問だけで参照します。")
+                Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は手動質問・自動提案それぞれの許可、または終了後要約の確認画面で選択した場合に参照します。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Text("無料枠では入出力が製品改善に利用され得ます。有料枠でも限定的な保持があります。ご自身のGoogleプロジェクトの条件をご確認ください。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
@@ -43,6 +43,12 @@ struct MeetingAIControls: View {
                     get: { meeting.ai.automaticEnabled }, set: { meeting.setAutomaticAI($0) }
                 ))
                 .disabled(!meeting.ai.permitted || meeting.ai.subscriptionFailed || meeting.page == .review || meeting.phase == .stopping)
+                Toggle("自動提案にも資料を使う", isOn: Binding(
+                    get: { meeting.ai.automaticKnowledgeEnabled }, set: { meeting.setAutomaticKnowledgeAllowed($0) }
+                ))
+                .disabled(!meeting.ai.permitted || !meeting.ai.automaticEnabled || meeting.page == .review || meeting.phase == .stopping || meeting.knowledge.isBusy)
+                Text("発話に関連する資料を検索し、最大5箇所・6,000文字と資料名・位置を送ります。提案の回数上限は同じですが、入力トークンが増える場合があります。手動質問・終了後要約の資料許可とは別の設定です。")
+                    .font(.caption).foregroundStyle(DesignTokens.secondary)
                 if meeting.page == .live {
                     TextField("会話や資料について質問する", text: $question, axis: .vertical)
                         .textFieldStyle(.roundedBorder).lineLimit(2...4)

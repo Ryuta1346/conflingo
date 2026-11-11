@@ -13,6 +13,7 @@ final class MeetingWorkspace {
         didSet {
             defaults.set(answerLanguage.rawValue, forKey: "aiAnswerLanguage")
             ai.answerLanguage = answerLanguage
+            cancelSummary()
         }
     }
     var name = ""
@@ -27,6 +28,7 @@ final class MeetingWorkspace {
     let export = MeetingExportState()
     var startedAt: Date? { controller.startedAt }
     private var pendingSummaryID: UUID?
+    private var preparingSummaryID: UUID?
     var candidates: MeetingCandidateStore { ai.candidates }
     let credentials: GeminiCredentials
     var insights: [MeetingInsight] {
@@ -69,6 +71,7 @@ final class MeetingWorkspace {
         self.ai = ai
         let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
         self.summary = summary
+        ai.knowledge.onContentChange = { [weak self] in self?.cancelSummary() }
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
         controller.captureActivityChanged = { [weak ai] active in
             if active { ai?.resume() } else { ai?.suspend() }
@@ -80,18 +83,48 @@ final class MeetingWorkspace {
     }
 
     func summaryPlan() throws -> MeetingSummaryPlan {
+        cancelSummary()
         let plan = try MeetingSummaryPlan(sessionID: store.sessionID, events: store.finals, answerLanguage: answerLanguage)
         pendingSummaryID = plan.id
         return plan
     }
 
+    func summaryPlan(includingKnowledge: Bool) async throws -> MeetingSummaryPlan {
+        if !includingKnowledge { return try summaryPlan() }
+        guard !knowledge.isBusy else { throw KnowledgeFailure.search }
+        cancelSummary()
+        let preparation = UUID()
+        preparingSummaryID = preparation
+        defer { if preparingSummaryID == preparation { preparingSummaryID = nil } }
+        let base = try MeetingSummaryPlan(sessionID: store.sessionID, events: store.finals, answerLanguage: answerLanguage)
+        let version = knowledge.revision
+        var groups: [[KnowledgeReference]] = []
+        for request in base.requests {
+            groups.append(try await knowledge.retrieveForSummary(request.events))
+            guard preparingSummaryID == preparation, version == knowledge.revision, !Task.isCancelled else { throw CancellationError() }
+        }
+        guard base.sessionID == store.sessionID, base.answerLanguage == answerLanguage,
+              base.events == store.finals.sorted(by: { $0.startOffset < $1.startOffset }) else { throw CancellationError() }
+        let plan = try MeetingSummaryPlan(sessionID: base.sessionID, events: base.events, answerLanguage: base.answerLanguage,
+                                          knowledgeBySection: groups, knowledgeRevision: version)
+        pendingSummaryID = plan.id
+        return plan
+    }
+
+    func isSummaryPlanCurrent(_ plan: MeetingSummaryPlan) -> Bool {
+        pendingSummaryID == plan.id && plan.sessionID == store.sessionID && plan.answerLanguage == answerLanguage
+            && (plan.knowledgeRevision == nil || (plan.knowledgeRevision == knowledge.revision && !knowledge.isBusy))
+            && plan.events == store.finals.sorted(by: { $0.startOffset < $1.startOffset })
+    }
+
     func generateSummary(_ plan: MeetingSummaryPlan, consent: Bool) async {
-        guard consent, page == .review, phase == .idle, !isBusy, pendingSummaryID == plan.id else { return }
+        guard consent, page == .review, phase == .idle, !isBusy, isSummaryPlanCurrent(plan) else { return }
         pendingSummaryID = nil
         await summary.generate(plan, consent: consent)
     }
 
     func cancelSummary() {
+        preparingSummaryID = nil
         pendingSummaryID = nil
         summary.cancel()
     }
@@ -114,9 +147,19 @@ final class MeetingWorkspace {
         knowledge.setPermission(allowed)
     }
 
+    func setAutomaticKnowledgeAllowed(_ allowed: Bool) {
+        guard !allowed || (page != .review && phase != .stopping && !knowledge.isBusy) else { return }
+        ai.setAutomaticKnowledge(allowed)
+    }
+
     func importKnowledge(_ url: URL) async {
         guard page == .setup, phase == .idle, !isBusy else { return }
         await knowledge.add(url: url)
+    }
+
+    func importRepository(_ scan: RepositoryScan, selected: Set<String>) async {
+        guard page == .setup, phase == .idle, !isBusy else { return }
+        await knowledge.importRepository(scan, selected: selected)
     }
 
     func setAutomaticAI(_ allowed: Bool) {

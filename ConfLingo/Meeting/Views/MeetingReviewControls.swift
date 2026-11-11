@@ -42,8 +42,7 @@ struct MeetingReviewControls: View {
                     }
                     if meeting.summary.state != .complete {
                         ForEach(meeting.summary.draft) { section in
-                            Text(section.text).font(.system(size: fontSize)).textSelection(.enabled)
-                            MeetingEvidenceLinks(meeting: meeting, ids: section.evidenceIDs)
+                            SummarySectionContent(meeting: meeting, section: section, fontSize: fontSize)
                         }
                     }
                     if !meeting.export.message.isEmpty {
@@ -67,37 +66,14 @@ struct MeetingReviewControls: View {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("\(MarkdownExporter.timestamp(section.startOffset))–\(MarkdownExporter.timestamp(section.endOffset))")
                                 .font(.caption)
-                            Text(section.text).font(.system(size: fontSize)).textSelection(.enabled)
-                            MeetingEvidenceLinks(meeting: meeting, ids: section.evidenceIDs)
+                            SummarySectionContent(meeting: meeting, section: section, fontSize: fontSize)
                         }
                     }
                 }
             }
         }
         .sheet(item: $pendingPlan) { plan in
-                VStack(alignment: .leading, spacing: 16) {
-                    Text("要約する内容を確認").font(.title2.bold())
-                    Text("この会議の確定発話\(plan.events.count)件をGeminiへ送ります。会議中にAIを許可する前の発話も含まれます。音声は送りません。")
-                    Text("回答言語：\(plan.answerLanguage.label) · \(plan.requests.count)区間／最大\(plan.requests.count)要求。利用料金が発生します。自動再送はしません。")
-                    ScrollView {
-                        VStack(alignment: .leading, spacing: 12) {
-                            ForEach(plan.events) { event in
-                                Text("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)\n\(event.text)")
-                                    .textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading)
-                            }
-                        }
-                    }
-                    HStack {
-                        Button("キャンセル") { pendingPlan = nil; meeting.cancelSummary() }.keyboardShortcut(.cancelAction)
-                        Spacer()
-                        Button("この内容を送って要約する") {
-                            pendingPlan = nil
-                            Task { await meeting.generateSummary(plan, consent: true) }
-                        }
-                        .buttonStyle(.borderedProminent)
-                    }
-                }
-                .padding(24).frame(minWidth: 500, idealWidth: 620, minHeight: 400, idealHeight: 560)
+            SummaryConfirmationView(meeting: meeting, initialPlan: plan) { pendingPlan = nil }
         }
     }
 
@@ -108,7 +84,7 @@ struct MeetingReviewControls: View {
                 preparationError = nil
             } catch { preparationError = error.localizedDescription }
         }
-        .disabled(meeting.summary.state == .sending || meeting.store.finals.isEmpty)
+        .disabled(meeting.summary.state == .sending || meeting.store.finals.isEmpty || meeting.knowledge.isBusy)
     }
 
     private var exportButton: some View {

@@ -38,6 +38,23 @@ enum MeetingPreview {
     }
 
     static func prepare(_ meeting: MeetingWorkspace, scenario: String) async {
+        if scenario == "repository-review" || scenario == "repository-automatic" {
+            guard !meeting.previewUsesLiveAI else { return }
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent("SyntheticProduct-\(UUID())")
+            defer { try? FileManager.default.removeItem(at: root) }
+            do {
+                try FileManager.default.createDirectory(at: root, withIntermediateDirectories: true)
+                try Data("// 架空の実装: security review pilot レビュー担当者\nfunc reviewStatus() -> String { \"pending\" }\n".utf8)
+                    .write(to: root.appendingPathComponent("ReviewService.swift"))
+                try Data("# 架空の設計\nsecurity review 完了後のパイロットを検討する。担当者は未確定。".utf8)
+                    .write(to: root.appendingPathComponent("README.md"))
+                let scan = try await RepositoryImporter.scan(root)
+                await meeting.knowledge.importRepository(scan, selected: Set(scan.eligible.map(\.path)))
+            } catch {
+                meeting.previewAIStatus = "合成リポジトリの準備に失敗・外部送信なし"
+                return
+            }
+        }
         if scenario == "pr8-setup" || scenario == "pr8-live" || scenario == "pr8-review" {
             await meeting.knowledge.add(data: Data("# 製品仕様（架空の資料）\n料金は月額100円です。\nAPI rate limit is 50 requests per minute.\n多要素認証を利用できます。".utf8), filename: "製品仕様.md")
         }
@@ -47,12 +64,18 @@ enum MeetingPreview {
         await meeting.start()
         guard meeting.phase == .listening else { return }
         populate(meeting, includeCandidates: scenario == "pr7-review")
+        if scenario == "repository-automatic", !meeting.previewUsesLiveAI {
+            meeting.setAIAllowed(true)
+            meeting.setAutomaticAI(true)
+            meeting.setAutomaticKnowledgeAllowed(true)
+            if let event = meeting.store.finals.last { await meeting.ai.receive(event)?.value }
+        }
         if scenario == "pr8-live" || scenario == "pr8-review" {
             meeting.setAIAllowed(true)
             meeting.setKnowledgeAllowed(true)
             await meeting.ai.ask("料金はいくらですか？")
         }
-        if scenario == "pr8-review" || scenario == "review" || scenario == "pr7-review" || scenario == "stop-failed" { await meeting.end() }
+        if scenario == "repository-review" || scenario == "pr8-review" || scenario == "review" || scenario == "pr7-review" || scenario == "stop-failed" { await meeting.end() }
         guard !meeting.previewUsesLiveAI else { return }
         if scenario == "offline" { meeting.previewAIStatus = "プレビュー：AIオフライン・外部送信なし" }
         if scenario == "sending" { meeting.previewAIStatus = "プレビュー：AI送信中の表示（実通信なし）" }
@@ -94,7 +117,16 @@ enum MeetingPreview {
 @MainActor
 private struct PreviewInsightClient: InsightClient {
     func generate(_ request: InsightRequest, update: @escaping @MainActor (String) -> Void) async throws -> InsightResult {
+        if request.purpose == .summary, let reference = request.knowledge.first {
+            return InsightResult(kind: .answerSuggestion, text: "会議では担当者と完了予定を確認しています。（架空の要約）",
+                                 evidenceIDs: Array(request.events.prefix(1).map(\.id)), knowledgeIDs: [reference.id],
+                                 supplement: "選択した資料の内容を補足として参照しています。（架空の補足）")
+        }
         if let reference = request.knowledge.first {
+            if reference.source != nil {
+                return InsightResult(kind: .answerSuggestion, text: "取り込んだ実装・設計を参照し、レビューの担当者と完了条件を確認しましょう。（架空の自動提案・外部送信なし）",
+                                     evidenceIDs: Array(request.events.suffix(1).map(\.id)), knowledgeIDs: [reference.id])
+            }
             return InsightResult(kind: .answerSuggestion, text: "資料には月額100円と記載されています。（架空の回答）", evidenceIDs: [],
                                  knowledgeIDs: [reference.id])
         }

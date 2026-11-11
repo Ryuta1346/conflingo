@@ -28,14 +28,17 @@ struct MeetingKnowledgeControls: View {
                         Text("UTF-8の.md / .txt · 20文書まで · 1文書1 MiB・10万文字、合計50万文字")
                             .font(.caption).foregroundStyle(DesignTokens.secondary)
                     }
+                    RepositoryKnowledgeControls(meeting: meeting)
                     if knowledge.documents.isEmpty {
                         Text("資料なし。準備画面から追加できます。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                     }
+                    ScrollView {
+                        LazyVStack(alignment: .leading, spacing: 8) {
                     ForEach(knowledge.documents) { document in
                         HStack {
                             VStack(alignment: .leading) {
-                                Text(document.title).lineLimit(2)
+                                Text(document.displayTitle).lineLimit(2)
                                 Text("\(document.characterCount)文字").font(.caption).foregroundStyle(DesignTokens.secondary)
                             }
                             Spacer()
@@ -44,6 +47,8 @@ struct MeetingKnowledgeControls: View {
                                 .accessibilityLabel("\(document.title)を取り外す")
                         }
                     }
+                        }
+                    }.frame(maxHeight: knowledge.documents.isEmpty ? 0 : 220)
                     if knowledge.isBusy { ProgressView().controlSize(.small) }
                     if !knowledge.message.isEmpty { Text(knowledge.message).font(.caption) }
                     if !importError.isEmpty { Text(importError).font(.caption).foregroundStyle(DesignTokens.warning) }
@@ -61,9 +66,9 @@ struct MeetingKnowledgeControls: View {
                         get: { knowledge.permitted }, set: { meeting.setKnowledgeAllowed($0) }
                     ))
                     .disabled(!meeting.ai.permitted || meeting.page == .review || meeting.phase == .stopping || knowledge.isBusy)
-                    Text("手動質問のみ。質問に一致する最大5箇所・6,000文字と資料名・位置を送ります。自動提案と会議要約は発話のみを参照します。")
+                    Text("この許可は手動質問用です。最大5箇所・6,000文字と資料名・位置を送ります。自動提案ではAI設定の「自動提案にも資料を使う」を選択します。終了後要約の資料参照は、要約の確認画面で選択します。")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
-                    Text(knowledge.permitted && meeting.ai.permitted ? "資料送信を許可済み" : "資料送信オフ・検索と閲覧はこのMac内")
+                    Text(knowledge.permitted && meeting.ai.permitted ? "手動質問の資料送信を許可済み" : "手動質問の資料送信オフ・検索と閲覧はこのMac内")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
                 }.padding(.top, 10)
             } label: {
@@ -99,11 +104,11 @@ struct MeetingKnowledgeControls: View {
             ForEach(knowledge.results) { reference in
                 Button { meeting.selectedKnowledge = reference } label: {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(reference.title) · \(reference.location)").font(.caption.weight(.semibold))
+                        Text("\(reference.displayTitle) · \(reference.provenance)").font(.caption.weight(.semibold))
                         Text(reference.snippet).font(.caption).lineLimit(3)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                 }.buttonStyle(.plain)
-                    .accessibilityLabel("\(reference.title)の\(reference.location)を開く")
+                    .accessibilityLabel("\(reference.displayTitle)の\(reference.provenance)を開く")
             }
         }
     }
@@ -118,8 +123,8 @@ struct KnowledgeReferenceView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(reference.title).font(.title2.weight(.semibold)).textSelection(.enabled)
-            Text("\(reference.location) · 取り込み日時 \(reference.importedAt.formatted())")
+            Text(reference.displayTitle).font(.title2.weight(.semibold)).textSelection(.enabled)
+            Text("\(reference.provenance) · 取り込み日時 \(reference.importedAt.formatted())")
                 .font(.caption).foregroundStyle(DesignTokens.secondary)
             Text("取り込んだ時点の抜粋です。原本の変更は反映されません。")
                 .font(.caption).foregroundStyle(DesignTokens.secondary)

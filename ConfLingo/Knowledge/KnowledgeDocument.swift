@@ -5,6 +5,8 @@ struct KnowledgeDocument: Identifiable, Equatable, Sendable {
     let title: String
     let importedAt: Date
     let characterCount: Int
+    var source: RepositorySource? = nil
+    var displayTitle: String { source.map { "\($0.name)/\($0.path)" } ?? title }
 }
 
 struct KnowledgeReference: Identifiable, Equatable, Sendable {
@@ -15,6 +17,10 @@ struct KnowledgeReference: Identifiable, Equatable, Sendable {
     let startLine: Int
     let characterOffset: Int
     let snippet: String
+    var source: RepositorySource? = nil
+    var displayTitle: String { source.map { "\($0.name)/\($0.path)" } ?? title }
+    var endLine: Int { startLine + snippet.dropLast(snippet.hasSuffix("\n") ? 1 : 0).filter { $0 == "\n" }.count }
+    var provenance: String { source.map { "\($0.description) · \(startLine)–\(endLine)行 · snapshot \($0.snapshotID)" } ?? location }
 
     var location: String { "\(startLine)行目から（文書先頭から\(characterOffset + 1)文字目）" }
 }

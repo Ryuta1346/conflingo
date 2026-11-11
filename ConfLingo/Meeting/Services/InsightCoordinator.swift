@@ -8,6 +8,8 @@ final class InsightCoordinator {
 
     private(set) var permitted = false
     private(set) var automaticEnabled = false
+    private(set) var automaticKnowledgeEnabled = false
+    private var requestUsesAutomaticKnowledge = false
     private(set) var subscriptionFailed = false
     private(set) var state: State = .off
     var answerLanguage: AnswerLanguage = .japanese
@@ -43,9 +45,13 @@ final class InsightCoordinator {
         self.timeout = timeout
         let knowledge = knowledge ?? KnowledgeStore()
         self.knowledge = knowledge
+        var knowledgeRevision = knowledge.revision
         knowledge.onChange = { [weak self] in
             guard let self else { return }
-            if self.lookupID != nil || self.request?.knowledge.isEmpty == false {
+            let contentChanged = knowledgeRevision != self.knowledge.revision
+            knowledgeRevision = self.knowledge.revision
+            let manualUsesKnowledge = self.lookupID != nil || (self.request?.trigger == .manual && self.request?.knowledge.isEmpty == false)
+            if manualUsesKnowledge || (contentChanged && self.request?.trigger == .automatic) {
                 self.cancelRequest()
                 self.state = self.permitted ? (self.active ? .ready : .paused) : .off
             }
@@ -69,7 +75,10 @@ final class InsightCoordinator {
     }
 
     func setPermission(_ value: Bool, after offset: TimeInterval) {
-        if !value { knowledge.setPermission(false) }
+        if !value {
+            automaticKnowledgeEnabled = false
+            knowledge.setPermission(false)
+        }
         guard permitted != value else { return }
         cancelRequest()
         startupEvents = []
@@ -86,6 +95,16 @@ final class InsightCoordinator {
         if !automaticEnabled { startupEvents = [] }
         if !automaticEnabled, request?.trigger == .automatic { cancelRequest() }
         if request == nil { state = permitted ? (active ? .ready : .paused) : .off }
+    }
+
+    func setAutomaticKnowledge(_ value: Bool) {
+        let enabled = value && permitted && automaticEnabled
+        guard automaticKnowledgeEnabled != enabled else { return }
+        automaticKnowledgeEnabled = enabled
+        if !enabled, requestUsesAutomaticKnowledge {
+            cancelRequest()
+            state = permitted ? (active ? .ready : .paused) : .off
+        }
     }
 
     func resume() {
@@ -112,6 +131,7 @@ final class InsightCoordinator {
         suspend()
         permitted = false
         automaticEnabled = false
+        automaticKnowledgeEnabled = false
         subscriptionFailed = false
         allowedAfter = .infinity
         automaticAfter = .infinity
@@ -201,7 +221,7 @@ final class InsightCoordinator {
                                              trigger: .automatic, events: context, answerLanguage: answerLanguage),
               next.events.contains(where: { $0.id == event.id }) else { return nil }
         recentTriggers.append((time, normalized))
-        return launch(next)
+        return launch(next, searchEvent: automaticKnowledgeEnabled ? event : nil)
     }
 
     private func bufferStartup(_ event: TranscriptEvent) {
@@ -213,15 +233,14 @@ final class InsightCoordinator {
         }
     }
 
-    private func launch(_ next: InsightRequest) -> Task<Void, Never> {
+    private func launch(_ next: InsightRequest, searchEvent: TranscriptEvent? = nil) -> Task<Void, Never> {
         cancelRequest()
         request = next
+        requestUsesAutomaticKnowledge = searchEvent != nil
         state = .sending
         lastUsage = nil
-        contextDescription = "今回の文脈：確定発話 \(next.events.count)件・上限により除外 \(next.omittedCount)件"
-        contextDescription += next.knowledge.isEmpty
-            ? (knowledge.permitted && next.trigger == .manual ? " · 資料の一致なし" : " · 資料送信なし")
-            : " · 資料 \(next.knowledge.count)箇所を参照"
+        describeContext(next)
+        if searchEvent != nil { contextDescription = "関連資料をこのMacで検索しています…" }
         insights.append(MeetingInsight(id: next.id, kind: .answerSuggestion, text: "回答を生成しています…",
                                        priority: 1, evidenceIDs: [], status: .generating))
         if insights.count > 100 { insights.removeFirst(insights.count - 100) }
@@ -235,13 +254,23 @@ final class InsightCoordinator {
         let operation = Task { [weak self, client] in
             guard self?.accepts(next) == true, !Task.isCancelled else { return }
             do {
-                let result = try await client.generate(next) { [weak self] text in
+                var enriched = next
+                if let searchEvent, let self {
+                    let version = self.knowledge.revision
+                    let references = try await self.knowledge.retrieveForAutomatic(searchEvent)
+                    guard self.accepts(next), self.automaticKnowledgeEnabled,
+                          self.knowledge.revision == version, !Task.isCancelled else { return }
+                    enriched = next.includingKnowledge(references)
+                    self.request = enriched
+                    self.describeContext(enriched)
+                }
+                let result = try await client.generate(enriched) { [weak self] text in
                     guard let self, self.accepts(next), text.count <= 8_000,
                           let index = self.insights.firstIndex(where: { $0.id == next.id }) else { return }
                     self.insights[index].text = text
                 }
                 guard let self, self.accepts(next), !Task.isCancelled else { return }
-                let card = try result.card(for: next)
+                let card = try result.card(for: enriched)
                 if next.trigger == .automatic,
                    self.insights.contains(where: { $0.status == .complete && Self.normalized($0.text) == Self.normalized(card.text) }) {
                     self.insights.removeAll { $0.id == next.id }
@@ -263,6 +292,14 @@ final class InsightCoordinator {
         return operation
     }
 
+    private func describeContext(_ next: InsightRequest) {
+        contextDescription = "今回の文脈：確定発話 \(next.events.count)件・上限により除外 \(next.omittedCount)件"
+        let usesKnowledge = next.trigger == .manual ? knowledge.permitted : requestUsesAutomaticKnowledge
+        contextDescription += next.knowledge.isEmpty
+            ? (usesKnowledge ? " · 資料の一致なし" : " · 資料送信なし")
+            : " · 資料 \(next.knowledge.count)箇所を参照"
+    }
+
     private func accepts(_ next: InsightRequest) -> Bool {
         active && permitted && request?.id == next.id && store.sessionID == next.sessionID
     }
@@ -271,6 +308,7 @@ final class InsightCoordinator {
         deadline?.cancel()
         deadline = nil
         request = nil
+        requestUsesAutomaticKnowledge = false
         task = nil
     }
 
