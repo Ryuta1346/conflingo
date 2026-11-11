@@ -12,13 +12,13 @@ final class MeetingSummaryCoordinator {
     private(set) var totalSections = 0
     private let store: MeetingSessionStore
     private let client: any InsightClient
-    private let timeout: Duration
+    private let timeout: Duration?
     private var operationID: UUID?
     private var requestID: UUID?
     @ObservationIgnored private var task: Task<Void, Never>?
     @ObservationIgnored private var deadline: Task<Void, Never>?
 
-    init(store: MeetingSessionStore, client: any InsightClient, timeout: Duration = .seconds(30)) {
+    init(store: MeetingSessionStore, client: any InsightClient, timeout: Duration? = nil) {
         self.store = store
         self.client = client
         self.timeout = timeout
@@ -39,7 +39,8 @@ final class MeetingSummaryCoordinator {
             for request in plan.requests {
                 guard let self, self.accepts(id, session: plan.sessionID), !Task.isCancelled else { return }
                 self.requestID = request.id
-                self.deadline = Task { [weak self, timeout] in
+                let timeout = self.timeout ?? .seconds(request.timeoutSeconds)
+                self.deadline = Task { [weak self] in
                     do { try await Task.sleep(for: timeout) } catch { return }
                     guard let self, self.accepts(id, session: plan.sessionID), self.requestID == request.id else { return }
                     self.stop(with: .failed(.timeout))

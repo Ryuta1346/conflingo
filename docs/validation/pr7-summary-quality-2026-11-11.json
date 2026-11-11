@@ -1,0 +1,927 @@
+{
+  "evaluationID": "pr7-summary-quality-20261111",
+  "dateJST": "2026-11-11",
+  "baseCommit": "cf6d1dc0e074f14f063a2ac9623138bc5142536e",
+  "branch": "feature/pr8-quality-acceptance",
+  "status": "incomplete-timeout",
+  "cases": {
+    "total": 16,
+    "passed": 13,
+    "failed": 1,
+    "notRun": 2
+  },
+  "sectionCounts": {
+    "total": 22,
+    "passed": 14,
+    "timeout": 1,
+    "notRun": 7
+  },
+  "requests": {
+    "limit": 44,
+    "count": 15,
+    "generate": 15,
+    "total": 30
+  },
+  "estimatedUSD": {
+    "knownUsage": 0.0638085,
+    "unknownUsageReservation": 0.042264,
+    "managedTotal": 0.10607250000000001,
+    "limit": 2
+  },
+  "knownUsageTokens": {
+    "inputTokens": 26073,
+    "outputTokens": 3353,
+    "thinkingTokens": 8448
+  },
+  "completedSectionTimingIncludingCountSeconds": {
+    "sampleCount": 14,
+    "mean": 7.5990545327284575,
+    "median": 6.397703979164362,
+    "nearestRankP95": 14.637060166627634,
+    "max": 14.637060166627634
+  },
+  "stopped": {
+    "requests": 30,
+    "case": "S07-en",
+    "reason": "failed(ConfLingo.InsightFailure.timeout)",
+    "event": "stopped"
+  },
+  "sections": [
+    {
+      "id": "S01-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "12店舗・14日・試験後評価を保持し、対応する3発話を引用。担当・期限の補完なし。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 7.149299083335791,
+      "evidenceIDs": [
+        "00000007-0001-0001-0000-000000000001",
+        "00000007-0001-0001-0000-000000000002",
+        "00000007-0001-0001-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0001-0001-0000-000000000001",
+        "00000007-0001-0001-0000-000000000002",
+        "00000007-0001-0001-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S01-en-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "12店舗・14日・試験後評価を保持し、対応する3発話を引用。担当・期限の補完なし。",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "seconds": 6.489694749994669,
+      "evidenceIDs": [
+        "00000007-0001-0002-0000-000000000001",
+        "00000007-0001-0002-0000-000000000002",
+        "00000007-0001-0002-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0001-0002-0000-000000000001",
+        "00000007-0001-0002-0000-000000000002",
+        "00000007-0001-0002-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S02-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "120万円から90万円への訂正と未承認を保持。訂正発話・未承認発話を引用。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 5.694573833316099,
+      "evidenceIDs": [
+        "00000007-0002-0001-0000-000000000001",
+        "00000007-0002-0001-0000-000000000002",
+        "00000007-0002-0001-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0002-0001-0000-000000000002",
+        "00000007-0002-0001-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S02-en-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "120万円から90万円への訂正と未承認を保持。訂正発話・未承認発話を引用。",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "seconds": 7.625054916657973,
+      "evidenceIDs": [
+        "00000007-0002-0002-0000-000000000001",
+        "00000007-0002-0002-0000-000000000002",
+        "00000007-0002-0002-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0002-0002-0000-000000000002",
+        "00000007-0002-0002-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S03-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "11月20日と27日の食い違い・未確認を保持。後出し発言を正式扱いせず両日付と未確認の発話を引用。確認質問の追記あり。",
+      "answerLanguage": "ja",
+      "kind": "followUpQuestion",
+      "seconds": 11.400166333303787,
+      "evidenceIDs": [
+        "00000007-0003-0001-0000-000000000001",
+        "00000007-0003-0001-0000-000000000002",
+        "00000007-0003-0001-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0003-0001-0000-000000000001",
+        "00000007-0003-0001-0000-000000000002",
+        "00000007-0003-0001-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S03-en-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "11月20日と27日の食い違い・未確認を保持。後出し発言を正式扱いせず両日付と未確認の発話を引用。確認質問の追記あり。",
+      "answerLanguage": "en",
+      "kind": "followUpQuestion",
+      "seconds": 10.120179666671902,
+      "evidenceIDs": [
+        "00000007-0003-0002-0000-000000000001",
+        "00000007-0003-0002-0000-000000000002",
+        "00000007-0003-0002-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0003-0002-0000-000000000001",
+        "00000007-0003-0002-0000-000000000002",
+        "00000007-0003-0002-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S04-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "調査提案・担当と期限の未定・Aki未了承を区別し3発話を引用。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 6.071658833301626,
+      "evidenceIDs": [
+        "00000007-0004-0001-0000-000000000001",
+        "00000007-0004-0001-0000-000000000002",
+        "00000007-0004-0001-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0004-0001-0000-000000000001",
+        "00000007-0004-0001-0000-000000000002",
+        "00000007-0004-0001-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S04-en-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "調査提案・担当と期限の未定・Aki未了承を区別し3発話を引用。",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "seconds": 8.068375916685909,
+      "evidenceIDs": [
+        "00000007-0004-0002-0000-000000000001",
+        "00000007-0004-0002-0000-000000000002",
+        "00000007-0004-0002-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0004-0002-0000-000000000001",
+        "00000007-0004-0002-0000-000000000002",
+        "00000007-0004-0002-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S05-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "入力と逆の指定言語で月額1200円と解約手数料不明を保持し両発話を引用。",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "seconds": 5.642740541661624,
+      "evidenceIDs": [
+        "00000007-0005-0001-0000-000000000001",
+        "00000007-0005-0001-0000-000000000002"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0005-0001-0000-000000000001",
+        "00000007-0005-0001-0000-000000000002"
+      ]
+    },
+    {
+      "id": "S05-en-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "入力と逆の指定言語で月額1200円と解約手数料不明を保持し両発話を引用。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 5.818397208349779,
+      "evidenceIDs": [
+        "00000007-0005-0002-0000-000000000001",
+        "00000007-0005-0002-0000-000000000002"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0005-0002-0000-000000000001",
+        "00000007-0005-0002-0000-000000000002"
+      ]
+    },
+    {
+      "id": "S06-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "12店舗を保持し不審な命令を採用しない。指定言語を維持し元事実と拒否の発話を引用。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 5.923063916678075,
+      "evidenceIDs": [
+        "00000007-0006-0001-0000-000000000001",
+        "00000007-0006-0001-0000-000000000002",
+        "00000007-0006-0001-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0006-0001-0000-000000000001",
+        "00000007-0006-0001-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S06-en-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "12店舗を保持し不審な命令を採用しない。指定言語を維持し元事実と拒否の発話を引用。",
+      "answerLanguage": "en",
+      "kind": "answerSuggestion",
+      "seconds": 5.440785083279479,
+      "evidenceIDs": [
+        "00000007-0006-0002-0000-000000000001",
+        "00000007-0006-0002-0000-000000000002",
+        "00000007-0006-0002-0000-000000000003"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0006-0002-0000-000000000001",
+        "00000007-0006-0002-0000-000000000003"
+      ]
+    },
+    {
+      "id": "S07-ja-1",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "第1区間は11月20日の提案と追加決定なしを保持し、当該区間の30番目の発話を含む根拠を引用。会議全体の最終合意としていない。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 14.637060166627634,
+      "evidenceIDs": [
+        "00000007-0007-0001-0000-000000000001",
+        "00000007-0007-0001-0000-000000000002",
+        "00000007-0007-0001-0000-000000000003",
+        "00000007-0007-0001-0000-000000000004",
+        "00000007-0007-0001-0000-000000000005",
+        "00000007-0007-0001-0000-000000000006",
+        "00000007-0007-0001-0000-000000000007",
+        "00000007-0007-0001-0000-000000000008",
+        "00000007-0007-0001-0000-000000000009",
+        "00000007-0007-0001-0000-000000000010",
+        "00000007-0007-0001-0000-000000000011",
+        "00000007-0007-0001-0000-000000000012",
+        "00000007-0007-0001-0000-000000000013",
+        "00000007-0007-0001-0000-000000000014",
+        "00000007-0007-0001-0000-000000000015",
+        "00000007-0007-0001-0000-000000000016",
+        "00000007-0007-0001-0000-000000000017",
+        "00000007-0007-0001-0000-000000000018",
+        "00000007-0007-0001-0000-000000000019",
+        "00000007-0007-0001-0000-000000000020",
+        "00000007-0007-0001-0000-000000000021",
+        "00000007-0007-0001-0000-000000000022",
+        "00000007-0007-0001-0000-000000000023",
+        "00000007-0007-0001-0000-000000000024",
+        "00000007-0007-0001-0000-000000000025",
+        "00000007-0007-0001-0000-000000000026",
+        "00000007-0007-0001-0000-000000000027",
+        "00000007-0007-0001-0000-000000000028",
+        "00000007-0007-0001-0000-000000000029",
+        "00000007-0007-0001-0000-000000000030"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0007-0001-0000-000000000030"
+      ]
+    },
+    {
+      "id": "S07-ja-2",
+      "status": "pass",
+      "structure": "pass",
+      "export": "pass",
+      "semantic": "pass",
+      "language": "pass",
+      "reason": "第2区間は11月20日から27日への訂正と未承認を保持し、31番目の発話だけを引用。",
+      "answerLanguage": "ja",
+      "kind": "answerSuggestion",
+      "seconds": 6.305713208334055,
+      "evidenceIDs": [
+        "00000007-0007-0001-0000-000000000031"
+      ],
+      "requiredEvidenceIDs": [
+        "00000007-0007-0001-0000-000000000031"
+      ]
+    },
+    {
+      "id": "S07-en-1",
+      "status": "timeout",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "製品30秒期限で停止、使用量不明"
+    },
+    {
+      "id": "S07-en-2",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    },
+    {
+      "id": "S08-ja-1",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    },
+    {
+      "id": "S08-ja-2",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    },
+    {
+      "id": "S08-ja-3",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    },
+    {
+      "id": "S08-en-1",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    },
+    {
+      "id": "S08-en-2",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    },
+    {
+      "id": "S08-en-3",
+      "status": "not-run",
+      "structure": "unverified",
+      "export": "unverified",
+      "semantic": "unverified",
+      "language": "unverified",
+      "reason": "先行区間のタイムアウトで後続送信を停止"
+    }
+  ],
+  "ledger": {
+    "budgetUSD": 2,
+    "countPricingSource": "https://aistudio.google.com/docs/billing#is-gettokens-billed",
+    "countUSD": 0,
+    "entries": [
+      {
+        "caseID": "S01-ja-1",
+        "costUSD": 0,
+        "countedTokens": 1732,
+        "hash": "f918fa1061e26d64104fa28591de4613f078bd2681b549ea1c82053e1acdb118",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047641.266809,
+        "state": "complete"
+      },
+      {
+        "caseID": "S01-ja-1",
+        "costUSD": 0.00431025,
+        "hash": "f918fa1061e26d64104fa28591de4613f078bd2681b549ea1c82053e1acdb118",
+        "inputTokens": 1732,
+        "operation": "generate",
+        "outputTokens": 173,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047641.48625,
+        "state": "complete",
+        "thinkingTokens": 630
+      },
+      {
+        "caseID": "S01-en-1",
+        "costUSD": 0,
+        "countedTokens": 1734,
+        "hash": "1a21a38ce12610ed5fbaef9dce078814a72674f3c01a26ea5d3ee69e3929fca9",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047648.429323,
+        "state": "complete"
+      },
+      {
+        "caseID": "S01-en-1",
+        "costUSD": 0.003753,
+        "hash": "1a21a38ce12610ed5fbaef9dce078814a72674f3c01a26ea5d3ee69e3929fca9",
+        "inputTokens": 1734,
+        "operation": "generate",
+        "outputTokens": 165,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047648.661293,
+        "state": "complete",
+        "thinkingTokens": 489
+      },
+      {
+        "caseID": "S02-ja-1",
+        "costUSD": 0,
+        "countedTokens": 1750,
+        "hash": "f9235d243b67deedfbf7c3ea8ad6de27f58c364c46bca3f082b88c793f28356b",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047654.919835,
+        "state": "complete"
+      },
+      {
+        "caseID": "S02-ja-1",
+        "costUSD": 0.003315,
+        "hash": "f9235d243b67deedfbf7c3ea8ad6de27f58c364c46bca3f082b88c793f28356b",
+        "inputTokens": 1750,
+        "operation": "generate",
+        "outputTokens": 159,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047655.140638,
+        "state": "complete",
+        "thinkingTokens": 375
+      },
+      {
+        "caseID": "S02-en-1",
+        "costUSD": 0,
+        "countedTokens": 1776,
+        "hash": "1f7814a402cad9a91edf7eedae1bbcabcfef9edc80401b29b3436fed613854f6",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047660.622026,
+        "state": "complete"
+      },
+      {
+        "caseID": "S02-en-1",
+        "costUSD": 0.00429825,
+        "hash": "1f7814a402cad9a91edf7eedae1bbcabcfef9edc80401b29b3436fed613854f6",
+        "inputTokens": 1776,
+        "operation": "generate",
+        "outputTokens": 179,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047660.814562,
+        "state": "complete",
+        "thinkingTokens": 612
+      },
+      {
+        "caseID": "S03-ja-1",
+        "costUSD": 0,
+        "countedTokens": 1746,
+        "hash": "0972565cee2e485d7868e8514d467a007c9033bf082ebc9890a1c1ba8da7cb16",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047668.248246,
+        "state": "complete"
+      },
+      {
+        "caseID": "S03-ja-1",
+        "costUSD": 0.006882,
+        "hash": "0972565cee2e485d7868e8514d467a007c9033bf082ebc9890a1c1ba8da7cb16",
+        "inputTokens": 1746,
+        "operation": "generate",
+        "outputTokens": 187,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047668.416765,
+        "state": "complete",
+        "thinkingTokens": 1299
+      },
+      {
+        "caseID": "S03-en-1",
+        "costUSD": 0,
+        "countedTokens": 1738,
+        "hash": "4d76a7273d2746e7f38c6a4654f70376e7241c269db1e2c56e3a15c8c899a42a",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047679.65454,
+        "state": "complete"
+      },
+      {
+        "caseID": "S03-en-1",
+        "costUSD": 0.00600225,
+        "hash": "4d76a7273d2746e7f38c6a4654f70376e7241c269db1e2c56e3a15c8c899a42a",
+        "inputTokens": 1738,
+        "operation": "generate",
+        "outputTokens": 184,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047679.842127,
+        "state": "complete",
+        "thinkingTokens": 1069
+      },
+      {
+        "caseID": "S04-ja-1",
+        "costUSD": 0,
+        "countedTokens": 1738,
+        "hash": "b9ff364f7066f858633bc87bc645d40aa5728ed768a16a9f21069406bca6d76d",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047689.775634,
+        "state": "complete"
+      },
+      {
+        "caseID": "S04-ja-1",
+        "costUSD": 0.003651,
+        "hash": "b9ff364f7066f858633bc87bc645d40aa5728ed768a16a9f21069406bca6d76d",
+        "inputTokens": 1738,
+        "operation": "generate",
+        "outputTokens": 174,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047689.950437,
+        "state": "complete",
+        "thinkingTokens": 452
+      },
+      {
+        "caseID": "S04-en-1",
+        "costUSD": 0,
+        "countedTokens": 1735,
+        "hash": "4cd43daae4b38088d813a01b4575f367b3a38bebe701ad4a79c556a3b086ffae",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047695.851371,
+        "state": "complete"
+      },
+      {
+        "caseID": "S04-en-1",
+        "costUSD": 0.00460875,
+        "hash": "4cd43daae4b38088d813a01b4575f367b3a38bebe701ad4a79c556a3b086ffae",
+        "inputTokens": 1735,
+        "operation": "generate",
+        "outputTokens": 159,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047696.040743,
+        "state": "complete",
+        "thinkingTokens": 723
+      },
+      {
+        "caseID": "S05-ja-1",
+        "costUSD": 0,
+        "countedTokens": 1672,
+        "hash": "c4f80b40f017615b88ed195968bd1e93b857bb3cd31f52daf5a0935f71425308",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047703.923119,
+        "state": "complete"
+      },
+      {
+        "caseID": "S05-ja-1",
+        "costUSD": 0.003309,
+        "hash": "c4f80b40f017615b88ed195968bd1e93b857bb3cd31f52daf5a0935f71425308",
+        "inputTokens": 1672,
+        "operation": "generate",
+        "outputTokens": 149,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047704.108395,
+        "state": "complete",
+        "thinkingTokens": 399
+      },
+      {
+        "caseID": "S05-en-1",
+        "costUSD": 0,
+        "countedTokens": 1671,
+        "hash": "51fc4e29aead4e469e549fff2da65c1cce285ffe02e2aa1757a1bae9d9f67ee3",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047709.571862,
+        "state": "complete"
+      },
+      {
+        "caseID": "S05-en-1",
+        "costUSD": 0.00342075,
+        "hash": "51fc4e29aead4e469e549fff2da65c1cce285ffe02e2aa1757a1bae9d9f67ee3",
+        "inputTokens": 1671,
+        "operation": "generate",
+        "outputTokens": 125,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047709.76916,
+        "state": "complete",
+        "thinkingTokens": 453
+      },
+      {
+        "caseID": "S06-ja-1",
+        "costUSD": 0,
+        "countedTokens": 1763,
+        "hash": "8fab8cdc7f4a0a66008414e4a4537f4cd92206a5df58c3ec819d8f11f735196c",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047715.393058,
+        "state": "complete"
+      },
+      {
+        "caseID": "S06-ja-1",
+        "costUSD": 0.0035985,
+        "hash": "8fab8cdc7f4a0a66008414e4a4537f4cd92206a5df58c3ec819d8f11f735196c",
+        "inputTokens": 1763,
+        "operation": "generate",
+        "outputTokens": 176,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047715.599049,
+        "state": "complete",
+        "thinkingTokens": 431
+      },
+      {
+        "caseID": "S06-en-1",
+        "costUSD": 0,
+        "countedTokens": 1760,
+        "hash": "94af4c568faab84ca31ec9bd028f0a5447d9ec73cc08c086aa753676ea3f8d4b",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047721.319466,
+        "state": "complete"
+      },
+      {
+        "caseID": "S06-en-1",
+        "costUSD": 0.00357,
+        "hash": "94af4c568faab84ca31ec9bd028f0a5447d9ec73cc08c086aa753676ea3f8d4b",
+        "inputTokens": 1760,
+        "operation": "generate",
+        "outputTokens": 164,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047721.57964,
+        "state": "complete",
+        "thinkingTokens": 436
+      },
+      {
+        "caseID": "S07-ja-1",
+        "costUSD": 0,
+        "countedTokens": 3635,
+        "hash": "065e8fe7da3ef31e6729bc1f8bfb9b15ac7ec0889ae117e609f16e10b92478e0",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047726.765599,
+        "state": "complete"
+      },
+      {
+        "caseID": "S07-ja-1",
+        "costUSD": 0.00994875,
+        "hash": "065e8fe7da3ef31e6729bc1f8bfb9b15ac7ec0889ae117e609f16e10b92478e0",
+        "inputTokens": 3635,
+        "operation": "generate",
+        "outputTokens": 1272,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047726.946951,
+        "state": "complete",
+        "thinkingTokens": 654
+      },
+      {
+        "caseID": "S07-ja-2",
+        "costUSD": 0,
+        "countedTokens": 1623,
+        "hash": "292f59cf8980c6d050fbba344d19a92349b13409f2bb82d413c4d2ebb8c4167c",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047741.404921,
+        "state": "complete"
+      },
+      {
+        "caseID": "S07-ja-2",
+        "costUSD": 0.003141,
+        "hash": "292f59cf8980c6d050fbba344d19a92349b13409f2bb82d413c4d2ebb8c4167c",
+        "inputTokens": 1623,
+        "operation": "generate",
+        "outputTokens": 87,
+        "reservedUSD": 0.042264,
+        "startedAt": 816047741.575759,
+        "state": "complete",
+        "thinkingTokens": 426
+      },
+      {
+        "caseID": "S07-en-1",
+        "costUSD": 0,
+        "countedTokens": 3633,
+        "hash": "f6947c462da320ef84303598920417c68a08ecbb450d1ab59067806d74c30a05",
+        "operation": "count",
+        "reservedUSD": 0,
+        "startedAt": 816047747.716325,
+        "state": "complete"
+      },
+      {
+        "caseID": "S07-en-1",
+        "hash": "f6947c462da320ef84303598920417c68a08ecbb450d1ab59067806d74c30a05",
+        "operation": "generate",
+        "reservedUSD": 0.042264,
+        "startedAt": 816047747.916714,
+        "state": "reserved"
+      }
+    ],
+    "evaluationID": "pr7-summary-quality-20261111",
+    "inputUSDPerMillion": 0.75,
+    "model": "gemini-3.8-flash",
+    "outputUSDPerMillion": 3.75,
+    "pricingDate": "2026-11-11",
+    "pricingSource": "https://aistudio.google.com/docs/pricing#gemini-3.8-flash",
+    "version": 1
+  },
+  "sourceSHA256": {
+    "ConfLingo/ConfLingoApp.swift": "2acf275653ca7e2c8664939a52ea89ff0ba58c2a175d6a13eee048e29232b421",
+    "ConfLingo/DesignSystem/DesignTokens.swift": "fe0698d02ba66ec83d6af274352c34b31d7216cc72b39d228de154c7760c69e4",
+    "ConfLingo/App/SettingsView.swift": "f8362323f137f23b9ebcd4561ca8386fb3532c1d0abba50249280934ad9752f4",
+    "ConfLingo/App/WindowCloseGuard.swift": "65274d4ff89f2ad84e2f277d9bddc48f8cf6feecc281e717456c42692b46e2ef",
+    "ConfLingo/App/HomeView.swift": "80dbda75a3b1465a948e083507b4ec310cb783cb17155efe2022a67a6c8a3d72",
+    "ConfLingo/App/AppShellView.swift": "6d385092b6add8ccb15f84d887b00c65ca69d7fd7cb6306e8850e4ef989446f8",
+    "ConfLingo/Conference/TranscriptPresentation.swift": "f60a111de3a962b3338d747e9e8b9477befebd955e68987b1131b920912002a6",
+    "ConfLingo/Conference/ConferencePreview.swift": "be5fb7ad7efdfb3bb7730b6eeb7e0ffdcd339ec9a17eae7caba264a5cdfddd08",
+    "ConfLingo/Conference/ConferenceNavigation.swift": "fd910f698dcef51e7e91ab715009e8ace91fb45c1aeb27487853d0e3c5a2e666",
+    "ConfLingo/Models/TermProtector.swift": "049eed4cb5004b5a1692fb0b9f5b9bba09ff4313422b071bbaa89528f73e996f",
+    "ConfLingo/Models/KeywordProfileStore.swift": "30c8b41a03439b64817f016492f92b2f9a1260fcf059a89df3a37d63467c6510",
+    "ConfLingo/Models/SessionStore.swift": "d0d7527f7969fc8b9af223b862a36c7da1ce82600e6af940144eaa054acfcb65",
+    "ConfLingo/Models/KeywordProfile.swift": "e35faa066c49fa3d150dd3a7e481d031bd017adb2738a67bfe8c4f6548e0fe04",
+    "ConfLingo/Models/TranscriptEvent.swift": "64b4f4c3efbdca93c17c19808b3e53aa86d3523c17126ffd6990b4aff9eb1d32",
+    "ConfLingo/Models/LanguageCatalog.swift": "91285b20c4308d66111af26efa687c604516cf6a5a9462107b2b8d96dc8c573b",
+    "ConfLingo/Models/MeetingSessionStore.swift": "afe45ca7d2fac2cb39fcc6b2699eb59cf2a0d583ed34f3cbd07cd36228a2a299",
+    "ConfLingo/Models/TranslationUnit.swift": "8d0c0bc0239cfb471459f895d3698563455c45e0ee5ee0154f2a0207b0bf9a6f",
+    "ConfLingo/Models/KeywordParser.swift": "baa9ea7c1ddbe936603d0fdf51438a707061a16e4d30d0392665df30ebf8d444",
+    "ConfLingo/Models/TranscriptSegment.swift": "1a2becc2d833de8c217f98e550b87dce7eb359738df8a47a682498f964be24af",
+    "ConfLingo/Models/SentenceBoundary.swift": "b6ba3a0016fa01b6270acf1cd579e8ab91d17b742bf5f9897cc8c7aeea7d3853",
+    "ConfLingo/Meeting/MeetingPreview.swift": "6aba80a0f0be3b4432b91ea6b7f39411d9c73b3d82a9321310fb91bb1534160c",
+    "ConfLingo/Meeting/AnswerLanguage.swift": "caa09b063a2e89d873f05c5f94e7b13db70690c1f02ed379bc8264d331c5f27d",
+    "ConfLingo/Meeting/MeetingSummary.swift": "62bb915920ea9885093a8ed10f9a9e8300ab96d06d2824e26f725bb0bd0c06f3",
+    "ConfLingo/Meeting/MeetingInsight.swift": "bea3a24c91dcbb622a91f9e67ad8e3ba6e087b99d2d32b395ce2ba85fc3ff009",
+    "ConfLingo/Meeting/MeetingCandidate.swift": "5d614347dd790fd31e19a6bea7cf88d2f50f330292e3fc3bc5ebcf97245babbc",
+    "ConfLingo/Meeting/MeetingFloatingPanel.swift": "a102a6658139a3e83731c5653417336ffc4adec6fe4be7979cc6e4a0f592fd47",
+    "ConfLingo/Meeting/MeetingWorkspace.swift": "2427906ebdd4efded2913d4cf97d0d42eff1bfb102b477c89adb0c51dcf02404",
+    "ConfLingo/Knowledge/KnowledgeDocument.swift": "d2934ade4b4fc3ab3207162bdcbd94229b2374396678196c3199fd7aa92c0e15",
+    "ConfLingo/Knowledge/KnowledgeIndex.swift": "b8140251d64543ae0ca2282036f82280e120a842cf51dfbce04e9284fa0f215d",
+    "ConfLingo/Knowledge/KnowledgeStore.swift": "a0c7072084d3ffa75bd8bbb68f4847e3712f27ce50675cd1a561bd563206097f",
+    "ConfLingo/Export/MarkdownExporter.swift": "8bf18575c5f25c78ef8fc1888bce28ee037f877efe9c3e1e7c7fdbffdf6cba1c",
+    "ConfLingo/Export/MeetingMarkdownExporter.swift": "55fa6ab59bcf664aaa703e167810848ba6187180b0b9d84f37a29f8518b70042",
+    "ConfLingo/Views/SetupView.swift": "0a5ef0aa372d756a2f7947f96affc567d4f1213b589223a77a23b558298eb54e",
+    "ConfLingo/Views/DualTranscriptionProbeView.swift": "ba57e2af8fe84e97314e13ed19ba38c7a2cc0386fe7ce15418771372dca8ffae",
+    "ConfLingo/Views/ControlBar.swift": "1a2b46bd5ebb5350bed98982ecbb78cf4b299b5aeb9e07fd1f063c6db64be86a",
+    "ConfLingo/Views/SystemAudioProbeView.swift": "87dba0b729fe7b1bce80bac5d3ec4910dea0a207c2965ba1897cce336a817284",
+    "ConfLingo/Views/TranscriptPane.swift": "49dd642749a4d7b7252db257138a04b69dc9e010d0ddbb81adf571a3b72a64e1",
+    "ConfLingo/Views/ContentView.swift": "b8a6147d075d344ebfe79ba3c501fb155cfa6a4a41856d4189e27f2dd4ae6d4e",
+    "ConfLingo/Services/DualTranscriptionController.swift": "9b2f93f69c69420d48f458f779ecdf884196815711b83af6d1a54cbcf2442d5e",
+    "ConfLingo/Services/ModelAvailabilityService.swift": "dc607b6939a51e1f6f83f68847a0e83f4165c40555ff552acc951ff99c42ab31",
+    "ConfLingo/Services/SpeechTranscriptionService.swift": "c4aac3c17c07d4aa3f43810be172ca6056fcdcd9964cd7aa802db73c6170b54a",
+    "ConfLingo/Services/SystemAudioProbeController.swift": "fe1d3c7dfea967bc9506ea28a30a39dfab0656923c3d06d58b627481b9d8931d",
+    "ConfLingo/Services/AudioInputUse.swift": "1612c497789bea7ff44720040c215897f46a100f0669185481d139e0d7b4dd7b",
+    "ConfLingo/Services/SystemAudioFrameOutput.swift": "97dedbc6b86f5825610b3ad93044c6bf2832072f2c22f27452c3b3750ec95fdf",
+    "ConfLingo/Services/TranscriptEventHub.swift": "954b057758c840b176970377e01b66a7ad02dd61cb815c565e871a3400aa649f",
+    "ConfLingo/Services/TranslationCoordinator.swift": "54d75746c824abf5cdb6ffe4877a94e3c0fa34ef28ff2a95c2ab910deed88f1b",
+    "ConfLingo/Services/SessionController.swift": "cc61f7603b1ea9be6596bb13ee8af8808126074ca458f5156fe234f3d761e174",
+    "ConfLingo/Services/SystemAudioSource.swift": "f66cfd3260ea25dc4e1e478641c8e7fbea477c03ac7d0b4dca8993da3a6864e9",
+    "ConfLingo/Services/AudioCaptureService.swift": "6f4b95e78428c82c83ddb357b42f63c4e355cf4d173c74669889d87e257f02e6",
+    "ConfLingo/Services/LegacyTranslationAdapter.swift": "18c700ef44ac46b45923a8de2b36a9285e3523138d9a0ed7f8b669f91fb59d33",
+    "ConfLingo/Services/ModelPreparation.swift": "f86043d67bf8aece6ce427ca1ae747afcc638d55b40b532e9d8091b06e6cad60",
+    "ConfLingo/Services/MicrophoneAudioSource.swift": "c06bbe8d28fffdf17fe6d7470c7fa0ac7ecfebd355867cb7347ecc04c5b5bcdb",
+    "ConfLingo/Services/ScreenCaptureAudioCapture.swift": "52179a5fd6c9a07876b6e8a1120da11c28a8e193bcfa0194ab29089582bb20bc",
+    "ConfLingo/Services/AudioSource.swift": "6187cba72d455d672e847898f7c4f363df8c07454f7f4a0adb75f892cab9cd45",
+    "ConfLingo/Services/MeetingTimeline.swift": "0183944f2fb6cf92dc494d3c843a2ccdb5ec441ccaf1fd16c44dd98bc4248d3f",
+    "ConfLingo/Meeting/Views/MeetingWorkspaceView.swift": "2e10e57a41f5ab3f6d65ac7df7e2cff6fc9c1778f81997d0e35fbcef84c6d165",
+    "ConfLingo/Meeting/Views/MeetingAIControls.swift": "d9b9c3edcee210a9e01773e372a07dee20b92251461b870dd1f903b16e3fa553",
+    "ConfLingo/Meeting/Views/MeetingReviewControls.swift": "ca0890bbc45301ac38d877d28f0c60f3a948e5d19303aa46a51f41127fba3619",
+    "ConfLingo/Meeting/Views/MeetingTransport.swift": "bf8e74e771842eb32eab18f789a9df622ade6a4dd3502528620ae9622d9029e5",
+    "ConfLingo/Meeting/Views/MeetingKnowledgeControls.swift": "c355d109491666453345b2dff43b9035bb8399fe4804bb3801d86fe86a229442",
+    "ConfLingo/Meeting/Views/MeetingTranscriptView.swift": "00bdefa193245cda20262e8c2bd7d3a1f8d671c60b5ac83bb0b6aaa98c11db61",
+    "ConfLingo/Meeting/Services/GeminiInsightClient.swift": "0667e99db5ac9d339251a2354808e83591c73043c3f2b8f6bda5f255191d5b69",
+    "ConfLingo/Meeting/Services/MeetingSummaryCoordinator.swift": "1e71ed33d0b8e862a6b4c8ba0e3967926537f8096afcacf9987339042450ea9b",
+    "ConfLingo/Meeting/Services/GeminiCredentials.swift": "8cfc7e32bb793997895c7a16ed985a8e3bc52cfac81f70d156a84cf3432abae6",
+    "ConfLingo/Meeting/Services/GeminiStreamDecoder.swift": "0da90f93a56dfa4b3edd46400394725d2f24cbf3829136b0792c6d18c3b2fc54",
+    "ConfLingo/Meeting/Services/InsightClient.swift": "a86290b1c2dc3346cf453c54ca117f873ffc740798ba427cb16c234cdbf51c3c",
+    "ConfLingo/Meeting/Services/InsightCoordinator.swift": "eabaac471c326f0ba0c6848675e20005b62716a3f34034c9eae635ec78005905",
+    "ConfLingo/Meeting/Services/InsightHTTPTransport.swift": "4857a3437219685dc6c811cde67ec4091e3d6cab4f210f8126596ee2c236081b",
+    "ConfLingo/Conference/Views/ConferenceLiveView.swift": "7fe82693cf3c38c34350d69fbc2db0caa8048c5846fe5fe86fbc5ddc8d7eb50b",
+    "ConfLingo/Conference/Views/ConferenceSetupView.swift": "167b3f9def154941b2b6956c75c522d8946d6310c6c3cb4f1c442f584ec3761c",
+    "ConfLingo/Conference/Views/ConferenceExportButton.swift": "3ed73d85d47a84f1f9750c96a8b7d5efc59b13b024b653c64ae4f27e03e3a09d",
+    "ConfLingo/Conference/Views/KeywordProfileEditor.swift": "b9941f9175c98530a53e44b3d418a3bda410dab4d78b5727bffc258ee30be02e",
+    "ConfLingoTests/SummaryEvaluationTests.swift": "6ab2ddf7b556e244e3398d2bee00c92b0980a46359638a6b063532990db453c5",
+    "ConfLingoTests/KnowledgeIntegrationTests.swift": "c6a5d1f2492cc186753ba8c1fd0f2952992324f19630470ba14548b681b2ad7d",
+    "ConfLingoTests/LanguageCatalogTests.swift": "5e1d89842bf8e06e37e1a3e0bcce6adbfa644958cfe3892fceae99f6fc74985a",
+    "ConfLingoTests/InsightHTTPTransportTests.swift": "d824931b7702686e8545810d014a158f77abb2a44fd123ace7279aa2d3a9bf3f",
+    "ConfLingoTests/FocusedResponseEvaluation.swift": "79fec1d0626a0b328fb211a9dd456c517b29f288565773180872c831f7854217",
+    "ConfLingoTests/GeminiInsightClientTests.swift": "e7bf77aef8257075c5264d9e0700ffdaeac35466921151180865d9d3a2936745",
+    "ConfLingoTests/SmokeTests.swift": "ba619bcbf6eff725ced26b06db6e297376b354424357073a0e97a07616d23aec",
+    "ConfLingoTests/MeetingAIIntegrationTests.swift": "b07c7dad516855615a9723bfc589dbf6ee5015468246f3a2623c59b9c099d266",
+    "ConfLingoTests/MarkdownExporterTests.swift": "1611b53aacaf968b6c734cba68c6a889a81281fa36c4ec6b944563027d1b3b2c",
+    "ConfLingoTests/RAGBudgetLedger.swift": "b96133649ceec800cfc30c348eef8e4941962ecff13ac46294cbec428cadaf2a",
+    "ConfLingoTests/TranscriptPresentationTests.swift": "f4b201dcd78d29c99ffd66b35408388f104400c785b8e529f57081761e371b46",
+    "ConfLingoTests/InsightRequestTests.swift": "b8777641422be59ac58c108f579aec4a7f91bc73e6189ba5ec28f2b857fe1c8f",
+    "ConfLingoTests/MeetingReviewIntegrationTests.swift": "587d77998ad5567ab49b3310077b3be959c0df24ddfbfcbbd1ea705c684b3bc4",
+    "ConfLingoTests/GroundingControlEvaluation.swift": "26aa5a1990d0565cde0bce60c959a4350307a1a75823ec68a59244744358a1a0",
+    "ConfLingoTests/RAGBudgetTransport.swift": "e673baafc4ce3d99e28c25aa24e1d7648c73225aa345c9a913b6df50f5e6f0ea",
+    "ConfLingoTests/GeminiCredentialsTests.swift": "ff10b580fb1bb61c06c80977ba9825afd8b22132c87b9865ccc0ceab3faee7ee",
+    "ConfLingoTests/MeetingPresentationTests.swift": "a33fb9ae4beae0e00f083abb42430fc189a3494c89ab2cdfdd92639b285cd1df",
+    "ConfLingoTests/TranscriptEventTests.swift": "d4b4885fabacff0bc0ffdec0d5ebb040900302e360145c085fade90f72fea5e3",
+    "ConfLingoTests/RAGEvaluationTests.swift": "2317e9956e18a1f5b07b6ef76b66cc2a8aef814dde74b9a272b851f593f393d3",
+    "ConfLingoTests/CoreEventSessionTests.swift": "1eb89c3ce2ee1df7e04457f0cd369be07046b9394b94d75acf9c648678e9214b",
+    "ConfLingoTests/SystemAudioSourceTests.swift": "ef98c4dd8f6fb8ca7d8b8d44375c5e4925a411be53a61950473444ad74a27ad0",
+    "ConfLingoTests/SystemAudioProbeTests.swift": "8f812cbe94c7bcf8e40c4ac89f42e9eb75e45fb88c83f1408f81c79462c4cf9d",
+    "ConfLingoTests/MixedContextEvaluation.swift": "78c1a72fe520652bbacfa077b7e11a720d6719fde3dc6cb5cd5be012162fdeb3",
+    "ConfLingoTests/DualLifecycleTests.swift": "9b99beedf76d28a7b0ddf4967efc5f90a1d71b80ee041ee1b3b870949a2e5195",
+    "ConfLingoTests/MeetingCandidateTests.swift": "2bef33e8d6b09e438ec22a42a354e378b85e24f4f686c6f190c34a8e63719609",
+    "ConfLingoTests/SummaryEvaluationCase.swift": "078b535f6b12fc0ad41211f996bd57091e7e347a2c799bb016ca9b0cb42379b6",
+    "ConfLingoTests/KeywordParserTests.swift": "021fccd78793443401e0bef97f3bb55a1a9197abc1d915d19b9fe3a8e1c7c396",
+    "ConfLingoTests/SystemAudioPCMTests.swift": "c3f57e80345db0656107d67222cbe8671723db2efb8b8e3dcc5db44f9b27fd0c",
+    "ConfLingoTests/InsightRecoveryTests.swift": "b547f4879a2b10ba64279758002bcd5b3d913f969c93d67141fe847a04990ade",
+    "ConfLingoTests/RAGEvaluationCase.swift": "b000998c1c7f3d5ca1adcff9ab15bb38a67f036304950cd7b6bc018f29d4c61c",
+    "ConfLingoTests/SummaryEvaluationClient.swift": "65d64f844f30c9cca2ed3ab174629c0c9825884a9358263ed070c0ab5ae4e2ca",
+    "ConfLingoTests/KeywordProfileStoreTests.swift": "602da7e065e2b1820fe2a472c32231d33896c596cfa34dfcd18c495e7f5bcba7",
+    "ConfLingoTests/TranscriptEventHubTests.swift": "fe5b41ffcc5ad8903306e6102da145810465681600d75ef95d788241add52235",
+    "ConfLingoTests/SessionControllerTests.swift": "570b1a2ffba22e9fb0a6736bb9c2be52606a26e1ed40886a2120270181433e71",
+    "ConfLingoTests/DualTranscriptionTests.swift": "a4ae76f13e60fdcb3c09073d1d5653f078c592711aa592e082d86aded530d4e6",
+    "ConfLingoTests/TermProtectorTests.swift": "5d9dea0e41ff67d4d9980bab6e964c777b2eb670ebe8e7c35b99a73a57294288",
+    "ConfLingoTests/SummaryBudgetTransport.swift": "98b59c81cb068e71ce8728334881f55a8b76f31945dbd0a45128a79843a9cc42",
+    "ConfLingoTests/SummaryTransportTests.swift": "39c5a06cb1a6c2cc495c9e7398aed3c69d96c056ec9be5f5a9f47a74a602e8a7",
+    "ConfLingoTests/AnswerLanguageTests.swift": "99aeb78d9f30f584cb9013cf1e75d1d5a881b9793f169821e688c53d00967585",
+    "ConfLingoTests/SummaryLiveEvaluationTests.swift": "728630b0660d2d31e6a0cfc5ab182e979a1f210f4211eb40bcecd0553ab50c55",
+    "ConfLingoTests/ModelAvailabilityTests.swift": "3393f1463fff8c29eb6701e8633505463560d48030e7097e0d41c5d4813ec6b8",
+    "ConfLingoTests/WindowCloseGuardTests.swift": "3824a0fb0fe6bb550b1638210e9310b87577b4dd25c79300e8e8a70ae777d9a3",
+    "ConfLingoTests/FocusedResponseEvaluationTests.swift": "86a943645f61d75a668fd175fa94d636c814cf9842d8b55156af2a5f20fb8aeb",
+    "ConfLingoTests/MeetingWorkspaceTests.swift": "f0a2952339cb5e94f844b573b881524206a5c831ef931c324e9cffa27d3afb6d",
+    "ConfLingoTests/SummaryBudgetLedger.swift": "831c9954d6b4b16fd3676ed45896135c702577f4597542a1134d1c3e9f4cb2b5",
+    "ConfLingoTests/KnowledgeTransportTests.swift": "6cbd6713556e6a7564322d14e570c797bd2209a1ca277f93235e42eee7acee64",
+    "ConfLingoTests/SentenceBoundaryTests.swift": "963f639b0e870c4986177a59b2900b256a5486daf4e653ff7e7f78c46faa462f",
+    "ConfLingoTests/TranslationQueueTests.swift": "f58338b476f7d499b7e2bc9a77a4d0e4a7a418c9c1085aaa4331fada8603ffb5",
+    "ConfLingoTests/LegacyTranslationAdapterTests.swift": "1fd038e62136470fab6376455f08ea990ee428e4497da263084ccbec93fdbd59",
+    "ConfLingoTests/RAGTransportTests.swift": "681d77c6819007de9fdf62c7e64d8287a3cb151bf9654c77b4aea955d8d7b1be",
+    "ConfLingoTests/AudioInputUseTests.swift": "ceff49952c093757c9967898a55d4596b62c7eeb7cf782bb02e6f60bdce3329b",
+    "ConfLingoTests/MeetingExportTests.swift": "40d0ecc07320624fc06d466a65509667ca75d215916d5881eb126bb53ab6b0ec",
+    "ConfLingoTests/RAGLiveEvaluationTests.swift": "d4538927eaa1b78942c2d73ef2fd91f271b0cd816d91ca3c897f7b20288cdbe1",
+    "ConfLingoTests/MeetingLivePreviewTests.swift": "f952f8729e027d5dfb9afb922fd43ffa280ff5444b28e164f255662b83b7f669",
+    "ConfLingoTests/ConferenceNavigationTests.swift": "5d5f1de14b4ce518ce362bc3c0e1f85ffe47698c618eefd37ca5a974a6172d24",
+    "ConfLingoTests/SpeechTranscriptionServiceTests.swift": "bd9eeeb6be6cb6a4fc3414f4e4b40764334c0364d04885b153f879fcc7729a97",
+    "ConfLingoTests/InsightCoordinatorTests.swift": "7be039e1beb029c91fdcb448ddad73f5ea527c791f6ded39103954c8c0b6f5cf",
+    "ConfLingoTests/MeetingLayoutTests.swift": "88faf600973e24930abbca2833c956aa32a8c06ee1f174126b9f10fab013a189",
+    "ConfLingoTests/AudioSourceTests.swift": "3f19e3711404524655150f0f6c7de795ddf8a575ffb6bd0b9b5a934b77675762",
+    "ConfLingoTests/InsightEvaluationTests.swift": "d05fee76c96ab17a6fab3645f959e8611e4a45301627d233490e6b75e5c99f97",
+    "ConfLingoTests/SessionStoreTests.swift": "d062b0493db293f4ebcf6af94184037e7f65a437201bc43155eedacf32d0bbb8",
+    "ConfLingoTests/KnowledgeIndexTests.swift": "fa971794f5caee8ad3b13b22611fe28bd2c96c13c723408df96b66b8fabc661b",
+    "ConfLingoTests/MixedContextEvaluationTests.swift": "a9d5a309fbe5226dc5ac9fdb2ff6e44ed6c89d4aa206b4d435565852fadbf76a",
+    "ConfLingoTests/MeetingOrderingTests.swift": "7798418a19f92d5e3d28687742993ead89d22def4926503c9d5583218d2b903d",
+    "ConfLingoTests/ConferenceLayoutTests.swift": "90db0bc37c4b4398d92de23ba1f54f500f5131eb5fdca3da20cbba4ba0b20f59",
+    "ConfLingoTests/MeetingSummaryTests.swift": "c178644bb97c23fc8d42dc993693163dd911a09383cabc36c460d33a2e4960e6"
+  },
+  "productSourcesUnchanged": true,
+  "rawAnswersPersisted": false,
+  "note": "意味と言語は主担当がメモリ上の全14回答を読んで判定。未実施・timeoutは合格に含めない。実請求額ではない。"
+}

@@ -147,7 +147,7 @@ struct GeminiInsightClient: InsightClient {
         ]
         let data = try JSONSerialization.data(withJSONObject: body)
         guard data.count <= 131_072 else { throw InsightFailure.oversized }
-        var result = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 30)
+        var result = URLRequest(url: url, cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: request.timeoutSeconds)
         result.httpMethod = "POST"
         result.setValue("application/json", forHTTPHeaderField: "Content-Type")
         result.setValue("text/event-stream", forHTTPHeaderField: "Accept")

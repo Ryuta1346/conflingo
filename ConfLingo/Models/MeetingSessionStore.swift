@@ -13,11 +13,12 @@ final class MeetingSessionStore {
         self.sessionID = sessionID
     }
 
-    func receive(_ event: TranscriptEvent) {
+    @discardableResult
+    func receive(_ event: TranscriptEvent) -> Bool {
         guard event.sessionID == sessionID,
-              !event.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
+              !event.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return false }
         if let previous = latest[event.id] {
-            guard !previous.isFinal, event.revision > previous.revision else { return }
+            guard !previous.isFinal, event.revision > previous.revision else { return false }
         }
         latest[event.id] = event
         partials.removeAll { $0.origin == event.origin }
@@ -27,6 +28,7 @@ final class MeetingSessionStore {
         } else {
             partials.append(event)
         }
+        return true
     }
 
     func clearPartials() {

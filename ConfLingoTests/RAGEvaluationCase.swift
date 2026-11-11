@@ -99,9 +99,9 @@ private final class RAGRequestCapture: InsightClient {
 enum RAGLiveConfiguration {
     static let legacyFlags = ["CONFLINGO_LIVE_AI", "CONFLINGO_FOCUSED_LIVE_AI", "CONFLINGO_GROUNDING_LIVE_AI"]
     static func enabled(_ environment: [String: String]) -> Bool {
-        environment["CONFLINGO_RAG_LIVE"] == "1" && legacyFlags.allSatisfy { environment[$0] != "1" }
+        environment["CONFLINGO_RAG_LIVE"] == "1" && environment["CONFLINGO_SUMMARY_LIVE"] != "1" && environment["CONFLINGO_SUMMARY_REMAINING_LIVE"] != "1" && environment["CONFLINGO_SUMMARY_DEADLINE_LIVE"] != "1" && legacyFlags.allSatisfy { environment[$0] != "1" }
     }
     static func legacyEnabled(_ flag: String, _ environment: [String: String] = ProcessInfo.processInfo.environment) -> Bool {
-        environment[flag] == "1" && environment["CONFLINGO_RAG_LIVE"] != "1"
+        environment[flag] == "1" && environment["CONFLINGO_RAG_LIVE"] != "1" && environment["CONFLINGO_SUMMARY_LIVE"] != "1" && environment["CONFLINGO_SUMMARY_REMAINING_LIVE"] != "1" && environment["CONFLINGO_SUMMARY_DEADLINE_LIVE"] != "1"
     }
 }

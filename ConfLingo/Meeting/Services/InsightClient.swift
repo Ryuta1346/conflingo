@@ -2,6 +2,9 @@ import Foundation
 
 struct InsightRequest: Sendable {
     enum Trigger: String, Sendable { case manual, automatic }
+    enum Purpose: Sendable { case assistance, summary }
+    let purpose: Purpose
+    var timeoutSeconds: TimeInterval { purpose == .summary ? 60 : 30 }
     let id = UUID()
     let sessionID: UUID
     let question: String
@@ -12,9 +15,10 @@ struct InsightRequest: Sendable {
     let knowledge: [KnowledgeReference]
 
     init(sessionID: UUID, question: String, trigger: Trigger, events: [TranscriptEvent],
-         answerLanguage: AnswerLanguage = .japanese, knowledge: [KnowledgeReference] = []) throws {
+         answerLanguage: AnswerLanguage = .japanese, knowledge: [KnowledgeReference] = [], purpose: Purpose = .assistance) throws {
         let question = question.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !question.isEmpty, question.count <= 2_000 else { throw InsightFailure.invalidQuestion }
+        self.purpose = purpose
         self.sessionID = sessionID
         self.question = question
         self.answerLanguage = answerLanguage
