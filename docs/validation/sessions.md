@@ -75,3 +75,15 @@ XCTestホストの既往最大常駐メモリ（`getrusage`）は一覧読み込
 - 未実装の後続: 保存記録の編集/AI再生成、PDF/OCR、永続資料ライブラリ、自動保存/クラッシュ復旧/クラウド同期。
 - 実音声結合・会議アプリ別・60分耐久・配布署名・既存Gate・請求照合は従来どおり残る。受入完了数2/12は変更しない。
 - ユーザー「コミットしてPR作成」の依頼によりコミット・push・[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)作成済み。担当: Ryuta1346。マージは未実施。
+
+## レビュー指摘の修正（2026-11-12）
+
+`811537c`に対するレビューで、保存詳細が資料引用だけのAI回答にも「根拠なし・要確認」と表示する問題を確認。ユーザー「修正進めて」により[修正計画](../design/sessions-review-fix-plan.md)を承認。
+
+- SavedSessionViewの警告判定をカードへ移し、発話参照と資料引用の両方が空の場合だけ表示するよう修正。既存のライブ画面と同じ条件にした。
+- 引用ボタン・発話参照・無効な根拠の警告・候補の確認条件は維持。要約は保存モデルの検証で発話根拠が必須のため、発話リンクの共通ヘルパーから警告を外しても、有効な保存要約の表示は変わらない。
+- SessionsPersistenceTests、SessionsStateTests、KnowledgeIntegrationTests、MeetingCandidateTests: **27テスト／4 suites成功**。テスト実行時は全`CONFLINGO_`環境変数を除去。
+- SwiftLint `--strict --no-cache`: **159ファイル・違反0**。Debugテストビルド・`git diff --check` 成功。
+- ログ: `/tmp/conflingo-review-fix-final.log`、`/tmp/conflingo-review-fix-lint.log`。
+
+NSHostingViewの表示文言をアクセシビリティ経由で検証するテストを試みたが、SwiftUIの警告文と引用ボタンを取得できず、検証前提を満たせなかった。試行テストは削除し、製品の不具合によるRedや画面表示の検証成功とは扱わない。表示条件の4ケースはコードで確認。全体テスト・Releaseビルド・手動のネイティブUI操作は今回未実施。既存のS12残件は維持する。ユーザー「コミットandプッシュ」により、本修正のコミット・pushが承認された。

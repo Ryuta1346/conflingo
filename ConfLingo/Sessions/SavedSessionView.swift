@@ -95,6 +95,9 @@ struct SavedSessionView: View {
                 Text(item.kind.label + (review.map { " · " + $0 } ?? "")).font(.headline)
                 bodyText(item.text)
                 if item.hasInvalidEvidence { Text("無効な根拠を含むため要確認").foregroundStyle(DesignTokens.warning) }
+                if item.evidenceIDs.isEmpty && item.knowledgeReferences.isEmpty {
+                    Text("根拠なし・要確認").font(.caption)
+                }
                 evidence(item.evidenceIDs, events: events, proxy: proxy)
                 references(item.knowledgeReferences)
             }
@@ -103,7 +106,6 @@ struct SavedSessionView: View {
 
     @ViewBuilder
     private func evidence(_ ids: [UUID], events: [TranscriptEvent], proxy: ScrollViewProxy) -> some View {
-        if ids.isEmpty { Text("根拠なし・要確認").font(.caption) }
         ForEach(Array(Set(ids)).sorted { $0.uuidString < $1.uuidString }, id: \.self) { id in
             if let event = events.first(where: { $0.id == id }) {
                 Button("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)の発話を見る") { proxy.scrollTo(id, anchor: .top) }
