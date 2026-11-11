@@ -5,7 +5,7 @@
 ## 現在地
 
 - 更新: **2026-11-12／ブランチ `feature/knowledge-library`**。ローカルmain `adfc2c5`でSessions PR #21のマージを確認。
-- **実装:** PR0〜8、追加リポジトリ参照（PR #20）、Sessions（PR #21）はマージ済み。永続資料ライブラリは[計画](docs/design/knowledge-library-implementation-plan.md)に従いローカル実装・主要検証済み（未コミット）。PR9は未着手。
+- **実装:** PR0〜8、追加リポジトリ参照（PR #20）、Sessions（PR #21）はマージ済み。永続資料ライブラリは[計画](docs/design/knowledge-library-implementation-plan.md)に従い実装・主要検証済み。[Draft PR #22](https://github.com/Ryuta1346/conflingo/pull/22)を作成（未マージ）。PR9は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** 資料ライブラリ追加後、444テスト／72 suites、lint166ファイル違反0、Debug/Release成功。保存・再起動後の復元・検索/引用・更新・削除を無通信UIで確認。狭幅・VoiceOver全経路などは未確認。[結果](docs/validation/knowledge-library.md)。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。

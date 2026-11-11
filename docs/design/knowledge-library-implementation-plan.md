@@ -105,4 +105,4 @@ PDF/OCR、クラウド同期、ファイル監視による自動更新、自動�
 
 ## 実施結果
 
-[検証記録](../validation/knowledge-library.md)。444テスト／72 suites、lint166ファイル違反0、Debug/Release成功。主要無通信UIを確認。L12の狭幅・VoiceOver全経路などの未確認範囲は記録を参照。独立レビュー・実API・実音声は未実施。Gitコミット・push・PR作成は未実施。
+[検証記録](../validation/knowledge-library.md)。444テスト／72 suites、lint166ファイル違反0、Debug/Release成功。主要無通信UIを確認。L12の狭幅・VoiceOver全経路などの未確認範囲は記録を参照。独立レビュー・実API・実音声は未実施。ユーザー「コミットしてPR作成」の依頼で`e236c16`をコミット・pushし、[Draft PR #22](https://github.com/Ryuta1346/conflingo/pull/22)を作成（未マージ）。
