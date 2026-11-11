@@ -1,5 +1,5 @@
 ---
-branch: main
+branch: feature/session-persistence
 phase: P2
 produced_by: codex
 summary: MeetingとConferenceの明示的なローカル保存・一覧・検索・再閲覧・削除
@@ -123,4 +123,4 @@ tags: [sessions, persistence, plan]
 
 ## 実施結果（2026-11-11）
 
-423テスト／70 suites・lint159ファイル違反0・Debug/Release成功。無通信プレビューで両モードの保存・再起動後の再閲覧・名前検索・引用・再出力・削除と再保存を確認。S12の狭幅・拡大文字・キー網羅・VoiceOverは操作ツールの制約により未完了。[検証記録](../validation/sessions.md)。未コミット。
+423テスト／70 suites・lint159ファイル違反0・Debug/Release成功。無通信プレビューで両モードの保存・再起動後の再閲覧・名前検索・引用・再出力・削除と再保存を確認。S12の狭幅・拡大文字・キー網羅・VoiceOverは操作ツールの制約により未完了。[検証記録](../validation/sessions.md)。ユーザー「コミットしてPR作成」の依頼で `e95f8ae` をコミット・pushし、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成（未マージ）。

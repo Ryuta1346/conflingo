@@ -1,7 +1,9 @@
 {
   "date": "2026-11-11",
   "base": "294bd0c",
-  "committed": false,
+  "validation_stage": "pre-commit",
+  "implementation_commit": "e95f8ae0990f838b32f10f214ae088c5d1b185eb",
+  "pull_request": "https://github.com/Ryuta1346/conflingo/pull/21",
   "tests": {
     "count": 423,
     "suites": 70,

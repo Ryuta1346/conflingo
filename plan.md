@@ -4,8 +4,8 @@
 
 ## 現在地
 
-- 更新: **2026-11-11／現在のブランチ `main`、HEAD `294bd0c`**。PR #20までのマージをローカルGit履歴で確認。ローカルの`origin/main`も同じコミット。整理開始時の作業ツリーはクリーン。リモートの再取得は未実施。
-- **実装:** Sessions永続保存はローカル実装・主要検証済み（未コミット）。PR0〜8はマージ済み（PR5-A/B/Cを含む11区分）。追加のリポジトリ取り込み・資料付き要約・資料を使う自動提案も[PR #20](https://github.com/Ryuta1346/conflingo/pull/20)でマージ済み。PR9（結合・性能・安全性検証）は未着手。
+- 更新: **2026-11-11／ブランチ `feature/session-persistence`**。Sessions実装コミット `e95f8ae`をpushし、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成。ベースmainは`294bd0c`で、リモートも同じコミットと確認済み。
+- **実装:** Sessions永続保存は実装・主要検証済み（[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)、未マージ）。PR0〜8はマージ済み（PR5-A/B/Cを含む11区分）。追加のリポジトリ取り込み・資料付き要約・資料を使う自動提案も[PR #20](https://github.com/Ryuta1346/conflingo/pull/20)でマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** Sessions実装後、**423テスト／70 suites成功、lint159ファイル違反0、Debug/Release成功**。両モードの保存・再起動後の再閲覧・検索・引用・再出力・削除を無通信UIで確認。狭幅・拡大文字・キー網羅・VoiceOverは未確認。[検証記録](docs/validation/sessions.md)。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
@@ -80,7 +80,7 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-11（Sessions）:** 計画承認後にローカル実装、423テスト・lint・Debug/Release成功。主要無通信UIを確認し、残るS12を明記。未コミット。[結果](docs/validation/sessions.md)。
+- **2026-11-11（Sessions）:** 計画承認後にローカル実装、423テスト・lint・Debug/Release成功。主要無通信UIを確認し、残るS12を明記。ユーザー依頼でコミット・pushし、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成。[結果](docs/validation/sessions.md)。
 - **2026-11-11（PR #20マージ後の整理）:** main `294bd0c`と検証記録151ファイルのハッシュ一致を確認。追加機能を実装済みへ更新し、実モデル品質・独立レビュー・大規模性能・README整合を残件に明記。受入完了数2/12と各Gate状態は維持。文書整理のみで追加API・音声取得は0。
 - **2026-11-11（実音声）:** 診断2試行で日本語4文・英語9文を確認。欠落の旧判定を撤回。新しい文での再開と通常Meetingの開始→一時停止→再開→終了も確認。追加API0。[診断](docs/validation/microphone-diagnostics.md)・[Meeting受入](docs/validation/meeting-real-input-2026-11-11.md)。
 - **2026-11-11（品質）:** PR8合成引用16/16合格。PR7要約期限を60秒へ変更し、複数回評価を通じ固定16会議・22区間の品質条件を確認。過去timeoutと使用量予約は保持。[PR8結果](docs/validation/pr8-quality-acceptance.md)・[PR7結果](docs/validation/pr7-summary-deadline.md)。
