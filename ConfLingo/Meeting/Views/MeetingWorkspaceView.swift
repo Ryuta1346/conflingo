@@ -28,9 +28,9 @@ struct MeetingWorkspaceView: View {
                     let layout = geometry.size.width >= 800
                         ? AnyLayout(HStackLayout(spacing: 16)) : AnyLayout(VStackLayout(spacing: 12))
                     layout {
-                        insights
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
                         MeetingTranscriptView(meeting: meeting, fontSize: fontSize)
+                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        insights
                             .frame(maxWidth: .infinity, maxHeight: .infinity)
                     }
                 }
