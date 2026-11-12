@@ -4,7 +4,7 @@ struct ConferenceSetupView: View {
     @Binding var sessionName: String
     @Binding var sourceLanguage: String
     @Binding var targetLanguage: String
-    @Binding var transcriptionOnly: Bool
+    @Binding var mode: SessionMode
     @Binding var fastFinalization: Bool
     @Bindable var profiles: KeywordProfileStore
     let sourceLocales: [Locale]
@@ -29,13 +29,13 @@ struct ConferenceSetupView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .accessibilityLabel("セッション名")
                         }
+                        SessionModePicker(selection: $mode).disabled(!canEdit)
                         ViewThatFits(in: .horizontal) {
                             HStack(alignment: .top, spacing: 24) { languageFields }
                             VStack(alignment: .leading, spacing: 18) { languageFields }
                         }
                         .disabled(!canEdit)
-                        Toggle("文字起こしのみ", isOn: $transcriptionOnly).disabled(!canEdit)
-                        if transcriptionOnly {
+                        if mode == .transcription {
                             Toggle("高速確定（精度より字幕の速さを優先）", isOn: $fastFinalization)
                                 .disabled(!canEdit)
                         }
@@ -84,7 +84,7 @@ struct ConferenceSetupView: View {
             }
             .labelsHidden()
         }
-        if !transcriptionOnly {
+        if mode == .translation {
             labeledField("翻訳先") {
                 Picker("翻訳先", selection: $targetLanguage) {
                     ForEach(LanguageCatalog.selectableTargets(targetLanguages, excludingSourceLocaleID: sourceLanguage), id: \.minimalIdentifier) {

@@ -10,12 +10,12 @@ type: user-guide
 
 **English** | [日本語](usage.ja.md)
 
-Conference transcribes microphone input and displays source text with translations. Choose recognition and target languages supported on your Mac; the default is English → Japanese. Requires macOS 26 or later and Apple Silicon. UI labels below match the current Japanese interface.
+New Meeting and Conference sessions default to **文字起こし** (Transcription). Select **リアルタイム翻訳** (Real-time translation) in setup to add translations. Conference starts with English recognition and offers Japanese as the initial translation target. Choose languages supported on your Mac. Requires macOS 26 or later and Apple Silicon. UI labels below match the current Japanese interface.
 
 ## Meeting transcription
 
 1. Open **会議を開く** (Open meeting) on Home or select **Meeting**.
-2. Enter a name, choose Japanese or English independently for the microphone and system audio, and confirm that participants have been notified and have consented. The checkbox does not send notifications.
+2. Enter a name and choose Japanese or English independently for the microphone and system audio. Keep **文字起こし** for transcription, or select **リアルタイム翻訳** to reveal per-input translation targets (initially English for the microphone and Japanese for system audio). Either input can use **翻訳なし**. Confirm that participants have been notified and have consented. The checkbox does not send notifications.
 3. Select **会議を開始** (Start meeting). The app prepares recognition models and checks input permissions. System audio may include other playback on your Mac; headphones are recommended.
 4. **一時停止** (Pause) stops both inputs; **再開** (Resume) preserves the same meeting and transcript. Preparation can be cancelled. If stopping fails, select **停止を再試行** (Retry stop).
 5. **会議を終了** (End meeting) waits for inputs to stop and final results to arrive before opening Review.
@@ -45,7 +45,6 @@ Real-audio acceptance remains postponed. See the [validation record](validation/
 
 If the AI status asks you to pause and resume the meeting, automatic suggestions cannot be enabled until recovery. Pause and resume the meeting, then enable automatic suggestions again. Local transcripts and manual Ask AI remain available while automatic suggestions are unavailable.
 
-
 Acceptance tests with real Zoom/Meet/Teams audio remain deferred. See the [PR5-C validation record](validation/pr5-c-meeting.md) for automated and non-recording checks.
 
 ## Launch and prepare
@@ -56,16 +55,20 @@ open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/Conf
 ```
 
 1. Select **字幕を準備する** (Prepare subtitles) on Home, or open Conference.
-2. Enter a session name and select recognition language, target language, and dictionary.
+2. Enter a session name and select a recognition language and dictionary. The default mode is **文字起こし**. Select **リアルタイム翻訳** to reveal and choose a translation target.
 3. Once the recognition model is ready, select **字幕を開始** (Start subtitles). Allow microphone access on first use.
 
 The app checks language availability at launch and when settings change, downloading recognition models when needed. macOS may also request a translation model download. Prepare with a network connection before attending an event. Unsupported languages or preparation failures are shown in the preparation screen; change settings or select **もう一度確認** (Check again).
 
 Recognition-model readiness does not guarantee that translation-model downloads are complete. Once the required models are installed, recognition and translation run on your Mac.
 
+New sessions and app launches return to transcription. Pause/resume preserves the selected mode; target languages are remembered.
+
 ## Read subtitles
 
-Source and translation appear side by side in wide windows and vertically in narrow windows. Transcription-only mode shows one source pane.
+In translation mode, source and translation appear side by side in wide windows and vertically in narrow windows. Transcription-only mode shows one source pane.
+
+Translation space is reserved as source text appears, based on source length, text size and available width. Waiting, failed and retry states keep this space so late translations do not shift later speech when they fit. Longer translations expand as needed to remain fully readable. Meeting and its floating panel use the same reservation behavior.
 
 - **認識中** marks partial recognition that may change.
 - Translation groups finalized speech into sentences; source and translation rows may not align one to one.
@@ -92,7 +95,7 @@ Stopping and navigation preserve current subtitles. Restarting appends to them. 
 
 Change languages, dictionaries, and modes while stopped. If source and target become the same language, the target switches automatically. Supported pairs depend on runtime availability checks.
 
-**文字起こしのみ** disables translation. This mode also offers **高速確定**, which prioritizes subtitle speed over recognition accuracy.
+**文字起こし** is the default mode and does not translate. This mode also offers **高速確定**, which prioritizes subtitle speed over recognition accuracy.
 
 Changing languages preserves existing text. Markdown records the language settings at export time, so export and clear before changing languages if you want separate files.
 
@@ -152,7 +155,6 @@ To replace an entry, import the new material, open its save dialog, select an ex
 Saving, viewing, and attaching do not send content externally. AI consent is never saved. Attaching a saved copy turns manual and automatic document permission off for fresh confirmation. Saved bodies remain until explicitly deleted from the library, independently of meeting disposal.
 
 The library supports up to 100 entries and 200 MiB of saved files. Existing per-meeting import limits still apply. PDF/OCR, cloud sync, and automatic refresh are not supported.
-
 
 ## Add materials during a session
 

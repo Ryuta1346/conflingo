@@ -26,7 +26,7 @@ struct ContentView: View {
     @AppStorage("fontSize") private var fontSize = 16.0
     @AppStorage("sourceLocaleID") private var sourceLocaleID = "en-US"
     @AppStorage("targetLanguageID") private var targetLanguageID = "ja"
-    @AppStorage("transcriptionOnly") private var transcriptionOnly = false
+    private var transcriptionOnly: Bool { store.mode == .transcription }
     @AppStorage("fastFinalization") private var fastFinalization = false
     @AppStorage("alwaysOnTop") private var alwaysOnTop = false
     @AppStorage("appearance") private var appearance = "system"
@@ -52,7 +52,6 @@ struct ContentView: View {
         _fontSize = AppStorage(wrappedValue: 16, "fontSize", store: settings)
         _sourceLocaleID = AppStorage(wrappedValue: "en-US", "sourceLocaleID", store: settings)
         _targetLanguageID = AppStorage(wrappedValue: "ja", "targetLanguageID", store: settings)
-        _transcriptionOnly = AppStorage(wrappedValue: false, "transcriptionOnly", store: settings)
         _fastFinalization = AppStorage(wrappedValue: false, "fastFinalization", store: settings)
         _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: settings)
         _appearance = AppStorage(wrappedValue: "system", "appearance", store: settings)
@@ -232,7 +231,7 @@ struct ContentView: View {
         case .setup:
             ConferenceSetupView(
                 sessionName: $store.sessionName, sourceLanguage: $sourceLocaleID,
-                targetLanguage: $targetLanguageID, transcriptionOnly: $transcriptionOnly,
+                targetLanguage: $targetLanguageID, mode: $store.mode,
                 fastFinalization: $fastFinalization, profiles: profileStore,
                 sourceLocales: sourceLocales, targetLanguages: targetLanguages,
                 modelState: modelState, downloadProgress: availability.downloadProgress,

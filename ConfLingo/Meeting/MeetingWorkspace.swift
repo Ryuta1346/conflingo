@@ -8,6 +8,7 @@ final class MeetingWorkspace {
     private enum Completion { case pause, end, cancelPreparation }
 
     let translations: MeetingTranslations
+    var mode: SessionMode = .transcription
     var microphoneTranslationLanguage: String { didSet { defaults.set(microphoneTranslationLanguage, forKey: "meetingMicrophoneTranslation") } }
     var systemTranslationLanguage: String { didSet { defaults.set(systemTranslationLanguage, forKey: "meetingSystemTranslation") } }
     let controller: DualTranscriptionController
@@ -92,7 +93,7 @@ final class MeetingWorkspace {
         controller.store.onFinal = { [weak self] event in
             guard let self else { return }
             let target = event.origin == .microphone ? self.microphoneTranslationLanguage : self.systemTranslationLanguage
-            self.translations.receive(event, targetLanguage: target.isEmpty ? nil : target)
+            self.translations.receive(event, targetLanguage: self.mode.translationTarget(source: event.languageCode, target: target))
         }
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
         controller.captureActivityChanged = { [weak ai] active in
@@ -225,6 +226,13 @@ final class MeetingWorkspace {
                                contextKeywords: recognitionKeywords)
     }
 
+    func translationTarget(for event: TranscriptEvent) -> String? {
+        if let entry = translations.entries[event.id] { return entry.request.targetLanguage }
+        guard !event.isFinal else { return nil }
+        let target = event.origin == .microphone ? microphoneTranslationLanguage : systemTranslationLanguage
+        return mode.translationTarget(source: event.languageCode, target: target)
+    }
+
     func pause() async { await complete(.pause) }
 
     var recognitionKeywords: [AudioOrigin: [String]] {
@@ -290,6 +298,7 @@ final class MeetingWorkspace {
         ai.reset()
         controller.clear()
         translations.reset(sessionID: store.sessionID)
+        mode = .transcription
         name = ""
         insights = []
         selectedEvidence = nil

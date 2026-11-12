@@ -143,7 +143,8 @@ private struct MeetingFloatingView: View {
                                 Text(event.origin == .microphone ? "自分 · マイク" : "相手側 · 内部音声")
                                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).textSelection(.enabled)
-                                MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize)
+                                MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,
+                                                       sourceText: event.text, targetLanguage: meeting.translationTarget(for: event))
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }

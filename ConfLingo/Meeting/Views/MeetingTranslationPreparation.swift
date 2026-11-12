@@ -49,22 +49,32 @@ struct MeetingTranslationText: View {
     let translations: MeetingTranslations
     let eventID: UUID
     let fontSize: Double
+    var sourceText = ""
+    var targetLanguage: String?
+
+    private var entry: MeetingTranslationEntry? { translations.entries[eventID] }
 
     var body: some View {
-        if let entry = translations.entries[eventID] {
+        if let target = entry?.request.targetLanguage ?? targetLanguage {
             VStack(alignment: .leading, spacing: 6) {
-                Text("訳文 · \(LanguageCatalog.displayName(for: entry.request.targetLanguage))")
+                Text("訳文 · \(LanguageCatalog.displayName(for: target))")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
-                if let translation = entry.translation {
-                    Text(translation.text).font(.system(size: fontSize)).lineSpacing(5).textSelection(.enabled)
-                } else {
-                    switch entry.state {
-                    case .pending: Text("翻訳待ち（初回はモデルを準備）").font(.caption).foregroundStyle(DesignTokens.secondary)
-                    case .translating: Text("翻訳中…").font(.caption).foregroundStyle(DesignTokens.secondary)
-                    case .failed(let reason):
-                        Text(reason).font(.caption).foregroundStyle(DesignTokens.warning)
-                        Button("翻訳を再試行") { translations.retry(eventID) }
-                    case .done: EmptyView()
+                ReservedTranslation(sourceText: entry?.request.event.text ?? sourceText, fontSize: fontSize) {
+                    if let translation = entry?.translation {
+                        Text(translation.text).font(.system(size: fontSize)).lineSpacing(6).textSelection(.enabled)
+                    } else {
+                        VStack(alignment: .leading, spacing: 6) {
+                            switch entry?.state {
+                            case .pending: Text("翻訳待ち（初回はモデルを準備）")
+                            case .translating: Text("翻訳中…")
+                            case .failed(let reason):
+                                Text(reason).foregroundStyle(DesignTokens.warning)
+                                Button("翻訳を再試行") { translations.retry(eventID) }
+                            case .done: Text("翻訳完了")
+                            case nil: Text("発話の確定待ち")
+                            }
+                        }
+                        .font(.caption).foregroundStyle(DesignTokens.secondary)
                     }
                 }
             }
