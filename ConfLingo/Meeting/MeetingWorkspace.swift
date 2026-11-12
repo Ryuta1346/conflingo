@@ -77,8 +77,8 @@ final class MeetingWorkspace {
         self.ai = ai
         let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
         self.summary = summary
+        ai.knowledge.onInvalidation = { [weak self] in self?.cancelSummary() }
         ai.knowledge.onContentChange = { [weak self] in
-            self?.cancelSummary()
             self?.documentTerms.reset()
             Task { [weak self] in await self?.applyDocumentTerms() }
         }

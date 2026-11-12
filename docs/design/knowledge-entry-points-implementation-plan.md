@@ -3,6 +3,7 @@
 2026-11-12 / conflingo / 実装ブランチ: feature/knowledge-entry-points / 基準: `56d7a81`
 状態: **承認済み・ローカル実装と自動検証／主要fake UI確認済み。実音声・実モデル品質とUI網羅受入は継続。**
 検証: [実装結果と残る受入](../validation/knowledge-entry-points.md)。レビュー提出版・未マージ。
+レビュー修正: [3件の修正計画と結果](knowledge-entry-points-review-fixes.md)。取り込み失敗時の用語保持、言語別の用語更新、録音前の資料回答保存を実装し、自動テストで確認した。
 正本保存先: `~/.coding-agents/docs/conflingo/feature-knowledge-entry-points/knowledge-entry-points-implementation-plan.md`
 要件: [ヒアリング](knowledge-entry-points-hearing.md)。ユーザーは用途1・2・3すべてを選択。
 

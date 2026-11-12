@@ -162,9 +162,13 @@ Open **資料** in Meeting, or the **資料（count）** button above Conference
 
 In the materials panel, enable **資料への質問を許可**, choose the answer language and ask a question. Only the question and relevant excerpts are sent to the selected LLM; captions and audio are excluded. Citations open the imported source. Changing materials or the LLM connection cancels pending generation and requires fresh permission.
 
+Completed document answers can be saved before recording. Use **このMacに保存** or **書き出す** at the top of the materials panel, then reopen saved answers and citations from Sessions. Session saving requires audio to be stopped. Empty sessions, terminology alone, and unfinished answers are not saved.
+
 ## Document terminology and corrections
 
 Expand **資料から専門用語を適用**, extract candidates, review their sources, select/edit terms and explicitly apply them. Candidates come from headings, marked terms, code spans and source/target glossary tables; translations are not invented. Confirm the source and target language. Existing manual dictionary entries take precedence, with a combined limit of 100 terms.
+
+Applying or clearing terms changes only the selected source language. Meeting can retain Japanese and English terms for its two inputs at the same time. The 100-term limit includes all retained languages and the existing manual dictionary. Failed or cancelled imports preserve confirmed terms and candidate edits. Successful additions or removals reset terms for review and reapplication.
 
 Confirmed translations apply to subsequent Conference translation requests. To bias speech recognition, select the vocabulary mode before starting. It uses DictationTranscriber and may need a model download: Conference prepares after mode selection, Meeting at start. Live vocabulary updates report success or defer to the next start without stopping audio. Real-audio accuracy improvements have not yet been evaluated.
 

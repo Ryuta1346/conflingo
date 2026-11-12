@@ -3,6 +3,7 @@ import SwiftUI
 struct ConferenceKnowledgeView: View {
     @Bindable var workspace: ConferenceKnowledgeWorkspace
     @Bindable var library: KnowledgeLibrary
+    let sessions: SessionsLibrary
     let fontSize: Double
     let stopAudio: () -> Void
     let sourceLanguage: String
@@ -24,6 +25,12 @@ struct ConferenceKnowledgeView: View {
             }
             ScrollView {
                 VStack(alignment: .leading, spacing: 20) {
+                    SessionSaveControls(library: sessions, snapshot: snapshot) {
+                        guard let snapshot else { return }
+                        Task { await sessions.save(snapshot) }
+                    }
+                    ConferenceExportButton(store: workspace.store, sourceLanguage: sourceLanguage,
+                        targetLanguage: targetLanguage, support: workspace.snapshot)
                     KnowledgeMaterialsView(knowledge: workspace.knowledge, library: library, fontSize: fontSize,
                         canEdit: { workspace.canEditKnowledge })
                     Divider()
@@ -79,5 +86,9 @@ struct ConferenceKnowledgeView: View {
                     Button("閉じる") { showSettings = false }.keyboardShortcut(.cancelAction)
                 }.padding().frame(minWidth: 560, minHeight: 420)
             }
+    }
+
+    private var snapshot: SessionSnapshot? {
+        workspace.store.sessionSnapshot(sourceLanguage: sourceLanguage, targetLanguage: targetLanguage, support: workspace.snapshot)
     }
 }

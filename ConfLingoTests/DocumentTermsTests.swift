@@ -40,4 +40,46 @@ struct DocumentTermsTests {
         #expect(throws: (any Error).self) { try terms.apply(sourceLanguage: "en", targetLanguage: "ja", manual: manual) }
         #expect(terms.applied == original)
     }
+
+    @Test func languageSwitchRestoresSelectionsAndClearKeepsOtherLanguage() throws {
+        let terms = DocumentTerms()
+        terms.selectCandidates(sourceLanguage: "en-US")
+        terms.addManual(term: "Photon", target: "")
+        try terms.apply(sourceLanguage: "en-US", targetLanguage: nil, manual: [])
+        terms.selectCandidates(sourceLanguage: "ja-JP")
+        #expect(terms.candidates.allSatisfy { !$0.selected })
+        terms.addManual(term: "フォトン", target: "")
+        try terms.apply(sourceLanguage: "ja-JP", targetLanguage: nil, manual: [])
+        terms.selectCandidates(sourceLanguage: "en-GB")
+        #expect(terms.candidates.filter(\.selected).map(\.term) == ["Photon"])
+        terms.clear(sourceLanguage: "en-US")
+        #expect(terms.glossary(sourceLanguage: "en", targetLanguage: nil, manual: []).isEmpty)
+        #expect(terms.glossary(sourceLanguage: "ja", targetLanguage: nil, manual: []).map(\.term) == ["フォトン"])
+    }
+
+    @Test func reopeningSameLanguageKeepsUnappliedSelections() throws {
+        let terms = DocumentTerms()
+        terms.selectCandidates(sourceLanguage: "en-US")
+        terms.addManual(term: "Photon", target: "")
+        try terms.apply(sourceLanguage: "en-US", targetLanguage: nil, manual: [])
+        terms.candidates[0].selected = false
+        terms.addManual(term: "New draft", target: "")
+        let draft = terms.candidates
+        terms.selectCandidates(sourceLanguage: "en-GB")
+        #expect(terms.candidates == draft)
+    }
+
+    @Test func combinedLanguageLimitFailureKeepsAllAppliedValues() throws {
+        let terms = DocumentTerms()
+        for index in 0..<99 { terms.addManual(term: "term\(index)", target: "") }
+        try terms.apply(sourceLanguage: "en", targetLanguage: nil, manual: [])
+        terms.selectCandidates(sourceLanguage: "ja")
+        terms.addManual(term: "日本語", target: "")
+        try terms.apply(sourceLanguage: "ja", targetLanguage: nil, manual: [])
+        let original = terms.applied
+        terms.addManual(term: "上限超過", target: "")
+        #expect(throws: DocumentTermFailure.self) { try terms.apply(sourceLanguage: "ja", targetLanguage: nil, manual: []) }
+        #expect(terms.applied == original)
+        #expect(terms.applied.count == 100)
+    }
 }

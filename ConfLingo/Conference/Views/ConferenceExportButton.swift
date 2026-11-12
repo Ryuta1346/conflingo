@@ -10,8 +10,8 @@ struct ConferenceExportButton: View {
 
     var body: some View {
         Button("書き出す", systemImage: "square.and.arrow.up") { saveMarkdown() }
-            .disabled(store.segments.isEmpty)
-            .help("現在の字幕をMarkdownで書き出す")
+            .disabled(store.segments.isEmpty && support?.hasCompletedAnswers != true)
+            .help("現在の字幕と完成した資料回答をMarkdownで書き出す")
     }
 
     private func saveMarkdown() {

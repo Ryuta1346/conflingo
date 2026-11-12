@@ -126,7 +126,7 @@ struct ContentView: View {
             KeywordProfileEditor(profiles: profileStore).disabled(store.phase != .idle)
         }
         .sheet(isPresented: $showConferenceKnowledge) {
-            ConferenceKnowledgeView(workspace: conferenceKnowledge, library: library, fontSize: fontSize,
+            ConferenceKnowledgeView(workspace: conferenceKnowledge, library: library, sessions: sessions, fontSize: fontSize,
                 stopAudio: { Task { await stopSession() } }, sourceLanguage: sourceLocaleID,
                 targetLanguage: transcriptionOnly ? nil : targetLanguageID,
                 manualGlossary: KeywordParser.parseGlossary(profileStore.selectedProfile.keywords),

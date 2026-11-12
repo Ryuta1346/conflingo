@@ -102,7 +102,8 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
                 }
             }
         case .conference(let value):
-            try require(!value.segments.isEmpty && unique(value.segments.map(\.id)) && unique(value.units.map(\.id)))
+            try require((!value.segments.isEmpty || value.support?.hasCompletedAnswers == true)
+                        && unique(value.segments.map(\.id)) && unique(value.units.map(\.id)))
             let ids = Set(value.segments.map(\.id))
             for segment in value.segments { try require(optionalTime(segment.startTime) && !segment.english.isEmpty) }
             for unit in value.units {

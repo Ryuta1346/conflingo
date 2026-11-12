@@ -30,7 +30,8 @@ final class ConferenceKnowledgeWorkspace {
         self.settings = settings
         self.client = client ?? SelectedLLMClient(settings: settings)
         self.timeout = timeout
-        knowledge.onContentChange = { [weak self] in self?.revokePermissions(); self?.terms.reset() }
+        knowledge.onInvalidation = { [weak self] in self?.revokePermissions() }
+        knowledge.onContentChange = { [weak self] in self?.terms.reset() }
         settings.observeChanges { [weak self] in self?.revokePermissions() }
     }
 

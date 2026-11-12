@@ -22,7 +22,11 @@ struct DocumentTermsView: View {
                     extracting = true
                     Task {
                         defer { extracting = false }
-                        do { terms.extract(try await knowledge.contents()); message = "候補を選択・編集して適用してください。" }
+                        do {
+                            terms.extract(try await knowledge.contents())
+                            terms.selectCandidates(sourceLanguage: sourceLanguage)
+                            message = "候補を選択・編集して適用してください。"
+                        }
                         catch { message = "資料を読み込めませんでした。" }
                     }
                 }.disabled(extracting || knowledge.isBusy || knowledge.documents.isEmpty)
@@ -31,6 +35,8 @@ struct DocumentTermsView: View {
                 }
                 Text(targetLanguage.map { "訳語の言語：\(LanguageCatalog.displayName(for: $0))" } ?? "認識用語のみ")
                     .font(.caption)
+                Text("適用・解除は選択中の原語言語だけを変更します。別の言語に適用した用語は保持します。")
+                    .font(.caption).foregroundStyle(DesignTokens.secondary)
                 ScrollView {
                     LazyVStack(alignment: .leading) {
                         ForEach($terms.candidates) { $candidate in
@@ -60,12 +66,16 @@ struct DocumentTermsView: View {
                             applied()
                         } catch { message = error.localizedDescription }
                     }.disabled(extracting || knowledge.isBusy || sourceLanguage.isEmpty)
-                    Button("適用を解除") { terms.reset(); applied() }
+                    Button("この言語の適用を解除") { terms.clear(sourceLanguage: sourceLanguage); applied() }
                 }
                 if !message.isEmpty { Text(message).font(.caption).textSelection(.enabled) }
             }.padding(.top, 10)
         }
-        .onAppear { sourceLanguage = sourceLanguages.first ?? "" }
+        .onAppear {
+            sourceLanguage = sourceLanguages.first ?? ""
+            terms.selectCandidates(sourceLanguage: sourceLanguage)
+        }
         .onChange(of: sourceLanguages) { sourceLanguage = sourceLanguages.first ?? "" }
+        .onChange(of: sourceLanguage) { terms.selectCandidates(sourceLanguage: sourceLanguage) }
     }
 }

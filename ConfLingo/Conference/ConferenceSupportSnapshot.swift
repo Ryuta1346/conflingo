@@ -34,6 +34,8 @@ struct ConferenceSupportSnapshot: Codable, Equatable, Sendable {
     var corrections: [ConferenceCorrection] = []
     var terms: [AppliedDocumentTerm] = []
 
+    var hasCompletedAnswers: Bool { answers.contains { $0.status == .complete } }
+
     var markdown: String {
         var lines: [String] = []
         if !answers.isEmpty {

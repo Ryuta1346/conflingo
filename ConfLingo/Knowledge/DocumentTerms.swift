@@ -40,6 +40,7 @@ final class DocumentTerms {
     var candidates: [DocumentTermCandidate] = []
     private(set) var applied: [AppliedDocumentTerm] = []
     private(set) var revision = UUID()
+    private var candidateLanguage: String?
 
     func extract(_ documents: [KnowledgeArchive.Document]) {
         var result: [DocumentTermCandidate] = []
@@ -77,6 +78,7 @@ final class DocumentTerms {
             }
         }
         candidates = result
+        candidateLanguage = nil
     }
 
     func addManual(term: String, target: String) {
@@ -85,6 +87,8 @@ final class DocumentTerms {
     }
 
     func apply(sourceLanguage: String, targetLanguage: String?, manual: [KeywordParser.GlossaryEntry]) throws {
+        let source = Self.language(sourceLanguage)
+        let retained = applied.filter { $0.sourceLanguage != source }
         var values: [AppliedDocumentTerm] = []
         var seen: [String: String] = [:]
         for candidate in candidates where candidate.selected {
@@ -98,11 +102,34 @@ final class DocumentTerms {
             }
             seen[key] = target
             values.append(.init(term: term, target: target.isEmpty ? nil : target,
-                sourceLanguage: Self.language(sourceLanguage), targetLanguage: targetLanguage.map(Self.language),
+                sourceLanguage: source, targetLanguage: targetLanguage.map(Self.language),
                 documentID: candidate.documentID, documentTitle: candidate.documentTitle, line: candidate.line, snippet: candidate.snippet))
         }
-        guard Set(manual.map { $0.term.lowercased() }).union(values.map { $0.term.lowercased() }).count <= 100 else { throw DocumentTermFailure.limit }
-        applied = values
+        guard retained.count + Set(manual.map { $0.term.lowercased() }).union(values.map { $0.term.lowercased() }).count <= 100 else { throw DocumentTermFailure.limit }
+        applied = retained + values
+        candidateLanguage = source
+        revision = UUID()
+    }
+
+    func selectCandidates(sourceLanguage: String) {
+        let source = Self.language(sourceLanguage)
+        guard candidateLanguage != source else { return }
+        candidateLanguage = source
+        for index in candidates.indices { candidates[index].selected = false }
+        for term in applied where term.sourceLanguage == source {
+            if let index = candidates.firstIndex(where: { $0.term == term.term && $0.target == (term.target ?? "") }) {
+                candidates[index].selected = true
+            } else {
+                candidates.append(.init(term: term.term, target: term.target ?? "", selected: true,
+                    documentID: term.documentID, documentTitle: term.documentTitle, line: term.line, snippet: term.snippet))
+            }
+        }
+    }
+
+    func clear(sourceLanguage: String) {
+        applied.removeAll { $0.sourceLanguage == Self.language(sourceLanguage) }
+        candidateLanguage = nil
+        selectCandidates(sourceLanguage: sourceLanguage)
         revision = UUID()
     }
 
@@ -117,7 +144,7 @@ final class DocumentTerms {
         return Array(result.prefix(100))
     }
 
-    func reset() { candidates = []; applied = []; revision = UUID() }
+    func reset() { candidates = []; applied = []; candidateLanguage = nil; revision = UUID() }
 
     private static func language(_ id: String) -> String { Locale(identifier: id).language.languageCode?.identifier ?? id }
     private static func valid(_ value: String) -> Bool {
