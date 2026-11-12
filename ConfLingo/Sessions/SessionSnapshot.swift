@@ -85,7 +85,8 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
         try require(startedAt?.timeIntervalSince1970.isFinite ?? true)
         switch self {
         case .meeting(let value, let cards):
-            try require(!value.events.isEmpty && unique(value.events.map(\.id)) && unique(cards.map(\.id))
+            let hasAnswers = (cards + (value.assistance ?? [])).contains { $0.status == .complete }
+            try require((!value.events.isEmpty || hasAnswers) && unique(value.events.map(\.id)) && unique(cards.map(\.id))
                         && unique(value.candidates.map(\.id)))
             let ids = Set(value.events.map(\.id))
             for event in value.events {

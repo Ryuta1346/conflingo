@@ -29,3 +29,16 @@
 正本: `~/.coding-agents/docs/conflingo/feature-shared-session-assistance/shared-session-assistance-plan.md`。
 
 PR構成: 既存PR #27（`feature/transcription-default`）をベースとし、共通支援の変更だけを`feature/shared-session-assistance`へ切り出す。
+
+## レビュー修正（2026-11-12）
+
+ユーザー「修正進めて」で4件の修正を承認。以下を実装・検証済み。上記の検証結果は修正前の記録。
+
+- 準備画面で通常のAI回答と資料引用を表示する。
+- 終了後の振り返り画面でもWeb調査の本文・出典を表示する。
+- 発話がなくても完成済み回答があれば準備画面から保存・Markdown出力できるようにする。空セッション・未完成回答・不正な発話引用は保存しない。
+- Conferenceの内部音声・両入力の停止エラーを画面側へ同期し、再試行成功時に解除する。
+
+資料→回帰テストの失敗確認→修正→関連/全テスト・Lintの順で実施した。全547件中541件成功・実API評価6件skip、97 suites。Lint219ファイル違反0。画面テストで準備中の回答・資料引用・出力操作と、終了後のWeb調査本文・出典を確認した。保存→再読込→Markdown、空/未完成/不正引用の拒否、停止失敗→再試行も検証済み。
+
+詳細計画: `~/.coding-agents/docs/conflingo/feature-shared-session-assistance/assistance-review-fixes-plan.md`。実API・実音声評価は追加していない。

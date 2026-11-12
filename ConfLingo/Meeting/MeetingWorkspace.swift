@@ -71,7 +71,8 @@ final class MeetingWorkspace {
 
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
          credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil,
-         translationClient: any MeetingTranslating = AppleMeetingTranslator(), prepareTranslationModels: Bool = true) {
+         translationClient: any MeetingTranslating = AppleMeetingTranslator(), prepareTranslationModels: Bool = true,
+         researchClient: (any LLMWebResearching)? = nil) {
         self.defaults = defaults
         microphoneTranslationLanguage = defaults.string(forKey: "meetingMicrophoneTranslation") ?? "en"
         systemTranslationLanguage = defaults.string(forKey: "meetingSystemTranslation") ?? "ja"
@@ -85,7 +86,7 @@ final class MeetingWorkspace {
         let ai = InsightCoordinator(store: controller.store, client: client)
         ai.answerLanguage = language
         self.ai = ai
-        research = WebResearchCoordinator(store: controller.store, knowledge: ai.knowledge, settings: settings)
+        research = WebResearchCoordinator(store: controller.store, knowledge: ai.knowledge, settings: settings, client: researchClient)
         let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
         self.summary = summary
         ai.knowledge.onInvalidation = { [weak self] in self?.cancelSummary() }
@@ -156,7 +157,8 @@ final class MeetingWorkspace {
     }
 
     var exportSnapshot: MeetingExportSnapshot? {
-        guard page == .review, phase == .idle, !isBusy else { return nil }
+        guard page == .review || (page == .setup && !completedAssistance.isEmpty),
+              phase == .idle, !isBusy else { return nil }
         return MeetingExportSnapshot(title: title, startedAt: startedAt, microphoneLocale: microphoneLocaleID,
                                      systemLocale: systemLocaleID, sessionID: store.sessionID,
                                      events: store.finals, candidates: candidates.items, summary: summary.completed,
@@ -279,7 +281,7 @@ final class MeetingWorkspace {
 
     func requestDiscard() {
         guard canDiscard else { return }
-        if store.finals.isEmpty && store.partials.isEmpty && insights.isEmpty && knowledge.documents.isEmpty {
+        if store.finals.isEmpty && store.partials.isEmpty && insights.isEmpty && research.answers.isEmpty && knowledge.documents.isEmpty {
             reset()
         } else {
             showsDiscardConfirmation = true

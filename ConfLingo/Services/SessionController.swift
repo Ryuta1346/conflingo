@@ -17,7 +17,11 @@ final class SessionController {
     private let requestPermission: @MainActor () async -> Bool
     private let timeline: MeetingTimeline
     let meetingStore: MeetingSessionStore
-    private(set) var lastError: String?
+    private var sessionError: String?
+    private(set) var lastError: String? {
+        get { usingDual ? dual?.lastError ?? sessionError : sessionError }
+        set { sessionError = newValue }
+    }
     private var hub: TranscriptEventHub?
     private var adapter: LegacyTranslationAdapter?
     private var consumers: [Task<Void, Never>] = []
@@ -248,9 +252,8 @@ extension SessionController {
         usingDual = true
         lastError = nil
         store.setActiveGlossary(glossary)
-        dual.phaseChanged = { [weak self, weak dual] phase in
+        dual.phaseChanged = { phase in
             store.phase = phase
-            self?.lastError = dual?.lastError
             if phase == .listening { store.markSessionStarted() }
         }
         dual.prepareOptionalConsumer = { [weak self, weak dual] hub in
@@ -274,6 +277,5 @@ extension SessionController {
         }
         await dual.start(microphoneLocale: locale, systemLocale: locale, fastResults: fastResults,
             recognitionMode: recognitionMode, contextKeywords: [.microphone: glossary.map(\.term), .systemAudio: glossary.map(\.term)], selection: selection)
-        lastError = dual.lastError
     }
 }

@@ -20,7 +20,7 @@ Choose microphone/external input, system audio, or both in setup. Select externa
 
 Register materials using **資料を追加** or **ライブラリから選択**. In Conference, open **資料・AI支援 → 資料と発話から支援**; in Meeting, use AI assistance. Review the destination and permit transcript assistance, then enable document use for manual questions if needed. Questions use up to 30 final utterances / 12,000 characters and five related excerpts / 6,000 characters. Document questions also work before capture starts. Enable automatic suggestions and automatic document use separately; suggestions run at most twice per minute with a 12-second minimum interval and never automatically search the Web.
 
-Citations open source utterances and document excerpts. Stopping, revoking permission, or changing materials or connections cancels pending work. Wide Conference windows show assistance beside subtitles; narrow windows use the materials sheet. Completed answers and citations are included in explicit saves and Markdown exports. Meeting saves require ending the meeting.
+Citations open source utterances and document excerpts. Stopping, revoking permission, or changing materials or connections cancels pending work. Wide Conference windows show assistance beside subtitles; narrow windows use the materials sheet. Meeting setup also displays ordinary AI answers and document citations. Completed answers can be explicitly saved or exported to Markdown from setup without recording any speech, or after ending the meeting. Empty sessions and unfinished answers are not saved. Completed Web research and its sources remain visible in Review after the meeting ends.
 
 ## Web research
 

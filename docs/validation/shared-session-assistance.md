@@ -1,5 +1,20 @@
 # 両モード共通の資料・発話支援 — 実装・検証記録
 
+## レビュー4件の修正検証（2026-11-12）
+
+ユーザー「修正進めて」により、準備中の通常AI回答表示、終了後のWeb調査表示、回答だけの保存/Markdown出力、Conferenceの内部音声停止エラー表示を修正した。準備画面と振り返り画面の保存・出力操作は`MeetingSaveControls`を共用する。Web調査結果だけが残る場合も新規会議へ切り替える前に破棄確認を表示する。
+
+- **Red:** `AssistanceReviewRegressionTests`で、内部音声/両入力の停止エラー未反映、通常回答/Web回答だけの保存不可、準備画面の回答・引用・Markdown操作の欠落、終了後のWeb本文・出典の欠落を確認した。画面の見出しを取得できることを前提条件とし、読み取り失敗を製品の不具合と区別した。
+- **Green:** 関連47テスト・6 suites成功。画面はモックLLMの回答を実際のSwiftUI Viewへ描画し、アクセシビリティツリーで本文と出典を確認する。テストアプリのアクセシビリティ有効化状態は終了時に復元する。
+- **全回帰:** 547件中**541件成功、6件skip、失敗0**。97 suites。パラメータ展開後768件成功・6件skip。最新xcresultのサマリーで確認。
+- **Lint:** SwiftLint 0.65.1、`lint --strict --no-cache`、219ファイル・違反0。`git diff --check`成功。
+- **保存:** 発話なしの通常回答/Web回答を準備画面で明示保存し、ファイル再読込とMarkdownの本文・引用を検証。空セッション、未完成回答、存在しない発話引用は引き続き拒否する。
+- **音声:** モックの停止失敗→エラー表示→再試行成功での解除を、内部音声と両入力で検証。実録音は行っていない。
+
+証跡: `/private/tmp/conflingo-review-8644b5f/Logs/Test/Test-ConfLingo-2026.11.12_21-19-09-+0900.xcresult`、`/private/tmp/conflingo-assistance-fixes-summary.json`、`/private/tmp/conflingo-assistance-fixes-red.log`、`/private/tmp/conflingo-assistance-fixes-green.log`、`/private/tmp/conflingo-assistance-fixes-lint.log`。
+
+実API・実音声、今回のReleaseビルド、手動VoiceOver操作は未実施。テストのアクセシビリティ有効化に使うAppKit APIには非推奨警告が残る。コミット・配布は行っていない。以下は修正前の実装と検証の記録。
+
 2026-11-12 / `feature/shared-session-assistance` / ローカル実装・検証済み
 
 ユーザー「1」でWebを含む範囲、「進めて」で実装計画を承認。その後の「ウェブ調査はllmの範疇で対応」に従い、独立したBrave検索と専用キーを廃止し、選択中LLMのWeb検索へ変更した。[現在の計画](../design/shared-session-assistance-plan.md)。

@@ -3,7 +3,7 @@ import Foundation
 extension MeetingWorkspace {
     var sessionSnapshot: SessionSnapshot? {
         guard !isSavingSession, summary.state != .sending, !knowledge.isBusy,
-              let snapshot = exportSnapshot, !snapshot.events.isEmpty else { return nil }
+              let snapshot = exportSnapshot, !snapshot.events.isEmpty || !completedAssistance.isEmpty else { return nil }
         return .meeting(snapshot, completedAssistance)
     }
 
