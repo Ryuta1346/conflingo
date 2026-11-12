@@ -71,9 +71,12 @@ struct MeetingTranscriptView: View {
                 .onChange(of: meeting.translations.completed) {
                     if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
                 }
-                .onChange(of: meeting.evidenceRequest) {
+                .task(id: meeting.evidenceRequest) {
                     guard let id = meeting.selectedEvidence, meeting.evidence(for: id) != nil else { return }
                     followsLatest = false
+                    // Let the outer scroll view reveal the pane before locating the utterance.
+                    await Task.yield()
+                    guard !Task.isCancelled else { return }
                     proxy.scrollTo(id, anchor: .top)
                 }
                 .onChange(of: meeting.store.sessionID) { followsLatest = true }

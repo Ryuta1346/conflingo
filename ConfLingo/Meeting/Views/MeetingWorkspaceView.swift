@@ -7,6 +7,7 @@ struct MeetingWorkspaceView: View {
     let compact: () -> Void
 
     @State private var translationLanguages: [Locale.Language] = []
+    @State private var workspaceScrollPosition = ScrollPosition(edge: .top)
 
     var sessions: SessionsLibrary?
     var library: KnowledgeLibrary?
@@ -37,6 +38,10 @@ struct MeetingWorkspaceView: View {
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                         }
                         .frame(height: max(geometry.size.height, horizontal ? paneHeight : paneHeight * 2 + 12))
+                    }
+                    .scrollPosition($workspaceScrollPosition)
+                    .onChange(of: meeting.evidenceRequest) {
+                        workspaceScrollPosition.scrollTo(edge: .top)
                     }
                 }
                 .padding(.horizontal, 16)

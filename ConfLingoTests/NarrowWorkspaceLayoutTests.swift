@@ -6,6 +6,48 @@ import Testing
 @MainActor
 @Suite(.serialized, .timeLimit(.minutes(1)))
 struct NarrowWorkspaceLayoutTests {
+    @Test(arguments: [16.0, 48.0], [false, true])
+    func evidenceLinkRevealsTranscriptFromSupportPane(fontSize: Double, review: Bool) async throws {
+        let suite = "ReviewEvidence." + UUID().uuidString
+        let defaults = try #require(UserDefaults(suiteName: suite))
+        defer { defaults.removePersistentDomain(forName: suite) }
+        let meeting = MeetingPreview.make(activity: AudioInputUse(), defaults: defaults)
+        meeting.consentConfirmed = true
+        await meeting.start()
+        MeetingPreview.populate(meeting, count: 40)
+        if review { await meeting.end() }
+        defer { meeting.translations.reset(sessionID: UUID()) }
+        let host = NSHostingView(rootView: AppShellView(destination: .meeting, phase: meeting.phase, navigate: { _ in }) {
+            MeetingWorkspaceView(meeting: meeting, fontSize: .constant(fontSize), compact: {})
+        })
+        let window = makeWindow(host)
+        defer { window.close() }
+        await resize(window, width: 640, height: 520)
+        let transcript = try #require(leafScrolls(host).max { documentHeight($0) < documentHeight($1) })
+        let outer = try #require(descendants(host, of: NSScrollView.self).first { scroll in
+            guard let document = scroll.documentView else { return false }
+            return descendants(document, of: NSScrollView.self).count >= 2
+        })
+        let outerBottom = max(0, documentHeight(outer) - outer.contentSize.height)
+        outer.contentView.scroll(to: NSPoint(x: 0, y: outerBottom))
+        outer.reflectScrolledClipView(outer.contentView)
+        await resize(window, width: 640, height: 520)
+        meeting.revealEvidence(try #require(meeting.store.finals.first).id)
+        await resize(window, width: 640, height: 520)
+        await resize(window, width: 640, height: 520)
+        #expect(transcript.documentVisibleRect.minY < 25, "The requested first utterance must be visible")
+        #expect(transcript.visibleRect.height >= 100, "Evidence navigation must reveal readable transcript text")
+        outer.contentView.scroll(to: NSPoint(x: 0, y: outerBottom))
+        outer.reflectScrolledClipView(outer.contentView)
+        await resize(window, width: 640, height: 520)
+        meeting.revealEvidence(try #require(meeting.store.finals.first).id)
+        await resize(window, width: 640, height: 520)
+        await resize(window, width: 640, height: 520)
+        #expect(transcript.visibleRect.height >= 100, "Requesting the same evidence must reveal it again")
+        #expect(transcript.documentVisibleRect.minY < 25)
+        if !review { await meeting.end() }
+    }
+
     @Test(arguments: [16.0, 32.0, 48.0], [false, true])
     func meetingKeepsReadableTranscriptAndLatestAfterResizing(fontSize: Double, review: Bool) async throws {
         let meeting = MeetingPreview.make(activity: AudioInputUse())

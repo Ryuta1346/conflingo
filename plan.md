@@ -1,3 +1,5 @@
+> 2026-11-13 レビュー指摘2件を修正: 英語検索の大小文字・アポストロフィと、狭幅の根拠リンクからの発話表示を回帰確認。全558件中552成功・実API評価6skip、Lint・Release成功。[詳細](docs/design/review-followup-fix-plan.md)。
+
 > 2026-11-13 実用確認: main `0d31dd8`上で狭幅字幕・ナビゲーションと日本語検索「月額」の修正を完了。全554件中548成功・実API評価6skip・失敗0、Lint220ファイル違反0、Release成功。合成UIで字幕・保存/終了操作・キーボード移動、および`月額`検索→引用本文を確認。資料質問→引用→保存→再起動→Markdown、署名済みSandboxでの資料取込・再利用も確認済み。実音声・実API・耐久・VoiceOver全経路などを残すためGate全体は未合格。[今回の結果](docs/validation/practical-acceptance-2026-11-12.md)・[検索修正計画](docs/design/japanese-search-fix-plan.md)。
 
 > 2026-11-12 共通支援: Conference／Meetingの資料＋発話への質問、自動提案、手動Web調査、入力3構成を実装。Web調査はLLM内蔵検索を使い、別の検索APIキーは不要。PR #28までローカルmainへマージ済み。[計画](docs/design/shared-session-assistance-plan.md)・[検証記録](docs/validation/shared-session-assistance.md)。

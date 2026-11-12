@@ -4,6 +4,30 @@ import Testing
 
 @Suite(.timeLimit(.minutes(1)))
 struct KnowledgeIndexTests {
+    @Test(arguments: ["O'Reilly", "o'reilly", "Reilly"])
+    func apostropheNameSearchIgnoresCase(query: String) async throws {
+        let index = KnowledgeIndex()
+        let body = "O'Reilly publishes books."
+        let document = try await index.add(data: Data(body.utf8), filename: "books.md")
+        let hits = try await index.search(query)
+        #expect(hits.map(\.documentID) == [document.id])
+        #expect(hits.first?.snippet == body)
+    }
+
+    @Test(arguments: ["John's", "john's"])
+    func possessiveSearchIgnoresCase(query: String) async throws {
+        let index = KnowledgeIndex()
+        let document = try await index.add(data: Data("John's account is ready.".utf8), filename: "account.md")
+        #expect(try await index.search(query).map(\.documentID) == [document.id])
+    }
+
+    @Test(arguments: ["登录", "权限"])
+    func chineseWordsKeepTheirLanguageBoundaries(query: String) async throws {
+        let index = KnowledgeIndex()
+        let document = try await index.add(data: Data("中文分词测试，用户登录权限。".utf8), filename: "guide.md")
+        #expect(try await index.search(query).map(\.documentID) == [document.id])
+    }
+
     @Test(arguments: ["月額", " 月額 ", "月額はいくらですか？", "月額 API", "月額 月額"],
           ["# 仕様\n料金は月額100円です。\nAPI rate limit is 50.", "# 月額\n100円です。", "月額 API\n100円です。"])
     func shortJapaneseQueryFindsWholeWordWithoutMatchingUnrelatedCharacters(query: String, body: String) async throws {

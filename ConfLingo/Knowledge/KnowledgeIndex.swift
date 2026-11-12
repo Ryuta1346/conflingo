@@ -195,16 +195,24 @@ actor KnowledgeIndex {
             .replacingOccurrences(of: "_", with: " ")
         let text = expanded == text ? text : text + " " + expanded
         let tokenizer = NLTokenizer(unit: .word)
-        tokenizer.setLanguage(.japanese)
         var words: [String] = []
-        // Keep surrounding whitespace or English from splitting a short Japanese term such as 月額.
         for part in text.split(whereSeparator: { $0.isWhitespace }) {
             let text = String(part)
             tokenizer.string = text
-            tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { range, _ in
+            var ranges = tokenizer.tokens(for: text.startIndex..<text.endIndex)
+            // Ambiguous short kanji terms such as 月額 can otherwise become isolated characters.
+            if ranges.count > 1 && ranges.allSatisfy({ range in
+                let scalars = text[range].unicodeScalars
+                return scalars.count == 1 && scalars.first?.properties.isIdeographic == true
+            }) {
+                let japanese = NLTokenizer(unit: .word)
+                japanese.setLanguage(.japanese)
+                japanese.string = text
+                ranges = japanese.tokens(for: text.startIndex..<text.endIndex)
+            }
+            for range in ranges {
                 let word = String(text[range]).folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
                 if word.unicodeScalars.contains(where: { CharacterSet.alphanumerics.contains($0) }) { words.append(word) }
-                return true
             }
         }
         return words
