@@ -11,7 +11,7 @@ struct MeetingAIIntegrationTests {
         let gate = TestGate()
         client.gate = gate
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client,
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()
         meeting.setAIAllowed(true)
@@ -39,7 +39,7 @@ struct MeetingAIIntegrationTests {
         let client = FakeInsightClient()
         let gate = TestGate()
         client.gate = gate
-        let settings = GeminiCredentials(store: MemoryAPIKeyStore())
+        let settings = APIKeyCredentials(store: MemoryAPIKeyStore())
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client, credentials: settings)
         meeting.consentConfirmed = true
         await meeting.start()
@@ -79,7 +79,7 @@ struct MeetingAIIntegrationTests {
     @Test func discardedSessionClearsAIConsentAndResults() async {
         let fixture = DualFixture()
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()
         meeting.setAIAllowed(true)

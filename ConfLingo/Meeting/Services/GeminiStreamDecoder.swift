@@ -8,21 +8,7 @@ struct GeminiStreamDecoder {
     private var ended = false
     private var usage: InsightUsage?
 
-    var previewText: String? {
-        guard let prefix = content.range(of: #"^\s*\{\s*"text"\s*:\s*""#, options: .regularExpression) else { return nil }
-        var encoded = "\""
-        var escaped = false
-        for character in content[prefix.upperBound...] {
-            if character == "\"", !escaped {
-                encoded.append(character)
-                return try? JSONDecoder().decode(String.self, from: Data(encoded.utf8))
-            }
-            encoded.append(character)
-            escaped = character == "\\" && !escaped
-        }
-        // Incomplete escape sequences wait for the next chunk.
-        return try? JSONDecoder().decode(String.self, from: Data((encoded + "\"").utf8))
-    }
+    var previewText: String? { InsightPayload.preview(content) }
 
     mutating func consume(_ data: Data) throws {
         totalBytes += data.count
@@ -42,20 +28,7 @@ struct GeminiStreamDecoder {
         if !line.isEmpty { try acceptLine(); line.removeAll() }
         if !frame.isEmpty { try acceptFrame() }
         guard ended else { throw InsightFailure.invalidResponse }
-        let result = try JSONDecoder().decode(Payload.self, from: Data(content.utf8))
-        guard !result.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
-              result.text.count <= 8_000, result.evidenceIDs.count <= 30, (result.knowledgeIDs?.count ?? 0) <= 5,
-              (result.supplement?.count ?? 0) <= 8_000 else { throw InsightFailure.invalidResponse }
-        // Invalid UUIDs must make the response fail, never silently disappear.
-        let ids = try result.evidenceIDs.map { value in
-            guard let id = UUID(uuidString: value) else { throw InsightFailure.invalidResponse }
-            return id
-        }
-        let knowledgeIDs = try (result.knowledgeIDs ?? []).map { value in
-            guard let id = UUID(uuidString: value) else { throw InsightFailure.invalidResponse }
-            return id
-        }
-        return InsightResult(kind: result.kind, text: result.text, evidenceIDs: ids, usage: usage, knowledgeIDs: knowledgeIDs, supplement: result.supplement)
+        return try InsightPayload.decode(content, usage: usage)
     }
 
     private mutating func acceptLine() throws {
@@ -97,13 +70,6 @@ struct GeminiStreamDecoder {
         }
     }
 
-    private struct Payload: Decodable {
-        let text: String
-        let kind: MeetingInsight.Kind
-        let evidenceIDs: [String]
-        let knowledgeIDs: [String]?
-        let supplement: String?
-    }
     private struct Chunk: Decodable {
         let candidates: [Candidate]?
         let usageMetadata: Usage?

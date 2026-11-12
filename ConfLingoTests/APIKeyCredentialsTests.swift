@@ -3,10 +3,10 @@ import Testing
 @testable import ConfLingo
 
 @MainActor
-struct GeminiCredentialsTests {
+struct APIKeyCredentialsTests {
     @Test func failedRefreshDoesNotReportAnUnregisteredKey() async {
         let store = MemoryAPIKeyStore()
-        let settings = GeminiCredentials(store: store)
+        let settings = APIKeyCredentials(store: store)
         settings.save("synthetic-key")
         store.fail = true
         await settings.refresh()
@@ -20,7 +20,7 @@ struct GeminiCredentialsTests {
 
     @Test func oldRefreshCannotOverwriteACompletedSave() async {
         let store = DeferredReadAPIKeyStore()
-        let settings = GeminiCredentials(store: store)
+        let settings = APIKeyCredentials(store: store)
         let refresh = Task { await settings.refresh() }
         await store.gate.entered.next()
         #expect(settings.statusText == "APIキーを確認しています…")
@@ -36,7 +36,7 @@ struct GeminiCredentialsTests {
         let store = DeferredReadAPIKeyStore()
         store.value = hasExistingKey ? "existing-key" : nil
         store.failWrites = true
-        let settings = GeminiCredentials(store: store)
+        let settings = APIKeyCredentials(store: store)
         let refresh = Task { await settings.refresh() }
         await store.gate.entered.next()
 
@@ -53,7 +53,7 @@ struct GeminiCredentialsTests {
 
     @Test func failedDeleteKeepsPendingRegistrationCheck() async {
         let store = DeferredReadAPIKeyStore()
-        let settings = GeminiCredentials(store: store)
+        let settings = APIKeyCredentials(store: store)
         settings.save("existing-key")
         store.failWrites = true
         let refresh = Task { await settings.refresh() }
@@ -71,7 +71,7 @@ struct GeminiCredentialsTests {
 
     @Test func oldRefreshCannotOverwriteACompletedDelete() async {
         let store = DeferredReadAPIKeyStore()
-        let settings = GeminiCredentials(store: store)
+        let settings = APIKeyCredentials(store: store)
         settings.save("existing-key")
         let refresh = Task { await settings.refresh() }
         await store.gate.entered.next()
@@ -87,7 +87,7 @@ struct GeminiCredentialsTests {
 
     @Test func registrationReplacementDeletionAndFailureAreTruthful() throws {
         let store = MemoryAPIKeyStore()
-        let settings = GeminiCredentials(store: store)
+        let settings = APIKeyCredentials(store: store)
         var changes = 0
         settings.onChange = { changes += 1 }
         settings.save(" test-key ")

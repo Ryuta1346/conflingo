@@ -15,10 +15,19 @@ final class InsightRedirectGuard: NSObject, URLSessionTaskDelegate, Sendable {
 @MainActor
 struct URLSessionInsightTransport: InsightHTTPTransport {
     var configuration: URLSessionConfiguration = .ephemeral
+    var allowedBaseURL: URL? = nil
+
+    static func permits(_ url: URL, base: URL?) -> Bool {
+        guard url.user == nil, url.password == nil else { return false }
+        guard let base else { return url.scheme == "https" && url.host == "generativelanguage.googleapis.com" }
+        guard url.scheme == base.scheme, url.host == base.host, url.port == base.port else { return false }
+        let prefix = base.path.hasSuffix("/") ? base.path : base.path + "/"
+        return url.path == base.path || url.path.hasPrefix(prefix)
+    }
 
     func stream(_ request: URLRequest, receive: @escaping @MainActor (Data) throws -> Void) async throws {
         try Task.checkCancellation()
-        guard request.url?.scheme == "https", request.url?.host == "generativelanguage.googleapis.com" else {
+        guard let url = request.url, Self.permits(url, base: allowedBaseURL) else {
             throw InsightFailure.invalidResponse
         }
         configuration.urlCache = nil

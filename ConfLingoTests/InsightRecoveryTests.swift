@@ -109,7 +109,7 @@ struct InsightRecoveryTests {
         let fixture = DualFixture()
         let client = FakeInsightClient()
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client,
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         let gate = TestGate()
         fixture.system.startGate = gate
         fixture.system.startError = fails ? .start : nil

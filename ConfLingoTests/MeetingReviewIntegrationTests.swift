@@ -9,7 +9,7 @@ struct MeetingReviewIntegrationTests {
         let fixture = DualFixture()
         let client = FakeInsightClient()
         let meeting = MeetingWorkspace(controller: fixture.controller(owner: .meeting), insightClient: client,
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()
         try await fixture.microphone.emit("Summary fixture", time: 1)
@@ -33,7 +33,7 @@ struct MeetingReviewIntegrationTests {
         let fixture = DualFixture()
         let client = FakeInsightClient()
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client,
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()
         fixture.microphone.finalOnStop = "Synthetic final"
@@ -49,7 +49,7 @@ struct MeetingReviewIntegrationTests {
         let fixture = DualFixture()
         let client = FakeInsightClient()
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client,
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()
         fixture.microphone.finalOnStop = "Synthetic final"
@@ -72,7 +72,7 @@ struct MeetingReviewIntegrationTests {
     @Test func keyChangeCancelsSummaryAndDiscardResetsReviewState() async throws {
         let fixture = DualFixture()
         let client = FakeInsightClient()
-        let credentials = GeminiCredentials(store: MemoryAPIKeyStore())
+        let credentials = APIKeyCredentials(store: MemoryAPIKeyStore())
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client, credentials: credentials)
         meeting.consentConfirmed = true
         await meeting.start()

@@ -32,7 +32,7 @@ enum MeetingPreview {
         let meeting = liveAI
             ? MeetingWorkspace(controller: controller, defaults: defaults)
             : MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
-                               credentials: GeminiCredentials(store: PreviewAPIKeyStore()), defaults: defaults)
+                               defaults: defaults, llmSettings: LLMSettings(defaults: defaults, keyStore: { _ in PreviewAPIKeyStore() }))
         meeting.previewUsesLiveAI = liveAI
         return meeting
     }
