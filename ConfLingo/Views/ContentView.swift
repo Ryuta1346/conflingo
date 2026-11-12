@@ -183,6 +183,7 @@ struct ContentView: View {
         .onChange(of: conferenceKnowledge.terms.revision) { Task { await applyConferenceTerms() } }
         // @Sendable でクロージャを nonisolated にし、非 Sendable な session を
         // MainActor 領域に取り込まずタスク領域に留める（translate 呼び出しに必須）。
+        .background { MeetingTranslationPreparation(translations: meeting.translations) }
         .translationTask(translationConfiguration) { @Sendable session in
             guard !isPreview else { return }
             do {

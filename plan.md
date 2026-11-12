@@ -1,14 +1,16 @@
 # ConfLingo — 開発・進捗管理
 
+- **追加実装（PR提出対象）:** Meetingの入力別オンデバイス翻訳、原文＋訳文、小窓・保存・Markdown対応。503テスト／89 suites成功、Lint198ファイル違反0、Debug/Release成功、日英・英日の実モデル応答、主要合成UI、ローカル反映を確認。実会議の品質・結合受入は継続。[検証記録](docs/validation/meeting-translation.md)。
+
 > **本ファイルは常に簡潔明瞭に保つ。** 詳細な仕様・タスク説明・受入条件は [詳細計画](docs/meeting-copilot-plan.md) に集約し、ここに重複させない。
 
 ## 現在地
 
-- **追加実装（承認済み・未マージ）:** `feature/knowledge-entry-points`でライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-12／`feature/knowledge-entry-points`・基準main `56d7a81`**。PR #23までのマージをGit履歴で確認。今回の変更はレビュー提出版。リモートの最新状態は再取得していない。
+- **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
+- 更新: **2026-11-12／`feature/meeting-translation`・基準main `595eb5c`**。PR #24までのマージを確認。Meeting翻訳の実装と検証結果をこのブランチに集約。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** 資料追加導線の484テスト／86 suites成功、Lint193ファイル違反0、Debug/Releaseと主要fake UIを確認。[最新結果](docs/validation/knowledge-entry-points.md)。新規クラウドとQwenの実生成・狭幅・VoiceOver全経路は引き続き未確認。
+- **直近の検証記録:** Meeting翻訳の503テスト／89 suites成功、Lint198ファイル違反0。[最新結果](docs/validation/meeting-translation.md)。新規クラウドとQwenの実生成・VoiceOver全経路は引き続き未確認。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。

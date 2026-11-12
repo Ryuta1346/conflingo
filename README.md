@@ -18,6 +18,10 @@ Saved records include final transcripts, available translations, completed AI ca
 
 Meeting also supports microphone and system audio transcription, optional AI responses and summaries, and document references. See the [progress tracker](plan.md) for outstanding real-meeting acceptance checks and the [Sessions validation record](docs/validation/sessions.md) for verified behavior. The instructions below primarily describe Conference.
 
+## Meeting translation
+
+Choose a translation target for each input in Meeting setup. Defaults are Japanese → English for the microphone and English → Japanese for system audio. Confirmed utterances keep their originals and show translations below them, including in the floating panel, saved sessions and Markdown exports. Each input can disable translation. Translation runs on this Mac without an API key; a model download may be needed. Translation failures do not stop transcription. See [validation](docs/validation/meeting-translation.md) for the tested scope.
+
 ## Knowledge library
 
 From the knowledge library, or before/during Meeting and Conference, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.

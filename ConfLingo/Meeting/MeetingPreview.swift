@@ -30,9 +30,10 @@ enum MeetingPreview {
             }
         )
         let meeting = liveAI
-            ? MeetingWorkspace(controller: controller, defaults: defaults)
+            ? MeetingWorkspace(controller: controller, defaults: defaults, translationClient: PreviewMeetingTranslator(), prepareTranslationModels: false)
             : MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
-                               defaults: defaults, llmSettings: LLMSettings(defaults: defaults, keyStore: { _ in PreviewAPIKeyStore() }))
+                               defaults: defaults, llmSettings: LLMSettings(defaults: defaults, keyStore: { _ in PreviewAPIKeyStore() }),
+                               translationClient: PreviewMeetingTranslator(), prepareTranslationModels: false)
         meeting.previewUsesLiveAI = liveAI
         return meeting
     }
@@ -184,5 +185,11 @@ private final class PreviewSpeech: SpeechTranscribing {
     func finishRecognition() async throws {}
     func cancelRecognition() async {}
     func stop() async throws { try await stopInput() }
+}
+struct PreviewMeetingTranslator: MeetingTranslating {
+    func translate(_ request: MeetingTranslationRequest) async throws -> String {
+        if request.targetLanguage == "ja" { return "合成プレビューの訳文：セキュリティレビュー後に次の計画を確認します。" }
+        return "Synthetic translation: We will review the next steps after the security review."
+    }
 }
 #endif

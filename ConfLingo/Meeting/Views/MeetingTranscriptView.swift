@@ -6,6 +6,7 @@ struct MeetingTranscriptView: View {
     @State private var followsLatest = true
     @State private var userScrolling = false
     @State private var atBottom = true
+    @State private var scrollPosition = ScrollPosition(edge: .bottom)
 
     private var events: [TranscriptEvent] { meeting.transcriptEvents }
 
@@ -35,6 +36,7 @@ struct MeetingTranscriptView: View {
                                 }
                                 .font(.caption).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).lineSpacing(5).textSelection(.enabled)
+                                MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize)
                                 if !event.isFinal {
                                     Text("認識中").font(.caption).foregroundStyle(DesignTokens.secondary)
                                 }
@@ -45,11 +47,14 @@ struct MeetingTranscriptView: View {
                                         in: RoundedRectangle(cornerRadius: 8))
                             .id(event.id)
                         }
-                        Color.clear.frame(height: 1).id("latest")
                     }
                     .padding(12)
                 }
                 .defaultScrollAnchor(.bottom, for: .initialOffset)
+                .scrollPosition($scrollPosition)
+                .onScrollGeometryChange(for: CGFloat.self) { $0.contentSize.height } action: { _, _ in
+                    if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
+                }
                 .onScrollGeometryChange(for: Bool.self) { $0.visibleRect.maxY >= $0.contentSize.height - 24 } action: { _, bottom in
                     atBottom = bottom
                     if userScrolling { followsLatest = bottom }
@@ -59,7 +64,10 @@ struct MeetingTranscriptView: View {
                     if userScrolling { followsLatest = atBottom }
                 }
                 .onChange(of: events) {
-                    if followsLatest { proxy.scrollTo("latest", anchor: .bottom) }
+                    if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
+                }
+                .onChange(of: meeting.translations.completed) {
+                    if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
                 }
                 .onChange(of: meeting.evidenceRequest) {
                     guard let id = meeting.selectedEvidence, meeting.evidence(for: id) != nil else { return }
@@ -72,7 +80,7 @@ struct MeetingTranscriptView: View {
                         Button("最新へ", systemImage: "arrow.down") {
                             followsLatest = true
                             meeting.selectedEvidence = nil
-                            proxy.scrollTo("latest", anchor: .bottom)
+                            scrollPosition.scrollTo(edge: .bottom)
                         }
                         .buttonStyle(.borderedProminent).padding(12)
                     }

@@ -135,6 +135,19 @@ private struct MeetingFloatingView: View {
                         Text("発話はメイン画面で確認できます。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                     }
+                    if !meeting.transcriptEvents.isEmpty {
+                        Divider()
+                        Text("直近の発話と翻訳").font(.headline)
+                        ForEach(Array(meeting.transcriptEvents.suffix(3))) { event in
+                            VStack(alignment: .leading, spacing: 6) {
+                                Text(event.origin == .microphone ? "自分 · マイク" : "相手側 · 内部音声")
+                                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                                Text(event.text).font(.system(size: fontSize)).textSelection(.enabled)
+                                MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                        }
+                    }
                     Text("非表示にしても音声収集は続きます。ウィンドウメニューから再表示できます。")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
                 }

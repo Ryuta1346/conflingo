@@ -83,6 +83,15 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
                             && (event.endOffset.map { $0 >= event.startOffset } ?? true)
                             && !event.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
+            let translations = value.translations ?? []
+            try require(unique(translations.map(\.id)))
+            let events = Dictionary(uniqueKeysWithValues: value.events.map { ($0.id, $0) })
+            for translation in translations {
+                try require(events[translation.id]?.languageCode == translation.sourceLanguage
+                            && !translation.sourceLanguage.isEmpty
+                            && !translation.targetLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
+                            && !translation.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+            }
             for card in cards + value.candidates.map(\.insight) {
                 try require(card.status == .complete && !card.text.isEmpty && card.evidenceIDs.allSatisfy { ids.contains($0) })
                 try references(card.knowledgeReferences)
