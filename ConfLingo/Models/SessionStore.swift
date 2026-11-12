@@ -24,9 +24,13 @@ final class SessionStore {
     /// 文末待ちで翻訳単位に未確定のセグメント ID（出現順）
     private(set) var bufferedSegmentIDs: [UUID] = []
     private(set) var volatileText: String = ""
-    var phase: SessionPhase = .idle
+    var phase: SessionPhase = .idle { didSet { phaseChanged?(phase) } }
+    var phaseChanged: ((SessionPhase) -> Void)?
     var mode: SessionMode = .transcription
     var sessionName: String = ""
+    var sourceLanguage = "en-US"
+    var onFinal: ((TranscriptSegment) -> Void)?
+    var onReset: (() -> Void)?
     private(set) var startedAt: Date?
 
     /// Start 時点で確定した専門用語辞書。翻訳時の do-not-translate / 訳語固定リストとして参照する。
@@ -39,20 +43,22 @@ final class SessionStore {
     /// final transcript を確定セグメントとして追加する。
     /// 空文字・直前セグメントと同一文は破棄して nil を返す（重複翻訳ガード）。
     @discardableResult
-    func appendFinal(_ text: String, startTime: TimeInterval? = nil) -> UUID? {
+    func appendFinal(_ text: String, startTime: TimeInterval? = nil, origin: AudioOrigin? = nil,
+                     sessionOffset: TimeInterval? = nil, languageCode: String? = nil) -> UUID? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
-        guard segments.last?.english != trimmed else { return nil }
+        guard segments.last?.english != trimmed || (origin != nil && segments.last?.origin != origin) else { return nil }
 
         let segment = TranscriptSegment(
             id: UUID(),
             index: segments.count + 1,
             english: trimmed,
             finalizedAt: Date(),
-            startTime: startTime
+            startTime: startTime, origin: origin, sessionOffset: sessionOffset, languageCode: languageCode
         )
         segments.append(segment)
         segmentByID[segment.id] = segment
+        onFinal?(segment)
         volatileText = ""
         return segment.id
     }
@@ -137,5 +143,6 @@ final class SessionStore {
         bufferedSegmentIDs = []
         volatileText = ""
         startedAt = nil
+        onReset?()
     }
 }

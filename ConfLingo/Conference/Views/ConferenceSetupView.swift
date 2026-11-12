@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ConferenceSetupView: View {
     @Binding var sessionName: String
+    var inputSelection: Binding<AudioInputSelection> = .constant(.microphone)
     @Binding var sourceLanguage: String
     @Binding var targetLanguage: String
     @Binding var mode: SessionMode
@@ -29,6 +30,7 @@ struct ConferenceSetupView: View {
                                 .textFieldStyle(.roundedBorder)
                                 .accessibilityLabel("セッション名")
                         }
+                        AudioInputPicker(selection: inputSelection).disabled(!canEdit)
                         SessionModePicker(selection: $mode).disabled(!canEdit)
                         ViewThatFits(in: .horizontal) {
                             HStack(alignment: .top, spacing: 24) { languageFields }

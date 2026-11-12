@@ -12,19 +12,24 @@ final class LegacyTranslationAdapter {
     private var latest: [UUID: TranscriptEvent] = [:]
     private var flushTask: Task<Void, Never>?
     private var finished = false
+    private let origins: Set<AudioOrigin>
+    private let commonTimeline: Bool
 
     init(
         sessionID: UUID, store: SessionStore, coordinator: TranslationCoordinator,
+        origins: Set<AudioOrigin> = [.microphone], commonTimeline: Bool = false,
         sleep: @escaping @MainActor (Duration) async throws -> Void = { try await Task.sleep(for: $0) }
     ) {
         self.sessionID = sessionID
+        self.origins = origins
+        self.commonTimeline = commonTimeline
         self.store = store
         self.coordinator = coordinator
         self.sleep = sleep
     }
 
     func receive(_ event: TranscriptEvent) {
-        guard !finished, event.sessionID == sessionID, event.origin == .microphone,
+        guard !finished, event.sessionID == sessionID, origins.contains(event.origin),
               !event.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { return }
         if let previous = latest[event.id] {
             guard !previous.isFinal, event.revision > previous.revision else { return }
@@ -35,7 +40,8 @@ final class LegacyTranslationAdapter {
             return
         }
         store.updateVolatile("")
-        guard let id = store.appendFinal(event.text, startTime: event.sourceStartTime) else { return }
+        if store.segments.last?.origin != event.origin { flush() }
+        guard let id = store.appendFinal(event.text, startTime: commonTimeline ? event.startOffset : event.sourceStartTime, origin: event.origin, sessionOffset: event.startOffset, languageCode: event.languageCode) else { return }
         flushTask?.cancel()
         if let unit = store.bufferSegment(id) {
             coordinator.enqueue(id: unit.id, text: unit.english)

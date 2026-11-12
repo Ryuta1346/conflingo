@@ -8,6 +8,7 @@ struct ContentView: View {
     @State private var meeting: MeetingWorkspace
     @State private var conferenceKnowledge: ConferenceKnowledgeWorkspace
     @State private var showConferenceKnowledge = false
+    @State private var conferenceInput: AudioInputSelection = .microphone
     @State private var floatingPanel: MeetingFloatingPanel
     @Environment(\.openWindow) private var openWindow
     @State private var store: SessionStore
@@ -94,7 +95,7 @@ struct ContentView: View {
                     Divider()
                     ControlBar(phase: store.phase, isStopping: controller.isStopping,
                                canStart: modelState == .ready && !conferenceKnowledge.knowledge.isBusy && !library.isBusy, hasTranscript: !store.segments.isEmpty,
-                               start: startSession, stop: { Task { await stopSession() } })
+                               start: startSession, stop: { Task { await stopSession() } }, inputLabel: conferenceInput.label)
                         .disabled(sessions.isBusy)
                 }
             }
@@ -107,10 +108,12 @@ struct ContentView: View {
             }
         }
         .onChange(of: navigation.destination) { _, destination in
-            if destination != .meeting { meeting.cancelSummary() }
+            if destination != .meeting { meeting.cancelSummary(); meeting.research.cancel() }
+            if destination != .live && destination != .setup { conferenceKnowledge.stop() }
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             meeting.cancelSummary()
+            meeting.research.cancel()
             conferenceKnowledge.stop()
         }
         .background(WindowCloseGuard(shouldClose: shouldCloseWindow))
@@ -230,7 +233,7 @@ struct ContentView: View {
                      showSessions: { sessions.closeDetail(); navigate(.sessions) }, openSession: openSavedSession)
         case .setup:
             ConferenceSetupView(
-                sessionName: $store.sessionName, sourceLanguage: $sourceLocaleID,
+                sessionName: $store.sessionName, inputSelection: $conferenceInput, sourceLanguage: $sourceLocaleID,
                 targetLanguage: $targetLanguageID, mode: $store.mode,
                 fastFinalization: $fastFinalization, profiles: profileStore,
                 sourceLocales: sourceLocales, targetLanguages: targetLanguages,
@@ -245,14 +248,26 @@ struct ContentView: View {
                     guard let snapshot = conferenceSnapshot else { return }
                     Task { await sessions.save(snapshot) }
                 }.padding([.horizontal, .top], 20)
-                ConferenceLiveView(
-                    store: store, sourceLanguage: sourceLocaleID,
-                    targetLanguage: transcriptionOnly ? nil : targetLanguageID,
-                    profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
-                    editSettings: { navigate(.setup) },
-                    clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections
-                )
-                .disabled(sessions.isBusy)
+                GeometryReader { geometry in
+                    HStack(spacing: 0) {
+                        ConferenceLiveView(
+                            store: store, sourceLanguage: sourceLocaleID,
+                            targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                            profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
+                            editSettings: { navigate(.setup) },
+                            clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections
+                        )
+                        if geometry.size.width >= 1_000 && !showConferenceKnowledge {
+                            Divider()
+                            ScrollView {
+                                VStack(alignment: .leading, spacing: 12) {
+                                    Button("資料・LLM設定を開く") { showConferenceKnowledge = true }
+                                    ConferenceAssistanceView(workspace: conferenceKnowledge)
+                                }.padding(16)
+                            }.frame(width: 340)
+                        }
+                    }
+                }.disabled(sessions.isBusy)
             }
         case .library:
             KnowledgeLibraryView(library: library, fontSize: fontSize)
@@ -275,7 +290,7 @@ struct ContentView: View {
                 .foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)
             if navigation.destination == .setup || navigation.destination == .live {
-                Button("資料（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
+                Button("資料・AI支援（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
                     .disabled(store.phase == .preparing || store.phase == .stopping)
             }
             if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions || navigation.destination == .library {
@@ -335,6 +350,7 @@ struct ContentView: View {
         switch activePhase {
         case .idle:
             meeting.cancelSummary()
+            meeting.research.cancel()
             conferenceKnowledge.stop()
             return true
         case .listening:
@@ -365,7 +381,7 @@ struct ContentView: View {
                 store: store, coordinator: coordinator,
                 locale: availability.speechLocale ?? Locale(identifier: sourceLocaleID),
                 glossary: conferenceGlossary,
-                fastResults: transcriptionOnly && fastFinalization, recognitionMode: conferenceKnowledge.recognitionMode
+                fastResults: transcriptionOnly && fastFinalization, recognitionMode: conferenceKnowledge.recognitionMode, selection: conferenceInput
             )
         }
     }

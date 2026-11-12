@@ -26,6 +26,8 @@ struct MeetingInsight: Identifiable, Equatable, Sendable, Codable {
     var status: Status = .complete
     var hasInvalidEvidence = false
     var knowledgeReferences: [KnowledgeReference] = []
+    var webReferences: [WebReference]? = nil
+    var searchSuggestionsHTML: String? = nil
 
     static func featured(in insights: [Self]) -> Self? {
         insights.reversed().max { $0.priority < $1.priority }

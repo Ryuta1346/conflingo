@@ -6,12 +6,15 @@ import Observation
 final class ConferenceKnowledgeWorkspace {
     let store: SessionStore
     let settings: LLMSettings
-    let knowledge = KnowledgeStore()
+    let knowledge: KnowledgeStore
+    let assistanceStore: MeetingSessionStore
+    let assistance: InsightCoordinator
+    let research: WebResearchCoordinator
     let terms = DocumentTerms()
     var recognitionMode: SpeechRecognitionMode = .standard
     var recognitionStatus = "認識用語は次回の開始時に適用します。"
     let client: any InsightClient
-    var answerLanguage: AnswerLanguage = .japanese
+    var answerLanguage: AnswerLanguage = .japanese { didSet { assistance.answerLanguage = answerLanguage } }
     private(set) var questionPermitted = false
     private(set) var correctionPermitted = false
     private(set) var corrections: [ConferenceCorrection] = []
@@ -28,8 +31,21 @@ final class ConferenceKnowledgeWorkspace {
     init(store: SessionStore, settings: LLMSettings, client: (any InsightClient)? = nil, timeout: Duration = .seconds(30)) {
         self.store = store
         self.settings = settings
-        self.client = client ?? SelectedLLMClient(settings: settings)
+        let client = client ?? SelectedLLMClient(settings: settings)
+        self.client = client
+        let knowledge = KnowledgeStore()
+        self.knowledge = knowledge
+        let events = MeetingSessionStore(sessionID: store.sessionID)
+        assistanceStore = events
+        assistance = InsightCoordinator(store: events, client: client, knowledge: knowledge)
+        research = WebResearchCoordinator(store: events, knowledge: knowledge, settings: settings)
         self.timeout = timeout
+        store.onFinal = { [weak self] segment in self?.receiveSpeech(segment) }
+        store.phaseChanged = { [weak self] phase in
+            if phase == .listening { self?.assistance.resume() }
+            if phase == .preparing || phase == .stopping { self?.stop() }
+        }
+        store.onReset = { [weak self] in self?.reset(); self?.synchronizeSpeech() }
         knowledge.onInvalidation = { [weak self] in self?.revokePermissions() }
         knowledge.onContentChange = { [weak self] in self?.terms.reset() }
         settings.observeChanges { [weak self] in self?.revokePermissions() }
@@ -47,9 +63,42 @@ final class ConferenceKnowledgeWorkspace {
         knowledge.setPermission(questionPermitted)
     }
 
+    func setAssistancePermission(_ allowed: Bool) {
+        if !allowed { research.setPermission(false) }
+        synchronizeSpeech()
+        assistance.resume()
+        assistance.setPermission(allowed, after: assistanceStore.finals.last?.startOffset ?? 0)
+    }
+
+    var canAskAssistance: Bool {
+        canEditKnowledge && assistance.permitted && assistance.state != .sending
+    }
+
+    func askAssistance(_ question: String) async {
+        guard canAskAssistance else { return }
+        synchronizeSpeech()
+        if store.phase == .idle { assistance.resume() }
+        await assistance.ask(question)
+    }
+
+    func synchronizeSpeech() {
+        if assistanceStore.sessionID != store.sessionID { assistanceStore.reset(sessionID: store.sessionID) }
+        for segment in store.segments { receiveSpeech(segment) }
+    }
+
+    private func receiveSpeech(_ segment: TranscriptSegment) {
+        if assistanceStore.sessionID != store.sessionID { assistanceStore.reset(sessionID: store.sessionID) }
+        let event = TranscriptEvent(id: segment.id, sessionID: store.sessionID, origin: segment.origin ?? .microphone,
+            languageCode: segment.languageCode ?? store.sourceLanguage,
+            startOffset: segment.sessionOffset ?? segment.startTime ?? Double(segment.index),
+            endOffset: nil, text: segment.english, isFinal: true, revision: 1, sourceStartTime: segment.startTime)
+        if assistanceStore.receive(event), store.phase == .listening { assistance.receive(event) }
+    }
+
     func revokePermissions() {
         setQuestionPermission(false)
         correctionPermitted = false
+        assistance.setPermission(false, after: 0)
     }
 
     func setCorrectionPermission(_ allowed: Bool) {
@@ -59,7 +108,7 @@ final class ConferenceKnowledgeWorkspace {
     }
 
     var snapshot: ConferenceSupportSnapshot {
-        ConferenceSupportSnapshot(answers: answers, corrections: corrections.filter(\.adopted), terms: terms.applied)
+        ConferenceSupportSnapshot(answers: answers + assistance.insights.filter { $0.status == .complete && !$0.hasInvalidEvidence } + research.answers, corrections: corrections.filter(\.adopted), terms: terms.applied)
     }
 
     func adoptCorrection(_ id: UUID, adopted: Bool) {
@@ -163,7 +212,7 @@ final class ConferenceKnowledgeWorkspace {
         preview = ""
     }
 
-    func stop() { cancel(); knowledge.cancelPendingImports() }
+    func stop() { cancel(); research.cancel(); assistance.suspend(); knowledge.cancelPendingImports() }
 
     func reset() {
         stop()
@@ -171,6 +220,8 @@ final class ConferenceKnowledgeWorkspace {
         knowledge.reset()
         terms.reset()
         answers = []
+        assistance.reset()
+        research.reset()
         corrections = []
         message = ""
     }

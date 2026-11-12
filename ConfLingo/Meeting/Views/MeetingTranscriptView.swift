@@ -15,7 +15,7 @@ struct MeetingTranscriptView: View {
             HStack {
                 Text("会話の流れ").font(.headline)
                 Spacer()
-                Text(followsLatest ? "自分 / 相手側" : "履歴を表示中")
+                Text(followsLatest ? "入力元ごとに表示" : "履歴を表示中")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
             }
             .padding(14)
@@ -30,13 +30,16 @@ struct MeetingTranscriptView: View {
                         ForEach(events) { event in
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
-                                    Text(event.origin == .microphone ? "自分 · マイク" : "相手側 · 内部音声")
+                                    Text(event.origin.label)
                                     if !event.isFinal { Text("認識中") }
                                     Spacer()
                                     Text(MarkdownExporter.timestamp(event.startOffset)).monospacedDigit()
                                 }
                                 .font(.caption).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).lineSpacing(5).textSelection(.enabled)
+                                if event.isFinal && meeting.page != .review {
+                                    Button("この発話をWebで調べる") { meeting.research.open(event.text, evidenceIDs: [event.id]) }.font(.caption)
+                                }
                                 MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,
                                                        sourceText: event.text, targetLanguage: meeting.translationTarget(for: event))
                             }

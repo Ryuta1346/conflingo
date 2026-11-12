@@ -18,7 +18,7 @@ struct ConferenceKnowledgeView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("Conferenceの資料").font(.title2.bold())
+                Text("Conferenceの資料・AI支援").font(.title2.bold())
                 Spacer()
                 if workspace.store.phase == .listening { Button("音声を停止", action: stopAudio) }
                 Button("閉じる") { dismiss() }.keyboardShortcut(.cancelAction)
@@ -43,8 +43,10 @@ struct ConferenceKnowledgeView: View {
                         sourceLanguages: [sourceLanguage], targetLanguage: targetLanguage, manual: manualGlossary, applied: applyTerms)
                     Text(workspace.recognitionStatus).font(.caption).foregroundStyle(DesignTokens.secondary)
                     Divider()
+                    ConferenceAssistanceView(workspace: workspace)
+                    Divider()
                     HStack {
-                        Text("資料に質問").font(.headline)
+                        Text("資料だけに質問").font(.headline)
                         Spacer()
                         Button("LLM設定") { showSettings = true }
                     }

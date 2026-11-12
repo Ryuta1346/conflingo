@@ -24,7 +24,7 @@ struct HomeView: View {
                             .font(.system(size: 28))
                             .foregroundStyle(DesignTokens.accent)
                         Text("Conference").font(.title2.weight(.semibold))
-                        Text("講演やセッションの理解を支えます。\n言語と専門用語を選んで、字幕をはじめましょう。")
+                        Text("講演の字幕・翻訳を読みながら、資料と発話を使った提案やWeb調査を利用できます。")
                             .foregroundStyle(DesignTokens.secondary)
                             .lineSpacing(5)
                         Button("字幕を準備する", systemImage: "arrow.right", action: prepare)
@@ -48,7 +48,7 @@ struct HomeView: View {
                 Surface {
                     VStack(alignment: .leading, spacing: 14) {
                         Label("Meeting", systemImage: "person.2").font(.title2.weight(.semibold))
-                        Text("自分と相手側の発話を、このMacで文字起こし。会議の流れを読み返せます。")
+                        Text("選んだ音声を文字起こし。資料・発話から提案やWeb調査を利用できます。")
                             .foregroundStyle(DesignTokens.secondary)
                         Button("会議を開く", systemImage: "arrow.right", action: openMeeting)
                             .buttonStyle(.bordered).controlSize(.large)

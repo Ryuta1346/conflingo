@@ -58,19 +58,20 @@ struct MeetingWorkspaceView: View {
     private var preparation: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                PageHeading(title: "会議を、はじめる。", subtitle: "自分と相手側の発話を、このMacで文字にします。", eyebrow: "Meeting / 準備")
+                PageHeading(title: "会議を、はじめる。", subtitle: "選んだ音声入力を、このMacで文字にします。", eyebrow: "Meeting / 準備")
                 Surface {
                     VStack(alignment: .leading, spacing: 18) {
                         TextField("会議名", text: $meeting.name)
                             .textFieldStyle(.roundedBorder).accessibilityLabel("会議名")
+                        AudioInputPicker(selection: $meeting.inputSelection)
                         SessionModePicker(selection: $meeting.mode)
-                        languagePicker("自分 · マイク", selection: $meeting.microphoneLocaleID)
+                        languagePicker("マイク・外部入力", selection: $meeting.microphoneLocaleID)
                         if meeting.mode == .translation {
-                            translationPicker("自分の翻訳先", selection: $meeting.microphoneTranslationLanguage)
+                            translationPicker("マイク・外部入力の翻訳先", selection: $meeting.microphoneTranslationLanguage)
                         }
-                        languagePicker("相手側 · 内部音声", selection: $meeting.systemLocaleID)
+                        languagePicker("Macの内部音声", selection: $meeting.systemLocaleID)
                         if meeting.mode == .translation {
-                            translationPicker("相手側の翻訳先", selection: $meeting.systemTranslationLanguage)
+                            translationPicker("内部音声の翻訳先", selection: $meeting.systemTranslationLanguage)
                             Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
                                 .font(.caption).foregroundStyle(DesignTokens.secondary)
                         }
@@ -87,7 +88,7 @@ struct MeetingWorkspaceView: View {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("音声認識と翻訳は、このMacで", systemImage: "checkmark.shield")
                             .font(.headline)
-                        Text("音声は保存・外部送信しません。翻訳モデルは初回にダウンロードが必要な場合があります。AIの回答言語と翻訳先は別設定です。発話はメモリ内に保持し、自動保存しません。終了後に「このMacに保存」を選べます。AI送信は下で明示的に許可した場合だけ行います。")
+                        Text("音声は保存・外部送信しません。翻訳モデルは初回にダウンロードが必要な場合があります。AIの回答言語と翻訳先は別設定です。自動保存はしません。準備中の完成したAI回答、または会議終了後の記録を「このMacに保存」で残せます。AI送信は下で明示的に許可した場合だけ行います。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                         ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
                             Text("\(origin.label)：\(permission(origin))").font(.caption)
@@ -95,6 +96,12 @@ struct MeetingWorkspaceView: View {
                     }
                 }
                 MeetingAIControls(meeting: meeting)
+                ForEach(meeting.insights.reversed()) { insight in
+                    MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
+                }
+                if !meeting.completedAssistance.isEmpty {
+                    Surface { MeetingSaveControls(meeting: meeting, sessions: sessions) }
+                }
                 MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
                 if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
             }
@@ -125,7 +132,12 @@ struct MeetingWorkspaceView: View {
                 Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
                     .font(.headline).accessibilityAddTraits(.isHeader)
                 if meeting.page == .live { MeetingAIControls(meeting: meeting) }
-                if meeting.page == .review { MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions) }
+                if meeting.page == .review {
+                    MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions)
+                    ForEach(meeting.research.answers.reversed()) { answer in
+                        AssistanceAnswerView(answer: answer, events: meeting.store.finals)
+                    }
+                }
                 MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
                 if !meeting.candidates.items.isEmpty {
                     Text("決定・アクション候補").font(.headline)
@@ -135,7 +147,7 @@ struct MeetingWorkspaceView: View {
                         MeetingInsightCard(meeting: meeting, insight: candidate.insight, fontSize: fontSize)
                     }
                 }
-                if meeting.insights.isEmpty {
+                if meeting.insights.isEmpty && meeting.research.answers.isEmpty {
                     Surface {
                         VStack(alignment: .leading, spacing: 14) {
                             Image(systemName: "sparkles").font(.title2).foregroundStyle(DesignTokens.accent)
@@ -222,6 +234,10 @@ struct MeetingInsightCard: View {
                     Button("資料：\(reference.displayTitle) · \(reference.location)") {
                         if let revealKnowledge { revealKnowledge(reference) } else { meeting.selectedKnowledge = reference }
                     }.font(.caption)
+                }
+                WebReferencesView(references: insight.webReferences ?? [])
+                if meeting.page != .review {
+                    Button("この提案をWebで調べる") { meeting.research.open(insight.text, evidenceIDs: insight.evidenceIDs) }
                 }
                 if insight.hasInvalidEvidence {
                     Text("応答に確認できない根拠が含まれます・要確認").font(.caption).foregroundStyle(DesignTokens.warning)

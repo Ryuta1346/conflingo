@@ -9,4 +9,7 @@ struct TranscriptSegment: Identifiable, Equatable, Sendable, Codable {
     let finalizedAt: Date
     /// 録音開始からの発話開始位置（秒）。nil は時刻不明。
     let startTime: TimeInterval?
+    var origin: AudioOrigin? = nil
+    var sessionOffset: TimeInterval? = nil
+    var languageCode: String? = nil
 }

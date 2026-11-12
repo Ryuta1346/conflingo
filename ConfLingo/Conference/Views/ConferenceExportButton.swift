@@ -32,7 +32,7 @@ struct ConferenceExportButton: View {
             units: store.units,
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage
-        ) + (support?.markdown ?? "")
+        ) + (support?.renderMarkdown(segments: store.segments) ?? "")
         do {
             try markdown.write(to: url, atomically: true, encoding: .utf8)
         } catch {

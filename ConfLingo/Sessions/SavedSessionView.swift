@@ -99,13 +99,15 @@ struct SavedSessionView: View {
         Surface {
             VStack(alignment: .leading, spacing: 12) {
                 Text(item.kind.label + (review.map { " · " + $0 } ?? "")).font(.headline)
-                bodyText(item.text)
+                ResearchAnswerText(answer: item).font(.system(size: fontSize))
                 if item.hasInvalidEvidence { Text("無効な根拠を含むため要確認").foregroundStyle(DesignTokens.warning) }
-                if item.evidenceIDs.isEmpty && item.knowledgeReferences.isEmpty {
+                if item.evidenceIDs.isEmpty && item.knowledgeReferences.isEmpty && item.webReferences?.isEmpty != false {
                     Text("根拠なし・要確認").font(.caption)
                 }
                 evidence(item.evidenceIDs, events: events, proxy: proxy)
                 references(item.knowledgeReferences)
+                WebReferencesView(references: item.webReferences ?? [])
+                if item.webReferences?.isEmpty == false { Text("Webの生抜粋は保存していません。").font(.caption) }
             }
         }
     }
@@ -133,7 +135,7 @@ struct SavedSessionView: View {
     @ViewBuilder
     private func conferenceContent(_ snapshot: ConferenceSnapshot) -> some View {
         if let support = snapshot.support {
-            ConferenceSavedSupportView(support: support, fontSize: fontSize)
+            ConferenceSavedSupportView(support: support, fontSize: fontSize, segments: snapshot.segments)
         }
         Text("原文 · \(snapshot.sourceLanguage)").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
         ForEach(snapshot.segments) { segment in

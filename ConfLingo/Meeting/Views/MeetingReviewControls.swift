@@ -1,6 +1,4 @@
-import AppKit
 import SwiftUI
-import UniformTypeIdentifiers
 
 struct MeetingReviewControls: View {
     @Bindable var meeting: MeetingWorkspace
@@ -14,17 +12,10 @@ struct MeetingReviewControls: View {
             Surface {
                 VStack(alignment: .leading, spacing: 12) {
                     Text("会話を振り返る").font(.headline)
-                    if let sessions {
-                        SessionSaveControls(library: sessions, snapshot: meeting.sessionSnapshot) {
-                            Task { await meeting.saveSession(to: sessions) }
-                        }
-                    }
+                    MeetingSaveControls(meeting: meeting, sessions: sessions)
                     Text("要約は任意です。AIを使わず、候補と発話だけを書き出すこともできます。")
                         .font(.callout).foregroundStyle(DesignTokens.secondary)
-                    ViewThatFits(in: .horizontal) {
-                        HStack { summaryButton; exportButton }
-                        VStack(alignment: .leading) { summaryButton; exportButton }
-                    }
+                    summaryButton
                     if let preparationError { Text(preparationError).font(.callout).foregroundStyle(DesignTokens.warning) }
                     if meeting.summary.state == .sending {
                         ProgressView(value: Double(meeting.summary.draft.count), total: Double(max(1, meeting.summary.totalSections)))
@@ -49,13 +40,6 @@ struct MeetingReviewControls: View {
                     if meeting.summary.state != .complete {
                         ForEach(meeting.summary.draft) { section in
                             SummarySectionContent(meeting: meeting, section: section, fontSize: fontSize)
-                        }
-                    }
-                    if !meeting.export.message.isEmpty {
-                        Text(meeting.export.message).font(.caption)
-                        if let snapshot = meeting.exportSnapshot, !meeting.export.matches(snapshot) {
-                            Text("現在の内容は書き出し済みの内容と異なるか、まだ書き出されていません。")
-                                .font(.caption).foregroundStyle(DesignTokens.warning)
                         }
                     }
                 }
@@ -91,18 +75,6 @@ struct MeetingReviewControls: View {
             } catch { preparationError = error.localizedDescription }
         }
         .disabled(meeting.summary.state == .sending || meeting.store.finals.isEmpty || meeting.knowledge.isBusy)
-    }
-
-    private var exportButton: some View {
-        Button("Markdownを書き出す", systemImage: "square.and.arrow.up") {
-            guard let snapshot = meeting.exportSnapshot else { return }
-            let panel = NSSavePanel()
-            panel.allowedContentTypes = [UTType(filenameExtension: "md") ?? .plainText]
-            panel.nameFieldStringValue = snapshot.filename
-            guard panel.runModal() == .OK else { return }
-            meeting.export.save(snapshot, to: panel.url)
-        }
-        .disabled(meeting.store.finals.isEmpty && meeting.candidates.items.isEmpty)
     }
 }
 
