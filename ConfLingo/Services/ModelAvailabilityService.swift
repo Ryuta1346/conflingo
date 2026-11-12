@@ -36,16 +36,21 @@ final class ModelAvailabilityService {
     private(set) var supportedTargetLanguages: [Locale.Language] = []
 
     private let backend: any ModelPreparing
+    private let vocabularyBackend: any ModelPreparing
+    private var currentMode: SpeechRecognitionMode = .standard
     private var requestID = UUID()
 
-    init(backend: any ModelPreparing = SystemModelPreparation()) {
+    init(backend: any ModelPreparing = SystemModelPreparation(), vocabularyBackend: any ModelPreparing = VocabularyModelPreparation()) {
         self.backend = backend
+        self.vocabularyBackend = vocabularyBackend
     }
 
     /// Returns true only when this request has prepared the selected language pair.
     @discardableResult
-    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String?) async -> Bool {
+    func checkAndPrepare(sourceLocaleID: String, targetLanguageID: String?, recognitionMode: SpeechRecognitionMode = .standard) async -> Bool {
         guard !Task.isCancelled else { return false }
+        if currentMode != recognitionMode { supportedSourceLocales = []; currentMode = recognitionMode }
+        let backend = recognitionMode == .standard ? backend : vocabularyBackend
         let request = UUID()
         requestID = request
         func isCurrent() -> Bool { requestID == request && !Task.isCancelled }

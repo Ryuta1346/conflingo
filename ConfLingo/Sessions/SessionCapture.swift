@@ -16,10 +16,10 @@ extension MeetingWorkspace {
 }
 
 extension SessionStore {
-    func sessionSnapshot(sourceLanguage: String, targetLanguage: String?) -> SessionSnapshot? {
-        guard phase == .idle, !segments.isEmpty else { return nil }
+    func sessionSnapshot(sourceLanguage: String, targetLanguage: String?, support: ConferenceSupportSnapshot? = nil) -> SessionSnapshot? {
+        guard phase == .idle, !segments.isEmpty || support?.hasCompletedAnswers == true else { return nil }
         let title = sessionName.trimmingCharacters(in: .whitespacesAndNewlines)
         return .conference(ConferenceSnapshot(id: sessionID, title: title.isEmpty ? "名前のない字幕" : title,
-            startedAt: startedAt, sourceLanguage: sourceLanguage, targetLanguage: targetLanguage, segments: segments, units: units))
+            startedAt: startedAt, sourceLanguage: sourceLanguage, targetLanguage: targetLanguage, segments: segments, units: units, support: support))
     }
 }

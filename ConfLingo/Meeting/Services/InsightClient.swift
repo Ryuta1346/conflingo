@@ -2,7 +2,7 @@ import Foundation
 
 struct InsightRequest: Sendable {
     enum Trigger: String, Sendable { case manual, automatic }
-    enum Purpose: Sendable { case assistance, summary }
+    enum Purpose: Sendable { case assistance, summary, documentQuestion, transcriptCorrection }
     let purpose: Purpose
     var timeoutSeconds: TimeInterval { purpose == .summary ? 60 : 30 }
     let id = UUID()
@@ -13,6 +13,7 @@ struct InsightRequest: Sendable {
     let events: [TranscriptEvent]
     let omittedCount: Int
     private(set) var knowledge: [KnowledgeReference]
+    var correction: TranscriptCorrectionInput?
 
     init(sessionID: UUID, question: String, trigger: Trigger, events: [TranscriptEvent],
          answerLanguage: AnswerLanguage = .japanese, knowledge: [KnowledgeReference] = [], purpose: Purpose = .assistance) throws {

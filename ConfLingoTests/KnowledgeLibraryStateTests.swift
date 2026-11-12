@@ -150,7 +150,7 @@ struct KnowledgeLibraryStateTests {
         #expect(navigation.destination == .library)
     }
 
-    @Test func activeMeetingCannotSaveOrAttach() async throws {
+    @Test func activeMeetingCanAttachAndSaveWithoutStoppingAudio() async throws {
         let root = temporaryLibrary()
         defer { try? FileManager.default.removeItem(at: root) }
         let files = KnowledgeLibraryFiles(directory: root)
@@ -159,9 +159,30 @@ struct KnowledgeLibraryStateTests {
         let meeting = libraryMeeting()
         meeting.consentConfirmed = true
         await meeting.start()
-        #expect(!(await library.attach(saved.id, to: meeting)))
-        #expect(!(await library.save(from: meeting, documentID: nil, title: "Invalid")))
+        #expect(await library.attach(saved.id, to: meeting))
+        let document = try #require(meeting.knowledge.documents.first)
+        #expect(await library.save(from: meeting, documentID: document.id, title: "Live資料"))
+        #expect(meeting.phase == .listening)
         await meeting.end()
+    }
+
+    @Test func stoppedMeetingRejectsDelayedLibrarySelection() async throws {
+        let root = temporaryLibrary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let files = KnowledgeLibraryFiles(directory: root)
+        let saved = try await files.save(try await libraryArchive(), title: "Price")
+        let gate = TestGate()
+        let library = KnowledgeLibrary(files: files, load: { _ in await gate.wait(); return saved })
+        let meeting = libraryMeeting()
+        meeting.consentConfirmed = true
+        await meeting.start()
+        let pending = Task { await library.attach(saved.id, to: meeting) }
+        await gate.entered.next()
+        await meeting.end()
+        #expect(meeting.phase == .idle)
+        gate.release()
+        #expect(!(await pending.value))
+        #expect(meeting.knowledge.documents.isEmpty)
     }
 }
 

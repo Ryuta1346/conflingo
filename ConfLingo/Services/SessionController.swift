@@ -44,7 +44,8 @@ final class SessionController {
         coordinator: TranslationCoordinator,
         locale: Locale,
         glossary: [KeywordParser.GlossaryEntry] = [],
-        fastResults: Bool = false
+        fastResults: Bool = false,
+        recognitionMode: SpeechRecognitionMode = .standard
     ) async {
         guard store.phase == .idle, !Task.isCancelled else { return }
         guard let token = activity.acquire(.conference) else {
@@ -86,6 +87,7 @@ final class SessionController {
 
         do {
             try Task.checkCancellation()
+            try await speechService.prepare(mode: recognitionMode, locale: locale)
             try await speechService.start(
                 locale: locale, contextKeywords: glossary.map(\.term), fastResults: fastResults,
                 onInputStarted: { [weak self] in
@@ -148,6 +150,14 @@ final class SessionController {
         meetingStore.reset(sessionID: timeline.sessionID)
         store.reset()
         lastError = nil
+    }
+
+    func updateContext(_ keywords: [String], store: SessionStore) async -> Bool {
+        guard store.phase == .listening, let run = runID else { return false }
+        do {
+            try await speechService.updateContext(keywords)
+            return runID == run && store.phase == .listening
+        } catch { return false }
     }
 
     private func finishInputUse(store: SessionStore) {

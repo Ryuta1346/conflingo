@@ -20,9 +20,11 @@ Meeting also supports microphone and system audio transcription, optional AI res
 
 ## Knowledge library
 
-In Meeting preparation, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.
+From the knowledge library, or before/during Meeting and Conference, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.
 
-Reuse saved material with **ライブラリから追加**. The library supports browsing, name search, replacement and deletion while preserving existing meeting copies and citations. AI consent is not saved. See the [usage guide](docs/usage.md#knowledge-library).
+Reuse saved material with **ライブラリから選択**. The library supports browsing, name search, replacement and deletion while preserving existing meeting copies and citations. AI consent is not saved. See the [usage guide](docs/usage.md#knowledge-library).
+
+Conference includes document browsing/search, cited AI questions, reviewed terminology and AI corrections that preserve originals. Recognition and correction quality have not yet been evaluated with real inputs. See the [usage guide](docs/usage.md#add-materials-during-a-session).
 
 ## Requirements
 
@@ -112,7 +114,9 @@ Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad
 2. System Settings > Privacy & Security > "Open Anyway"
 3. After that, it launches normally (developers can also run `xattr -dr com.apple.quarantine ConfLingo.app`)
 
-### Requirements to tell recipients
+#Conference includes document browsing/search, cited AI questions, reviewed terminology and AI corrections that preserve originals. Recognition and correction quality have not yet been evaluated with real inputs. See the [usage guide](docs/usage.md#add-materials-during-a-session).
+
+## Requirements to tell recipients
 
 - **macOS 26 or later + Apple Silicon** (does not launch on earlier macOS versions)
 - **Network required on first launch**: each Mac downloads the recognition and translation models (several hundred MB). In case the venue Wi-Fi is weak, ask recipients to launch the app as soon as they receive it

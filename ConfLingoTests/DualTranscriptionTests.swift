@@ -225,6 +225,14 @@ final class TestGate {
 @MainActor
 final class DualFakeSpeech: SpeechTranscribing {
     enum Failure: Error { case start, stop, recognition, model }
+    var preparedMode: SpeechRecognitionMode = .standard
+    var keywords: [String] = []
+    var contextFails = false
+    func prepare(mode: SpeechRecognitionMode, locale: Locale) async throws { preparedMode = mode }
+    func updateContext(_ values: [String]) async throws {
+        if contextFails { throw VocabularyFailure.unavailable }
+        keywords = values
+    }
     var starts = 0
     var inputStops = 0
     var finishes = 0
@@ -247,6 +255,7 @@ final class DualFakeSpeech: SpeechTranscribing {
         onFailure: @escaping @MainActor (any Error) -> Void
     ) async throws {
         starts += 1
+        keywords = contextKeywords
         self.receive = receive
         self.onFailure = onFailure
         await startGate?.wait()

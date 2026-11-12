@@ -14,6 +14,7 @@ final class KnowledgeStore {
     private var index = KnowledgeIndex()
     private(set) var librarySources: [UUID: KnowledgeLibraryEntry] = [:]
     private(set) var revision = UUID()
+    private(set) var importGeneration = UUID()
     private var consentRevision = UUID()
     private var searchID = UUID()
     private var mutationID: UUID?
@@ -23,6 +24,7 @@ final class KnowledgeStore {
         self.lookup = lookup ?? { index, query in try await index.search(query) }
     }
     @ObservationIgnored var onChange: (() -> Void)?
+    @ObservationIgnored var onInvalidation: (() -> Void)?
     @ObservationIgnored var onContentChange: (() -> Void)?
     @ObservationIgnored private var repositoryTask: Task<[KnowledgeDocument], Error>?
 
@@ -36,6 +38,7 @@ final class KnowledgeStore {
         isBusy = true
         message = "リポジトリを取り込んでいます…"
         let index = index
+        let generation = importGeneration
         let task = Task {
             let snapshot = try await RepositoryImporter.load(scan, selected: selected)
             try Task.checkCancellation()
@@ -44,8 +47,13 @@ final class KnowledgeStore {
         repositoryTask = task
         do {
             let imported = try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
+            guard generation == importGeneration, !Task.isCancelled else {
+                for document in imported { try? await index.remove(document.id) }
+                throw CancellationError()
+            }
             guard mutationID == mutation else { return }
             documents += imported
+            onContentChange?()
             message = "リポジトリを取り込みました。取り込み時点の作業ツリーをこの会議で参照します。"
         } catch {
             guard mutationID == mutation else { return }
@@ -57,6 +65,18 @@ final class KnowledgeStore {
     }
 
     func cancelRepositoryImport() { repositoryTask?.cancel() }
+
+    func cancelPendingImports() {
+        importGeneration = UUID()
+        repositoryTask?.cancel()
+    }
+
+    func contents() async throws -> [KnowledgeArchive.Document] {
+        let version = revision
+        let result = await index.contents()
+        guard version == revision, !isBusy else { throw CancellationError() }
+        return result
+    }
 
     func removeRepository() async {
         guard !isBusy, hasRepository else { return }
@@ -70,6 +90,7 @@ final class KnowledgeStore {
             documents.removeAll { $0.source != nil }
             let remaining = Set(documents.map(\.id))
             librarySources = librarySources.filter { remaining.contains($0.key) }
+            onContentChange?()
             message = "リポジトリを取り外しました。生成済みの引用は会議破棄まで残ります。"
         } catch {
             guard mutationID == mutation else { return }
@@ -82,6 +103,8 @@ final class KnowledgeStore {
     func retrieveForSummary(_ events: [TranscriptEvent]) async throws -> [KnowledgeReference] {
         try await rankedReferences(events.map(\.text))
     }
+
+    func localReferences(_ text: String) async throws -> [KnowledgeReference] { try await rankedReferences([text]) }
 
     func retrieveForAutomatic(_ event: TranscriptEvent) async throws -> [KnowledgeReference] {
         try await rankedReferences([String(event.text.prefix(12_000))])
@@ -139,10 +162,17 @@ final class KnowledgeStore {
         mutationID = mutation
         isBusy = true
         defer { if mutationID == mutation { mutationID = nil; isBusy = false } }
+        let index = index
+        let generation = importGeneration
         let restored = try await index.restore(saved.content)
+        guard generation == importGeneration, !Task.isCancelled else {
+            for document in restored { try? await index.remove(document.id) }
+            throw CancellationError()
+        }
         guard mutationID == mutation else { throw CancellationError() }
         documents += restored
         markSaved(saved)
+        onContentChange?()
         message = "保存資料を追加しました。資料の送信許可を確認してください。"
     }
 
@@ -168,14 +198,21 @@ final class KnowledgeStore {
         mutationID = mutation
         isBusy = true
         message = "資料を取り込んでいます…"
+        let index = index
+        let generation = importGeneration
         do {
             let document = try await operation(index)
+            guard generation == importGeneration, !Task.isCancelled else {
+                try? await index.remove(document.id)
+                throw CancellationError()
+            }
             guard mutationID == mutation else { return }
             documents.append(document)
+            onContentChange?()
             message = "資料を取り込みました。この会議の終了後も、破棄するまで参照できます。"
         } catch {
             guard mutationID == mutation else { return }
-            message = (error as? KnowledgeFailure ?? .unreadable).localizedDescription
+            message = error is CancellationError ? "取り込みを中止しました。" : (error as? KnowledgeFailure ?? .unreadable).localizedDescription
         }
         mutationID = nil
         isBusy = false
@@ -192,6 +229,7 @@ final class KnowledgeStore {
             guard mutationID == mutation else { return }
             documents.removeAll { $0.id == id }
             librarySources[id] = nil
+            onContentChange?()
             message = "資料を取り外しました。既存の回答にある引用は会議破棄まで残ります。"
         } catch {
             guard mutationID == mutation else { return }
@@ -231,6 +269,7 @@ final class KnowledgeStore {
     }
 
     func reset() {
+        cancelPendingImports()
         repositoryTask?.cancel()
         repositoryTask = nil
         invalidate()
@@ -241,11 +280,12 @@ final class KnowledgeStore {
         permitted = false
         isBusy = false
         message = ""
+        onContentChange?()
     }
 
     private func invalidate() {
         revision = UUID()
-        onContentChange?()
+        onInvalidation?()
         searchID = UUID()
         results = []
         searchState = .idle

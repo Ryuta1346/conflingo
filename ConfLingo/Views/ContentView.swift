@@ -6,6 +6,8 @@ struct ContentView: View {
     @State private var sessions: SessionsLibrary
     @State private var library: KnowledgeLibrary
     @State private var meeting: MeetingWorkspace
+    @State private var conferenceKnowledge: ConferenceKnowledgeWorkspace
+    @State private var showConferenceKnowledge = false
     @State private var floatingPanel: MeetingFloatingPanel
     @Environment(\.openWindow) private var openWindow
     @State private var store: SessionStore
@@ -55,10 +57,15 @@ struct ContentView: View {
         _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: settings)
         _appearance = AppStorage(wrappedValue: "system", "appearance", store: settings)
         #if DEBUG
-        _meeting = State(initialValue: meeting ?? (isPreview ? MeetingPreview.make(activity: activity, defaults: settings)
-            : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings)))
+        let meetingWorkspace = meeting ?? (isPreview ? MeetingPreview.make(activity: activity, defaults: settings)
+            : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings))
+        _meeting = State(initialValue: meetingWorkspace)
+        _conferenceKnowledge = State(initialValue: ConferenceKnowledgeWorkspace(store: session, settings: meetingWorkspace.llmSettings,
+            client: isPreview ? PreviewInsightClient() : nil))
         #else
-        _meeting = State(initialValue: meeting ?? MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings))
+        let meetingWorkspace = meeting ?? MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings)
+        _meeting = State(initialValue: meetingWorkspace)
+        _conferenceKnowledge = State(initialValue: ConferenceKnowledgeWorkspace(store: session, settings: meetingWorkspace.llmSettings))
         #endif
         _floatingPanel = State(initialValue: floatingPanel ?? MeetingFloatingPanel(defaults: settings))
         _store = State(initialValue: session)
@@ -87,7 +94,7 @@ struct ContentView: View {
                 if navigation.destination == .setup || navigation.destination == .live {
                     Divider()
                     ControlBar(phase: store.phase, isStopping: controller.isStopping,
-                               canStart: modelState == .ready, hasTranscript: !store.segments.isEmpty,
+                               canStart: modelState == .ready && !conferenceKnowledge.knowledge.isBusy && !library.isBusy, hasTranscript: !store.segments.isEmpty,
                                start: startSession, stop: { Task { await stopSession() } })
                         .disabled(sessions.isBusy)
                 }
@@ -105,6 +112,7 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: NSApplication.willTerminateNotification)) { _ in
             meeting.cancelSummary()
+            conferenceKnowledge.stop()
         }
         .background(WindowCloseGuard(shouldClose: shouldCloseWindow))
         .background(MeetingWindowAttachment(floating: floatingPanel))
@@ -116,6 +124,13 @@ struct ContentView: View {
         .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
         .sheet(isPresented: $showDictionary) {
             KeywordProfileEditor(profiles: profileStore).disabled(store.phase != .idle)
+        }
+        .sheet(isPresented: $showConferenceKnowledge) {
+            ConferenceKnowledgeView(workspace: conferenceKnowledge, library: library, sessions: sessions, fontSize: fontSize,
+                stopAudio: { Task { await stopSession() } }, sourceLanguage: sourceLocaleID,
+                targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                manualGlossary: KeywordParser.parseGlossary(profileStore.selectedProfile.keywords),
+                applyTerms: { Task { await applyConferenceTerms() } })
         }
         .alert(closeRequested ? "音声収集を停止してウィンドウを閉じますか？" : "音声収集を停止して移動しますか？", isPresented: $navigation.showsStopConfirmation) {
             Button("キャンセル", role: .cancel) { navigation.cancelNavigation(); closeRequested = false }
@@ -131,17 +146,18 @@ struct ContentView: View {
         }
         .alert("字幕を消去しますか？", isPresented: $showClearConfirmation) {
             Button("キャンセル", role: .cancel) {}
-            Button("消去", role: .destructive) { if !sessions.isBusy { controller.reset(store: store) } }
+            Button("消去", role: .destructive) { if !sessions.isBusy { conferenceKnowledge.reset(); controller.reset(store: store) } }
         } message: {
-            Text("現在の字幕を消去します。保存済みセッションと書き出し済みのMarkdownは削除しません。")
+            Text("現在の字幕と、このConferenceの一時資料・AI回答を破棄します。資料ライブラリ、保存済みセッション、Markdownは削除しません。")
         }
-        .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)|retry=\(preparationRetry)") {
+        .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)|retry=\(preparationRetry)|mode=\(conferenceKnowledge.recognitionMode.rawValue)") {
             guard !isPreview else { return }
             // 起動時・言語ペア変更時・文字起こしのみモード切替時に利用可能性を再チェックする
             translationConfiguration = nil
             let ready = await availability.checkAndPrepare(
                 sourceLocaleID: sourceLocaleID,
-                targetLanguageID: transcriptionOnly ? nil : targetLanguageID
+                targetLanguageID: transcriptionOnly ? nil : targetLanguageID,
+                recognitionMode: conferenceKnowledge.recognitionMode
             )
             guard ready, !Task.isCancelled else { return }
             if transcriptionOnly {
@@ -155,12 +171,16 @@ struct ContentView: View {
             }
         }
         .onChange(of: sourceLocaleID) {
+            conferenceKnowledge.cancel()
+            conferenceKnowledge.terms.reset()
             // 認識言語と翻訳先が同一言語に衝突したら自動で振り替える
             targetLanguageID = LanguageCatalog.resolveTarget(
                 current: targetLanguageID,
                 sourceLocaleID: sourceLocaleID
             )
         }
+        .onChange(of: targetLanguageID) { conferenceKnowledge.cancel(); conferenceKnowledge.terms.reset() }
+        .onChange(of: conferenceKnowledge.terms.revision) { Task { await applyConferenceTerms() } }
         // @Sendable でクロージャを nonisolated にし、非 Sendable な session を
         // MainActor 領域に取り込まずタスク領域に留める（translate 呼び出しに必須）。
         .translationTask(translationConfiguration) { @Sendable session in
@@ -230,7 +250,7 @@ struct ContentView: View {
                     targetLanguage: transcriptionOnly ? nil : targetLanguageID,
                     profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
                     editSettings: { navigate(.setup) },
-                    clear: { if !sessions.isBusy { showClearConfirmation = true } }
+                    clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections
                 )
                 .disabled(sessions.isBusy)
             }
@@ -254,6 +274,10 @@ struct ContentView: View {
                 .font(.callout.weight(.medium))
                 .foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)
+            if navigation.destination == .setup || navigation.destination == .live {
+                Button("資料（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
+                    .disabled(store.phase == .preparing || store.phase == .stopping)
+            }
             if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions || navigation.destination == .library {
                 Button("A−") { fontSize = max(10, fontSize - 2) }
                     .keyboardShortcut("-", modifiers: .command)
@@ -265,7 +289,7 @@ struct ContentView: View {
                     .toggleStyle(.button)
                 if navigation.destination == .live {
                     ConferenceExportButton(store: store, sourceLanguage: sourceLocaleID,
-                                           targetLanguage: transcriptionOnly ? nil : targetLanguageID)
+                        targetLanguage: transcriptionOnly ? nil : targetLanguageID, support: conferenceKnowledge.snapshot)
                 }
             }
         }
@@ -276,7 +300,8 @@ struct ContentView: View {
     }
 
     private var conferenceSnapshot: SessionSnapshot? {
-        store.sessionSnapshot(sourceLanguage: sourceLocaleID, targetLanguage: transcriptionOnly ? nil : targetLanguageID)
+        store.sessionSnapshot(sourceLanguage: sourceLocaleID, targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                              support: conferenceKnowledge.snapshot)
     }
 
     private func openSavedSession(_ id: UUID) {
@@ -310,6 +335,7 @@ struct ContentView: View {
         switch activePhase {
         case .idle:
             meeting.cancelSummary()
+            conferenceKnowledge.stop()
             return true
         case .listening:
             closeRequested = true
@@ -327,7 +353,7 @@ struct ContentView: View {
     }
 
     private func startSession() {
-        guard !sessions.isBusy, modelState == .ready, store.phase == .idle else { return }
+        guard !sessions.isBusy, !conferenceKnowledge.knowledge.isBusy, !library.isBusy, modelState == .ready, store.phase == .idle else { return }
         navigate(.live)
         if isPreview {
             store.phase = .listening
@@ -338,19 +364,38 @@ struct ContentView: View {
             await controller.start(
                 store: store, coordinator: coordinator,
                 locale: availability.speechLocale ?? Locale(identifier: sourceLocaleID),
-                glossary: KeywordParser.parseGlossary(profileStore.selectedProfile.keywords),
-                fastResults: transcriptionOnly && fastFinalization
+                glossary: conferenceGlossary,
+                fastResults: transcriptionOnly && fastFinalization, recognitionMode: conferenceKnowledge.recognitionMode
             )
         }
     }
 
     private func stopSession() async {
+        conferenceKnowledge.stop()
         if isPreview {
             store.phase = .idle
             store.updateVolatile("")
             return
         }
         await controller.stop(store: store, coordinator: coordinator)
+    }
+
+    private var conferenceGlossary: [KeywordParser.GlossaryEntry] {
+        conferenceKnowledge.terms.glossary(sourceLanguage: sourceLocaleID, targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+            manual: KeywordParser.parseGlossary(profileStore.selectedProfile.keywords))
+    }
+
+    private func applyConferenceTerms() async {
+        let glossary = conferenceGlossary
+        store.setActiveGlossary(glossary)
+        guard store.phase == .listening, conferenceKnowledge.recognitionMode == .vocabulary else {
+            conferenceKnowledge.recognitionStatus = "翻訳用語を設定しました。認識用語は資料用語優先モードの開始時に適用します。"
+            return
+        }
+        let revision = conferenceKnowledge.terms.revision
+        let updated = isPreview ? true : await controller.updateContext(glossary.map(\.term), store: store)
+        guard revision == conferenceKnowledge.terms.revision else { return }
+        conferenceKnowledge.recognitionStatus = updated ? "認識エンジンへ用語を反映しました。精度への効果は未評価です。" : "認識用語は未反映です。次回の開始時に適用します。"
     }
 }
 

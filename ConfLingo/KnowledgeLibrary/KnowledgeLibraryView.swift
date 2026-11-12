@@ -3,14 +3,17 @@ import SwiftUI
 struct KnowledgeLibraryView: View {
     @Bindable var library: KnowledgeLibrary
     let fontSize: Double
+    var attachedIDs: Set<UUID> = []
     var choose: ((KnowledgeLibraryEntry) -> Void)?
     @State private var removing: KnowledgeLibraryEntry?
+    @State private var importing = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
                 Text(choose == nil ? "資料ライブラリ" : "ライブラリから追加").font(.title2.bold())
                 Spacer()
+                if choose == nil { Button("資料を追加", systemImage: "doc.badge.plus") { importing = true } }
                 if library.isBusy { ProgressView().controlSize(.small) }
             }
             Text("このMacに保存した資料です。会議で選んだ保存版を使います。閲覧・追加だけでは外部送信しません。")
@@ -22,7 +25,7 @@ struct KnowledgeLibraryView: View {
                 HStack {
                     Button("一覧へ戻る") { library.close() }
                     Spacer()
-                    if let choose { Button("この保存版を会議に追加") { choose(selected.entry) } }
+                    if let choose { Button("この保存版を追加") { choose(selected.entry) }.disabled(attachedIDs.contains(selected.id)) }
                 }
                 KnowledgeLibraryDetail(saved: selected, fontSize: fontSize)
             } else {
@@ -33,7 +36,7 @@ struct KnowledgeLibraryView: View {
                 }
                 if library.entries.isEmpty && !library.isBusy {
                     ContentUnavailableView("保存した資料はありません", systemImage: "books.vertical",
-                        description: Text("Meetingの準備画面で資料を取り込み、「ライブラリに保存」を選んでください。"))
+                        description: Text("「資料を追加」から事前登録できます。MeetingやConferenceでも資料を追加・選択できます。"))
                 } else if library.filtered.isEmpty && !library.isBusy {
                     Text("一致する保存名はありません。").foregroundStyle(DesignTokens.secondary)
                 }
@@ -49,7 +52,8 @@ struct KnowledgeLibraryView: View {
                                     HStack {
                                         Button("内容を見る") { Task { await library.open(entry.id) } }.disabled(entry.failure != nil)
                                         if let choose {
-                                            Button("会議に追加") { choose(entry) }.disabled(entry.failure != nil)
+                                            Button(attachedIDs.contains(entry.id) ? "選択済み" : "追加") { choose(entry) }
+                                                .disabled(entry.failure != nil || attachedIDs.contains(entry.id))
                                         } else {
                                             Button("削除", role: .destructive) { removing = entry }
                                         }
@@ -66,6 +70,7 @@ struct KnowledgeLibraryView: View {
         .padding(24)
         .disabled(library.isBusy)
         .task { library.close(); await library.reload() }
+        .sheet(isPresented: $importing) { LibraryImportView(library: library, fontSize: fontSize) }
         .alert("保存資料を削除しますか？", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("キャンセル", role: .cancel) { removing = nil }
             Button("削除", role: .destructive) {
@@ -75,6 +80,27 @@ struct KnowledgeLibraryView: View {
         } message: {
             Text("「\(removing?.title ?? "")」のライブラリ内の保存を削除します。使用中の会議、保存済みの引用、元ファイルは残ります。")
         }
+    }
+}
+
+private struct LibraryImportView: View {
+    @Bindable var library: KnowledgeLibrary
+    let fontSize: Double
+    @State private var draft = KnowledgeStore()
+    @Environment(\.dismiss) private var dismiss
+    var body: some View {
+        VStack(alignment: .leading, spacing: 16) {
+            Text("資料を事前に登録").font(.title2.bold())
+            Text("ファイルを取り込み、各資料の「ライブラリに保存」を選んでください。閉じると未保存の取り込み内容は破棄されます。")
+                .font(.callout).foregroundStyle(DesignTokens.secondary)
+            ScrollView {
+                KnowledgeMaterialsView(knowledge: draft, library: library, fontSize: fontSize,
+                    canEdit: { !draft.isBusy && !library.isBusy }, allowsSelection: false)
+            }
+            Button("完了") { draft.cancelPendingImports(); dismiss() }.keyboardShortcut(.cancelAction).disabled(library.isBusy)
+        }.padding(24).frame(minWidth: 480, idealWidth: 660, minHeight: 480, idealHeight: 650)
+            .interactiveDismissDisabled(library.isBusy)
+            .onDisappear { draft.cancelPendingImports() }
     }
 }
 

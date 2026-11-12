@@ -1,8 +1,8 @@
-> 2026-11-12 現在: 永続資料ライブラリをローカル実装・自動検証・主要UI確認済み（[Draft PR #22](https://github.com/Ryuta1346/conflingo/pull/22)・未マージ）。会議への追加は保存時点のコピーで、更新・削除は使用中の会議と引用へ波及しない。AI送信許可は保存しない。狭幅実操作・VoiceOver全経路は未確認。以下の過去フェーズの記述は実施当時の履歴。[検証記録](validation/knowledge-library.md)。
+> 2026-11-12 現在: 永続資料ライブラリをローカル実装・自動検証・主要UI確認済み（[PR #22](https://github.com/Ryuta1346/conflingo/pull/22)・マージ済み）。会議への追加は保存時点のコピーで、更新・削除は使用中の会議と引用へ波及しない。AI送信許可は保存しない。狭幅実操作・VoiceOver全経路は未確認。以下の過去フェーズの記述は実施当時の履歴。[検証記録](validation/knowledge-library.md)。
 
 > Sessions追補（2026-11-11、計画承認済み・実装と主要検証済み）: MeetingとConferenceの明示保存・一覧・名前検索・読み取り専用再閲覧・Markdown再出力・削除を追加した。引用抜粋も保存し、元資料全体・音声・送信許可は保存しない。自動保存は行わない。423テスト成功、UI網羅確認は継続。[実装計画](design/sessions-implementation-plan.md)。以下のSessions持ち越し記述は従来の実施範囲。
 
-> 現在地（2026-11-12）: ローカルmain `adfc2c5`にPR #21までマージ済み。永続資料ライブラリは`feature/knowledge-library`で実装・主要検証済み。PR9は未着手、受入完了は2/12区分。[進捗管理](../plan.md)を参照。
+> 現在地（2026-11-12）: main `56d7a81`にPR #23までマージ済み。`feature/knowledge-entry-points`で事前登録・Meeting/Conference中の資料追加・Conference資料支援をローカル実装し、主要fake UIを確認。未マージ。[最新の自動検証・残件](validation/knowledge-entry-points.md)。新規LLMの実生成、実音声結合、UI網羅と耐久検証は残る。PR9は未着手、受入完了は2/12区分。現在の残件と優先順は[進捗管理](../plan.md)を参照。以下の評価件数・持ち越し記述は各時点の履歴。
 
 > 利用者確認追補（2026-11-10）: VoiceOverの読み上げ・キャプション・Control+Option+Spaceによる設定ボタン操作を利用者確認として記録。[証跡と制約](validation/pr6-focus-stability.md)。基本確認の質問は回答済み。全画面の読み順・実会議等の網羅確認とは区別する。
 

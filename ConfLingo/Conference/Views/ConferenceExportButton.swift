@@ -6,11 +6,12 @@ struct ConferenceExportButton: View {
     let store: SessionStore
     let sourceLanguage: String
     let targetLanguage: String?
+    var support: ConferenceSupportSnapshot?
 
     var body: some View {
         Button("書き出す", systemImage: "square.and.arrow.up") { saveMarkdown() }
-            .disabled(store.segments.isEmpty)
-            .help("現在の字幕をMarkdownで書き出す")
+            .disabled(store.segments.isEmpty && support?.hasCompletedAnswers != true)
+            .help("現在の字幕と完成した資料回答をMarkdownで書き出す")
     }
 
     private func saveMarkdown() {
@@ -31,7 +32,7 @@ struct ConferenceExportButton: View {
             units: store.units,
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage
-        )
+        ) + (support?.markdown ?? "")
         do {
             try markdown.write(to: url, atomically: true, encoding: .utf8)
         } catch {
