@@ -28,7 +28,7 @@ struct MeetingReviewControls: View {
                     if let preparationError { Text(preparationError).font(.callout).foregroundStyle(DesignTokens.warning) }
                     if meeting.summary.state == .sending {
                         ProgressView(value: Double(meeting.summary.draft.count), total: Double(max(1, meeting.summary.totalSections)))
-                        Text("要約中：\(meeting.summary.draft.count) / \(meeting.summary.totalSections)区間完了 · Geminiへ送信中")
+                        Text("要約中：\(meeting.summary.draft.count) / \(meeting.summary.totalSections)区間完了 · \(meeting.llmSettings.selected.name)へ送信中")
                             .font(.caption)
                         Button("要約の送信を停止", action: meeting.cancelSummary)
                         if !meeting.summary.partialText.isEmpty {

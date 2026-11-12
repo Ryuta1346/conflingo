@@ -114,7 +114,7 @@ private struct MeetingFloatingView: View {
                 VStack(alignment: .leading, spacing: 12) {
                     #if DEBUG
                     if meeting.previewUsesLiveAI {
-                        Text("実API検証：合成発話・音声取得なし・Geminiへ実通信")
+                        Text("実API検証：合成発話・音声取得なし・選択したAIへ実通信")
                             .font(.caption).foregroundStyle(DesignTokens.warning)
                     }
                     #endif

@@ -101,24 +101,28 @@ enum InsightFailure: Error, Equatable, LocalizedError {
     case queueOverflow, invalidQuestion, invalidResponse, missingKey, keyStorage, oversized, timeout, offline, interrupted, blocked
     case http(Int)
     case knowledge
+    case invalidEndpoint, invalidConfiguration
 
     var errorDescription: String? {
         switch self {
+        case .invalidEndpoint: "接続先URLを確認してください。クラウドはHTTPS、ローカルはこのMacのlocalhost・127.0.0.1・::1を指定できます。"
+        case .invalidConfiguration: "接続名と有効なモデルIDを設定してください。"
         case .knowledge: "資料を検索できなかったため送信を中止しました。資料の状態を確認してください。"
         case .queueOverflow: "AIの処理が追いつかないため自動提案を停止しました。字幕は継続します。"
         case .invalidQuestion: "質問は1〜2,000文字で入力してください。"
         case .invalidResponse: "AIの応答を確認できませんでした。必要なら手動で再試行してください。"
-        case .missingKey: "設定でGemini APIキーを登録してください。"
+        case .missingKey: "設定で選択した接続のAPIキーを登録してください。"
         case .keyStorage: "APIキーをKeychainで読み書きできませんでした。"
         case .oversized: "送受信する内容が上限を超えました。"
         case .timeout: "AIへの接続がタイムアウトしました。字幕は継続します。"
         case .offline: "AIに接続できません。ネットワークを確認してください。"
         case .interrupted: "AI生成を中断しました。"
         case .blocked: "AIが応答を返しませんでした。質問内容をご確認ください。"
-        case .http(401), .http(403): "Geminiの認証に失敗しました。APIキーと利用権限をご確認ください。"
-        case .http(429): "Geminiの利用上限に達しました。時間をおいて手動で再試行してください。"
-        case .http(404): "Geminiモデルを利用できません。利用権限またはアプリの更新をご確認ください。"
-        case .http: "Geminiへの要求に失敗しました。自動で再送はしません。"
+        case .http(401), .http(403): "選択したAIの認証に失敗しました。APIキーと利用権限をご確認ください。"
+        case .http(429): "選択したAIの利用上限に達しました。時間をおいて手動で再試行してください。"
+        case .http(404): "接続先またはモデルが見つかりません。URL・モデルID・利用権限をご確認ください。"
+        case .http(400), .http(422): "モデルが要求を受け付けませんでした。モデルID・応答形式と接続先の対応状況をご確認ください。"
+        case .http: "AIへの要求に失敗しました。自動で再送はしません。"
         }
     }
 

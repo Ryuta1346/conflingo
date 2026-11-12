@@ -149,3 +149,5 @@ AVAudioEngine マイク入力（ハードウェアフォーマット）
 | `Services/TranslationCoordinator.swift` | 翻訳キュー（ID dedup + AsyncStream） |
 | `Services/ModelAvailabilityService.swift` | 起動時の利用可能性チェック・モデル DL |
 | `Export/MarkdownExporter.swift` | Markdown 生成（純関数） |
+
+MeetingのLLMはGemini・OpenAI・Claude・Kimi・DeepSeek・その他OpenAI互換クラウド・ローカルモデル（Qwen等）から選択できます。APIキーは接続別にKeychainへ保存。ローカルモデルはOllama / LM Studio等へ接続します。[設定方法](docs/usage.ja.md#meetingのai支援llm選択)と[検証範囲](docs/validation/llm-selection.md)を参照してください。

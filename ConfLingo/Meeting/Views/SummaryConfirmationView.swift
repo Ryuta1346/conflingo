@@ -39,7 +39,7 @@ struct SummaryConfirmationView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text("要約する内容を確認").font(.title2.bold())
-            Text("この会議の確定発話\(plan.events.count)件をGeminiへ送ります。会議中にAIを許可する前の発話も含まれます。音声は送りません。")
+            Text("この会議の確定発話\(plan.events.count)件を\(meeting.llmSettings.selected.name)へ送ります。会議中にAIを許可する前の発話も含まれます。音声は送りません。")
             Toggle("この要約では資料も参照する", isOn: $includingKnowledge)
                 .disabled(meeting.knowledge.documents.isEmpty || meeting.knowledge.isBusy)
             Text("この要約だけの選択です。会議中の資料送信許可は変更しません。")
@@ -49,7 +49,7 @@ struct SummaryConfirmationView: View {
             if !preparing && !meeting.isSummaryPlanCurrent(plan) {
                 Text("対象が変更されました。確認画面を開き直してください。").foregroundStyle(DesignTokens.warning)
             }
-            Text("回答言語：\(plan.answerLanguage.label) · \(plan.requests.count)区間／最大\(plan.requests.count)要求。利用料金が発生します。自動再送はしません。")
+            Text("回答言語：\(plan.answerLanguage.label) · \(plan.requests.count)区間／最大\(plan.requests.count)要求。クラウドでは利用料金が発生する場合があります。自動再送はしません。")
             if includingKnowledge {
                 Text("資料名・相対パス・版・位置・抜粋も送ります。最大5箇所・6,000文字/区間。今回の資料本文：\(plan.requests.flatMap(\.knowledge).reduce(0) { $0 + $1.snippet.count })文字。")
                     .font(.caption)

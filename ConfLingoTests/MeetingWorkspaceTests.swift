@@ -167,7 +167,7 @@ struct MeetingWorkspaceTests {
     @Test func startDateTracksFirstInputAndSurvivesResumeUntilDiscard() async throws {
         let fixture = DualFixture()
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         var firstInputBoundary = Date.distantFuture
         var secondInputBoundary = Date.distantFuture
         fixture.microphone.beforeInput = { firstInputBoundary = Date() }
@@ -193,7 +193,7 @@ struct MeetingWorkspaceTests {
         fixture.microphonePermission.status = .undetermined
         fixture.microphonePermission.decision = false
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()
         #expect(meeting.startedAt == nil)
@@ -210,7 +210,7 @@ struct MeetingWorkspaceTests {
         let fixture = DualFixture()
         fixture.system.startError = .start
         let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: FakeInsightClient(),
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         var inputBoundary = Date.distantFuture
         fixture.microphone.beforeInput = { inputBoundary = Date() }
         meeting.consentConfirmed = true

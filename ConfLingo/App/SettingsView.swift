@@ -5,7 +5,7 @@ struct SettingsView: View {
     @Binding var alwaysOnTop: Bool
     @Binding var appearance: String
     @Binding var answerLanguage: AnswerLanguage
-    let credentials: GeminiCredentials
+    let llmSettings: LLMSettings
     let editDictionary: () -> Void
     let prepare: () -> Void
 
@@ -53,7 +53,7 @@ struct SettingsView: View {
                         Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
                             .font(.caption).foregroundStyle(DesignTokens.secondary)
                         Divider()
-                        GeminiKeySettingsView(credentials: credentials)
+                        LLMSettingsView(settings: llmSettings)
                     }
                 }
                 Surface {

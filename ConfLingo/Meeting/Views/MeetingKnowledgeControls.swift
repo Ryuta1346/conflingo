@@ -69,7 +69,7 @@ struct MeetingKnowledgeControls: View {
                     Text("日英の単語で検索します。部分文字列では一致しない場合があります。検索だけでは外部送信しません。")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
                     searchResults
-                    Toggle("この会議の資料の抜粋をGeminiへ送信する", isOn: Binding(
+                    Toggle("この会議の資料の抜粋を\(meeting.llmSettings.selected.name)へ送信する", isOn: Binding(
                         get: { knowledge.permitted }, set: { meeting.setKnowledgeAllowed($0) }
                     ))
                     .disabled(!meeting.ai.permitted || meeting.page == .review || meeting.phase == .stopping || knowledge.isBusy)

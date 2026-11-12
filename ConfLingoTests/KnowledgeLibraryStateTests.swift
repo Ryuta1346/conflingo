@@ -108,7 +108,7 @@ struct KnowledgeLibraryStateTests {
         let saved = try await files.save(try await libraryArchive("refundPayment は返金処理です。"), title: "返金資料")
         let client = RepositorySummaryClient()
         let meeting = MeetingWorkspace(controller: DualFixture().controller(), insightClient: client,
-            credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+            credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         let library = KnowledgeLibrary(files: files)
         #expect(await library.attach(saved.id, to: meeting))
         #expect(client.requests.isEmpty)
@@ -168,5 +168,5 @@ struct KnowledgeLibraryStateTests {
 @MainActor
 func libraryMeeting() -> MeetingWorkspace {
     MeetingWorkspace(controller: DualFixture().controller(), insightClient: KnowledgeClient(),
-                     credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                     credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
 }

@@ -32,7 +32,8 @@ final class MeetingWorkspace {
     private var pendingSummaryID: UUID?
     private var preparingSummaryID: UUID?
     var candidates: MeetingCandidateStore { ai.candidates }
-    let credentials: GeminiCredentials
+    let llmSettings: LLMSettings
+    var credentials: APIKeyCredentials { llmSettings.credentials }
     var insights: [MeetingInsight] {
         get { ai.insights }
         set {
@@ -46,7 +47,7 @@ final class MeetingWorkspace {
     #endif
     var canStopAI: Bool { ai.permitted || summary.state == .sending }
     var aiStatus: String {
-        if summary.state == .sending { return "会議の要約をGeminiへ送信中" }
+        if summary.state == .sending { return "会議の要約を\(llmSettings.selected.name)へ送信中" }
         #if DEBUG
         if let previewAIStatus { return previewAIStatus }
         #endif
@@ -60,14 +61,14 @@ final class MeetingWorkspace {
     private var pendingCompletion: Completion?
 
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
-         credentials: GeminiCredentials? = nil, defaults: UserDefaults = .standard) {
+         credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil) {
         self.defaults = defaults
         let language = AnswerLanguage(rawValue: defaults.string(forKey: "aiAnswerLanguage") ?? "") ?? .japanese
         answerLanguage = language
         self.controller = controller
-        let credentials = credentials ?? GeminiCredentials()
-        self.credentials = credentials
-        let client = insightClient ?? GeminiInsightClient(key: { try await credentials.store.read() })
+        let settings = llmSettings ?? LLMSettings(defaults: defaults, legacyCredentials: credentials)
+        self.llmSettings = settings
+        let client = insightClient ?? SelectedLLMClient(settings: settings)
         let ai = InsightCoordinator(store: controller.store, client: client)
         ai.answerLanguage = language
         self.ai = ai
@@ -78,7 +79,7 @@ final class MeetingWorkspace {
         controller.captureActivityChanged = { [weak ai] active in
             if active { ai?.resume() } else { ai?.suspend() }
         }
-        credentials.onChange = { [weak self] in
+        settings.onChange = { [weak self] in
             self?.ai.setPermission(false, after: 0)
             self?.cancelSummary()
         }

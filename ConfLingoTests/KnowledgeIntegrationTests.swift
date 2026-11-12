@@ -110,7 +110,7 @@ struct KnowledgeIntegrationTests {
 
     @Test func meetingReviewRetainsDocumentsAndDiscardRequiresConfirmation() async throws {
         let meeting = MeetingWorkspace(controller: DualFixture().controller(), insightClient: KnowledgeClient(),
-                                       credentials: GeminiCredentials(store: MemoryAPIKeyStore()))
+                                       credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         await meeting.knowledge.add(data: Data("料金100円".utf8), filename: "spec.txt")
         meeting.requestDiscard()
         #expect(meeting.showsDiscardConfirmation)

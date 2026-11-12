@@ -149,3 +149,5 @@ AVAudioEngine microphone input (hardware format)
 | `Services/TranslationCoordinator.swift` | Translation queue (ID dedup + AsyncStream) |
 | `Services/ModelAvailabilityService.swift` | Availability checks and model downloads at launch |
 | `Export/MarkdownExporter.swift` | Markdown generation (pure function) |
+
+Meeting supports Gemini, OpenAI, Claude, Kimi, DeepSeek, other OpenAI-compatible clouds, and local models such as Qwen through Ollama / LM Studio. API keys are stored per connection in Keychain. See [setup](docs/usage.md#meeting-ai-assistance-and-llm-selection) and [validation scope](docs/validation/llm-selection.md).

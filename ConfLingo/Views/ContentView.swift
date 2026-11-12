@@ -243,7 +243,7 @@ struct ContentView: View {
         case .settings:
             SettingsView(fontSize: $fontSize, alwaysOnTop: $alwaysOnTop, appearance: $appearance,
                          answerLanguage: Binding(get: { meeting.answerLanguage }, set: { meeting.answerLanguage = $0 }),
-                         credentials: meeting.credentials,
+                         llmSettings: meeting.llmSettings,
                          editDictionary: { showDictionary = true }, prepare: { navigate(.setup) })
         }
     }

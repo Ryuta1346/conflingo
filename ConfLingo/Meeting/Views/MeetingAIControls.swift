@@ -11,14 +11,14 @@ struct MeetingAIControls: View {
             VStack(alignment: .leading, spacing: 12) {
                 #if DEBUG
                 if meeting.previewUsesLiveAI {
-                    Text("実API検証：合成発話・音声取得なし・Geminiへ実通信（API利用料金が発生）")
+                    Text("実API検証：合成発話・音声取得なし・選択したAIへ実通信（API利用料金が発生）")
                         .font(.caption).foregroundStyle(DesignTokens.warning)
                 }
                 #endif
                 HStack {
-                    Label("Gemini / 自分のAPIキー", systemImage: "sparkles").font(.headline)
+                    Label(meeting.llmSettings.selected.destinationLabel, systemImage: "sparkles").font(.headline)
                     Spacer()
-                    Button("APIキー設定") { showsKeySettings = true }
+                    Button("LLM設定") { showsKeySettings = true }
                 }
                 Picker("AIの回答言語", selection: $meeting.answerLanguage) {
                     ForEach(AnswerLanguage.allCases, id: \.self) { language in
@@ -27,19 +27,17 @@ struct MeetingAIControls: View {
                 }
                 Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
-                Toggle("確定発話と質問文のGeminiへの送信を許可", isOn: Binding(
+                Toggle("確定発話と質問文を\(meeting.llmSettings.selected.name)へ送信することを許可", isOn: Binding(
                     get: { meeting.ai.permitted }, set: { meeting.setAIAllowed($0) }
                 ))
                 .disabled(meeting.page == .review || meeting.phase == .stopping)
                 DisclosureGroup("送信する内容・データの扱い", isExpanded: $showsDataDetails) {
                 Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は手動質問・自動提案それぞれの許可、または終了後要約の確認画面で選択した場合に参照します。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
-                Text("無料枠では入出力が製品改善に利用され得ます。有料枠でも限定的な保持があります。ご自身のGoogleプロジェクトの条件をご確認ください。")
+                Text("送信先：\(meeting.llmSettings.selected.baseURL)。料金・データ保持・学習への利用は、接続先サービスとご自身の契約・実行環境の条件をご確認ください。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
-                Link("Googleのデータ利用条件", destination: URL(string: "https://ai.google.dev/gemini-api/terms")!)
-                    .font(.caption)
                 }
-                Toggle("自動提案を使う（追加のAPI利用が発生）", isOn: Binding(
+                Toggle("自動提案を使う（追加のAI処理が発生）", isOn: Binding(
                     get: { meeting.ai.automaticEnabled }, set: { meeting.setAutomaticAI($0) }
                 ))
                 .disabled(!meeting.ai.permitted || meeting.ai.subscriptionFailed || meeting.page == .review || meeting.phase == .stopping)
@@ -82,45 +80,10 @@ struct MeetingAIControls: View {
         }
         .sheet(isPresented: $showsKeySettings) {
             VStack(alignment: .trailing, spacing: 16) {
-                GeminiKeySettingsView(credentials: meeting.credentials)
+                LLMSettingsView(settings: meeting.llmSettings)
                 Button("閉じる") { showsKeySettings = false }.keyboardShortcut(.cancelAction)
             }
-            .padding(24).frame(width: 520)
+            .padding(24).frame(width: 680)
         }
-    }
-}
-
-struct GeminiKeySettingsView: View {
-    @Bindable var credentials: GeminiCredentials
-    @State private var key = ""
-    @State private var confirmsDeletion = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 14) {
-            Text("Gemini APIキー").font(.headline)
-            Text("ご自身のAPIキーでGoogleへ直接接続します。キーはこのMacのKeychainに保存します。APIの利用料金はご自身のGoogleプロジェクトに発生します。")
-                .font(.callout).foregroundStyle(DesignTokens.secondary)
-            Text("モデル：\(GeminiInsightClient.model)").font(.caption)
-            Text(credentials.statusText).font(.callout)
-            SecureField("Gemini APIキー", text: $key).textFieldStyle(.roundedBorder)
-            HStack {
-                Button("Keychainへ保存") {
-                    credentials.save(key)
-                    key = ""
-                }.disabled(key.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
-                Button("キーを削除", role: .destructive) { confirmsDeletion = true }.disabled(!credentials.configured)
-            }
-            if !credentials.message.isEmpty { Text(credentials.message).font(.callout) }
-            Text("キーの変更・削除時はAI送信許可を解除します。通常の字幕は継続します。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
-            Link("Gemini APIの料金を見る", destination: URL(string: "https://ai.google.dev/gemini-api/docs/pricing")!)
-                .font(.caption)
-        }
-        .task { await credentials.refresh() }
-        .onDisappear { key = "" }
-        .alert("Gemini APIキーを削除しますか？", isPresented: $confirmsDeletion) {
-            Button("キャンセル", role: .cancel) {}
-            Button("削除", role: .destructive) { credentials.delete() }
-        } message: { Text("このMacに保存したキーを削除し、AI送信許可を解除します。Google側のキーは削除しません。") }
     }
 }

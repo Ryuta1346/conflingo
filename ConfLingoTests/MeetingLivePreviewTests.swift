@@ -42,3 +42,17 @@ struct MeetingLivePreviewTests {
         await meeting.end()
     }
 }
+
+@MainActor
+struct MeetingPreviewLLMIsolationTests {
+    @Test func restoredCustomConnectionInMockPreviewNeverUsesRealKeychain() throws {
+        let defaults = UserDefaults(suiteName: UUID().uuidString)!
+        let settings = LLMSettings(defaults: defaults, keyStore: TestConnectionKeys().store)
+        var local = LLMConnection.preset(.local)
+        local.model = "synthetic-model"
+        try settings.save(local)
+        let meeting = MeetingPreview.make(activity: AudioInputUse(), defaults: defaults)
+        #expect(!(meeting.credentials.store is KeychainAPIKeyStore))
+        #expect(meeting.llmSettings.selected.model == "synthetic-model")
+    }
+}

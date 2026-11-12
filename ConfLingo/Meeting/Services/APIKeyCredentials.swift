@@ -66,7 +66,7 @@ struct KeychainAPIKeyStore: APIKeyStore {
 
 @MainActor
 @Observable
-final class GeminiCredentials {
+final class APIKeyCredentials {
     private(set) var configured = false
     private(set) var message = ""
     private var checking = false
@@ -102,11 +102,16 @@ final class GeminiCredentials {
         }
     }
 
-    func save(_ value: String) {
+    static func isValid(_ key: String) -> Bool {
+        !key.isEmpty && key.count <= 512 && key.unicodeScalars.allSatisfy({ $0.isASCII && !CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains($0) })
+    }
+
+    @discardableResult
+    func save(_ value: String) -> Bool {
         let key = value.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !key.isEmpty, key.count <= 512, key.unicodeScalars.allSatisfy({ $0.isASCII && !CharacterSet.whitespacesAndNewlines.union(.controlCharacters).contains($0) }) else {
+        guard Self.isValid(key) else {
             message = "有効なAPIキーを入力してください。"
-            return
+            return false
         }
         onChange?()
         do {
@@ -116,7 +121,8 @@ final class GeminiCredentials {
             configured = true
             readFailed = false
             message = "APIキーをKeychainへ保存しました。"
-        } catch { message = InsightFailure.keyStorage.localizedDescription }
+            return true
+        } catch { message = InsightFailure.keyStorage.localizedDescription; return false }
     }
 
     func delete() {

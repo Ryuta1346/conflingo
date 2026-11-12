@@ -4,13 +4,13 @@
 
 ## 現在地
 
-- 更新: **2026-11-12／ブランチ `feature/knowledge-library`**。ローカルmain `adfc2c5`でSessions PR #21のマージを確認。
-- **実装:** PR0〜8、追加リポジトリ参照（PR #20）、Sessions（PR #21）はマージ済み。永続資料ライブラリは[計画](docs/design/knowledge-library-implementation-plan.md)に従い実装・主要検証済み。[Draft PR #22](https://github.com/Ryuta1346/conflingo/pull/22)を作成（未マージ）。PR9は未着手。
+- 更新: **2026-11-12／ブランチ `feature/llm-selection`**。ベース `adf9516`で資料ライブラリPR #22のマージを確認。LLM選択の追加差分は未マージ。
+- **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）はマージ済み。LLM選択の追加実装と主要検証を完了（未マージ）。PR9は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** 資料ライブラリ追加後、444テスト／72 suites、lint166ファイル違反0、Debug/Release成功。保存・再起動後の復元・検索/引用・更新・削除を無通信UIで確認。狭幅・VoiceOver全経路などは未確認。[結果](docs/validation/knowledge-library.md)。
+- **直近の検証記録:** LLM選択追加後、462テスト／79 suites、lint178ファイル違反0、署名付きDebug/Releaseビルド成功。ローカル模擬サーバーへの一覧取得・キーなし生成をUIで確認。新規クラウドとQwenの実生成・狭幅・VoiceOver全経路は未確認。[結果](docs/validation/llm-selection.md)。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
-- **今回の開発:** 永続資料ライブラリ。Markdown/Text・取り込み済みリポジトリの明示保存、一覧/名前検索/本文閲覧、次の会議での選択、更新/削除を実装。使用中の会議と過去の引用は保持。次の未実装候補はPDF/OCR。
+- **今回の開発:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
 - **持ち越す検証:** Conference回帰 → Zoom/Meet/Teams別2入力受入 → 実音声とAI・候補管理・要約・資料検索・Markdown出力の結合受入。PR #20の品質評価・独立レビュー、UIの残る確認、60分耐久・性能・配布条件も継続する。
 - **実施条件:** 実音声は試験環境と参加者同意を確認し、追加実APIは新たな送信範囲・要求上限の承認後に実施する。既存の使用済み評価枠は拡張しない。
 

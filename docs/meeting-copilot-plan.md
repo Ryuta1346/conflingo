@@ -568,3 +568,7 @@ ConfLingoTests/
 ## PR8 承認済み実装範囲（2026-11-11）
 
 ユーザー「承認」により、Markdown/Textの会議内取り込み、ローカル全文検索、資料根拠の表示、会議ごとの明示許可による手動質問への抜粋送信を実装する。資料はReviewまで保持し、会議破棄・アプリ終了で破棄する。PDF、永続ライブラリ、資料を使う自動提案・要約は後続。資料だけで決定・アクション候補を確認済みにしない。[実装計画](design/pr8-implementation-plan.md)の上限・取消・検証契約を適用。ローカル実装・331テスト・Debug/Release・lint・非録音UI確認を完了。[検証記録](validation/pr8-local-rag.md)。後続の承認済み指摘対応で342テスト・lint・Releaseを確認し、実APIの合成引用品質は16/16件合格（計数込み32要求・推定US$0.04850325）。[品質評価結果](validation/pr8-quality-acceptance.md)。実音声、PR6/7の残る受入と品質Gateは未完了を維持する。
+
+## LLM選択の拡張（2026-11-12承認・実装済み）
+
+Gemini / OpenAI / Claude / Kimi / DeepSeek / その他OpenAI互換クラウド / PC内のQwen等を利用者が選択する。[承認済み計画](design/llm-selection-implementation-plan.md)に従い、接続別KeychainとローカルAPI接続を実装。462テスト・lint・Releaseビルド合格。署名済みアプリのローカル模擬接続を確認し、実クラウド各社／Qwenの生成品質は未検証。[検証記録](validation/llm-selection.md)。ChatGPTログインは今回除外。既存PR6のGemini品質評価とは分けて扱う。
