@@ -4,15 +4,25 @@
 
 ## 現在地
 
-- 更新: **2026-11-12／ブランチ `feature/llm-selection`**。ベース `adf9516`で資料ライブラリPR #22のマージを確認。LLM選択の追加差分は未マージ。
-- **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）はマージ済み。LLM選択の追加実装と主要検証を完了（未マージ）。PR9は未着手。
+- **追加実装（承認済み・未マージ）:** `feature/knowledge-entry-points`でライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
+- 更新: **2026-11-12／`feature/knowledge-entry-points`・基準main `56d7a81`**。PR #23までのマージをGit履歴で確認。今回の変更はレビュー提出版。リモートの最新状態は再取得していない。
+- **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** LLM選択追加後、462テスト／79 suites、lint178ファイル違反0、署名付きDebug/Releaseビルド成功。ローカル模擬サーバーへの一覧取得・キーなし生成をUIで確認。新規クラウドとQwenの実生成・狭幅・VoiceOver全経路は未確認。[結果](docs/validation/llm-selection.md)。
+- **直近の検証記録:** 資料追加導線の484テスト／86 suites成功、Lint193ファイル違反0、Debug/Releaseと主要fake UIを確認。[最新結果](docs/validation/knowledge-entry-points.md)。新規クラウドとQwenの実生成・狭幅・VoiceOver全経路は引き続き未確認。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
-- **今回の開発:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
+- **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
 - **持ち越す検証:** Conference回帰 → Zoom/Meet/Teams別2入力受入 → 実音声とAI・候補管理・要約・資料検索・Markdown出力の結合受入。PR #20の品質評価・独立レビュー、UIの残る確認、60分耐久・性能・配布条件も継続する。
 - **実施条件:** 実音声は試験環境と参加者同意を確認し、追加実APIは新たな送信範囲・要求上限の承認後に実施する。既存の使用済み評価枠は拡張しない。
+
+## 次の作業の優先順（提案）
+
+1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
+2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
+3. **操作性とレビュー:** Sessions・資料ライブラリ・LLM設定を含む狭幅・拡大文字・キーボード・VoiceOver、未確認の画面状態、残る独立レビューを完了（Gate U）。実音声待ちの間にも進められる。
+4. **実用判定:** 60分耐久・遅延・メモリ・障害復旧・送信停止・配布署名を確認し、費用照合と利用案内を整理（PR9／Gate D）。
+
+新機能を優先する場合の既存候補は**PDF/OCR**。専門プリセット（Engineering / Sales）や保存記録の編集・AI再生成・自動保存・クラウド同期等は、後続の構想／初版対象外であり、今回の必須残タスクや承認済み実装として扱わない。
 
 ## PR進捗
 
@@ -51,13 +61,16 @@
 |---|---|---|---|
 | [x] | PR8／レビュー・修正マージ | 独立レビュー・MEDIUM 2件の修正検証・実API評価を完了。PR #19はmain `7efbd3f`でマージ確認済み。PR8全体の受入は継続 | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
 | [x] | PR4（短時間ローカル） | 新しい文による再開と通常Meetingの開始・一時停止・再開・終了を確認。会議アプリ別・Gate B全体は次行で継続 | [実入力受入](docs/validation/meeting-real-input-2026-11-11.md)・[診断結果](docs/validation/microphone-diagnostics.md) |
+| [ ] | 資料追加導線／新規受入 | 通常／語彙モードの日英精度・ライブ更新と2入力、実モデル質問・補正、狭幅・文字拡大・キーボード・VoiceOverと独立レビュー。ローカル実装・fake UI成功とは区別 | [検証記録](docs/validation/knowledge-entry-points.md) |
 | [ ] | Sessions／UI受入 | 通常幅の主要操作と再起動後の復元は確認済み。狭幅・拡大文字・キーボード全経路・VoiceOverを確認。Windowメニューの操作ツールエラーで当該実操作は未完了 | [Sessions検証](docs/validation/sessions.md) |
+| [ ] | 資料ライブラリ／UI・レビュー | L12の狭幅・最大文字・キーボード・VoiceOver全経路と独立レビュー。100項目・1,000ファイルの保存版読込／索引復元は測定済み、最大容量の測定は未実施 | [資料ライブラリ検証](docs/validation/knowledge-library.md) |
+| [ ] | LLM選択／実モデル・UI | 新規クラウド各社・Qwenの実生成、構造化応答・回答/引用品質・速度を確認。モデル一覧から選択して保存する一連の操作、狭幅・VoiceOver全経路も未確認。ローカル模擬API成功と実モデル成功を区別 | [LLM選択検証](docs/validation/llm-selection.md) |
 | [ ] | PR0・5-B／Gate A | Conferenceの実翻訳・文字起こし専用・字幕・停止/再開・辞書・言語切替・Clear・Markdown保存・権限拒否/復旧など、回帰表の未実施項目を実機確認 | [Conference回帰表](docs/validation/conference-baseline.md#conference回帰表) |
 | [ ] | PR3・4／Gate B | Zoom/Meet/Teamsそれぞれで内部音声とマイクを識別。入力切替・機器/権限変更・切断/復旧・検証画面閉鎖時の停止、2系統STTの精度・時刻誤差・遅延・CPU/メモリを確認 | [2入力検証](docs/validation/dual-transcription.md)・[詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR5-C・6・7・8／Gate C | 通常Meetingの開始・一時停止/再開・終了は実音声で確認済み。候補確認/却下・要約・Markdown保存との結合受入が残る。根拠表示・誤確定防止・提案連発防止、通信断時の音声継続とAIのみの縮退、資料検索との結合を確認 | [PR5-C](docs/validation/pr5-c-meeting.md)・[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-meeting-state.md)・[PR8](docs/validation/pr8-local-rag.md) |
 | [x] | PR7（合成要約品質） | 要約60秒化後の3会議・8区間が合格。過去評価と合わせ固定16会議・22区間の品質条件を確認。過去2回のtimeoutは保持し、実音声・Gate Cは別途受入 | [修正・評価結果](docs/validation/pr7-summary-deadline.md) |
 | [x] | PR8／合成引用品質 | 日英16/16ケースの意味・言語・引用が合格。命令・矛盾・不足資料を含む。Gate C全体とは区別 | [PR8品質評価](docs/validation/pr8-quality-acceptance.md) |
-| [ ] | PR #20／追加機能の品質・レビュー | リポジトリを使う手動質問・自動提案・資料付き要約を実モデルで評価。自然言語からコードへの検索精度、補足と引用の正確さ、実音声との結合を確認。独立レビューと1,000ファイル級の索引化時間・メモリ・操作性も未確認 | [リポジトリ資料化](docs/validation/repository-knowledge.md)・[自動提案](docs/validation/automatic-knowledge.md) |
+| [ ] | PR #20／追加機能の品質・レビュー | リポジトリを使う手動質問・自動提案・資料付き要約を実モデルで評価。自然言語からコードへの検索精度、補足と引用の正確さ、実音声との結合を確認。独立レビューと1,000ファイル級の原本走査→選択→索引化の時間・メモリ・操作性も未確認。ライブラリ保存版の索引復元の測定とは区別 | [リポジトリ資料化](docs/validation/repository-knowledge.md)・[自動提案](docs/validation/automatic-knowledge.md) |
 | [ ] | PR5-A/B/C・6〜8／Gate U | 承認モックと実装画像の比較、未確認の画面/空・失敗状態、全操作の受入記録を完成。VoiceOver全経路、画面共有・複数画面・高コントラスト等を確認。PR5-Cの独立コード/画像レビューを実施 | [設計検証](docs/design/validation.md)・[PR5-B](docs/validation/pr5-b-conference.md)・[PR5-C](docs/validation/pr5-c-meeting.md)・[確認済み範囲](docs/validation/pr6-focus-stability.md) |
 | [ ] | PR0・3・9／Gate B・D | ScreenCaptureKit/Process Tapの権限・Sandbox・配布条件と配布署名での動作を検証 | [詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR9／Gate D | 60分実会議の耐久、クラッシュ・メモリ増加・処理滞留、入力切断/再接続、APIタイムアウト・連続開始/停止を確認。発話終了→AI完成のp95目標8秒とSTT遅延を実測し、質問検知率・誤提案率・根拠正確性を記録 | [Gate D・テスト計画](docs/meeting-copilot-plan.md#4-フェーズごとの受入基準) |
@@ -80,6 +93,8 @@
 
 ## 更新履歴（直近のみ）
 
+- **2026-11-12（資料追加導線）:** 承認済みの事前登録・会議中追加・Conference支援をローカル実装。自動検証・主要fake UIを確認。実音声・実モデル品質・UI網羅は継続。レビュー提出版・未マージ。[結果](docs/validation/knowledge-entry-points.md)。
+- **2026-11-12（現状整理）:** ローカルmain `56d7a81`でPR #21〜23のマージを確認。最新テスト件数を467へ修正し、資料ライブラリ・LLM選択の未検証項目と作業優先順を明記。文書整理のみ。受入完了数2/12と各Gateの未完了を維持。
 - **2026-11-11（Sessions）:** 計画承認後にローカル実装、423テスト・lint・Debug/Release成功。主要無通信UIを確認し、残るS12を明記。ユーザー依頼でコミット・pushし、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成。[結果](docs/validation/sessions.md)。
 - **2026-11-11（PR #20マージ後の整理）:** main `294bd0c`と検証記録151ファイルのハッシュ一致を確認。追加機能を実装済みへ更新し、実モデル品質・独立レビュー・大規模性能・README整合を残件に明記。受入完了数2/12と各Gate状態は維持。文書整理のみで追加API・音声取得は0。
 - **2026-11-11（実音声）:** 診断2試行で日本語4文・英語9文を確認。欠落の旧判定を撤回。新しい文での再開と通常Meetingの開始→一時停止→再開→終了も確認。追加API0。[診断](docs/validation/microphone-diagnostics.md)・[Meeting受入](docs/validation/meeting-real-input-2026-11-11.md)。

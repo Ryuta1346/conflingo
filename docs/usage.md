@@ -100,7 +100,7 @@ Changing languages preserves existing text. Markdown records the language settin
 
 Open **辞書を管理** from preparation or Settings. Create, select, duplicate, rename, or delete dictionaries. The final dictionary cannot be deleted.
 
-Separate terms with commas, Japanese commas, or newlines. Use `evals=評価` to specify a translation. Terms without a translation are protected to preserve their spelling. Terms also provide recognition hints; correct recognition and translation are not guaranteed.
+Separate terms with commas, Japanese commas, or newlines. Use `evals=評価` to specify a translation. Terms without a translation are protected to preserve their spelling. Terms provide recognition hints in vocabulary mode; correct recognition and translation are not guaranteed.
 
 ```text
 ConfLingo
@@ -131,7 +131,7 @@ See [README](../README.md#distribution) for distribution builds and [PR5-B valid
 
 ## Repository context in Meeting
 
-In Meeting preparation, open **資料 → リポジトリを追加** and select a local working folder. Review the source, tests, and documents, exclude files or directories, then import. Hidden files, dependencies, generated output, and known credential files are excluded. Full `.gitignore` semantics and detection of secrets embedded in source are not provided.
+Before or during a Meeting, open **資料 → リポジトリを追加** and select a local working folder. Review the source, tests, and documents, exclude files or directories, then import. Hidden files, dependencies, generated output, and known credential files are excluded. Full `.gitignore` semantics and detection of secrets embedded in source are not provided.
 
 One repository per meeting supports up to 1,000 files, five million characters, and 20 MiB; each file is limited to 1 MiB and 100,000 characters. Ordinary Markdown/Text documents retain their separate limits. Import and local search send nothing externally.
 
@@ -143,12 +143,29 @@ Search uses words, paths, and split identifiers. It does not guarantee cross-lan
 
 ## Knowledge library
 
-In Meeting preparation, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.
+From **資料ライブラリ → 資料を追加**, or before/during a Meeting or Conference, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.
 
-For the next meeting, use **ライブラリから追加** to select a saved snapshot. **資料ライブラリ** in the sidebar supports saved-name search, read-only body and source viewing, and deletion. Saved copies work after the originals move or disappear; changes to originals are not applied automatically.
+For the next meeting, use **ライブラリから選択** to select a saved snapshot. **資料ライブラリ** in the sidebar supports saved-name search, read-only body and source viewing, and deletion. Saved copies work after the originals move or disappear; changes to originals are not applied automatically.
 
-To replace an entry, import the new material in preparation, open its save dialog, select an existing entry of the same type, and confirm the replacement. Re-saving the same attached material updates its existing entry. Library updates and deletion do not change copies already attached to meetings or previous citations. Remove and re-add a meeting's copy in preparation to use a newer revision.
+To replace an entry, import the new material, open its save dialog, select an existing entry of the same type, and confirm the replacement. Re-saving the same attached material updates its existing entry. Library updates and deletion do not change copies already attached to meetings or previous citations. Remove and re-add a session's copy to use a newer revision.
 
 Saving, viewing, and attaching do not send content externally. AI consent is never saved. Attaching a saved copy turns manual and automatic document permission off for fresh confirmation. Saved bodies remain until explicitly deleted from the library, independently of meeting disposal.
 
 The library supports up to 100 entries and 200 MiB of saved files. Existing per-meeting import limits still apply. PDF/OCR, cloud sync, and automatic refresh are not supported.
+
+
+## Add materials during a session
+
+Open **資料** in Meeting, or the **資料（count）** button above Conference captions. Add multiple Markdown/Text files, select a saved library copy, or import a repository while audio continues. New imports are disabled during starting/stopping; stopping cancels pending attachment. Meeting Review keeps browsing and search but does not accept new imports. Stopped Conference remains the same session. Clearing Conference discards its temporary materials and AI results, not saved library entries.
+
+## Conference document questions
+
+In the materials panel, enable **資料への質問を許可**, choose the answer language and ask a question. Only the question and relevant excerpts are sent to the selected LLM; captions and audio are excluded. Citations open the imported source. Changing materials or the LLM connection cancels pending generation and requires fresh permission.
+
+## Document terminology and corrections
+
+Expand **資料から専門用語を適用**, extract candidates, review their sources, select/edit terms and explicitly apply them. Candidates come from headings, marked terms, code spans and source/target glossary tables; translations are not invented. Confirm the source and target language. Existing manual dictionary entries take precedence, with a combined limit of 100 terms.
+
+Confirmed translations apply to subsequent Conference translation requests. To bias speech recognition, select the vocabulary mode before starting. It uses DictationTranscriber and may need a model download: Conference prepares after mode selection, Meeting at start. Live vocabulary updates report success or defer to the next start without stopping audio. Real-audio accuracy improvements have not yet been evaluated.
+
+Conference also offers **資料で補正する**. Separately permit sending a selected final utterance, its existing translation, related excerpts and applied terms. Review the proposed source/translation against the originals and explicitly adopt or undo it. Adopted corrections are labeled in captions. Originals remain available; only adopted corrections, completed document answers, citations and applied terms are included in explicit session saves and Markdown output. Real-model correction quality remains unverified.

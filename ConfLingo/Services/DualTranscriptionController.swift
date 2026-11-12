@@ -77,7 +77,8 @@ final class DualTranscriptionController {
 
     func start(
         microphoneLocale: Locale = Locale(identifier: "en-US"),
-        systemLocale: Locale = Locale(identifier: "en-US"), fastResults: Bool = false
+        systemLocale: Locale = Locale(identifier: "en-US"), fastResults: Bool = false,
+        recognitionMode: SpeechRecognitionMode = .standard, contextKeywords: [AudioOrigin: [String]] = [:]
     ) async {
         guard phase == .idle, !Task.isCancelled else { return }
         guard let token = activity.acquire(owner) else {
@@ -96,7 +97,7 @@ final class DualTranscriptionController {
         let task = Task {
             await prepareAndStart(
                 run: run, locales: [.microphone: microphoneLocale, .systemAudio: systemLocale],
-                fastResults: fastResults
+                fastResults: fastResults, recognitionMode: recognitionMode, contextKeywords: contextKeywords
             )
             startTask = nil
         }
@@ -157,7 +158,19 @@ final class DualTranscriptionController {
         lastError = nil
     }
 
-    private func prepareAndStart(run: UUID, locales: [AudioOrigin: Locale], fastResults: Bool) async {
+    func updateContext(_ keywords: [AudioOrigin: [String]]) async -> Bool {
+        guard phase == .listening, let run = runID else { return false }
+        var succeeded = true
+        for input in inputs {
+            guard runID == run, phase == .listening else { return false }
+            do { try await input.speech.updateContext(keywords[input.origin] ?? []) }
+            catch { succeeded = false }
+        }
+        return succeeded && runID == run && phase == .listening
+    }
+
+    private func prepareAndStart(run: UUID, locales: [AudioOrigin: Locale], fastResults: Bool,
+                                 recognitionMode: SpeechRecognitionMode, contextKeywords: [AudioOrigin: [String]]) async {
         var currentOrigin = AudioOrigin.microphone
         do {
             var prepared: [AudioOrigin: Locale] = [:]
@@ -165,7 +178,9 @@ final class DualTranscriptionController {
                 currentOrigin = input.origin
                 try Task.checkCancellation()
                 preparation = "\(input.origin.label)：認識モデルを準備中（必要に応じてダウンロード）"
-                prepared[input.origin] = try await prepareModel(locales[input.origin] ?? Locale(identifier: "en-US"))
+                let locale = locales[input.origin] ?? Locale(identifier: "en-US")
+                prepared[input.origin] = recognitionMode == .standard ? try await prepareModel(locale) : locale
+                try await input.speech.prepare(mode: recognitionMode, locale: prepared[input.origin] ?? locale)
                 try Task.checkCancellation()
                 preparation = "\(input.origin.label)：アクセスを確認中"
                 let allowed = await input.source.requestPermission()
@@ -197,7 +212,7 @@ final class DualTranscriptionController {
                 preparation = "\(input.origin.label)：入力を開始中"
                 activeInputs.insert(input.origin)
                 try await input.speech.start(
-                    locale: locale, contextKeywords: [], fastResults: fastResults,
+                    locale: locale, contextKeywords: contextKeywords[input.origin] ?? [], fastResults: fastResults,
                     onInputStarted: { [weak self] in
                         guard let self, self.runID == run, self.phase == .preparing else { return }
                         self.startedInputs.insert(input.origin)

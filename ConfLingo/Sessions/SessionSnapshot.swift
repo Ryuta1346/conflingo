@@ -8,6 +8,7 @@ struct ConferenceSnapshot: Codable, Equatable, Sendable {
     let targetLanguage: String?
     let segments: [TranscriptSegment]
     let units: [TranslationUnit]
+    var support: ConferenceSupportSnapshot?
 }
 
 enum SessionSnapshot: Codable, Equatable, Sendable {
@@ -48,7 +49,7 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
         case .conference(let value):
             MarkdownExporter.render(sessionName: value.title, date: value.startedAt,
                                     segments: value.segments, units: value.units,
-                                    sourceLanguage: value.sourceLanguage, targetLanguage: value.targetLanguage)
+                                    sourceLanguage: value.sourceLanguage, targetLanguage: value.targetLanguage) + (value.support?.markdown ?? "")
         }
     }
 
@@ -107,6 +108,23 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
             for unit in value.units {
                 try require(optionalTime(unit.startTime) && !unit.segmentIDs.isEmpty && unique(unit.segmentIDs)
                             && unit.segmentIDs.allSatisfy { ids.contains($0) })
+            }
+            if let support = value.support {
+                try require(unique(support.answers.map(\.id)) && unique(support.corrections.map(\.id))
+                            && Set(support.corrections.map(\.unitID)).count == support.corrections.count && support.terms.count <= 100)
+                for answer in support.answers {
+                    try require(answer.status == .complete && !answer.text.isEmpty && answer.text.count <= 8_000
+                                && answer.evidenceIDs.isEmpty && !answer.hasInvalidEvidence
+                                && (answer.kind == .answerSuggestion || answer.kind == .followUpQuestion))
+                    try references(answer.knowledgeReferences)
+                }
+                for correction in support.corrections {
+                    guard correction.adopted, let unit = value.units.first(where: { $0.id == correction.unitID }) else { throw SessionFileError.invalid }
+                    try correction.validate(unit: unit)
+                    try require(!correction.original.sourceLanguage.isEmpty && correction.original.targetLanguage?.isEmpty != true)
+                    try references(correction.references)
+                }
+                for term in support.terms { try require(!term.term.isEmpty && term.term.count <= 80 && (term.target?.count ?? 0) <= 80 && term.line >= 0) }
             }
         }
     }

@@ -101,6 +101,10 @@ actor KnowledgeIndex {
         return archive
     }
 
+    func contents() -> [KnowledgeArchive.Document] {
+        documents.compactMap { document in bodies[document.id].map { .init(document: document, body: $0) } }
+    }
+
     func restore(_ archive: KnowledgeArchive) throws -> [KnowledgeDocument] {
         try Task.checkCancellation()
         try archive.validate()

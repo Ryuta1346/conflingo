@@ -126,6 +126,9 @@ struct SavedSessionView: View {
 
     @ViewBuilder
     private func conferenceContent(_ snapshot: ConferenceSnapshot) -> some View {
+        if let support = snapshot.support {
+            ConferenceSavedSupportView(support: support, fontSize: fontSize)
+        }
         Text("原文 · \(snapshot.sourceLanguage)").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
         ForEach(snapshot.segments) { segment in
             Surface {

@@ -2,7 +2,22 @@ import SwiftUI
 import AppKit
 
 struct RepositoryKnowledgeControls: View {
-    @Bindable var meeting: MeetingWorkspace
+    @Bindable var knowledge: KnowledgeStore
+    let canEdit: () -> Bool
+    let importSelection: (RepositoryScan, Set<String>) async -> Void
+
+    init(meeting: MeetingWorkspace) {
+        knowledge = meeting.knowledge
+        canEdit = { meeting.canEditKnowledge }
+        importSelection = { await meeting.importRepository($0, selected: $1) }
+    }
+
+    init(knowledge: KnowledgeStore, canEdit: @escaping () -> Bool,
+         importSelection: @escaping (RepositoryScan, Set<String>) async -> Void) {
+        self.knowledge = knowledge
+        self.canEdit = canEdit
+        self.importSelection = importSelection
+    }
     @State private var scan: RepositoryScan?
     @State private var selected: Set<String> = []
     @State private var scanning = false
@@ -12,9 +27,9 @@ struct RepositoryKnowledgeControls: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if meeting.page == .setup {
+            if canEdit() {
                 Button("リポジトリを追加", systemImage: "folder.badge.plus") { chooseFolder() }
-                    .disabled(scanning || meeting.isBusy || meeting.knowledge.isBusy || meeting.knowledge.hasRepository)
+                    .disabled(scanning || !canEdit() || knowledge.isBusy || knowledge.hasRepository)
                 Text("ローカルのコード・テスト・文書を選びます。1リポジトリ・1,000ファイル・500万文字・20 MiBまで。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
             }
@@ -25,12 +40,12 @@ struct RepositoryKnowledgeControls: View {
                     Button("中止") { scanTask?.cancel() }
                 }
             }
-            if meeting.knowledge.hasRepository {
+            if knowledge.hasRepository {
                 Button("リポジトリを取り外す", role: .destructive) { showsRemoval = true }
-                    .disabled(meeting.knowledge.isBusy)
+                    .disabled(!canEdit() || knowledge.isBusy)
             }
-            if meeting.knowledge.isBusy {
-                Button("リポジトリ取り込みを中止") { meeting.knowledge.cancelRepositoryImport() }
+            if knowledge.isBusy {
+                Button("リポジトリ取り込みを中止") { knowledge.cancelRepositoryImport() }
             }
             if !error.isEmpty { Text(error).font(.caption).foregroundStyle(DesignTokens.warning) }
         }
@@ -40,18 +55,16 @@ struct RepositoryKnowledgeControls: View {
             } importSelection: {
                 let paths = selected
                 scan = nil
-                Task { await meeting.importRepository(preview, selected: paths) }
+                Task { if canEdit() { await importSelection(preview, paths) } }
             }
         }
         .alert("リポジトリを取り外しますか？", isPresented: $showsRemoval) {
             Button("キャンセル", role: .cancel) { }
-            Button("取り外す", role: .destructive) { Task { await meeting.knowledge.removeRepository() } }
+            Button("取り外す", role: .destructive) { Task { if canEdit() { await knowledge.removeRepository() } } }
         } message: {
             Text("検索・送信から除外し、資料を使う生成を停止します。生成済みの引用は会議破棄まで残ります。元ファイルは削除しません。")
         }
-        .onChange(of: meeting.page) { _, page in
-            if page != .setup { scanTask?.cancel(); scan = nil }
-        }
+        .onChange(of: knowledge.importGeneration) { scanTask?.cancel(); scan = nil }
         .onDisappear { scanTask?.cancel() }
     }
 
@@ -70,11 +83,12 @@ struct RepositoryKnowledgeControls: View {
         scanTask?.cancel()
         scanning = true
         error = ""
+        let generation = knowledge.importGeneration
         scanTask = Task {
             defer { scanning = false }
             do {
                 let result = try await RepositoryImporter.scan(url)
-                guard !Task.isCancelled, meeting.page == .setup else { return }
+                guard !Task.isCancelled, canEdit(), generation == knowledge.importGeneration else { return }
                 selected = Set(result.eligible.map(\.path))
                 scan = result
             } catch is CancellationError { } catch {
@@ -84,7 +98,7 @@ struct RepositoryKnowledgeControls: View {
     }
 }
 
-private struct RepositorySelectionView: View {
+struct RepositorySelectionView: View {
     let scan: RepositoryScan
     @Binding var selected: Set<String>
     let cancel: () -> Void

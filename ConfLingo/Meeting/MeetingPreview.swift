@@ -115,8 +115,12 @@ enum MeetingPreview {
 }
 
 @MainActor
-private struct PreviewInsightClient: InsightClient {
+struct PreviewInsightClient: InsightClient {
     func generate(_ request: InsightRequest, update: @escaping @MainActor (String) -> Void) async throws -> InsightResult {
+        if let correction = request.correction, let reference = request.knowledge.first {
+            return InsightResult(kind: .answerSuggestion, text: correction.sourceText, evidenceIDs: [],
+                knowledgeIDs: [reference.id], supplement: correction.translation ?? "プレビュー用の訳文（外部送信なし）")
+        }
         if request.purpose == .summary, let reference = request.knowledge.first {
             return InsightResult(kind: .answerSuggestion, text: "会議では担当者と完了予定を確認しています。（架空の要約）",
                                  evidenceIDs: Array(request.events.prefix(1).map(\.id)), knowledgeIDs: [reference.id],

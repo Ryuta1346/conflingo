@@ -14,6 +14,7 @@ final class KnowledgeStore {
     private var index = KnowledgeIndex()
     private(set) var librarySources: [UUID: KnowledgeLibraryEntry] = [:]
     private(set) var revision = UUID()
+    private(set) var importGeneration = UUID()
     private var consentRevision = UUID()
     private var searchID = UUID()
     private var mutationID: UUID?
@@ -36,6 +37,7 @@ final class KnowledgeStore {
         isBusy = true
         message = "リポジトリを取り込んでいます…"
         let index = index
+        let generation = importGeneration
         let task = Task {
             let snapshot = try await RepositoryImporter.load(scan, selected: selected)
             try Task.checkCancellation()
@@ -44,6 +46,10 @@ final class KnowledgeStore {
         repositoryTask = task
         do {
             let imported = try await withTaskCancellationHandler { try await task.value } onCancel: { task.cancel() }
+            guard generation == importGeneration, !Task.isCancelled else {
+                for document in imported { try? await index.remove(document.id) }
+                throw CancellationError()
+            }
             guard mutationID == mutation else { return }
             documents += imported
             message = "リポジトリを取り込みました。取り込み時点の作業ツリーをこの会議で参照します。"
@@ -57,6 +63,18 @@ final class KnowledgeStore {
     }
 
     func cancelRepositoryImport() { repositoryTask?.cancel() }
+
+    func cancelPendingImports() {
+        importGeneration = UUID()
+        repositoryTask?.cancel()
+    }
+
+    func contents() async throws -> [KnowledgeArchive.Document] {
+        let version = revision
+        let result = await index.contents()
+        guard version == revision, !isBusy else { throw CancellationError() }
+        return result
+    }
 
     func removeRepository() async {
         guard !isBusy, hasRepository else { return }
@@ -82,6 +100,8 @@ final class KnowledgeStore {
     func retrieveForSummary(_ events: [TranscriptEvent]) async throws -> [KnowledgeReference] {
         try await rankedReferences(events.map(\.text))
     }
+
+    func localReferences(_ text: String) async throws -> [KnowledgeReference] { try await rankedReferences([text]) }
 
     func retrieveForAutomatic(_ event: TranscriptEvent) async throws -> [KnowledgeReference] {
         try await rankedReferences([String(event.text.prefix(12_000))])
@@ -139,7 +159,13 @@ final class KnowledgeStore {
         mutationID = mutation
         isBusy = true
         defer { if mutationID == mutation { mutationID = nil; isBusy = false } }
+        let index = index
+        let generation = importGeneration
         let restored = try await index.restore(saved.content)
+        guard generation == importGeneration, !Task.isCancelled else {
+            for document in restored { try? await index.remove(document.id) }
+            throw CancellationError()
+        }
         guard mutationID == mutation else { throw CancellationError() }
         documents += restored
         markSaved(saved)
@@ -168,14 +194,20 @@ final class KnowledgeStore {
         mutationID = mutation
         isBusy = true
         message = "資料を取り込んでいます…"
+        let index = index
+        let generation = importGeneration
         do {
             let document = try await operation(index)
+            guard generation == importGeneration, !Task.isCancelled else {
+                try? await index.remove(document.id)
+                throw CancellationError()
+            }
             guard mutationID == mutation else { return }
             documents.append(document)
             message = "資料を取り込みました。この会議の終了後も、破棄するまで参照できます。"
         } catch {
             guard mutationID == mutation else { return }
-            message = (error as? KnowledgeFailure ?? .unreadable).localizedDescription
+            message = error is CancellationError ? "取り込みを中止しました。" : (error as? KnowledgeFailure ?? .unreadable).localizedDescription
         }
         mutationID = nil
         isBusy = false
@@ -231,6 +263,7 @@ final class KnowledgeStore {
     }
 
     func reset() {
+        cancelPendingImports()
         repositoryTask?.cancel()
         repositoryTask = nil
         invalidate()

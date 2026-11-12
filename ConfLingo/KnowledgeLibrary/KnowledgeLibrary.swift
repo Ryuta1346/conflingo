@@ -65,51 +65,59 @@ final class KnowledgeLibrary {
         } catch { self.error = "削除できませんでした。\(error.localizedDescription)" }
     }
 
-    func canUse(_ meeting: MeetingWorkspace) -> Bool {
-        !isBusy && !meeting.isUsingLibrary && !meeting.isBusy && !meeting.isSavingSession
-            && !meeting.knowledge.isBusy && meeting.page == .setup && meeting.phase == .idle
-    }
+    func canUse(_ meeting: MeetingWorkspace) -> Bool { !isBusy && meeting.canEditKnowledge }
 
     func save(from meeting: MeetingWorkspace, documentID: UUID?, title: String,
               replacing replacement: KnowledgeLibraryEntry? = nil) async -> Bool {
         guard canUse(meeting) else { error = LibraryFailure.unavailable.localizedDescription; return false }
-        isBusy = true
         meeting.isUsingLibrary = true
+        defer { meeting.isUsingLibrary = false }
+        return await save(from: meeting.knowledge, documentID: documentID, title: title, replacing: replacement)
+    }
+
+    func save(from knowledge: KnowledgeStore, documentID: UUID?, title: String,
+              replacing replacement: KnowledgeLibraryEntry? = nil) async -> Bool {
+        guard !isBusy, !knowledge.isBusy else { return false }
+        isBusy = true
         error = nil
-        defer { isBusy = false; meeting.isUsingLibrary = false }
-        let session = meeting.store.sessionID
-        let revision = meeting.knowledge.revision
+        defer { isBusy = false }
+        let revision = knowledge.revision
+        let generation = knowledge.importGeneration
         do {
-            let content = try await meeting.knowledge.archive(documentID: documentID)
-            guard session == meeting.store.sessionID, revision == meeting.knowledge.revision, !Task.isCancelled else { throw CancellationError() }
-            let previous = content.documents.first.flatMap { meeting.knowledge.librarySources[$0.document.id] }
+            let content = try await knowledge.archive(documentID: documentID)
+            guard revision == knowledge.revision, generation == knowledge.importGeneration, !Task.isCancelled else { throw CancellationError() }
+            let previous = content.documents.first.flatMap { knowledge.librarySources[$0.document.id] }
             let target = replacement ?? previous.flatMap { old in entries.contains { $0.id == old.id } ? old : nil }
             let saved = try await files.save(content, title: title, replacing: target?.id, expectedRevision: target?.revision)
             upsert(saved.entry)
             if selected?.id == saved.id { selected = saved }
-            if session == meeting.store.sessionID, revision == meeting.knowledge.revision {
-                meeting.knowledge.markSaved(saved)
-            }
+            if revision == knowledge.revision, generation == knowledge.importGeneration { knowledge.markSaved(saved) }
             return true
         } catch { self.error = "保存できませんでした。前回の保存版を保持します。\(error.localizedDescription)"; return false }
     }
 
     func attach(_ id: UUID, to meeting: MeetingWorkspace) async -> Bool {
         guard canUse(meeting) else { error = LibraryFailure.unavailable.localizedDescription; return false }
-        isBusy = true
         meeting.isUsingLibrary = true
+        defer { meeting.isUsingLibrary = false }
+        let result = await attach(id, to: meeting.knowledge)
+        if result { meeting.setKnowledgeAllowed(false); meeting.setAutomaticKnowledgeAllowed(false) }
+        return result
+    }
+
+    func attach(_ id: UUID, to knowledge: KnowledgeStore) async -> Bool {
+        guard !isBusy, !knowledge.isBusy else { return false }
+        isBusy = true
         error = nil
-        defer { isBusy = false; meeting.isUsingLibrary = false }
-        let session = meeting.store.sessionID
-        let revision = meeting.knowledge.revision
+        defer { isBusy = false }
+        let revision = knowledge.revision
+        let generation = knowledge.importGeneration
         do {
             let saved = try await load(id)
-            guard session == meeting.store.sessionID, revision == meeting.knowledge.revision, !Task.isCancelled else { throw CancellationError() }
-            try await meeting.knowledge.restore(saved)
-            guard session == meeting.store.sessionID else { throw CancellationError() }
+            guard revision == knowledge.revision, generation == knowledge.importGeneration, !Task.isCancelled else { throw CancellationError() }
+            try await knowledge.restore(saved)
             upsert(saved.entry)
-            meeting.setKnowledgeAllowed(false)
-            meeting.setAutomaticKnowledgeAllowed(false)
+            knowledge.setPermission(false)
             return true
         } catch { self.error = "追加できませんでした。\(error.localizedDescription)"; return false }
     }

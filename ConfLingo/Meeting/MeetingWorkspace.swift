@@ -25,6 +25,9 @@ final class MeetingWorkspace {
     var knowledge: KnowledgeStore { ai.knowledge }
     var selectedKnowledge: KnowledgeReference?
     var isUsingLibrary = false
+    let documentTerms = DocumentTerms()
+    var recognitionMode: SpeechRecognitionMode = .standard
+    var recognitionStatus = "認識用語は次回の開始時に適用します。"
     let ai: InsightCoordinator
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
@@ -74,7 +77,11 @@ final class MeetingWorkspace {
         self.ai = ai
         let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
         self.summary = summary
-        ai.knowledge.onContentChange = { [weak self] in self?.cancelSummary() }
+        ai.knowledge.onContentChange = { [weak self] in
+            self?.cancelSummary()
+            self?.documentTerms.reset()
+            Task { [weak self] in await self?.applyDocumentTerms() }
+        }
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
         controller.captureActivityChanged = { [weak ai] active in
             if active { ai?.resume() } else { ai?.suspend() }
@@ -156,13 +163,17 @@ final class MeetingWorkspace {
     }
 
     func importKnowledge(_ url: URL) async {
-        guard page == .setup, phase == .idle, !isBusy, !isUsingLibrary else { return }
+        guard canEditKnowledge else { return }
+        let count = knowledge.documents.count
         await knowledge.add(url: url)
+        if knowledge.documents.count > count { setKnowledgeAllowed(false); setAutomaticKnowledgeAllowed(false) }
     }
 
     func importRepository(_ scan: RepositoryScan, selected: Set<String>) async {
-        guard page == .setup, phase == .idle, !isBusy, !isUsingLibrary else { return }
+        guard canEditKnowledge else { return }
+        let count = knowledge.documents.count
         await knowledge.importRepository(scan, selected: selected)
+        if knowledge.documents.count > count { setKnowledgeAllowed(false); setAutomaticKnowledgeAllowed(false) }
     }
 
     func setAutomaticAI(_ allowed: Bool) {
@@ -175,6 +186,10 @@ final class MeetingWorkspace {
     }
     var phase: SessionPhase { controller.phase }
     var isBusy: Bool { isStarting || isTransitioning || controller.isStopping }
+    var canEditKnowledge: Bool {
+        page != .review && (phase == .idle || phase == .listening)
+            && !isBusy && !isUsingLibrary && !isSavingSession && !knowledge.isBusy
+    }
     var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && page != .review }
     var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && !isSavingSession }
     var title: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "名前のない会議" : name }
@@ -193,10 +208,27 @@ final class MeetingWorkspace {
         page = .live
         defer { isStarting = false }
         await controller.start(microphoneLocale: Locale(identifier: microphoneLocaleID),
-                               systemLocale: Locale(identifier: systemLocaleID))
+                               systemLocale: Locale(identifier: systemLocaleID), recognitionMode: recognitionMode,
+                               contextKeywords: recognitionKeywords)
     }
 
     func pause() async { await complete(.pause) }
+
+    var recognitionKeywords: [AudioOrigin: [String]] {
+        [.microphone: documentTerms.glossary(sourceLanguage: microphoneLocaleID, targetLanguage: nil, manual: []).map(\.term),
+         .systemAudio: documentTerms.glossary(sourceLanguage: systemLocaleID, targetLanguage: nil, manual: []).map(\.term)]
+    }
+
+    func applyDocumentTerms() async {
+        guard phase == .listening, recognitionMode == .vocabulary else {
+            recognitionStatus = recognitionMode == .standard ? "用語ヒントは「資料の用語を優先」で使用します。方式は開始前に選択します。" : "認識用語は次回の開始時に適用します。"
+            return
+        }
+        let revision = documentTerms.revision
+        let updated = await controller.updateContext(recognitionKeywords)
+        guard revision == documentTerms.revision else { return }
+        recognitionStatus = updated ? "認識エンジンへ用語を反映しました。認識精度への効果は未評価です。" : "認識用語は未反映です。次回の開始時に適用します。"
+    }
     func end() async { await complete(.end) }
     func cancelPreparation() async { await complete(.cancelPreparation) }
     func retryStop() async { await complete(pendingCompletion ?? .pause) }
@@ -223,6 +255,7 @@ final class MeetingWorkspace {
 
     private func complete(_ completion: Completion) async {
         guard !isTransitioning, page != .review else { return }
+        knowledge.cancelPendingImports()
         ai.suspend()
         isTransitioning = true
         pendingCompletion = completion

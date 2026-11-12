@@ -8,6 +8,7 @@ struct ConferenceLiveView: View {
     @Binding var fontSize: Double
     let editSettings: () -> Void
     let clear: () -> Void
+    var corrections: [ConferenceCorrection] = []
 
     var body: some View {
         GeometryReader { geometry in
@@ -69,13 +70,13 @@ struct ConferenceLiveView: View {
 
     private var sourcePane: some View {
         TranscriptPane(title: "原文 · \(LanguageCatalog.displayName(for: sourceLanguage))",
-                       entries: TranscriptPresentation.source(store), fontSize: fontSize)
+                       entries: TranscriptPresentation.source(store, corrections: corrections), fontSize: fontSize)
             .frame(minWidth: 220, minHeight: 60)
     }
 
     private var translationPane: some View {
         TranscriptPane(title: "翻訳 · \(LanguageCatalog.displayName(for: targetLanguage ?? "ja"))",
-                       entries: TranscriptPresentation.translation(store), fontSize: fontSize)
+                       entries: TranscriptPresentation.translation(store, corrections: corrections), fontSize: fontSize)
             .frame(minWidth: 220, minHeight: 60)
     }
 }

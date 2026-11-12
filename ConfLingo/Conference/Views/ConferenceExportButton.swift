@@ -6,6 +6,7 @@ struct ConferenceExportButton: View {
     let store: SessionStore
     let sourceLanguage: String
     let targetLanguage: String?
+    var support: ConferenceSupportSnapshot?
 
     var body: some View {
         Button("書き出す", systemImage: "square.and.arrow.up") { saveMarkdown() }
@@ -31,7 +32,7 @@ struct ConferenceExportButton: View {
             units: store.units,
             sourceLanguage: sourceLanguage,
             targetLanguage: targetLanguage
-        )
+        ) + (support?.markdown ?? "")
         do {
             try markdown.write(to: url, atomically: true, encoding: .utf8)
         } catch {

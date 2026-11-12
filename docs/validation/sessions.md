@@ -1,6 +1,8 @@
 # Sessions 永続保存 — 検証記録
 
-2026-11-11 / main `294bd0c`をベースに検証。実装コミット `e95f8ae`、ブランチ `feature/session-persistence`、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)（未マージ）。
+> 2026-11-12追補: 事前資料登録・Meeting/Conference実行中の追加とConference資料支援をローカル実装。今回の検証と未受入項目は[追加導線の記録](knowledge-entry-points.md)を参照。以下は各実施時点の結果。
+
+2026-11-11 / main `294bd0c`をベースに検証。実装コミット `e95f8ae`、ブランチ `feature/session-persistence`、[PR #21](https://github.com/Ryuta1346/conflingo/pull/21)（マージ済み。2026-11-12、ローカルmainの`adfc2c5`で確認）。
 ユーザー「1で」で対象選択、「進めて」で[計画](../design/sessions-implementation-plan.md)を承認。
 
 **実装・自動検証・主要な無通信UI操作を確認。狭幅・拡大文字・キーボード全経路・VoiceOverの実操作は残る。**
@@ -72,9 +74,9 @@ XCTestホストの既往最大常駐メモリ（`getrusage`）は一覧読み込
 
 - 実装・自動検証・主要UI: 確認済み。
 - 計画全体の受入: **S12の残りがあるため未完了**。UI網羅の最終QA判定は保留。
-- 未実装の後続: 保存記録の編集/AI再生成、PDF/OCR、永続資料ライブラリ、自動保存/クラッシュ復旧/クラウド同期。
+- 未実装の後続: 保存記録の編集/AI再生成、PDF/OCR、自動保存/クラッシュ復旧/クラウド同期。永続資料ライブラリはその後PR #22で実装・マージ済み（[検証記録](knowledge-library.md)）。
 - 実音声結合・会議アプリ別・60分耐久・配布署名・既存Gate・請求照合は従来どおり残る。受入完了数2/12は変更しない。
-- ユーザー「コミットしてPR作成」の依頼によりコミット・push・[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)作成済み。担当: Ryuta1346。マージは未実施。
+- ユーザー「コミットしてPR作成」の依頼によりコミット・push・[PR #21](https://github.com/Ryuta1346/conflingo/pull/21)をDraftとして作成。担当: Ryuta1346。その後、2026-11-12の進捗整理でマージコミット`adfc2c5`を確認。S12の残件は維持する。
 
 ## レビュー指摘の修正（2026-11-12）
 

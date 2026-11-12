@@ -4,6 +4,16 @@ import Testing
 
 @MainActor
 struct ModelAvailabilityTests {
+    @Test func vocabularyModePreparesItsOwnModel() async {
+        let standard = PreparationStub()
+        standard.failure = .speech
+        let vocabulary = PreparationStub()
+        let service = ModelAvailabilityService(backend: standard, vocabularyBackend: vocabulary)
+        #expect(!(await service.checkAndPrepare(sourceLocaleID: "en-US", targetLanguageID: nil)))
+        #expect(await service.checkAndPrepare(sourceLocaleID: "en-US", targetLanguageID: nil, recognitionMode: .vocabulary))
+        vocabulary.failure = .speech
+        #expect(!(await service.checkAndPrepare(sourceLocaleID: "en-US", targetLanguageID: nil, recognitionMode: .vocabulary)))
+    }
     @Test(arguments: PreparationStub.Stage.allCases)
     func obsoleteCompletionCannotReplaceLatestSelection(stage: PreparationStub.Stage) async {
         let backend = PreparationStub(heldStage: stage)
