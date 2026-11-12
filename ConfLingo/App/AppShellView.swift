@@ -33,6 +33,7 @@ struct AppShellView<Content: View>: View {
             navigationButton("Conference", symbol: "captions.bubble", target: .setup)
             navigationButton("Meeting", symbol: "person.2", target: .meeting)
             navigationButton("保存", symbol: "folder", target: .sessions)
+            navigationButton("資料", symbol: "books.vertical", target: .library)
             Spacer(minLength: 0)
             navigationButton("設定", symbol: "gearshape", target: .settings)
         }
@@ -58,6 +59,7 @@ struct AppShellView<Content: View>: View {
             navigationButton("Conference", symbol: "captions.bubble", target: .setup)
             navigationButton("Meeting", symbol: "person.2", target: .meeting)
             navigationButton("保存したセッション", symbol: "folder", target: .sessions)
+            navigationButton("資料ライブラリ", symbol: "books.vertical", target: .library)
             Spacer()
             navigationButton("設定", symbol: "gearshape", target: .settings)
             Divider().padding(.vertical, 12)

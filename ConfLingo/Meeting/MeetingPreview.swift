@@ -38,7 +38,7 @@ enum MeetingPreview {
     }
 
     static func prepare(_ meeting: MeetingWorkspace, scenario: String) async {
-        if scenario == "repository-review" || scenario == "repository-automatic" {
+        if scenario == "repository-review" || scenario == "repository-automatic" || scenario == "library-setup" {
             guard !meeting.previewUsesLiveAI else { return }
             let root = FileManager.default.temporaryDirectory.appendingPathComponent("SyntheticProduct-\(UUID())")
             defer { try? FileManager.default.removeItem(at: root) }
@@ -55,10 +55,10 @@ enum MeetingPreview {
                 return
             }
         }
-        if scenario == "pr8-setup" || scenario == "pr8-live" || scenario == "pr8-review" {
+        if scenario == "library-setup" || scenario == "pr8-setup" || scenario == "pr8-live" || scenario == "pr8-review" {
             await meeting.knowledge.add(data: Data("# 製品仕様（架空の資料）\n料金は月額100円です。\nAPI rate limit is 50 requests per minute.\n多要素認証を利用できます。".utf8), filename: "製品仕様.md")
         }
-        guard scenario != "setup", scenario != "pr8-setup" else { return }
+        guard scenario != "setup", scenario != "pr8-setup", scenario != "library-setup" else { return }
         meeting.name = "プロダクト定例"
         meeting.consentConfirmed = true
         await meeting.start()

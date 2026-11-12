@@ -12,6 +12,7 @@ final class KnowledgeStore {
     private(set) var message = ""
     private(set) var permitted = false
     private var index = KnowledgeIndex()
+    private(set) var librarySources: [UUID: KnowledgeLibraryEntry] = [:]
     private(set) var revision = UUID()
     private var consentRevision = UUID()
     private var searchID = UUID()
@@ -67,6 +68,8 @@ final class KnowledgeStore {
             try await index.removeRepository()
             guard mutationID == mutation else { return }
             documents.removeAll { $0.source != nil }
+            let remaining = Set(documents.map(\.id))
+            librarySources = librarySources.filter { remaining.contains($0.key) }
             message = "リポジトリを取り外しました。生成済みの引用は会議破棄まで残ります。"
         } catch {
             guard mutationID == mutation else { return }
@@ -110,6 +113,37 @@ final class KnowledgeStore {
             if $0.displayTitle != $1.displayTitle { return $0.displayTitle < $1.displayTitle }
             return $0.characterOffset < $1.characterOffset
         }.prefix(5).map { $0 }
+    }
+
+    func archive(documentID: UUID?) async throws -> KnowledgeArchive {
+        guard !isBusy else { throw LibraryFailure.unavailable }
+        let version = revision
+        let content = try await index.archive(documentID: documentID)
+        guard version == revision else { throw CancellationError() }
+        return content
+    }
+
+    func markSaved(_ saved: SavedKnowledge) {
+        let ids = Set(documents.map(\.id))
+        for item in saved.content.documents where ids.contains(item.document.id) {
+            librarySources[item.document.id] = saved.entry
+        }
+    }
+
+    func restore(_ saved: SavedKnowledge) async throws {
+        guard !isBusy else { throw LibraryFailure.unavailable }
+        try saved.validate()
+        guard !librarySources.values.contains(where: { $0.id == saved.id }) else { throw LibraryFailure.duplicate }
+        invalidate()
+        let mutation = UUID()
+        mutationID = mutation
+        isBusy = true
+        defer { if mutationID == mutation { mutationID = nil; isBusy = false } }
+        let restored = try await index.restore(saved.content)
+        guard mutationID == mutation else { throw CancellationError() }
+        documents += restored
+        markSaved(saved)
+        message = "保存資料を追加しました。資料の送信許可を確認してください。"
     }
 
     func setPermission(_ value: Bool) {
@@ -157,6 +191,7 @@ final class KnowledgeStore {
             try await index.remove(id)
             guard mutationID == mutation else { return }
             documents.removeAll { $0.id == id }
+            librarySources[id] = nil
             message = "資料を取り外しました。既存の回答にある引用は会議破棄まで残ります。"
         } catch {
             guard mutationID == mutation else { return }
@@ -202,6 +237,7 @@ final class KnowledgeStore {
         mutationID = nil
         index = KnowledgeIndex()
         documents = []
+        librarySources = [:]
         permitted = false
         isBusy = false
         message = ""

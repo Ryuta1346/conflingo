@@ -120,7 +120,7 @@ Cancelling the save dialog or encountering a write failure preserves subtitles. 
 | Poor recognition | Check the input microphone, background noise, distance, and technical-term dictionary |
 | Stop remains unconfirmed | Select **停止を再試行**; the app preserves captions and input state while retrying |
 
-Conference uses microphone input. System audio and dual-input transcription currently live in separate validation windows under the Window menu. Meeting, session history, and AI summaries are not yet available in the Conference interface.
+Conference uses microphone input. Meeting supports microphone and system audio, optional AI answers and summaries, and document references. Saved sessions and the knowledge library are available from the shared navigation.
 
 See [README](../README.md#distribution) for distribution builds and [PR5-B validation](validation/pr5-b-conference.md) for the verification scope.
 
@@ -132,6 +132,18 @@ One repository per meeting supports up to 1,000 files, five million characters, 
 
 Manual questions require both meeting AI and document permission; at most five matching excerpts / 6,000 characters plus their names and locations are sent to Gemini. Automatic suggestions can use the same material when **自動提案にも資料を使う** is enabled in AI settings. This defaults off and is independent of manual and summary permissions. The triggering final utterance searches for up to five excerpts / 6,000 characters. No matches means transcript-only generation; a search failure sends nothing and disables automatic suggestions. The existing two-per-minute and 12-second minimum interval remain, with one 30-second deadline covering search and generation. A manual question preempts automatic work. Input token usage may increase. After the meeting, select **この要約では資料も参照する** in summary confirmation to review excerpts and request counts before sending. This choice is independent of the live meeting permission and defaults to transcript only.
 
-Summary output separates spoken content from document/implementation supplements. Citations open the imported snapshot with relative paths, line numbers, and content hashes, and are included in Markdown export. A working-tree snapshot is not a verified Git commit or deployed state. Original files are unchanged; imported material is discarded with the meeting or app exit. Existing answer citations remain until meeting disposal even after a source is removed.
+Summary output separates spoken content from document/implementation supplements. Citations open the imported snapshot with relative paths, line numbers, and content hashes, and are included in Markdown export. A working-tree snapshot is not a verified Git commit or deployed state. Original files are unchanged. In-memory meeting copies are discarded with the meeting or app exit; bodies explicitly saved to the library remain. Existing answer citations remain until meeting disposal even after a source is removed.
 
 Search uses words, paths, and split identifiers. It does not guarantee cross-language semantic retrieval or complete understanding of dependencies across files.
+
+## Knowledge library
+
+In Meeting preparation, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.
+
+For the next meeting, use **ライブラリから追加** to select a saved snapshot. **資料ライブラリ** in the sidebar supports saved-name search, read-only body and source viewing, and deletion. Saved copies work after the originals move or disappear; changes to originals are not applied automatically.
+
+To replace an entry, import the new material in preparation, open its save dialog, select an existing entry of the same type, and confirm the replacement. Re-saving the same attached material updates its existing entry. Library updates and deletion do not change copies already attached to meetings or previous citations. Remove and re-add a meeting's copy in preparation to use a newer revision.
+
+Saving, viewing, and attaching do not send content externally. AI consent is never saved. Attaching a saved copy turns manual and automatic document permission off for fresh confirmation. Saved bodies remain until explicitly deleted from the library, independently of meeting disposal.
+
+The library supports up to 100 entries and 200 MiB of saved files. Existing per-meeting import limits still apply. PDF/OCR, cloud sync, and automatic refresh are not supported.

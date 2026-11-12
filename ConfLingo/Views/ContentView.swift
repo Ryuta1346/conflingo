@@ -4,6 +4,7 @@ import Translation
 
 struct ContentView: View {
     @State private var sessions: SessionsLibrary
+    @State private var library: KnowledgeLibrary
     @State private var meeting: MeetingWorkspace
     @State private var floatingPanel: MeetingFloatingPanel
     @Environment(\.openWindow) private var openWindow
@@ -36,6 +37,7 @@ struct ContentView: View {
         #else
         isPreview = false
         #endif
+        _library = State(initialValue: KnowledgeLibrary.make(preview: isPreview))
         _sessions = State(initialValue: sessions ?? SessionsLibrary.make(preview: isPreview))
         let session = SessionStore()
         let settings: UserDefaults
@@ -76,7 +78,7 @@ struct ContentView: View {
                 ZStack {
                     page
                     MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
-                                         compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions)
+                                         compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions, library: library)
                         .opacity(navigation.destination == .meeting ? 1 : 0)
                         .allowsHitTesting(navigation.destination == .meeting)
                         .disabled(navigation.destination != .meeting)
@@ -91,7 +93,7 @@ struct ContentView: View {
                 }
             }
         }
-        .task { await sessions.reload() }
+        .task { await sessions.reload(); await library.reload() }
         .onAppear {
             floatingPanel.expand = {
                 openWindow(id: "main")
@@ -232,6 +234,8 @@ struct ContentView: View {
                 )
                 .disabled(sessions.isBusy)
             }
+        case .library:
+            KnowledgeLibraryView(library: library, fontSize: fontSize)
         case .sessions:
             SessionsView(library: sessions, fontSize: fontSize)
         case .meeting:
@@ -246,11 +250,11 @@ struct ContentView: View {
 
     private var topBar: some View {
         HStack(spacing: 10) {
-            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .sessions ? "Sessions" : navigation.destination == .meeting ? "Meeting" : "Conference")
+            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "Sessions" : navigation.destination == .meeting ? "Meeting" : "Conference")
                 .font(.callout.weight(.medium))
                 .foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)
-            if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions {
+            if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions || navigation.destination == .library {
                 Button("A−") { fontSize = max(10, fontSize - 2) }
                     .keyboardShortcut("-", modifiers: .command)
                     .accessibilityLabel("字幕を小さく")
@@ -302,7 +306,7 @@ struct ContentView: View {
     }
 
     private func shouldCloseWindow(_: NSWindow) -> Bool {
-        if sessions.isBusy { showCloseBlocked = true; return false }
+        if sessions.isBusy || library.isBusy { showCloseBlocked = true; return false }
         switch activePhase {
         case .idle:
             meeting.cancelSummary()
@@ -317,7 +321,7 @@ struct ContentView: View {
     }
 
     private func navigate(_ destination: ConferenceNavigation.Destination) {
-        guard !sessions.isBusy else { return }
+        guard !sessions.isBusy, !library.isBusy else { return }
         if destination != .meeting { meeting.cancelSummary() }
         navigation.request(destination, phase: activePhase)
     }

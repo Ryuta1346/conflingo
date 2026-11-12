@@ -24,6 +24,7 @@ final class MeetingWorkspace {
     var showsDiscardConfirmation = false
     var knowledge: KnowledgeStore { ai.knowledge }
     var selectedKnowledge: KnowledgeReference?
+    var isUsingLibrary = false
     let ai: InsightCoordinator
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
@@ -154,12 +155,12 @@ final class MeetingWorkspace {
     }
 
     func importKnowledge(_ url: URL) async {
-        guard page == .setup, phase == .idle, !isBusy else { return }
+        guard page == .setup, phase == .idle, !isBusy, !isUsingLibrary else { return }
         await knowledge.add(url: url)
     }
 
     func importRepository(_ scan: RepositoryScan, selected: Set<String>) async {
-        guard page == .setup, phase == .idle, !isBusy else { return }
+        guard page == .setup, phase == .idle, !isBusy, !isUsingLibrary else { return }
         await knowledge.importRepository(scan, selected: selected)
     }
 
@@ -173,8 +174,8 @@ final class MeetingWorkspace {
     }
     var phase: SessionPhase { controller.phase }
     var isBusy: Bool { isStarting || isTransitioning || controller.isStopping }
-    var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && page != .review }
-    var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy && !isSavingSession }
+    var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && page != .review }
+    var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && !isSavingSession }
     var title: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "名前のない会議" : name }
 
     func evidence(for id: UUID) -> TranscriptEvent? { store.finals.first { $0.id == id } }

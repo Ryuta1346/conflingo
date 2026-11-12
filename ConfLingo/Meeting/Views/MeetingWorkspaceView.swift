@@ -6,6 +6,7 @@ struct MeetingWorkspaceView: View {
     let compact: () -> Void
 
     var sessions: SessionsLibrary?
+    var library: KnowledgeLibrary?
 
     var body: some View {
         VStack(spacing: 0) {
@@ -32,7 +33,7 @@ struct MeetingWorkspaceView: View {
             Divider()
             MeetingTransport(meeting: meeting)
         }
-        .disabled(meeting.isSavingSession)
+        .disabled(meeting.isSavingSession || meeting.isUsingLibrary)
         .sheet(item: $meeting.selectedKnowledge) { reference in
             KnowledgeReferenceView(reference: reference, fontSize: fontSize)
         }
@@ -40,7 +41,7 @@ struct MeetingWorkspaceView: View {
             Button("キャンセル", role: .cancel) {}
             Button("破棄して新しい会議へ", role: .destructive) { meeting.confirmDiscard() }
         } message: {
-            Text("現在の会議の未保存の変更と資料全体を破棄します。保存済みセッションと書き出したMarkdownは残ります。")
+            Text("現在の会議の未保存の変更と資料全体を破棄します。保存済みセッション、資料ライブラリと書き出したMarkdownは残ります。")
         }
     }
 
@@ -75,7 +76,7 @@ struct MeetingWorkspaceView: View {
                     }
                 }
                 MeetingAIControls(meeting: meeting)
-                MeetingKnowledgeControls(meeting: meeting)
+                MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
                 if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
             }
             .padding(24)
@@ -106,7 +107,7 @@ struct MeetingWorkspaceView: View {
                     .font(.headline).accessibilityAddTraits(.isHeader)
                 if meeting.page == .live { MeetingAIControls(meeting: meeting) }
                 if meeting.page == .review { MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions) }
-                MeetingKnowledgeControls(meeting: meeting)
+                MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
                 if !meeting.candidates.items.isEmpty {
                     Text("決定・アクション候補").font(.headline)
                     Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
