@@ -8,8 +8,8 @@ Gemini / OpenAI / Claude / Kimi / DeepSeek / その他OpenAI互換クラウド /
 
 | 検証 | 結果 |
 | --- | --- |
-| 全回帰テスト | **462 tests / 79 suites 合格**（実APIのオプトイン評価は無効） |
-| SwiftLint 0.65.1 | **178ファイル、違反0** |
+| 全回帰テスト | **467 tests / 81 suites 合格**（キー順依存修正後。実APIのオプトイン評価は無効） |
+| SwiftLint 0.65.1 | **179ファイル、違反0** |
 | git diff --check | 合格 |
 | Debug署名ビルド | 成功。App Sandbox・network.client有効、ATSはNSAllowsLocalNetworkingのみ追加 |
 | Release署名ビルド | 成功 |
@@ -51,6 +51,8 @@ xcodebuild build -project ConfLingo.xcodeproj -scheme ConfLingo -configuration R
 初回の制限環境ではSwiftマクロの実行が拒否されたため、許可されたXcode実行環境で検証した。リントは既存のローカルSwiftLint 0.65.1を使用。
 
 ## 制約と未検証
+
+- レビューで確認した、JSONの`text`が先頭でない場合に生成途中の本文を表示できない問題は[修正・検証済み](../design/llm-preview-order-fix-plan.md)。トップレベルのキーを順序に依存せず探索し、入れ子・引用文字列を除外する。先行テストの失敗後、エスケープ・Unicode分割・完了前の表示と未完了エラーの維持を含む回帰テストが合格した。
 
 - このPCのOllamaは稼働しているが、`ollama list`の導入済みモデルは0件だった。Qwenのダウンロードやインストールはしていない。
 - 新規クラウドへの有料生成要求は0。各社の実際のアカウント権限・モデルの応答品質・速度・料金は未検証。既存Geminiの過去の品質合格を新しいモデルへ流用しない。
