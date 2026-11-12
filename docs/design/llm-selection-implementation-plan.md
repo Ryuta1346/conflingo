@@ -4,6 +4,10 @@
 状態: 2026-11-12 ユーザー「OK」により更新版承認済み。コード実装・自動テスト・ローカル模擬接続検証を完了。実クラウド／Qwenの生成品質は未検証。結果は `docs/validation/llm-selection.md` を参照。以下は承認時の実装計画。
 正本保存先: `~/.coding-agents/docs/conflingo/feature-llm-selection/llm-selection-implementation-plan.md`
 
+## 実装後の方針決定（2026-11-12）
+
+LLMライブラリと自前実装を比較し、ユーザー承認により当面は現行の自前実装を維持する。SDKの導入・置換や中継プロセスの追加は行わない。独自APIへの対応増加や仕様追従の負担が顕在化した時点で再検討する。[比較・決定記録](llm-library-comparison.md)を参照。
+
 ## 目的と提案範囲
 
 利用者がGemini / OpenAI / Claude（Anthropic）/ その他クラウドLLM / ローカルLLMから接続先とモデルを選ぶ。Meetingの手動質問、自動提案、資料参照、要約で同じ選択を使用する。ChatGPTログイン・サブスク認証は今回の対象から除外する。
