@@ -44,6 +44,7 @@ struct SavedSessionView: View {
 
     @ViewBuilder
     private func meetingContent(_ snapshot: MeetingExportSnapshot, cards: [MeetingInsight], proxy: ScrollViewProxy) -> some View {
+        let translations = Dictionary((snapshot.translations ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         if let summary = snapshot.summary {
             Text("AIによる区間別要約 · 未確認").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
             Text("各区間の記述は会議全体の最終合意ではありません。回答言語：\(summary.answerLanguage.label)")
@@ -83,6 +84,11 @@ struct SavedSessionView: View {
                     Text("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label) · \(event.languageCode)")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
                     bodyText(event.text)
+                    if let translation = translations[event.id] {
+                        Text("訳文 · \(LanguageCatalog.displayName(for: translation.targetLanguage))")
+                            .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        bodyText(translation.text)
+                    }
                 }
             }
             .id(event.id)

@@ -7,6 +7,9 @@ final class MeetingWorkspace {
     enum Page { case setup, live, review }
     private enum Completion { case pause, end, cancelPreparation }
 
+    let translations: MeetingTranslations
+    var microphoneTranslationLanguage: String { didSet { defaults.set(microphoneTranslationLanguage, forKey: "meetingMicrophoneTranslation") } }
+    var systemTranslationLanguage: String { didSet { defaults.set(systemTranslationLanguage, forKey: "meetingSystemTranslation") } }
     let controller: DualTranscriptionController
     private let defaults: UserDefaults
     var answerLanguage: AnswerLanguage {
@@ -64,8 +67,12 @@ final class MeetingWorkspace {
     private var pendingCompletion: Completion?
 
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
-         credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil) {
+         credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil,
+         translationClient: any MeetingTranslating = AppleMeetingTranslator(), prepareTranslationModels: Bool = true) {
         self.defaults = defaults
+        microphoneTranslationLanguage = defaults.string(forKey: "meetingMicrophoneTranslation") ?? "en"
+        systemTranslationLanguage = defaults.string(forKey: "meetingSystemTranslation") ?? "ja"
+        translations = MeetingTranslations(sessionID: controller.store.sessionID, client: translationClient, requiresPreparation: prepareTranslationModels)
         let language = AnswerLanguage(rawValue: defaults.string(forKey: "aiAnswerLanguage") ?? "") ?? .japanese
         answerLanguage = language
         self.controller = controller
@@ -81,6 +88,11 @@ final class MeetingWorkspace {
         ai.knowledge.onContentChange = { [weak self] in
             self?.documentTerms.reset()
             Task { [weak self] in await self?.applyDocumentTerms() }
+        }
+        controller.store.onFinal = { [weak self] event in
+            guard let self else { return }
+            let target = event.origin == .microphone ? self.microphoneTranslationLanguage : self.systemTranslationLanguage
+            self.translations.receive(event, targetLanguage: target.isEmpty ? nil : target)
         }
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
         controller.captureActivityChanged = { [weak ai] active in
@@ -143,7 +155,8 @@ final class MeetingWorkspace {
         guard page == .review, phase == .idle, !isBusy else { return nil }
         return MeetingExportSnapshot(title: title, startedAt: startedAt, microphoneLocale: microphoneLocaleID,
                                      systemLocale: systemLocaleID, sessionID: store.sessionID,
-                                     events: store.finals, candidates: candidates.items, summary: summary.completed)
+                                     events: store.finals, candidates: candidates.items, summary: summary.completed,
+                                     translations: translations.completed)
     }
 
     func setAIAllowed(_ allowed: Bool) {
@@ -276,6 +289,7 @@ final class MeetingWorkspace {
         export.reset()
         ai.reset()
         controller.clear()
+        translations.reset(sessionID: store.sessionID)
         name = ""
         insights = []
         selectedEvidence = nil

@@ -1,9 +1,12 @@
 import SwiftUI
+import Translation
 
 struct MeetingWorkspaceView: View {
     @Bindable var meeting: MeetingWorkspace
     @Binding var fontSize: Double
     let compact: () -> Void
+
+    @State private var translationLanguages: [Locale.Language] = []
 
     var sessions: SessionsLibrary?
     var library: KnowledgeLibrary?
@@ -14,6 +17,10 @@ struct MeetingWorkspaceView: View {
                 preparation
             } else {
                 header
+                if meeting.translations.pendingCount > 0 {
+                    Text("翻訳待ち \(meeting.translations.pendingCount)件 · 保存には完成した訳文を含めます")
+                        .font(.caption).foregroundStyle(DesignTokens.secondary).padding(.horizontal, 16)
+                }
                 if let error = meeting.controller.lastError {
                     SessionErrorBanner(message: error).padding([.horizontal, .bottom], 16)
                 }
@@ -33,6 +40,7 @@ struct MeetingWorkspaceView: View {
             Divider()
             MeetingTransport(meeting: meeting)
         }
+        .task { translationLanguages = await SystemModelPreparation().targetLanguages() }
         .disabled(meeting.isSavingSession || meeting.isUsingLibrary)
         .sheet(item: $meeting.selectedKnowledge) { reference in
             KnowledgeReferenceView(reference: reference, fontSize: fontSize)
@@ -54,7 +62,11 @@ struct MeetingWorkspaceView: View {
                         TextField("会議名", text: $meeting.name)
                             .textFieldStyle(.roundedBorder).accessibilityLabel("会議名")
                         languagePicker("自分 · マイク", selection: $meeting.microphoneLocaleID)
+                        translationPicker("自分の翻訳先", selection: $meeting.microphoneTranslationLanguage)
                         languagePicker("相手側 · 内部音声", selection: $meeting.systemLocaleID)
+                        translationPicker("相手側の翻訳先", selection: $meeting.systemTranslationLanguage)
+                        Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
+                            .font(.caption).foregroundStyle(DesignTokens.secondary)
                         Text("内部音声にはMacで再生する他の音も含まれます。ヘッドフォンの利用を推奨します。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                         Divider()
@@ -66,9 +78,9 @@ struct MeetingWorkspaceView: View {
                 }
                 Surface {
                     VStack(alignment: .leading, spacing: 12) {
-                        Label("音声は保存・外部送信しません", systemImage: "checkmark.shield")
+                        Label("音声認識と翻訳は、このMacで", systemImage: "checkmark.shield")
                             .font(.headline)
-                        Text("発話はメモリ内に保持し、自動保存しません。終了後に「このMacに保存」を選べます。AI送信は下で明示的に許可した場合だけ行います。")
+                        Text("音声は保存・外部送信しません。翻訳モデルは初回にダウンロードが必要な場合があります。AIの回答言語と翻訳先は別設定です。発話はメモリ内に保持し、自動保存しません。終了後に「このMacに保存」を選べます。AI送信は下で明示的に許可した場合だけ行います。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                         ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
                             Text("\(origin.label)：\(permission(origin))").font(.caption)
@@ -142,6 +154,17 @@ struct MeetingWorkspaceView: View {
                 }
             }
             .padding(1)
+        }
+    }
+
+    private func translationPicker(_ title: String, selection: Binding<String>) -> some View {
+        let identifiers = Set(translationLanguages.map(\.minimalIdentifier) + ["ja", "en", selection.wrappedValue])
+            .filter { !$0.isEmpty }.sorted { LanguageCatalog.displayName(for: $0) < LanguageCatalog.displayName(for: $1) }
+        return Picker(title, selection: selection) {
+            Text("翻訳なし").tag("")
+            ForEach(identifiers, id: \.self) { identifier in
+                Text(LanguageCatalog.displayName(for: identifier)).tag(identifier)
+            }
         }
     }
 

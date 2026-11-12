@@ -6,6 +6,32 @@ import Testing
 @MainActor
 @Suite(.serialized, .timeLimit(.minutes(1)))
 struct MeetingLayoutTests {
+    @Test func lateTranslationsKeepLatestVisibleAtLargeFontInNarrowWindow() async throws {
+        let fixture = DualFixture()
+        let meeting = MeetingWorkspace(controller: fixture.controller(), translationClient: FakeMeetingTranslator())
+        for index in 0..<8 {
+            meeting.store.receive(TranscriptEvent(id: UUID(), sessionID: meeting.store.sessionID, origin: .systemAudio,
+                languageCode: "en-US", startOffset: Double(index), endOffset: Double(index + 1),
+                text: "Sentence \(index). " + String(repeating: "A long meeting transcript. ", count: 5),
+                isFinal: true, revision: 1, sourceStartTime: Double(index)))
+        }
+        let host = NSHostingView(rootView: MeetingTranscriptView(meeting: meeting, fontSize: 32))
+        let window = makeWindow(host)
+        defer { window.close() }
+        await resize(window, width: 420, height: 520)
+        let scroll = try #require(descendants(host, of: NSScrollView.self).first)
+        for lane in meeting.translations.lanes { meeting.translations.prepared(lane.id, generation: lane.generation) }
+        for _ in 0..<10_000 {
+            if !meeting.translations.isWorking { break }
+            await Task.yield()
+        }
+        await layout(window)
+        await layout(window)
+        let height = try #require(scroll.documentView?.frame.height)
+        #expect(height - scroll.documentVisibleRect.maxY < 25, "Late translations must remain visible when following latest")
+        #expect(meeting.translations.completed.count == 8)
+    }
+
     @Test func expansionPreservesMeetingDuringCaptureAndFailedStop() async throws {
         let fixture = DualFixture()
         let meeting = MeetingWorkspace(controller: fixture.controller(owner: .meeting))

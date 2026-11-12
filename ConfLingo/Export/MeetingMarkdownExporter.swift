@@ -10,6 +10,7 @@ struct MeetingExportSnapshot: Equatable, Codable, Sendable {
     let events: [TranscriptEvent]
     let candidates: [MeetingCandidate]
     let summary: MeetingSummary?
+    var translations: [MeetingTranslation]? = nil
 
     var filename: String {
         let safe = title.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) || $0 == "-" || $0 == "_" ? String($0) : "-" }.joined()
@@ -45,9 +46,13 @@ struct MeetingExportSnapshot: Equatable, Codable, Sendable {
             lines += entries(candidates.filter { $0.review == review }, eventsByID: eventsByID)
         }
         lines += ["## 確定発話", ""]
+        let translated = Dictionary((translations ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         for event in finals {
             lines += ["<a id=\"utterance-\(event.id.uuidString.lowercased())\"></a>",
                       "### \(Self.time(event.startOffset)) · \(event.origin.label)", "", Self.quoted(event.text), ""]
+            if let translation = translated[event.id] {
+                lines += ["訳文（\(Self.escape(translation.targetLanguage))）", "", Self.quoted(translation.text), ""]
+            }
         }
         return lines.joined(separator: "\n")
     }
