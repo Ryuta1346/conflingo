@@ -4,6 +4,37 @@ import Testing
 
 @Suite(.timeLimit(.minutes(1)))
 struct KnowledgeIndexTests {
+    @Test(arguments: ["月額", " 月額 ", "月額はいくらですか？", "月額 API", "月額 月額"],
+          ["# 仕様\n料金は月額100円です。\nAPI rate limit is 50.", "# 月額\n100円です。", "月額 API\n100円です。"])
+    func shortJapaneseQueryFindsWholeWordWithoutMatchingUnrelatedCharacters(query: String, body: String) async throws {
+        let index = KnowledgeIndex()
+        let document = try await index.add(data: Data(body.utf8), filename: "仕様.md")
+        _ = try await index.add(data: Data("月の満ち欠けを観察します。額の傷を確認します。".utf8), filename: "無関係.md")
+
+        let hits = try await index.search(query)
+
+        #expect(hits.map(\.documentID) == [document.id])
+        #expect(hits.first?.snippet == body)
+        #expect(hits.first?.startLine == 1)
+        #expect(hits.first?.characterOffset == 0)
+    }
+
+    @Test func shortJapaneseQuerySearchesRepositoryBodyAndRetainsCitation() async throws {
+        let index = KnowledgeIndex()
+        let body = "# Billing\n料金は月額100円です。"
+        let snapshot = RepositorySnapshot(id: UUID(), name: "Product", importedAt: Date(), files: [
+            .init(path: "docs/BillingGuide.md", body: body, hash: KnowledgeArchive.hash(body))
+        ])
+        _ = try await index.addRepository(snapshot)
+
+        let hit = try #require(try await index.search("月額").first)
+
+        #expect(hit.snippet == body)
+        #expect(hit.source?.path == "docs/BillingGuide.md")
+        #expect(hit.source?.snapshotID == snapshot.id)
+        #expect(hit.source?.contentHash == KnowledgeArchive.hash(body))
+    }
+
     @Test func citationLocationDistinguishesDocumentOffsetFromLineColumn() async throws {
         let index = KnowledgeIndex()
         let body = String(repeating: String(repeating: "あ", count: 599) + "\n", count: 2) + "料金は100円です"

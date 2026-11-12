@@ -4,6 +4,27 @@ import Testing
 @testable import ConfLingo
 
 struct KnowledgeLibraryPersistenceTests {
+    @Test func savedJapaneseTextIsSearchableByShortWordAfterRebuildingIndex() async throws {
+        let root = temporaryLibrary()
+        defer { try? FileManager.default.removeItem(at: root) }
+        let index = KnowledgeIndex()
+        let body = "料金は月額100円です。"
+        let document = try await index.add(data: Data(body.utf8), filename: "料金.md")
+        let saved = try await KnowledgeLibraryFiles(directory: root).save(
+            try await index.archive(documentID: document.id), title: "料金資料")
+        let reopened = try await KnowledgeLibraryFiles(directory: root).load(saved.id)
+        let restored = KnowledgeIndex()
+        _ = try await restored.restore(reopened.content)
+
+        let hit = try #require(try await restored.search("月額").first)
+
+        #expect(hit.documentID == document.id)
+        #expect(hit.importedAt == document.importedAt)
+        #expect(hit.snippet == body)
+        #expect(hit.startLine == 1)
+        #expect(hit.characterOffset == 0)
+    }
+
     @Test func savedTextSurvivesNewStoreAndSourceDeletion() async throws {
         let root = temporaryLibrary()
         defer { try? FileManager.default.removeItem(at: root) }

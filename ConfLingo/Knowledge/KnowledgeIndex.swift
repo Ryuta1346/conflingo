@@ -193,14 +193,19 @@ actor KnowledgeIndex {
         let expanded = text.replacingOccurrences(of: "([a-z0-9])([A-Z])", with: "$1 $2", options: .regularExpression)
             .replacingOccurrences(of: "([A-Z])([A-Z][a-z])", with: "$1 $2", options: .regularExpression)
             .replacingOccurrences(of: "_", with: " ")
-        let text = text + " " + expanded
+        let text = expanded == text ? text : text + " " + expanded
         let tokenizer = NLTokenizer(unit: .word)
-        tokenizer.string = text
+        tokenizer.setLanguage(.japanese)
         var words: [String] = []
-        tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { range, _ in
-            let word = String(text[range]).folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
-            if word.unicodeScalars.contains(where: { CharacterSet.alphanumerics.contains($0) }) { words.append(word) }
-            return true
+        // Keep surrounding whitespace or English from splitting a short Japanese term such as 月額.
+        for part in text.split(whereSeparator: { $0.isWhitespace }) {
+            let text = String(part)
+            tokenizer.string = text
+            tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { range, _ in
+                let word = String(text[range]).folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+                if word.unicodeScalars.contains(where: { CharacterSet.alphanumerics.contains($0) }) { words.append(word) }
+                return true
+            }
         }
         return words
     }
