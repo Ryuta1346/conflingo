@@ -1,3 +1,5 @@
+> 2026-11-12 共通支援: Conference／Meetingの資料＋発話への質問、自動提案、手動Web調査、入力3構成をローカル実装。Web調査はユーザー指定によりLLM内蔵検索へ変更し、別の検索API/キーを削除。542件／96 suites中536件成功・実API評価6件skip、Lint217ファイル違反0、Debugテスト・Releaseビルド成功。実音声・実API品質と操作性の網羅受入は未実施。[計画](docs/design/shared-session-assistance-plan.md)・[検証記録](docs/validation/shared-session-assistance.md)。
+
 # ConfLingo — 開発・進捗管理
 
 - **追加実装（PR提出対象）:** Meetingの入力別オンデバイス翻訳、原文＋訳文、小窓・保存・Markdown対応。503テスト／89 suites成功、Lint198ファイル違反0、Debug/Release成功、日英・英日の実モデル応答、主要合成UI、ローカル反映を確認。実会議の品質・結合受入は継続。[検証記録](docs/validation/meeting-translation.md)。
@@ -7,10 +9,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-12／`feature/meeting-translation`・基準main `595eb5c`**。PR #24までのマージを確認。Meeting翻訳の実装と検証結果をこのブランチに集約。
+- 更新: **2026-11-12／`feature/shared-session-assistance`**。共通支援を実装・ローカル検証。以下のPRマージ・全体受入の記録は既存の履歴で、今回の変更はPR #27をベースとする独立ブランチへ分離。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** Meeting翻訳の503テスト／89 suites成功、Lint198ファイル違反0。[最新結果](docs/validation/meeting-translation.md)。新規クラウドとQwenの実生成・VoiceOver全経路は引き続き未確認。
+- **直近の検証記録:** 共通支援の542件／96 suites中536件成功・実API評価6件skip、Lint217ファイル違反0。[最新結果](docs/validation/shared-session-assistance.md)。以前の[Meeting翻訳検証](docs/validation/meeting-translation.md)と実機結果は保持。新規機能の実音声・実API品質とVoiceOver全経路は未確認。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。

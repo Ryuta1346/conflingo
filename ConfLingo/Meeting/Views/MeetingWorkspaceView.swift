@@ -58,19 +58,20 @@ struct MeetingWorkspaceView: View {
     private var preparation: some View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
-                PageHeading(title: "会議を、はじめる。", subtitle: "自分と相手側の発話を、このMacで文字にします。", eyebrow: "Meeting / 準備")
+                PageHeading(title: "会議を、はじめる。", subtitle: "選んだ音声入力を、このMacで文字にします。", eyebrow: "Meeting / 準備")
                 Surface {
                     VStack(alignment: .leading, spacing: 18) {
                         TextField("会議名", text: $meeting.name)
                             .textFieldStyle(.roundedBorder).accessibilityLabel("会議名")
+                        AudioInputPicker(selection: $meeting.inputSelection)
                         SessionModePicker(selection: $meeting.mode)
-                        languagePicker("自分 · マイク", selection: $meeting.microphoneLocaleID)
+                        languagePicker("マイク・外部入力", selection: $meeting.microphoneLocaleID)
                         if meeting.mode == .translation {
-                            translationPicker("自分の翻訳先", selection: $meeting.microphoneTranslationLanguage)
+                            translationPicker("マイク・外部入力の翻訳先", selection: $meeting.microphoneTranslationLanguage)
                         }
-                        languagePicker("相手側 · 内部音声", selection: $meeting.systemLocaleID)
+                        languagePicker("Macの内部音声", selection: $meeting.systemLocaleID)
                         if meeting.mode == .translation {
-                            translationPicker("相手側の翻訳先", selection: $meeting.systemTranslationLanguage)
+                            translationPicker("内部音声の翻訳先", selection: $meeting.systemTranslationLanguage)
                             Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
                                 .font(.caption).foregroundStyle(DesignTokens.secondary)
                         }
@@ -222,6 +223,10 @@ struct MeetingInsightCard: View {
                     Button("資料：\(reference.displayTitle) · \(reference.location)") {
                         if let revealKnowledge { revealKnowledge(reference) } else { meeting.selectedKnowledge = reference }
                     }.font(.caption)
+                }
+                WebReferencesView(references: insight.webReferences ?? [])
+                if meeting.page != .review {
+                    Button("この提案をWebで調べる") { meeting.research.open(insight.text, evidenceIDs: insight.evidenceIDs) }
                 }
                 if insight.hasInvalidEvidence {
                     Text("応答に確認できない根拠が含まれます・要確認").font(.caption).foregroundStyle(DesignTokens.warning)

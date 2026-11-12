@@ -18,6 +18,12 @@ Saved records include final transcripts, available translations, completed AI ca
 
 Meeting also supports microphone and system audio transcription, optional AI responses and summaries, and document references. See the [progress tracker](plan.md) for outstanding real-meeting acceptance checks and the [Sessions validation record](docs/validation/sessions.md) for verified behavior. The instructions below primarily describe Conference.
 
+## Assistance in both modes
+
+Conference and Meeting both support registered materials, transcript-plus-document questions, automatic suggestions and manual Web research. Choose microphone/external devices, system audio, or both in setup for in-person or online sessions.
+
+Web research uses the selected Gemini, OpenAI or Claude model’s built-in search and existing LLM credentials; no separate search key is needed. Completed answers and transcript, document and Web citations can be saved and exported as Markdown. See [usage](docs/usage.md#web-research) and [validation and remaining checks](docs/validation/shared-session-assistance.md).
+
 ## Meeting translation
 
 Meeting and Conference default to transcription for each new session. Select **リアルタイム翻訳** in setup to enable translation. Meeting initially offers English for the microphone and Japanese for system audio; target choices are remembered separately from the mode. Space is reserved below source text before translations arrive, reducing layout shifts. Translations that exceed the reserved space expand to remain readable. Original text and completed translations are retained, including in the floating panel, saved sessions and Markdown exports. Each input can disable translation. Translation runs on this Mac without an API key; a model download may be needed. Translation failures do not stop transcription. See [validation](docs/validation/meeting-translation.md) for the tested scope.
@@ -62,7 +68,7 @@ See the [Conference baseline](docs/validation/conference-baseline.md) for setup,
 
 ## Permissions
 
-1. **Microphone**: A microphone permission dialog appears the first time you press Start. Transcription does not work without it
+1. **Microphone**: A microphone permission dialog appears the first time you press Start. Required when using the microphone; system-audio-only capture does not request it
 2. **Speech recognition model**: If the recognition model is not installed at first launch, the download starts automatically (with progress display)
 3. **Translation model**: If the translation model is not installed, the standard OS download confirmation dialog appears
 
@@ -118,7 +124,6 @@ Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad
 2. System Settings > Privacy & Security > "Open Anyway"
 3. After that, it launches normally (developers can also run `xattr -dr com.apple.quarantine ConfLingo.app`)
 
-#Conference includes document browsing/search, cited AI questions, reviewed terminology and AI corrections that preserve originals. Recognition and correction quality have not yet been evaluated with real inputs. See the [usage guide](docs/usage.md#add-materials-during-a-session).
 
 ## Requirements to tell recipients
 
@@ -128,7 +133,7 @@ Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad
 
 ## Limitations
 
-- Conference uses microphone input. Meeting also supports system audio; Zoom/Meet/Teams-specific acceptance checks remain outstanding.
+- Both modes support microphone/external devices, system audio, or both; Zoom/Meet/Teams-specific acceptance checks remain outstanding.
 - In-progress (partial) sentences are not translated by design (to avoid unstable translations). Translation lags finalized sentences by roughly 2–5 seconds
 - Languages can only be changed while stopped. Switching languages keeps the existing subtitle history (the Markdown header records the language pair at save time)
 - Speaker identification and audio file recording are not supported. Optional AI summaries are available in Meeting.

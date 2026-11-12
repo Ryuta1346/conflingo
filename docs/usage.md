@@ -1,7 +1,7 @@
 ---
 title: ConfLingo Usage Guide
 created: 2026-06-10
-updated: 2026-11-09
+updated: 2026-11-12
 status: active
 type: user-guide
 ---
@@ -12,19 +12,39 @@ type: user-guide
 
 New Meeting and Conference sessions default to **文字起こし** (Transcription). Select **リアルタイム翻訳** (Real-time translation) in setup to add translations. Conference starts with English recognition and offers Japanese as the initial translation target. Choose languages supported on your Mac. Requires macOS 26 or later and Apple Silicon. UI labels below match the current Japanese interface.
 
+## Shared inputs and assistance
+
+Conference emphasizes subtitles and understanding; Meeting emphasizes conversation and reviewing discussion points. Both support registered materials, transcript-plus-document questions, automatic suggestions and manual Web research, for in-person or online use.
+
+Choose microphone/external input, system audio, or both in setup. Select external devices through macOS Sound settings. System audio includes playback across the Mac, including Zoom and other applications. Change inputs while stopped; the choice applies when capture resumes. Input labels do not identify individual speakers.
+
+Register materials using **資料を追加** or **ライブラリから選択**. In Conference, open **資料・AI支援 → 資料と発話から支援**; in Meeting, use AI assistance. Review the destination and permit transcript assistance, then enable document use for manual questions if needed. Questions use up to 30 final utterances / 12,000 characters and five related excerpts / 6,000 characters. Document questions also work before capture starts. Enable automatic suggestions and automatic document use separately; suggestions run at most twice per minute with a 12-second minimum interval and never automatically search the Web.
+
+Citations open source utterances and document excerpts. Stopping, revoking permission, or changing materials or connections cancels pending work. Wide Conference windows show assistance beside subtitles; narrow windows use the materials sheet. Completed answers and citations are included in explicit saves and Markdown exports. Meeting saves require ending the meeting.
+
+## Web research
+
+Open **Webで調べる** directly or from an utterance/suggestion. **Research uses the selected LLM connection, model and existing API key; no separate search account/key is required.** Gemini, OpenAI and Claude use their provider-hosted search tools. The selected model and account must support the tool. Other connections show Web research as unsupported; ordinary document/transcript questions remain available.
+
+Enter your question, review the destination and context, permit the operation, then choose **LLMで調べる**. The question, selected/recent speech and related document excerpts go to the LLM. **The LLM generates search queries, so this context may be used by its search service.** Remove materials you do not want used for external search. Audio is not sent.
+
+Each operation makes one LLM API request, with no automatic retry and a 60-second deadline. The initial session limit is 20 research operations and can be changed explicitly. Cancellation does not refund attempts. This does not cap model-internal searches or charges; those depend on the selected service.
+
+Provider-returned sources appear as clickable inline numbers and a URL list. Retrieval time is not publication time. Gemini's returned Google search suggestions are displayed too. Missing search evidence/citations and incomplete responses are failures, not completed research. Explicit saves retain answers, local citations, source metadata and search suggestions; raw Web pages/search responses are not retained or automatically fetched again. Real-provider quality remains untested. See [validation](validation/shared-session-assistance.md).
+
 ## Meeting transcription
 
 1. Open **会議を開く** (Open meeting) on Home or select **Meeting**.
 2. Enter a name and choose Japanese or English independently for the microphone and system audio. Keep **文字起こし** for transcription, or select **リアルタイム翻訳** to reveal per-input translation targets (initially English for the microphone and Japanese for system audio). Either input can use **翻訳なし**. Confirm that participants have been notified and have consented. The checkbox does not send notifications.
 3. Select **会議を開始** (Start meeting). The app prepares recognition models and checks input permissions. System audio may include other playback on your Mac; headphones are recommended.
-4. **一時停止** (Pause) stops both inputs; **再開** (Resume) preserves the same meeting and transcript. Preparation can be cancelled. If stopping fails, select **停止を再試行** (Retry stop).
+4. **一時停止** (Pause) stops the selected inputs; **再開** (Resume) preserves the same meeting and transcript. Preparation can be cancelled. If stopping fails, select **停止を再試行** (Retry stop).
 5. **会議を終了** (End meeting) waits for inputs to stop and final results to arrive before opening Review.
 
 The timeline identifies input sources, not individual participants. Reading older speech suspends automatic scrolling; **最新へ** returns to the latest speech. Text size and appearance are shared with Conference.
 
 **小さく表示** hides the main window and opens the floating panel. **展開** restores the main window. Hiding or closing the panel does not stop capture. Restore it through **Window → Meetingの小窓を表示**. Use Pause or End to stop capture. The panel is not guaranteed to be excluded from screen sharing.
 
-Transcripts remain in memory until the app exits. Audio files and transcripts are not saved automatically. AI requests require explicit permission for each meeting. Candidate confirmation/rejection and Meeting save/export are not available yet. Text can be selected and copied. Starting a new meeting asks before discarding existing speech. Conference Markdown export is a separate feature.
+Transcripts and audio are not saved automatically. After ending the meeting, explicitly save on this Mac or export Markdown. Completed translations, AI answers and citations are retained and can be reopened from Sessions. Candidate confirmation/rejection is available. AI requests require session permission. Starting a new meeting asks before discarding existing speech.
 
 ### Meeting AI assistance and LLM selection
 
@@ -56,7 +76,7 @@ open ~/Library/Developer/Xcode/DerivedData/ConfLingo-*/Build/Products/Debug/Conf
 
 1. Select **字幕を準備する** (Prepare subtitles) on Home, or open Conference.
 2. Enter a session name and select a recognition language and dictionary. The default mode is **文字起こし**. Select **リアルタイム翻訳** to reveal and choose a translation target.
-3. Once the recognition model is ready, select **字幕を開始** (Start subtitles). Allow microphone access on first use.
+3. Once the recognition model is ready, select **字幕を開始** (Start subtitles). Allow access for the selected microphone or screen/system audio input.
 
 The app checks language availability at launch and when settings change, downloading recognition models when needed. macOS may also request a translation model download. Prepare with a network connection before attending an event. Unsupported languages or preparation failures are shown in the preparation screen; change settings or select **もう一度確認** (Check again).
 
@@ -128,7 +148,7 @@ Cancelling the save dialog or encountering a write failure preserves subtitles. 
 | Poor recognition | Check the input microphone, background noise, distance, and technical-term dictionary |
 | Stop remains unconfirmed | Select **停止を再試行**; the app preserves captions and input state while retrying |
 
-Conference uses microphone input. Meeting supports microphone and system audio, optional AI answers and summaries, and document references. Saved sessions and the knowledge library are available from the shared navigation.
+Both modes offer microphone/external devices, system audio, or both, plus document and transcript assistance and manual Web research. Meeting also offers summaries and candidate review. Saved sessions and the knowledge library are available from the shared navigation.
 
 See [README](../README.md#distribution) for distribution builds and [PR5-B validation](validation/pr5-b-conference.md) for the verification scope.
 
@@ -162,7 +182,7 @@ Open **資料** in Meeting, or the **資料（count）** button above Conference
 
 ## Conference document questions
 
-In the materials panel, enable **資料への質問を許可**, choose the answer language and ask a question. Only the question and relevant excerpts are sent to the selected LLM; captions and audio are excluded. Citations open the imported source. Changing materials or the LLM connection cancels pending generation and requires fresh permission.
+For document-only questions, open **資料だけに質問** in the materials panel and enable **資料への質問を許可**, choose the answer language and ask a question. Only the question and relevant excerpts are sent to the selected LLM; captions and audio are excluded. Citations open the imported source. Changing materials or the LLM connection cancels pending generation and requires fresh permission.
 
 Completed document answers can be saved before recording. Use **このMacに保存** or **書き出す** at the top of the materials panel, then reopen saved answers and citations from Sessions. Session saving requires audio to be stopped. Empty sessions, terminology alone, and unfinished answers are not saved.
 

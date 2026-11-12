@@ -11,6 +11,7 @@ struct MeetingExportSnapshot: Equatable, Codable, Sendable {
     let candidates: [MeetingCandidate]
     let summary: MeetingSummary?
     var translations: [MeetingTranslation]? = nil
+    var assistance: [MeetingInsight]? = nil
 
     var filename: String {
         let safe = title.unicodeScalars.map { CharacterSet.alphanumerics.contains($0) || $0 == "-" || $0 == "_" ? String($0) : "-" }.joined()
@@ -54,7 +55,7 @@ struct MeetingExportSnapshot: Equatable, Codable, Sendable {
                 lines += ["訳文（\(Self.escape(translation.targetLanguage))）", "", Self.quoted(translation.text), ""]
             }
         }
-        return lines.joined(separator: "\n")
+        return lines.joined(separator: "\n") + AssistanceMarkdown.render(assistance ?? [], speech: eventsByID.mapValues(\.text))
     }
 
     private func entries(_ values: [MeetingCandidate], eventsByID: [UUID: TranscriptEvent]) -> [String] {

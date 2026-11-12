@@ -7,6 +7,7 @@ struct ControlBar: View {
     let hasTranscript: Bool
     let start: () -> Void
     let stop: () -> Void
+    var inputLabel = "マイク"
 
     var body: some View {
         HStack(spacing: 16) {
@@ -43,10 +44,10 @@ struct ControlBar: View {
 
     private var status: String {
         switch phase {
-        case .idle: "マイク 停止中"
-        case .preparing: "マイク 準備中"
-        case .listening: "マイク 取得中"
-        case .stopping: isStopping ? "マイク 停止処理中" : "マイク 停止未確認"
+        case .idle: "\(inputLabel) 停止中"
+        case .preparing: "\(inputLabel) 準備中"
+        case .listening: "\(inputLabel) 取得中"
+        case .stopping: isStopping ? "\(inputLabel) 停止処理中" : "\(inputLabel) 停止未確認"
         }
     }
 }

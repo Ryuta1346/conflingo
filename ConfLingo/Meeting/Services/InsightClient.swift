@@ -2,7 +2,7 @@ import Foundation
 
 struct InsightRequest: Sendable {
     enum Trigger: String, Sendable { case manual, automatic }
-    enum Purpose: Sendable { case assistance, summary, documentQuestion, transcriptCorrection }
+    enum Purpose: Sendable { case assistance, summary, documentQuestion, transcriptCorrection, webResearch }
     let purpose: Purpose
     var timeoutSeconds: TimeInterval { purpose == .summary ? 60 : 30 }
     let id = UUID()

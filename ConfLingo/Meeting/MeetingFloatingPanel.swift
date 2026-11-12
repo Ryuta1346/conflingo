@@ -140,7 +140,7 @@ private struct MeetingFloatingView: View {
                         Text("直近の発話と翻訳").font(.headline)
                         ForEach(Array(meeting.transcriptEvents.suffix(3))) { event in
                             VStack(alignment: .leading, spacing: 6) {
-                                Text(event.origin == .microphone ? "自分 · マイク" : "相手側 · 内部音声")
+                                Text(event.origin.label)
                                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).textSelection(.enabled)
                                 MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,

@@ -36,11 +36,13 @@ struct ConferenceSupportSnapshot: Codable, Equatable, Sendable {
 
     var hasCompletedAnswers: Bool { answers.contains { $0.status == .complete } }
 
-    var markdown: String {
+    var markdown: String { renderMarkdown(segments: []) }
+
+    func renderMarkdown(segments: [TranscriptSegment]) -> String {
         var lines: [String] = []
         if !answers.isEmpty {
-            lines += ["", "## 資料へのAI質問 · 要確認", ""]
-            for answer in answers { lines += [quote(answer.text), citations(answer.knowledgeReferences), ""] }
+            let speech = Dictionary(segments.map { ($0.id, $0.english) }, uniquingKeysWith: { first, _ in first })
+            lines += [AssistanceMarkdown.render(answers, speech: speech)]
         }
         if !corrections.isEmpty {
             lines += ["", "## 採用した資料参照補正", ""]

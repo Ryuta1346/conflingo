@@ -11,7 +11,9 @@ final class SessionController {
     private let audioSource: any AudioSource
     let activity: AudioInputUse
     private var usageToken: UUID?
-    var isStopping: Bool { stopTask != nil }
+    private var dual: DualTranscriptionController?
+    private var usingDual = false
+    var isStopping: Bool { stopTask != nil || (usingDual && dual?.isStopping == true) }
     private let requestPermission: @MainActor () async -> Bool
     private let timeline: MeetingTimeline
     let meetingStore: MeetingSessionStore
@@ -29,8 +31,10 @@ final class SessionController {
         speechService: (any SpeechTranscribing)? = nil,
         requestPermission: (@MainActor () async -> Bool)? = nil,
         timeline: MeetingTimeline = MeetingTimeline(),
-        activity: AudioInputUse = AudioInputUse()
+        activity: AudioInputUse = AudioInputUse(),
+        dualController: DualTranscriptionController? = nil
     ) {
+        self.dual = dualController
         self.audioSource = audioSource
         self.activity = activity
         self.speechService = speechService ?? SpeechTranscriptionService(audioSource: audioSource)
@@ -45,9 +49,16 @@ final class SessionController {
         locale: Locale,
         glossary: [KeywordParser.GlossaryEntry] = [],
         fastResults: Bool = false,
-        recognitionMode: SpeechRecognitionMode = .standard
+        recognitionMode: SpeechRecognitionMode = .standard,
+        selection: AudioInputSelection = .microphone
     ) async {
         guard store.phase == .idle, !Task.isCancelled else { return }
+        store.sourceLanguage = locale.identifier
+        if selection != .microphone || usingDual {
+            await startSelected(store: store, coordinator: coordinator, locale: locale, glossary: glossary,
+                                fastResults: fastResults, recognitionMode: recognitionMode, selection: selection)
+            return
+        }
         guard let token = activity.acquire(.conference) else {
             lastError = activity.busyMessage
             return
@@ -123,6 +134,7 @@ final class SessionController {
     }
 
     func stop(store: SessionStore, coordinator: TranslationCoordinator) async {
+        if usingDual { await dual?.stop(); return }
         if let stopTask {
             await stopTask.value
             return
@@ -146,13 +158,15 @@ final class SessionController {
 
     func reset(store: SessionStore) {
         guard store.phase == .idle else { return }
-        timeline.reset()
+        if let dual { dual.clear() } else { timeline.reset() }
+        usingDual = false
         meetingStore.reset(sessionID: timeline.sessionID)
         store.reset()
         lastError = nil
     }
 
     func updateContext(_ keywords: [String], store: SessionStore) async -> Bool {
+        if usingDual { return await dual?.updateContext([.microphone: keywords, .systemAudio: keywords]) ?? false }
         guard store.phase == .listening, let run = runID else { return false }
         do {
             try await speechService.updateContext(keywords)
@@ -219,5 +233,47 @@ final class SessionController {
         if let unit = store.flushBuffer() { coordinator.enqueue(id: unit.id, text: unit.english) }
         store.updateVolatile("")
         meetingStore.clearPartials()
+    }
+}
+
+extension SessionController {
+    private func startSelected(store: SessionStore, coordinator: TranslationCoordinator, locale: Locale,
+                               glossary: [KeywordParser.GlossaryEntry], fastResults: Bool,
+                               recognitionMode: SpeechRecognitionMode, selection: AudioInputSelection) async {
+        if dual == nil {
+            dual = DualTranscriptionController(microphone: audioSource, microphoneSpeech: speechService,
+                timeline: timeline, activity: activity, owner: .conference, prepareModel: { $0 })
+        }
+        guard let dual else { return }
+        usingDual = true
+        lastError = nil
+        store.setActiveGlossary(glossary)
+        dual.phaseChanged = { [weak self, weak dual] phase in
+            store.phase = phase
+            self?.lastError = dual?.lastError
+            if phase == .listening { store.markSessionStarted() }
+        }
+        dual.prepareOptionalConsumer = { [weak self, weak dual] hub in
+            guard let self, let dual else { return }
+            let adapter = LegacyTranslationAdapter(sessionID: dual.store.sessionID, store: store,
+                coordinator: coordinator, origins: selection.origins, commonTimeline: true)
+            self.adapter = adapter
+            let subscription = await hub.subscribe()
+            self.consumers = [Task {
+                do {
+                    while let event = try await subscription.next() { adapter.receive(event) }
+                } catch {
+                    self.lastError = "字幕処理が追いつかないため入力を停止します。"
+                    Task { await dual.stop() }
+                }
+                await subscription.cancel()
+            }]
+        }
+        dual.finishOptionalConsumer = { [weak self] in
+            await self?.finishEvents(store: store, coordinator: coordinator)
+        }
+        await dual.start(microphoneLocale: locale, systemLocale: locale, fastResults: fastResults,
+            recognitionMode: recognitionMode, contextKeywords: [.microphone: glossary.map(\.term), .systemAudio: glossary.map(\.term)], selection: selection)
+        lastError = dual.lastError
     }
 }

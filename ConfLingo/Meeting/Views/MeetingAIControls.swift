@@ -47,26 +47,28 @@ struct MeetingAIControls: View {
                 .disabled(!meeting.ai.permitted || !meeting.ai.automaticEnabled || meeting.page == .review || meeting.phase == .stopping || meeting.knowledge.isBusy)
                 Text("発話に関連する資料を検索し、最大5箇所・6,000文字と資料名・位置を送ります。提案の回数上限は同じですが、入力トークンが増える場合があります。手動質問・終了後要約の資料許可とは別の設定です。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
-                if meeting.page == .live {
+                if meeting.page != .review {
                     TextField("会話や資料について質問する", text: $question, axis: .vertical)
                         .textFieldStyle(.roundedBorder).lineLimit(2...4)
                         .accessibilityLabel("AIへの質問")
                     HStack {
                         Button("Ask AI", systemImage: "paperplane") {
                             let value = question
-                            Task { await meeting.ai.ask(value) }
+                            Task { await meeting.askAssistance(value) }
                         }
                         .buttonStyle(.borderedProminent)
-                        .disabled(!meeting.ai.canAsk || question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || question.count > 2_000)
+                        .disabled(!meeting.canAskAssistance || question.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || question.count > 2_000)
                         if meeting.ai.permitted {
                             Button("AI送信を停止", role: .cancel) { meeting.setAIAllowed(false) }
                         }
                     }
                     if question.count > 2_000 { Text("質問は2,000文字以内で入力してください。").font(.caption) }
                 }
+                WebResearchControls(research: meeting.research, language: meeting.answerLanguage,
+                    enabled: meeting.phase != .stopping && meeting.phase != .preparing && meeting.page != .review)
                 Label(meeting.ai.statusText, systemImage: meeting.ai.state == .sending ? "arrow.up.circle" : "cloud")
                     .font(.caption).accessibilityLabel("AI状態：\(meeting.ai.statusText)")
-                if meeting.page == .live {
+                if meeting.page != .review {
                     Text(meeting.ai.contextDescription).font(.caption).foregroundStyle(DesignTokens.secondary)
                     if let usage = meeting.ai.lastUsage {
                         Text("直近の使用量：入力 \(usage.inputTokens)・出力 \(usage.outputTokens + usage.thinkingTokens) トークン（思考を含む）")

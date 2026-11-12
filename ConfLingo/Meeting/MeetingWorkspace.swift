@@ -9,6 +9,7 @@ final class MeetingWorkspace {
 
     let translations: MeetingTranslations
     var mode: SessionMode = .transcription
+    var inputSelection: AudioInputSelection = .both
     var microphoneTranslationLanguage: String { didSet { defaults.set(microphoneTranslationLanguage, forKey: "meetingMicrophoneTranslation") } }
     var systemTranslationLanguage: String { didSet { defaults.set(systemTranslationLanguage, forKey: "meetingSystemTranslation") } }
     let controller: DualTranscriptionController
@@ -33,6 +34,7 @@ final class MeetingWorkspace {
     var recognitionMode: SpeechRecognitionMode = .standard
     var recognitionStatus = "認識用語は次回の開始時に適用します。"
     let ai: InsightCoordinator
+    let research: WebResearchCoordinator
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
     var startedAt: Date? { controller.startedAt }
@@ -83,6 +85,7 @@ final class MeetingWorkspace {
         let ai = InsightCoordinator(store: controller.store, client: client)
         ai.answerLanguage = language
         self.ai = ai
+        research = WebResearchCoordinator(store: controller.store, knowledge: ai.knowledge, settings: settings)
         let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
         self.summary = summary
         ai.knowledge.onInvalidation = { [weak self] in self?.cancelSummary() }
@@ -96,8 +99,8 @@ final class MeetingWorkspace {
             self.translations.receive(event, targetLanguage: self.mode.translationTarget(source: event.languageCode, target: target))
         }
         controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
-        controller.captureActivityChanged = { [weak ai] active in
-            if active { ai?.resume() } else { ai?.suspend() }
+        controller.captureActivityChanged = { [weak ai, weak research] active in
+            if active { ai?.resume() } else { ai?.suspend(); research?.cancel() }
         }
         settings.onChange = { [weak self] in
             self?.ai.setPermission(false, after: 0)
@@ -157,11 +160,24 @@ final class MeetingWorkspace {
         return MeetingExportSnapshot(title: title, startedAt: startedAt, microphoneLocale: microphoneLocaleID,
                                      systemLocale: systemLocaleID, sessionID: store.sessionID,
                                      events: store.finals, candidates: candidates.items, summary: summary.completed,
-                                     translations: translations.completed)
+                                     translations: translations.completed, assistance: completedAssistance)
+    }
+
+    var completedAssistance: [MeetingInsight] { insights.filter { $0.status == .complete } + research.answers }
+
+    var canAskAssistance: Bool {
+        ai.permitted && page != .review && !isBusy && !knowledge.isBusy
+            && (phase == .idle || phase == .listening) && ai.state != .sending
+    }
+
+    func askAssistance(_ question: String) async {
+        guard canAskAssistance else { return }
+        if phase == .idle { ai.resume() }
+        await ai.ask(question)
     }
 
     func setAIAllowed(_ allowed: Bool) {
-        if !allowed { cancelSummary() }
+        if !allowed { cancelSummary(); research.setPermission(false) }
         guard !allowed || (page != .review && phase != .stopping) else { return }
         ai.setPermission(allowed, after: controller.elapsedOffset)
     }
@@ -223,7 +239,7 @@ final class MeetingWorkspace {
         defer { isStarting = false }
         await controller.start(microphoneLocale: Locale(identifier: microphoneLocaleID),
                                systemLocale: Locale(identifier: systemLocaleID), recognitionMode: recognitionMode,
-                               contextKeywords: recognitionKeywords)
+                               contextKeywords: recognitionKeywords, selection: inputSelection)
     }
 
     func translationTarget(for event: TranscriptEvent) -> String? {
@@ -256,6 +272,7 @@ final class MeetingWorkspace {
 
     func editPreparation() {
         guard canDiscard, page != .review else { return }
+        research.cancel()
         ai.suspend()
         page = .setup
     }
@@ -277,6 +294,7 @@ final class MeetingWorkspace {
     private func complete(_ completion: Completion) async {
         guard !isTransitioning, page != .review else { return }
         knowledge.cancelPendingImports()
+        research.cancel()
         ai.suspend()
         isTransitioning = true
         pendingCompletion = completion
@@ -295,6 +313,7 @@ final class MeetingWorkspace {
         cancelSummary()
         summary.reset()
         export.reset()
+        research.reset()
         ai.reset()
         controller.clear()
         translations.reset(sessionID: store.sessionID)

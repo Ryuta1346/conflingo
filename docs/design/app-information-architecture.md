@@ -1,3 +1,5 @@
+> 2026-11-12 共通支援をローカル実装: 両モードで資料＋発話への質問・自動提案・手動Web調査と、マイク／システム音声／両方の選択に対応。Conferenceの資料だけの質問は別操作として維持。以下は過去フェーズの設計記録で、入力固定・資料のみという制約は現在の共通支援には適用しない。[共通支援計画](shared-session-assistance-plan.md)・[検証と未確認事項](../validation/shared-session-assistance.md)。
+
 > 2026-11-12 現在: 永続資料ライブラリをローカル実装・自動検証・主要UI確認済み（[Draft PR #22](https://github.com/Ryuta1346/conflingo/pull/22)・未マージ）。会議への追加は保存時点のコピーで、更新・削除は使用中の会議と引用へ波及しない。AI送信許可は保存しない。狭幅実操作・VoiceOver全経路は未確認。以下の過去フェーズの記述は実施当時の履歴。[検証記録](../validation/knowledge-library.md)。
 
 > Sessions追補（2026-11-11、計画承認済み・実装と主要検証済み）: MeetingとConferenceの明示保存・一覧・名前検索・読み取り専用再閲覧・Markdown再出力・削除を追加した。引用抜粋も保存し、元資料全体・音声・送信許可は保存しない。自動保存は行わない。423テスト成功、UI網羅確認は継続。[実装計画](sessions-implementation-plan.md)。以下のSessions持ち越し記述は従来の実施範囲。

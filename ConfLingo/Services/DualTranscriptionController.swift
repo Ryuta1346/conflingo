@@ -10,7 +10,7 @@ final class DualTranscriptionController {
         var origin: AudioOrigin { source.origin }
     }
 
-    private(set) var phase: SessionPhase = .idle
+    private(set) var phase: SessionPhase = .idle { didSet { phaseChanged?(phase) } }
     private(set) var lastError: String?
     private(set) var preparation = ""
     private(set) var permissions: [AudioOrigin: AudioPermissionStatus] = [:]
@@ -19,6 +19,7 @@ final class DualTranscriptionController {
     let store: MeetingSessionStore
     let activity: AudioInputUse
     var prepareOptionalConsumer: (@MainActor (TranscriptEventHub) async -> Void)?
+    var finishOptionalConsumer: (@MainActor () async -> Void)?
     var captureActivityChanged: (@MainActor (Bool) -> Void)?
     var elapsedOffset: TimeInterval { timeline.offset }
     var isStopping: Bool { stopTask != nil }
@@ -26,6 +27,8 @@ final class DualTranscriptionController {
     let diagnostics: AudioDiagnostics?
     private(set) var diagnosticSaveFailed = false
     private let inputs: [Input]
+    private var selectedOrigins: Set<AudioOrigin> = [.microphone, .systemAudio]
+    var phaseChanged: ((SessionPhase) -> Void)?
     private let timeline: MeetingTimeline
     private let owner: AudioInputUse.Owner
     private let prepareModel: @MainActor (Locale) async throws -> Locale
@@ -78,7 +81,8 @@ final class DualTranscriptionController {
     func start(
         microphoneLocale: Locale = Locale(identifier: "en-US"),
         systemLocale: Locale = Locale(identifier: "en-US"), fastResults: Bool = false,
-        recognitionMode: SpeechRecognitionMode = .standard, contextKeywords: [AudioOrigin: [String]] = [:]
+        recognitionMode: SpeechRecognitionMode = .standard, contextKeywords: [AudioOrigin: [String]] = [:],
+        selection: AudioInputSelection = .both
     ) async {
         guard phase == .idle, !Task.isCancelled else { return }
         guard let token = activity.acquire(owner) else {
@@ -86,6 +90,7 @@ final class DualTranscriptionController {
             return
         }
         usageToken = token
+        selectedOrigins = selection.origins
         diagnostics?.begin()
         diagnosticSaveFailed = false
         let run = UUID()
@@ -130,6 +135,7 @@ final class DualTranscriptionController {
             runID = nil
             await hub?.finish()
             await consumer?.value
+            await finishOptionalConsumer?()
             diagnostics?.mark(.deliveryFinished)
             hub = nil
             consumer = nil
@@ -161,7 +167,7 @@ final class DualTranscriptionController {
     func updateContext(_ keywords: [AudioOrigin: [String]]) async -> Bool {
         guard phase == .listening, let run = runID else { return false }
         var succeeded = true
-        for input in inputs {
+        for input in inputs where activeInputs.contains(input.origin) {
             guard runID == run, phase == .listening else { return false }
             do { try await input.speech.updateContext(keywords[input.origin] ?? []) }
             catch { succeeded = false }
@@ -174,7 +180,7 @@ final class DualTranscriptionController {
         var currentOrigin = AudioOrigin.microphone
         do {
             var prepared: [AudioOrigin: Locale] = [:]
-            for input in inputs {
+            for input in inputs where selectedOrigins.contains(input.origin) {
                 currentOrigin = input.origin
                 try Task.checkCancellation()
                 preparation = "\(input.origin.label)：認識モデルを準備中（必要に応じてダウンロード）"
@@ -204,7 +210,7 @@ final class DualTranscriptionController {
                 await subscription.cancel()
             }
             await prepareOptionalConsumer?(hub)
-            for input in inputs {
+            for input in inputs where selectedOrigins.contains(input.origin) {
                 currentOrigin = input.origin
                 try Task.checkCancellation()
                 guard !failed, phase == .preparing else { throw CancellationError() }

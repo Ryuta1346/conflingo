@@ -283,9 +283,13 @@ final class KnowledgeStore {
         onContentChange?()
     }
 
+    @ObservationIgnored private var invalidationObservers: [() -> Void] = []
+    func observeInvalidation(_ action: @escaping () -> Void) { invalidationObservers.append(action) }
+
     private func invalidate() {
         revision = UUID()
         onInvalidation?()
+        for observer in invalidationObservers { observer() }
         searchID = UUID()
         results = []
         searchState = .idle

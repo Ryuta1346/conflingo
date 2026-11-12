@@ -45,11 +45,14 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
 
     var markdown: String {
         switch self {
-        case .meeting(let value, _): value.markdown
+        case .meeting(let value, let cards):
+            value.markdown + AssistanceMarkdown.render(cards.filter { card in
+                !(value.assistance ?? []).contains { $0.id == card.id }
+            }, speech: Dictionary(value.events.map { ($0.id, $0.text) }, uniquingKeysWith: { first, _ in first }))
         case .conference(let value):
             MarkdownExporter.render(sessionName: value.title, date: value.startedAt,
                                     segments: value.segments, units: value.units,
-                                    sourceLanguage: value.sourceLanguage, targetLanguage: value.targetLanguage) + (value.support?.markdown ?? "")
+                                    sourceLanguage: value.sourceLanguage, targetLanguage: value.targetLanguage) + (value.support?.renderMarkdown(segments: value.segments) ?? "")
         }
     }
 
@@ -68,6 +71,14 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
                 if let source = reference.source {
                     try require(!source.path.hasPrefix("/") && !source.path.split(separator: "/").contains(".."))
                 }
+            }
+        }
+        func webReferences(_ values: [WebReference]?) throws {
+            let values = values ?? []
+            try require(values.count <= 20 && unique(values.map(\.id)))
+            for reference in values {
+                try require(WebReference.validURL(reference.url) && reference.title.count <= 200
+                            && reference.fetchedAt.timeIntervalSince1970.isFinite)
             }
         }
         try require(!title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
@@ -92,9 +103,11 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
                             && !translation.targetLanguage.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty
                             && !translation.text.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
             }
-            for card in cards + value.candidates.map(\.insight) {
+            for card in cards + (value.assistance ?? []) + value.candidates.map(\.insight) {
                 try require(card.status == .complete && !card.text.isEmpty && card.evidenceIDs.allSatisfy { ids.contains($0) })
                 try references(card.knowledgeReferences)
+                try webReferences(card.webReferences)
+                try require((card.searchSuggestionsHTML?.utf8.count ?? 0) <= 65_536)
             }
             for candidate in value.candidates {
                 try require(candidate.sessionID == id && (candidate.insight.kind == .decisionCandidate || candidate.insight.kind == .actionCandidate))
@@ -114,7 +127,7 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
             try require((!value.segments.isEmpty || value.support?.hasCompletedAnswers == true)
                         && unique(value.segments.map(\.id)) && unique(value.units.map(\.id)))
             let ids = Set(value.segments.map(\.id))
-            for segment in value.segments { try require(optionalTime(segment.startTime) && !segment.english.isEmpty) }
+            for segment in value.segments { try require(optionalTime(segment.startTime) && optionalTime(segment.sessionOffset) && !segment.english.isEmpty) }
             for unit in value.units {
                 try require(optionalTime(unit.startTime) && !unit.segmentIDs.isEmpty && unique(unit.segmentIDs)
                             && unit.segmentIDs.allSatisfy { ids.contains($0) })
@@ -124,9 +137,10 @@ enum SessionSnapshot: Codable, Equatable, Sendable {
                             && Set(support.corrections.map(\.unitID)).count == support.corrections.count && support.terms.count <= 100)
                 for answer in support.answers {
                     try require(answer.status == .complete && !answer.text.isEmpty && answer.text.count <= 8_000
-                                && answer.evidenceIDs.isEmpty && !answer.hasInvalidEvidence
-                                && (answer.kind == .answerSuggestion || answer.kind == .followUpQuestion))
+                                && answer.evidenceIDs.allSatisfy { ids.contains($0) } && !answer.hasInvalidEvidence)
                     try references(answer.knowledgeReferences)
+                    try webReferences(answer.webReferences)
+                    try require((answer.searchSuggestionsHTML?.utf8.count ?? 0) <= 65_536)
                 }
                 for correction in support.corrections {
                     guard correction.adopted, let unit = value.units.first(where: { $0.id == correction.unitID }) else { throw SessionFileError.invalid }

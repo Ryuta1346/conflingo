@@ -3,13 +3,21 @@ import SwiftUI
 struct ConferenceSavedSupportView: View {
     let support: ConferenceSupportSnapshot
     let fontSize: Double
+    var segments: [TranscriptSegment] = []
     @State private var reference: KnowledgeReference?
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if !support.answers.isEmpty { Text("資料へのAI質問 · 要確認").font(.title3.bold()) }
+            if !support.answers.isEmpty { Text("AIの回答・提案・Web調査 · 要確認").font(.title3.bold()) }
             ForEach(support.answers) { answer in
-                Text(answer.text).font(.system(size: fontSize)).textSelection(.enabled)
+                ResearchAnswerText(answer: answer).font(.system(size: fontSize))
                 citations(answer.knowledgeReferences)
+                ForEach(answer.evidenceIDs, id: \.self) { id in
+                    if let segment = segments.first(where: { $0.id == id }) {
+                        DisclosureGroup("根拠の発話") { Text(segment.english).textSelection(.enabled) }
+                    }
+                }
+                WebReferencesView(references: answer.webReferences ?? [])
+                if answer.webReferences?.isEmpty == false { Text("Webの生抜粋は保存していません。").font(.caption) }
             }
             if !support.corrections.isEmpty { Text("採用した資料参照補正").font(.title3.bold()) }
             ForEach(support.corrections) { correction in
