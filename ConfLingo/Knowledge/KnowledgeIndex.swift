@@ -193,14 +193,27 @@ actor KnowledgeIndex {
         let expanded = text.replacingOccurrences(of: "([a-z0-9])([A-Z])", with: "$1 $2", options: .regularExpression)
             .replacingOccurrences(of: "([A-Z])([A-Z][a-z])", with: "$1 $2", options: .regularExpression)
             .replacingOccurrences(of: "_", with: " ")
-        let text = text + " " + expanded
+        let text = expanded == text ? text : text + " " + expanded
         let tokenizer = NLTokenizer(unit: .word)
-        tokenizer.string = text
         var words: [String] = []
-        tokenizer.enumerateTokens(in: text.startIndex..<text.endIndex) { range, _ in
-            let word = String(text[range]).folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
-            if word.unicodeScalars.contains(where: { CharacterSet.alphanumerics.contains($0) }) { words.append(word) }
-            return true
+        for part in text.split(whereSeparator: { $0.isWhitespace }) {
+            let text = String(part)
+            tokenizer.string = text
+            var ranges = tokenizer.tokens(for: text.startIndex..<text.endIndex)
+            // Ambiguous short kanji terms such as 月額 can otherwise become isolated characters.
+            if ranges.count > 1 && ranges.allSatisfy({ range in
+                let scalars = text[range].unicodeScalars
+                return scalars.count == 1 && scalars.first?.properties.isIdeographic == true
+            }) {
+                let japanese = NLTokenizer(unit: .word)
+                japanese.setLanguage(.japanese)
+                japanese.string = text
+                ranges = japanese.tokens(for: text.startIndex..<text.endIndex)
+            }
+            for range in ranges {
+                let word = String(text[range]).folding(options: [.caseInsensitive, .diacriticInsensitive, .widthInsensitive], locale: Locale(identifier: "en_US_POSIX"))
+                if word.unicodeScalars.contains(where: { CharacterSet.alphanumerics.contains($0) }) { words.append(word) }
+            }
         }
         return words
     }

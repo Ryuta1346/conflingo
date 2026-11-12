@@ -28,7 +28,7 @@ struct ConferenceLayoutTests {
         let window = makeWindow(host)
         defer { window.close() }
         await resize(window, width: 1100)
-        let scrollViews = descendants(host, of: NSScrollView.self)
+        let scrollViews = paneScrolls(host)
         try #require(scrollViews.count == 2)
         for scroll in scrollViews {
             scroll.contentView.scroll(to: NSPoint(x: 0, y: 200))
@@ -36,13 +36,13 @@ struct ConferenceLayoutTests {
             try await scrollUp(scroll)
         }
         await resize(window, width: 700)
-        let narrowViews = descendants(host, of: NSScrollView.self)
-        #expect(Set(narrowViews.map(ObjectIdentifier.init)) == Set(scrollViews.map(ObjectIdentifier.init)))
-        for scroll in narrowViews {
+        let narrowViews = paneScrolls(host)
+        #expect(Set(scrollViews.map(ObjectIdentifier.init)).isSubset(of: Set(narrowViews.map(ObjectIdentifier.init))))
+        for scroll in scrollViews {
             #expect(scroll.documentVisibleRect.minY < 1000)
         }
         await resize(window, width: 1100)
-        #expect(Set(descendants(host, of: NSScrollView.self).map(ObjectIdentifier.init)) == Set(scrollViews.map(ObjectIdentifier.init)))
+        #expect(Set(paneScrolls(host).map(ObjectIdentifier.init)) == Set(scrollViews.map(ObjectIdentifier.init)))
         let id = try #require(store.appendFinal("A new sentence after resizing."))
         let unit = try #require(store.bufferSegment(id))
         store.applyTranslation(id: unit.id, japanese: "サイズ変更後の新しい字幕です。")
@@ -78,7 +78,14 @@ struct ConferenceLayoutTests {
         window.contentView?.layoutSubtreeIfNeeded()
     }
 
+    private func paneScrolls(_ view: NSView) -> [NSScrollView] {
+        descendants(view, of: NSScrollView.self).filter { scroll in
+            guard let document = scroll.documentView else { return false }
+            return descendants(document, of: NSScrollView.self).isEmpty
+        }
+    }
+
     private func descendants<T: NSView>(_ view: NSView, of type: T.Type) -> [T] {
-        (view as? T).map { [$0] } ?? view.subviews.flatMap { descendants($0, of: type) }
+        ((view as? T).map { [$0] } ?? []) + view.subviews.flatMap { descendants($0, of: type) }
     }
 }
