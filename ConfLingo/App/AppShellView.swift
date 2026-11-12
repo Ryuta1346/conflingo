@@ -28,16 +28,20 @@ struct AppShellView<Content: View>: View {
     }
 
     private var compactNavigation: some View {
-        HStack(spacing: 8) {
-            navigationButton("ホーム", symbol: "house", target: .home)
-            navigationButton("Conference", symbol: "captions.bubble", target: .setup)
-            navigationButton("Meeting", symbol: "person.2", target: .meeting)
-            navigationButton("保存", symbol: "folder", target: .sessions)
-            navigationButton("資料", symbol: "books.vertical", target: .library)
-            Spacer(minLength: 0)
-            navigationButton("設定", symbol: "gearshape", target: .settings)
+        ScrollView(.horizontal) {
+            HStack(spacing: 8) {
+                navigationButton("ホーム", symbol: "house", target: .home)
+                navigationButton("Conference", symbol: "captions.bubble", target: .setup)
+                navigationButton("Meeting", symbol: "person.2", target: .meeting)
+                navigationButton("保存", symbol: "folder", target: .sessions)
+                navigationButton("資料", symbol: "books.vertical", target: .library)
+                navigationButton("設定", symbol: "gearshape", target: .settings)
+            }
+            .lineLimit(1)
+            .fixedSize(horizontal: true, vertical: false)
+            .padding(12)
         }
-        .padding(12)
+        .fixedSize(horizontal: false, vertical: true)
         .background(DesignTokens.sidebar)
     }
 

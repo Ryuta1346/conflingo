@@ -7,6 +7,7 @@ struct TranscriptPane: View {
     @State private var followsLatest = true
     @State private var userScrolling = false
     @State private var atBottom = true
+    @State private var scrollPosition = ScrollPosition(edge: .bottom)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -58,6 +59,10 @@ struct TranscriptPane: View {
                 }
                 .clipped()
                 .defaultScrollAnchor(.bottom, for: .initialOffset)
+                .scrollPosition($scrollPosition)
+                .onScrollGeometryChange(for: [CGSize].self) { [$0.contentSize, $0.containerSize] } action: { _, _ in
+                    if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
+                }
                 .onScrollGeometryChange(for: Bool.self) { geometry in
                     geometry.visibleRect.maxY >= geometry.contentSize.height - 24
                 } action: { _, bottom in

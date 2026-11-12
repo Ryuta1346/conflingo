@@ -114,7 +114,7 @@ struct MeetingLayoutTests {
             defaults.removePersistentDomain(forName: suite)
         }
         await resize(window, width: 1280, height: 800)
-        let scrolls = descendants(host, of: NSScrollView.self)
+        let scrolls = paneScrolls(host)
         try #require(scrolls.count == 2)
         let transcript = try #require(scrolls.max { ($0.documentView?.frame.height ?? 0) < ($1.documentView?.frame.height ?? 0) })
         let evidence = try #require(meeting.store.finals.first)
@@ -122,7 +122,7 @@ struct MeetingLayoutTests {
         await layout(window)
         #expect(transcript.documentVisibleRect.minY < 1000)
         await resize(window, width: 720, height: 560)
-        #expect(Set(descendants(host, of: NSScrollView.self).map(ObjectIdentifier.init)) == Set(scrolls.map(ObjectIdentifier.init)))
+        #expect(Set(scrolls.map(ObjectIdentifier.init)).isSubset(of: Set(paneScrolls(host).map(ObjectIdentifier.init))))
         #expect(transcript.documentVisibleRect.minY < 1000)
         floating.mainWindow = window
         floating.show(meeting: meeting, compactMain: true)
@@ -138,7 +138,7 @@ struct MeetingLayoutTests {
         await meeting.end()
         await layout(window)
         #expect(meeting.page == .review)
-        #expect(Set(descendants(host, of: NSScrollView.self).map(ObjectIdentifier.init)) == Set(scrolls.map(ObjectIdentifier.init)))
+        #expect(Set(scrolls.map(ObjectIdentifier.init)).isSubset(of: Set(paneScrolls(host).map(ObjectIdentifier.init))))
     }
 
     @Test func panelHideCloseAndRestoreNeverStopOrReplaceMeeting() async throws {
@@ -189,7 +189,14 @@ struct MeetingLayoutTests {
         window.contentView?.layoutSubtreeIfNeeded()
     }
 
+    private func paneScrolls(_ view: NSView) -> [NSScrollView] {
+        descendants(view, of: NSScrollView.self).filter { scroll in
+            guard let document = scroll.documentView else { return false }
+            return descendants(document, of: NSScrollView.self).isEmpty
+        }
+    }
+
     private func descendants<T: NSView>(_ view: NSView, of type: T.Type) -> [T] {
-        (view as? T).map { [$0] } ?? view.subviews.flatMap { descendants($0, of: type) }
+        ((view as? T).map { [$0] } ?? []) + view.subviews.flatMap { descendants($0, of: type) }
     }
 }

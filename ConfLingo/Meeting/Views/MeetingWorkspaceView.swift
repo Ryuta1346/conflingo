@@ -25,13 +25,18 @@ struct MeetingWorkspaceView: View {
                     SessionErrorBanner(message: error).padding([.horizontal, .bottom], 16)
                 }
                 GeometryReader { geometry in
-                    let layout = geometry.size.width >= 800
+                    let horizontal = geometry.size.width >= 800
+                    let paneHeight = 80 + max(160, fontSize * 4)
+                    let layout = horizontal
                         ? AnyLayout(HStackLayout(spacing: 16)) : AnyLayout(VStackLayout(spacing: 12))
-                    layout {
-                        MeetingTranscriptView(meeting: meeting, fontSize: fontSize)
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
-                        insights
-                            .frame(maxWidth: .infinity, maxHeight: .infinity)
+                    ScrollView {
+                        layout {
+                            MeetingTranscriptView(meeting: meeting, fontSize: fontSize)
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                            insights
+                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                        }
+                        .frame(height: max(geometry.size.height, horizontal ? paneHeight : paneHeight * 2 + 12))
                     }
                 }
                 .padding(.horizontal, 16)
