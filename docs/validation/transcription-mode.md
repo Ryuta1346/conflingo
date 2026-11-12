@@ -8,7 +8,7 @@
 - 翻訳先の言語設定とモードを分離。旧Conferenceの永続設定 `transcriptionOnly` は参照せず、既存設定が翻訳有効でも新規セッションは翻訳しない。
 - Meetingは翻訳対象の認識途中の発話にも訳文欄を用意。過去に文字起こしのみで確定した発話へ、切替だけで翻訳待ち欄を後付けしない。
 - Conferenceは2ペインを維持し、認識途中・文の確定待ち・翻訳単位に原文に応じた予約高さを設定する。
-- 共通のSwiftUI Layoutが原文の折返し＋1行、最低約2行分と実際の内容の高さから表示高を決める。同じ幅・文字サイズでは高さを縮めず、失敗・再試行・短い訳文への差替えで後続項目を引き上げない。
+- 共通のSwiftUI Layoutが原文の折返し＋1行、最低約2行分と実際の内容の高さから表示高を決める。同じ翻訳単位・幅・文字サイズでは高さを縮めず、失敗・再試行・短い訳文への差替えで後続項目を引き上げない。
 - 訳文が予約高を超えた場合は全文が収まるまで広げる。文字サイズ・幅が変わった場合は再計算する。予約用の非表示テキストはアクセシビリティから除外する。
 
 ## テスト結果
@@ -52,3 +52,14 @@ xcodebuild build -project ConfLingo.xcodeproj -scheme ConfLingo -configuration R
 
 ログ: `/private/tmp/conflingo-mode-{red,green,all,final,lint,release}.log`。
 最初のサンドボックス内ビルドはSwiftマクロの起動制約で失敗したため、その後は通常のXcode実行環境で検証した。
+
+## レビュー修正: 前の文の予約余白を次の発話へ残さない
+
+2026-11-12。未確定行のIDを直近の翻訳単位ID（まだ単位がない場合はセッションID）に基づけた。タイムアウトで前の文が確定したとき、残った認識途中の発話には予約高を再計算する。同じ単位内の更新・失敗・再試行の高さ維持は継続する。
+
+- Red: 文末なし原文＋次のpartialを表示し、`flushBuffer()`で前の文を確定。幅280pt・24ptフォントで更新後のホストと同じデータの新規ホストを比較し、修正前は266.5ptの余白残存で失敗した。
+- Green: 同じ再現テストが成功。TranslationReservationTests、TranscriptPresentationTests、ConferenceLayoutTests、MeetingLayoutTests、MeetingTranslationTests、TranscriptionModeTests、LegacyTranslationAdapterTests、SessionStoreTestsの49テスト・8スイートが成功した。
+- SwiftLint 0.65.1: strict / no-cache、203ファイル、違反0件。`git diff --check`も成功。
+- 今回は実音声・実翻訳エンジン、全テスト、Releaseビルドを再実行していない。表示はSwiftUIホストで検証した。
+
+ログ: `/private/tmp/conflingo-buffer-reservation-{red,green,lint}.log`。

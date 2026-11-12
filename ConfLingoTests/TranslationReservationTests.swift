@@ -53,6 +53,31 @@ struct TranslationReservationTests {
         #expect(TranscriptPresentation.source(store).first?.text == source)
     }
 
+    @Test func conferenceFlushDoesNotCarryBufferedHeightIntoNextPartial() async throws {
+        let store = SessionStore()
+        let source = String(repeating: "Long buffered words waiting for the next translation unit ", count: 3)
+        let segment = try #require(store.appendFinal(source))
+        #expect(store.bufferSegment(segment) == nil)
+        store.updateVolatile("Next short partial")
+        let host = NSHostingView(rootView: ConferenceTranslationFixture(store: store))
+        let window = makeWindow(host)
+        defer { window.close() }
+        await layout(host)
+
+        // The timeout can flush the preceding final while the next partial is still being recognized.
+        _ = try #require(store.flushBuffer())
+        await layout(host)
+        let updatedHeight = host.fittingSize.height
+        let freshHost = NSHostingView(rootView: ConferenceTranslationFixture(store: store))
+        let freshWindow = makeWindow(freshHost)
+        defer { freshWindow.close() }
+        await layout(freshHost)
+
+        #expect(TranscriptPresentation.translation(store).count == 2)
+        #expect(abs(updatedHeight - freshHost.fittingSize.height) < 1,
+                "The next partial must not retain the previous translation unit's reserved space")
+    }
+
     @Test func oversizedTranslationExpandsWithoutTruncationAndDoesNotShrinkOnRetry() async throws {
         let state = ReservationFixtureState()
         let host = NSHostingView(rootView: ReservationFixture(state: state))

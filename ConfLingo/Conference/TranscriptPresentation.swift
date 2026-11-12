@@ -65,8 +65,9 @@ enum TranscriptPresentation {
             let buffered = Set(store.bufferedSegmentIDs)
             let source = (store.segments.filter { buffered.contains($0.id) }.map(\.english) + [store.volatileText])
                 .filter { !$0.isEmpty }.joined(separator: " ")
+            let bufferGeneration = store.units.last?.id ?? store.sessionID
             entries.append(TranscriptEntry(
-                id: "buffered", text: "発話が確定するのを待っています。", status: .translating, time: nil, reservationText: source
+                id: "buffered-\(bufferGeneration)", text: "発話が確定するのを待っています。", status: .translating, time: nil, reservationText: source
             ))
         }
         return entries
