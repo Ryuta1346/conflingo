@@ -40,7 +40,9 @@ struct MeetingWorkspaceView: View {
             Divider()
             MeetingTransport(meeting: meeting)
         }
-        .task { translationLanguages = await SystemModelPreparation().targetLanguages() }
+        .task(id: meeting.mode) {
+            if meeting.mode == .translation { translationLanguages = await SystemModelPreparation().targetLanguages() }
+        }
         .disabled(meeting.isSavingSession || meeting.isUsingLibrary)
         .sheet(item: $meeting.selectedKnowledge) { reference in
             KnowledgeReferenceView(reference: reference, fontSize: fontSize)
@@ -61,12 +63,17 @@ struct MeetingWorkspaceView: View {
                     VStack(alignment: .leading, spacing: 18) {
                         TextField("会議名", text: $meeting.name)
                             .textFieldStyle(.roundedBorder).accessibilityLabel("会議名")
+                        SessionModePicker(selection: $meeting.mode)
                         languagePicker("自分 · マイク", selection: $meeting.microphoneLocaleID)
-                        translationPicker("自分の翻訳先", selection: $meeting.microphoneTranslationLanguage)
+                        if meeting.mode == .translation {
+                            translationPicker("自分の翻訳先", selection: $meeting.microphoneTranslationLanguage)
+                        }
                         languagePicker("相手側 · 内部音声", selection: $meeting.systemLocaleID)
-                        translationPicker("相手側の翻訳先", selection: $meeting.systemTranslationLanguage)
-                        Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
-                            .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        if meeting.mode == .translation {
+                            translationPicker("相手側の翻訳先", selection: $meeting.systemTranslationLanguage)
+                            Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
+                                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        }
                         Text("内部音声にはMacで再生する他の音も含まれます。ヘッドフォンの利用を推奨します。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                         Divider()

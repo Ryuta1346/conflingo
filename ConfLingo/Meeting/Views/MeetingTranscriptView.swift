@@ -31,15 +31,14 @@ struct MeetingTranscriptView: View {
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
                                     Text(event.origin == .microphone ? "自分 · マイク" : "相手側 · 内部音声")
+                                    if !event.isFinal { Text("認識中") }
                                     Spacer()
                                     Text(MarkdownExporter.timestamp(event.startOffset)).monospacedDigit()
                                 }
                                 .font(.caption).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).lineSpacing(5).textSelection(.enabled)
-                                MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize)
-                                if !event.isFinal {
-                                    Text("認識中").font(.caption).foregroundStyle(DesignTokens.secondary)
-                                }
+                                MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,
+                                                       sourceText: event.text, targetLanguage: meeting.translationTarget(for: event))
                             }
                             .frame(maxWidth: .infinity, alignment: .leading)
                             .padding(12)

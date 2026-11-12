@@ -20,7 +20,7 @@ Meeting also supports microphone and system audio transcription, optional AI res
 
 ## Meeting translation
 
-Choose a translation target for each input in Meeting setup. Defaults are Japanese → English for the microphone and English → Japanese for system audio. Confirmed utterances keep their originals and show translations below them, including in the floating panel, saved sessions and Markdown exports. Each input can disable translation. Translation runs on this Mac without an API key; a model download may be needed. Translation failures do not stop transcription. See [validation](docs/validation/meeting-translation.md) for the tested scope.
+Meeting and Conference default to transcription for each new session. Select **リアルタイム翻訳** in setup to enable translation. Meeting initially offers English for the microphone and Japanese for system audio; target choices are remembered separately from the mode. Space is reserved below source text before translations arrive, reducing layout shifts. Translations that exceed the reserved space expand to remain readable. Original text and completed translations are retained, including in the floating panel, saved sessions and Markdown exports. Each input can disable translation. Translation runs on this Mac without an API key; a model download may be needed. Translation failures do not stop transcription. See [validation](docs/validation/meeting-translation.md) for the tested scope.
 
 ## Knowledge library
 

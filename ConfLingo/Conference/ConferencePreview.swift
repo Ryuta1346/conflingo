@@ -11,6 +11,7 @@ enum ConferencePreview {
     }()
 
     static func populate(_ session: SessionStore) {
+        session.mode = .translation
         session.sessionName = "WWDC セッション"
         let examples = [
             ("Great tools help us stay present in the conversation, without getting in the way.",

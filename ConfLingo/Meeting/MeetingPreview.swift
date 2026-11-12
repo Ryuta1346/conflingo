@@ -34,6 +34,7 @@ enum MeetingPreview {
             : MeetingWorkspace(controller: controller, insightClient: PreviewInsightClient(),
                                defaults: defaults, llmSettings: LLMSettings(defaults: defaults, keyStore: { _ in PreviewAPIKeyStore() }),
                                translationClient: PreviewMeetingTranslator(), prepareTranslationModels: false)
+        if scenario != "setup" { meeting.mode = .translation }
         meeting.previewUsesLiveAI = liveAI
         return meeting
     }

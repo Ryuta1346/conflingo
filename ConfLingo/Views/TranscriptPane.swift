@@ -37,16 +37,19 @@ struct TranscriptPane: View {
                                     if let time = entry.time {
                                         Text(MarkdownExporter.timestamp(time)).monospacedDigit()
                                     }
-                                    if let status = entry.status.label { Text(status) }
+                                    if let status = entry.status.label {
+                                        Text(status)
+                                    } else if entry.reservationText != nil {
+                                        Text(" ").accessibilityHidden(true)
+                                    }
                                 }
                                 .font(.caption)
                                 .foregroundStyle(entry.status == .failed ? DesignTokens.danger : DesignTokens.secondary)
-                                Text(entry.text)
-                                    .font(.system(size: fontSize))
-                                    .lineSpacing(6)
-                                    .foregroundStyle(entry.status == .final ? DesignTokens.text : DesignTokens.secondary)
-                                    .textSelection(.enabled)
-                                    .frame(maxWidth: .infinity, alignment: .leading)
+                                if let source = entry.reservationText {
+                                    ReservedTranslation(sourceText: source, fontSize: fontSize) { entryText(entry) }
+                                } else {
+                                    entryText(entry)
+                                }
                             }
                         }
                         Color.clear.frame(height: 1).id("latest")
@@ -82,5 +85,13 @@ struct TranscriptPane: View {
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)
         .background(DesignTokens.surface)
+    }
+
+    private func entryText(_ entry: TranscriptEntry) -> some View {
+        Text(entry.text)
+            .font(.system(size: fontSize)).lineSpacing(6)
+            .foregroundStyle(entry.status == .final ? DesignTokens.text : DesignTokens.secondary)
+            .textSelection(.enabled)
+            .frame(maxWidth: .infinity, alignment: .leading)
     }
 }

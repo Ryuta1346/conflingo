@@ -18,6 +18,7 @@ struct TranscriptEntry: Identifiable, Equatable {
     let text: String
     let status: Status
     let time: TimeInterval?
+    var reservationText: String?
 }
 
 @MainActor
@@ -42,7 +43,8 @@ enum TranscriptPresentation {
     static func translation(_ store: SessionStore, corrections: [ConferenceCorrection] = []) -> [TranscriptEntry] {
         var entries = store.units.map { unit in
             if let correction = corrections.first(where: { $0.adopted && $0.unitID == unit.id }), let translation = correction.translation {
-                return TranscriptEntry(id: unit.id.uuidString, text: translation + " （補正採用）", status: .final, time: unit.startTime)
+                return TranscriptEntry(id: unit.id.uuidString, text: translation + " （補正採用）", status: .final,
+                                       time: unit.startTime, reservationText: unit.english)
             }
             let text: String
             let status: TranscriptEntry.Status
@@ -57,11 +59,14 @@ enum TranscriptPresentation {
                 text = "翻訳を待っています…"
                 status = .translating
             }
-            return TranscriptEntry(id: unit.id.uuidString, text: text, status: status, time: unit.startTime)
+            return TranscriptEntry(id: unit.id.uuidString, text: text, status: status, time: unit.startTime, reservationText: unit.english)
         }
-        if !store.bufferedSegmentIDs.isEmpty {
+        if !store.bufferedSegmentIDs.isEmpty || !store.volatileText.isEmpty {
+            let buffered = Set(store.bufferedSegmentIDs)
+            let source = (store.segments.filter { buffered.contains($0.id) }.map(\.english) + [store.volatileText])
+                .filter { !$0.isEmpty }.joined(separator: " ")
             entries.append(TranscriptEntry(
-                id: "buffered", text: "発話が確定するのを待っています。", status: .translating, time: nil
+                id: "buffered", text: "発話が確定するのを待っています。", status: .translating, time: nil, reservationText: source
             ))
         }
         return entries

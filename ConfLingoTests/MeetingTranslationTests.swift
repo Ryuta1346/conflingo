@@ -106,6 +106,7 @@ struct MeetingTranslationTests {
     @Test func meetingDrainsStopFinalsAndResumeKeepsCompletedTranslations() async throws {
         let fixture = DualFixture()
         let meeting = MeetingWorkspace(controller: fixture.controller(), translationClient: FakeMeetingTranslator())
+        meeting.mode = .translation
         meeting.consentConfirmed = true
         await meeting.start()
         try await fixture.system.emit("before pause", time: 1)

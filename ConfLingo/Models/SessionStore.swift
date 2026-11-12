@@ -25,6 +25,7 @@ final class SessionStore {
     private(set) var bufferedSegmentIDs: [UUID] = []
     private(set) var volatileText: String = ""
     var phase: SessionPhase = .idle
+    var mode: SessionMode = .transcription
     var sessionName: String = ""
     private(set) var startedAt: Date?
 
@@ -128,6 +129,7 @@ final class SessionStore {
     }
 
     func reset() {
+        mode = .transcription
         sessionID = UUID()
         segments = []
         segmentByID = [:]
