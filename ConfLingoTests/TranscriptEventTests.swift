@@ -31,10 +31,15 @@ struct TranscriptEventTests {
 
     @Test func distinctUtterancesAndOriginsSurviveIdenticalText() {
         let store = MeetingSessionStore(sessionID: UUID())
+        let first = transcriptEvent(sessionID: store.sessionID)
+        store.receive(first)
+        store.receive(first)
         store.receive(transcriptEvent(sessionID: store.sessionID))
         store.receive(transcriptEvent(sessionID: store.sessionID, origin: .systemAudio))
-        #expect(store.finals.map(\.origin) == [.microphone, .systemAudio])
-        #expect(store.finals.map(\.languageCode) == ["en-US", "en-US"])
+        #expect(store.finals.map(\.origin) == [.microphone, .microphone, .systemAudio])
+        #expect(store.finals.map(\.languageCode) == ["en-US", "en-US", "en-US"])
+        #expect(store.finals.map(\.text) == ["Hello", "Hello", "Hello"])
+        #expect(Set(store.finals.map(\.id)).count == 3)
     }
 
     @Test func resetRejectsOldSessionAndEmptyText() {
