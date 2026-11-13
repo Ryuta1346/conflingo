@@ -3,11 +3,14 @@ import Foundation
 
 enum AudioCaptureError: LocalizedError {
     case converterUnavailable
+    case configurationChanged
 
     var errorDescription: String? {
         switch self {
         case .converterUnavailable:
             "マイク入力のフォーマット変換を初期化できませんでした。"
+        case .configurationChanged:
+            "マイクの機器構成が変更されたため、音声入力を停止しました。入力機器を確認して、もう一度開始してください。"
         }
     }
 }
@@ -21,16 +24,30 @@ protocol AudioCapturing: AnyObject {
 /// AVAudioEngine のマイク入力を指定PCMフォーマットへ変換するOS境界。
 @MainActor
 final class AudioCaptureService: AudioCapturing {
-    private let engine = AVAudioEngine()
+    private let engine: any MicrophoneCaptureEngine
+    private let notificationCenter: NotificationCenter
+    private var configurationObserver: (any NSObjectProtocol)?
+    private var runID: UUID?
     private var continuation: AudioFrameStream.Continuation?
     private let diagnostics: AudioDiagnostics?
 
-    init(diagnostics: AudioDiagnostics? = nil) { self.diagnostics = diagnostics }
+    init(diagnostics: AudioDiagnostics? = nil,
+         engine: any MicrophoneCaptureEngine = SystemMicrophoneCaptureEngine(),
+         notificationCenter: NotificationCenter = .default) {
+        self.diagnostics = diagnostics
+        self.engine = engine
+        self.notificationCenter = notificationCenter
+    }
+
+    isolated deinit {
+        if let configurationObserver { notificationCenter.removeObserver(configurationObserver) }
+        if continuation != nil { engine.stop() }
+        continuation?.finish()
+    }
 
     func start(targetFormat: AVAudioFormat) throws -> AudioFrameStream {
         guard continuation == nil else { throw AudioSourceError.alreadyRunning }
-        let inputNode = engine.inputNode
-        let hardwareFormat = inputNode.outputFormat(forBus: 0)
+        let hardwareFormat = engine.inputFormat
 
         guard let converter = BufferConverter(from: hardwareFormat, to: targetFormat, diagnostics: diagnostics) else {
             throw AudioCaptureError.converterUnavailable
@@ -38,11 +55,22 @@ final class AudioCaptureService: AudioCapturing {
 
         let (stream, newContinuation) = AudioFrameStream.makeStream()
         continuation = newContinuation
+        let currentRun = UUID()
+        runID = currentRun
+        configurationObserver = notificationCenter.addObserver(
+            forName: .AVAudioEngineConfigurationChange, object: engine.notificationObject, queue: nil
+        ) { @Sendable [weak self] _ in
+            // OS内部の通知キューではエンジンを停止・破棄しない。
+            Task { @MainActor [weak self] in
+                guard let self, self.runID == currentRun else { return }
+                self.finish(throwing: AudioCaptureError.configurationChanged)
+            }
+        }
 
         // tap コールバックは音声スレッドで呼ばれる。@Sendable を明示しないと
         // @MainActor コンテキストの隔離を継承し、実行時の隔離アサーションでクラッシュする。
         let diagnostics = self.diagnostics
-        inputNode.installTap(onBus: 0, bufferSize: 4096, format: hardwareFormat) { @Sendable buffer, _ in
+        engine.installTap(format: hardwareFormat) { @Sendable buffer in
             diagnostics?.record(.tap, origin: .microphone, samples: Int(buffer.frameLength),
                                 sampleRate: buffer.format.sampleRate, channels: buffer.format.channelCount)
             guard let converted = converter.convert(buffer) else { return }
@@ -60,26 +88,28 @@ final class AudioCaptureService: AudioCapturing {
             }
         }
 
-        engine.prepare()
         do {
             try engine.start()
         } catch {
-            inputNode.removeTap(onBus: 0)
-            engine.stop()
-            newContinuation.finish()
-            continuation = nil
+            stop()
             throw error
         }
         return stream
     }
 
     func stop() {
+        finish()
+    }
+
+    private func finish(throwing error: (any Error)? = nil) {
         // 未開始・停止済みの場合、inputNode の取得による音声デバイス接続を避ける。
-        guard continuation != nil else { return }
-        engine.inputNode.removeTap(onBus: 0)
+        guard let continuation else { return }
+        self.continuation = nil
+        runID = nil
+        if let configurationObserver { notificationCenter.removeObserver(configurationObserver) }
+        configurationObserver = nil
         engine.stop()
-        continuation?.finish()
-        continuation = nil
+        continuation.finish(throwing: error)
     }
 }
 
