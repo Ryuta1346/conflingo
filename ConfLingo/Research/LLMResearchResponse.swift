@@ -127,7 +127,8 @@ struct LLMResearchResponse {
             }
             texts.append(text)
         }
-        return texts.joined(separator: "\n\n")
+        // 引用によるブロック境界は段落とは限らない。空白・改行は本文のまま保持する。
+        return texts.joined()
     }
 
     private static func localCitations(_ text: String, request: InsightRequest) throws -> (String, [UUID], [UUID]) {
