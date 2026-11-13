@@ -48,4 +48,9 @@ Gemini4要求では超過は未再現だが、7経路の合成長文は約46〜7
 - 全599件中592成功・実API7skip・失敗0。SwiftLint233ファイル違反0。Release（arm64/x86_64・署名なし）成功。単独プローブ34ケースも修正後はすべて成功。
 - Geminiの実測4要求は修正前ビルドで成功。今回の実応答では旧上限超過なし。修正後の検証は合成応答によるもので、追加の実API要求は行っていない。
 - [検証詳細](../validation/r2-response-size-investigation.md)。差分は自己レビュー済み、独立レビュー未実施。他社の実測、実会議の受入、PRマージは未完了のためR2をREVIEWとする。
-- 次の実装タスクはR3（保存形式のゴールデンファイル）。コミット・push・PR作成・インストール済みアプリ更新は行っていない。
+- 次の実装タスクはR3（保存形式のゴールデンファイル）。検証完了時点ではコミット・push・PR作成・インストール済みアプリ更新は未実施だった。
+
+
+## PR提出（2026-11-14）
+
+ユーザー「コミットand PR作成」に基づき、`fix/llm-response-limits`で`ab4f10e`（`fix(llm): separate wire and payload limits`）をコミット・pushし、main向け[Draft PR #33](https://github.com/Ryuta1346/conflingo/pull/33)を作成。担当はRyuta1346。REVIEWと未受入項目を維持する。インストール済みアプリは更新していない。

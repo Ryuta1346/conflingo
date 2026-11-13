@@ -96,4 +96,9 @@ Swiftコンパイル・プローブ実行は成功。保存したプローブで
 
 最終ログ: `/private/tmp/conflingo-r2/all-final.log`、`lint-final.log`、`release-final.log`、`test-summary-final.json`。xcresult: `/private/tmp/conflingo-r2/build/Logs/Test/Test-ConfLingo-2026.11.13_23-54-56-+0900.xcresult`。
 
-実API計測は修正前ビルド。今回の4件は旧上限以下であり、修正後の大規模な実応答の受入とは区別する。OpenAI・Claude・Kimi・DeepSeek等の実測、独立レビュー、実会議の品質ゲート、PRマージは残る。R2はREVIEW、次の実装はR3。コミット・push・PR作成・インストール済みアプリ更新は未実施。
+実API計測は修正前ビルド。今回の4件は旧上限以下であり、修正後の大規模な実応答の受入とは区別する。OpenAI・Claude・Kimi・DeepSeek等の実測、独立レビュー、実会議の品質ゲート、PRマージは残る。R2はREVIEW、次の実装はR3。検証完了時点ではコミット・push・PR作成・インストール済みアプリ更新は未実施だった。
+
+
+## PR提出（2026-11-14）
+
+ユーザー「コミットand PR作成」に基づき、`fix/llm-response-limits`で`ab4f10e`（`fix(llm): separate wire and payload limits`）をコミット・pushし、main向け[Draft PR #33](https://github.com/Ryuta1346/conflingo/pull/33)を作成。担当はRyuta1346。REVIEWと未受入項目を維持する。インストール済みアプリは更新していない。
