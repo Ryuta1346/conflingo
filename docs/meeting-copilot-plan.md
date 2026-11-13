@@ -133,6 +133,13 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
 - 自動受入は権限、PCM内容・順序、二重開始・停止、開始失敗・再開、旧入力混入防止、既存Conference回帰、build/test/lint。結果は[PR2検証記録](validation/audio-abstraction.md)へ記載する。
 - 実音声試験の延期を継続する。実デバイスのリソース解放・認識結果の同等性は未検証として扱う。
 
+#### R4の統合契約（2026-11-14承認・ローカル実装／自動検証済み）
+
+- Conferenceはマイク単独・内部音声単独・両入力とも`DualTranscriptionController`へ委譲する。`SessionController`は字幕・翻訳adapterと画面状態の接続を担い、旧マイク専用処理と未使用の`meetingStore`を削除した。
+- マイク単独の字幕時刻は入力内時刻、支援用時刻は共通時計を保持する。内部音声／両入力の字幕は共通時計を使う。選択履歴にかかわらず現在の選択で決め、Clear・再開・入力切替も検証する。
+- 入力停止→認識finalize→Hub配送完了→翻訳buffer確定の順を保持する。停止失敗時は利用権を保持し、再試行後に解放する。権限要求はAudioSourceに集約する。
+- [承認済み計画](design/r4-transcription-unification-plan.md)・[検証結果](validation/r4-transcription-unification.md)。全609件中602成功・実API7skip、Lint・Release成功。実機のGate A受入は別途継続する。
+
 #### PR3の実装契約（2026-11-08承認、実装・自動検証済み）
 
 - AudioSourceの開始・停止を非同期化し、PCMストリームに開始後のエラーを伝達できるようにする。開始中キャンセル・同時停止・再開の世代分離を検証する。

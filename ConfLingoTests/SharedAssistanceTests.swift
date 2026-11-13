@@ -131,7 +131,7 @@ extension SharedAssistanceTests {
         let speech = DualFakeSpeech()
         let store = SessionStore()
         let workspace = ConferenceKnowledgeWorkspace(store: store, settings: conferenceTestSettings(), client: KnowledgeClient())
-        let controller = SessionController(speechService: speech, requestPermission: { true }, timeline: MeetingTimeline(now: { now }))
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech, timeline: MeetingTimeline(now: { now }))
         let translation = TranslationCoordinator()
         await controller.start(store: store, coordinator: translation, locale: Locale(identifier: "en"))
         try await speech.emit("first.", time: 1)

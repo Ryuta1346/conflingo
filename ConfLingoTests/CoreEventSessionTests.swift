@@ -10,7 +10,7 @@ struct CoreEventSessionTests {
         let store = SessionStore()
         store.mode = .translation
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         let generation = coordinator.beginPreparation()
         coordinator.preparationFailed(generation: generation, reason: "download cancelled")
@@ -83,7 +83,7 @@ struct CoreEventSessionTests {
         let coordinator = TranslationCoordinator()
         let glossary = [KeywordParser.GlossaryEntry(term: "API", target: "エーピーアイ")]
         speech.inputStarted = { #expect(store.activeGlossary == glossary) }
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current, glossary: glossary)
         await controller.stop(store: store, coordinator: coordinator)
     }
@@ -93,7 +93,7 @@ struct CoreEventSessionTests {
         speech.holdStop = true
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         try await speech.emit(text: "accepted")
         speech.fail(TranscriptEventHub.Failure.overflow)
@@ -112,7 +112,7 @@ struct CoreEventSessionTests {
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
         let translations = coordinator.attach()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: Locale(identifier: "en-US"))
         try await speech.emit(text: "an unfinished", isFinal: false)
         speech.stopResults = [SpeechResult(text: "an unfinished sentence", isFinal: true, startTime: 1, endTime: 2)]
@@ -122,8 +122,7 @@ struct CoreEventSessionTests {
         var items: [String] = []
         for await item in translations { items.append(item.text) }
         #expect(items == ["an unfinished sentence"])
-        #expect(controller.meetingStore.finals.map(\.text) == items)
-        #expect(controller.meetingStore.partials.isEmpty)
+        #expect(store.segments.map(\.english) == items)
         #expect(store.volatileText.isEmpty)
         #expect(store.phase == .idle)
         #expect(speech.stops == 1)
@@ -135,40 +134,40 @@ struct CoreEventSessionTests {
         let speech = StubSpeechInput()
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true }, timeline: timeline)
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech, timeline: timeline)
         await controller.start(store: store, coordinator: coordinator, locale: Locale(identifier: "en-US"))
         try await speech.emit(text: "first.")
         let oldReceive = try #require(speech.receive)
         await controller.stop(store: store, coordinator: coordinator)
-        let sessionID = controller.meetingStore.sessionID
+        let sessionID = store.sessionID
         now = 125
         await controller.start(store: store, coordinator: coordinator, locale: Locale(identifier: "ja-JP"))
         try await speech.emit(text: "次です。")
         await controller.stop(store: store, coordinator: coordinator)
-        #expect(controller.meetingStore.sessionID == sessionID)
-        #expect(controller.meetingStore.finals.map(\.startOffset) == [1, 26])
-        #expect(controller.meetingStore.finals.map(\.languageCode) == ["en-US", "ja-JP"])
+        #expect(store.sessionID == sessionID)
+        #expect(store.segments.map(\.sessionOffset) == [1, 26])
+        #expect(store.segments.map(\.languageCode) == ["en-US", "ja-JP"])
         #expect(store.segments.map(\.startTime) == [1, 1])
         controller.reset(store: store)
-        #expect(controller.meetingStore.sessionID != sessionID)
+        #expect(store.sessionID != sessionID)
         await controller.start(store: store, coordinator: coordinator, locale: Locale(identifier: "en-US"))
         try await oldReceive(SpeechResult(text: "stale", isFinal: true, startTime: 1, endTime: 2))
         try await speech.emit(text: "new.")
         await controller.stop(store: store, coordinator: coordinator)
-        #expect(controller.meetingStore.finals.map(\.text) == ["new."])
-        #expect(controller.meetingStore.finals.first?.startOffset == 1)
         #expect(store.segments.map(\.english) == ["new."])
+        #expect(store.segments.first?.sessionOffset == 1)
     }
 
     @Test func deniedPermissionNeverStartsInput() async {
         let speech = StubSpeechInput()
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { false })
+        let controller = SessionController(audioSource: StubMicrophonePermission(status: .denied).source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         #expect(speech.starts == 0)
         #expect(store.phase == .idle)
         #expect(controller.lastError != nil)
+        #expect(controller.lastError?.contains("システム設定 > プライバシーとセキュリティ > マイク") == true)
     }
 
     @Test func failedStartCleansUpAndCanRetry() async throws {
@@ -176,7 +175,7 @@ struct CoreEventSessionTests {
         speech.startError = StubSpeechInput.Failure.start
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         #expect(store.phase == .idle)
         #expect(speech.stops == 1)
@@ -193,7 +192,7 @@ struct CoreEventSessionTests {
         let speech = StubSpeechInput()
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         try await speech.emit(text: "accepted")
         speech.stopError = StubSpeechInput.Failure.stop
@@ -209,7 +208,7 @@ struct CoreEventSessionTests {
         speech.failDuringStart = true
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         #expect(store.phase == .idle)
         #expect(speech.stops == 1)
@@ -220,13 +219,13 @@ struct CoreEventSessionTests {
         let speech = StubSpeechInput()
         let store = SessionStore()
         let coordinator = TranslationCoordinator()
-        let controller = SessionController(speechService: speech, requestPermission: { true })
+        let controller = SessionController(audioSource: StubMicrophonePermission().source(capture: StubAudioCapture()), speechService: speech)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
-        let session = controller.meetingStore.sessionID
+        let session = store.sessionID
         controller.reset(store: store)
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         #expect(speech.starts == 1)
-        #expect(controller.meetingStore.sessionID == session)
+        #expect(store.sessionID == session)
         try await speech.emit(text: "kept.")
         await controller.stop(store: store, coordinator: coordinator)
         #expect(store.segments.map(\.english) == ["kept."])
