@@ -33,6 +33,6 @@ struct SharedAssistanceLayoutTests {
         let bitmap = try #require(host.bitmapImageRepForCachingDisplay(in: host.bounds))
         host.cacheDisplay(in: host.bounds, to: bitmap)
         let data = try #require(bitmap.representation(using: .png, properties: [:]))
-        try data.write(to: URL(fileURLWithPath: "/tmp/conflingo-\(filename).png"))
+        try data.write(to: FileManager.default.temporaryDirectory.appendingPathComponent("conflingo-\(filename).png"))
     }
 }

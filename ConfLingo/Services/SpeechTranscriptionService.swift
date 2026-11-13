@@ -71,14 +71,14 @@ final class SpeechTranscriptionService: SpeechTranscribing {
         self.audioSource = audioSource
     }
 
-    func startAudioInput(targetFormat: AVAudioFormat) async throws -> AsyncMapSequence<AudioFrameStream, AnalyzerInput> {
-        let diagnostics = self.diagnostics
-        let origin = audioSource.origin
-        return try await audioSource.start(targetFormat: targetFormat).map {
-            diagnostics?.record(.consumed, origin: origin, samples: Int($0.buffer.frameLength),
-                                sampleRate: $0.buffer.format.sampleRate, channels: $0.buffer.format.channelCount)
-            return AnalyzerInput(buffer: $0.buffer)
-        }
+    func startAudioInput(
+        targetFormat: AVAudioFormat,
+        onFailure: @escaping @MainActor (any Error) -> Void = { _ in }
+    ) async throws -> SpeechAudioInputSequence {
+        SpeechAudioInputSequence(
+            frames: try await audioSource.start(targetFormat: targetFormat),
+            origin: audioSource.origin, diagnostics: diagnostics, onFailure: onFailure
+        )
     }
 
     nonisolated static func reportingOptions(fastResults: Bool) -> Set<SpeechTranscriber.ReportingOption> {
@@ -120,7 +120,7 @@ final class SpeechTranscriptionService: SpeechTranscribing {
                 throw TranscriptionError.audioFormatUnavailable
             }
             try Task.checkCancellation()
-            let audioStream = try await startAudioInput(targetFormat: format)
+            let audioStream = try await startAudioInput(targetFormat: format, onFailure: onFailure)
             onInputStarted()
             resultsTask = Task {
                 do {
