@@ -54,7 +54,8 @@ final class MeetingTranslationLane: Identifiable {
 @Observable
 final class MeetingTranslations {
     private(set) var sessionID: UUID
-    private(set) var entries: [UUID: MeetingTranslationEntry] = [:]
+    private(set) var entries: [UUID: MeetingTranslationEntry] = [:] { didSet { displayRevision &+= 1 } }
+    private(set) var displayRevision = 0
     private(set) var lanes: [MeetingTranslationLane] = []
     let requiresPreparation: Bool
     private let client: any MeetingTranslating

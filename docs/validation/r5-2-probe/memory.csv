@@ -1,0 +1,2 @@
+rows,before_cache_bytes,after_cache_bytes,after_1000_updates_bytes,after_reset_bytes
+30000,36945920,44859392,44859392,44859392

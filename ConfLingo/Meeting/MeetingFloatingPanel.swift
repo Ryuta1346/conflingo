@@ -135,10 +135,11 @@ private struct MeetingFloatingView: View {
                         Text("発話はメイン画面で確認できます。")
                             .font(.callout).foregroundStyle(DesignTokens.secondary)
                     }
-                    if !meeting.transcriptEvents.isEmpty {
+                    let transcript = meeting.transcriptEvents
+                    if !transcript.isEmpty {
                         Divider()
                         Text("直近の発話と翻訳").font(.headline)
-                        ForEach(Array(meeting.transcriptEvents.suffix(3))) { event in
+                        ForEach(transcript.suffix(3)) { event in
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(event.origin.label)
                                     .font(.caption).foregroundStyle(DesignTokens.secondary)

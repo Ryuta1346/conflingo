@@ -7,6 +7,7 @@ final class MeetingSessionStore {
     private(set) var sessionID: UUID
     private(set) var finals: [TranscriptEvent] = []
     private(set) var partials: [TranscriptEvent] = []
+    private(set) var displayRevision = 0
     var onFinal: ((TranscriptEvent) -> Void)?
     private var latest: [UUID: TranscriptEvent] = [:]
 
@@ -26,14 +27,17 @@ final class MeetingSessionStore {
         if event.isFinal {
             let position = finals.firstIndex { $0.startOffset > event.startOffset } ?? finals.endIndex
             finals.insert(event, at: position)
+            displayRevision &+= 1
             onFinal?(event)
         } else {
             partials.append(event)
+            displayRevision &+= 1
         }
         return true
     }
 
     func clearPartials() {
+        if !partials.isEmpty { displayRevision &+= 1 }
         partials = []
         latest = latest.filter { $0.value.isFinal }
     }
@@ -43,5 +47,6 @@ final class MeetingSessionStore {
         finals = []
         partials = []
         latest = [:]
+        displayRevision &+= 1
     }
 }

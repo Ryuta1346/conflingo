@@ -27,14 +27,14 @@ struct SummaryEvaluationTests {
         #expect(Set(SummaryEvaluationCase.allowedSectionIDs).count == 22)
     }
 
-    @Test func maximumTwentySectionsAndCharacterBoundariesRemainLocalOnly() throws {
+    @Test func maximumHundredSectionsAndCharacterBoundariesRemainLocalOnly() throws {
         let session = UUID()
-        let events = (0..<600).map { insightEvent(session: session, text: "Synthetic boundary", offset: Double($0)) }
+        let events = (0..<3_000).map { insightEvent(session: session, text: "Synthetic boundary", offset: Double($0)) }
         let maximum = try MeetingSummaryPlan(sessionID: session, events: events, answerLanguage: .english)
-        #expect(maximum.requests.count == 20)
+        #expect(maximum.requests.count == 100)
         #expect(maximum.requests.flatMap(\.events) == events)
         #expect(throws: (any Error).self) {
-            try MeetingSummaryPlan(sessionID: session, events: events + [insightEvent(session: session, offset: 600)], answerLanguage: .english)
+            try MeetingSummaryPlan(sessionID: session, events: events + [insightEvent(session: session, offset: 3_000)], answerLanguage: .english)
         }
         let exact = insightEvent(session: session, text: String(repeating: "a", count: 12_000))
         let split = try MeetingSummaryPlan(sessionID: session, events: [exact, events[1]], answerLanguage: .english)

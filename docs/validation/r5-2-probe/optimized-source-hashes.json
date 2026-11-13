@@ -1,0 +1,12 @@
+{
+  "ConfLingo/Models/TranscriptEvent.swift": "a045f2cd41593c9a7bbe0a0b22ec4734b7f293b22fbee4193f517756d481ff26",
+  "ConfLingo/Models/TranscriptSegment.swift": "219a715fcc2f7b34d2551301af07801ef02912edb0cdd87fb33d5c304c218a0c",
+  "ConfLingo/Models/TranslationUnit.swift": "e6bf7fbbe690f38feedc129d89567fd691950d19e058600a768c0e48d7ddf4e6",
+  "ConfLingo/Models/KeywordParser.swift": "baa9ea7c1ddbe936603d0fdf51438a707061a16e4d30d0392665df30ebf8d444",
+  "ConfLingo/Models/SentenceBoundary.swift": "b6ba3a0016fa01b6270acf1cd579e8ab91d17b742bf5f9897cc8c7aeea7d3853",
+  "ConfLingo/Models/SessionStore.swift": "eeca0bf26f13dbd7e071eaceec2aefb7a8f4d04ee04a1797916504fa3df3d1b2",
+  "ConfLingo/Models/MeetingSessionStore.swift": "6d48c16811d7522834ec4fc766461105dcb8cadf41258d8b831c16ff2352768d",
+  "ConfLingo/Conference/TranscriptPresentation.swift": "b5fb468ed08ae096a4726b5e07761cba16d584de52287aa81c984ea9f38805ed",
+  "ConfLingo/Conference/TranscriptEntries.swift": "7579b74f17b8c198f086a60ff38588a3d2ec9103102004e22a58d5ae8745951c",
+  "ConfLingo/Meeting/MeetingTranscriptTimeline.swift": "4479381019fa1645d7652c3c54c85661789abd58eb438b569381b5863d413fb7"
+}

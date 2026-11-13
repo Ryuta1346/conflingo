@@ -20,7 +20,9 @@ final class SessionStore {
     private(set) var segments: [TranscriptSegment] = []
     /// ID 引きの逆引きインデックス。bufferedSegments が segments を線形探索しないため。
     private var segmentByID: [UUID: TranscriptSegment] = [:]
-    private(set) var units: [TranslationUnit] = []
+    private(set) var units: [TranslationUnit] = [] { didSet { translationRevision &+= 1 } }
+    private(set) var translationRevision = 0
+    @ObservationIgnored var transcriptCache = TranscriptPresentation.Cache()
     /// 文末待ちで翻訳単位に未確定のセグメント ID（出現順）
     private(set) var bufferedSegmentIDs: [UUID] = []
     private(set) var volatileText: String = ""
@@ -104,6 +106,11 @@ final class SessionStore {
         bufferedSegmentIDs.compactMap { segmentByID[$0] }
     }
 
+    var bufferedSourceText: String {
+        Set(bufferedSegmentIDs).compactMap { segmentByID[$0] }
+            .sorted { $0.index < $1.index }.map(\.english).joined(separator: " ")
+    }
+
     func updateVolatile(_ text: String) {
         volatileText = text
     }
@@ -143,6 +150,7 @@ final class SessionStore {
         bufferedSegmentIDs = []
         volatileText = ""
         startedAt = nil
+        transcriptCache = TranscriptPresentation.Cache()
         onReset?()
     }
 }

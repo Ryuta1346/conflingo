@@ -213,8 +213,8 @@ final class MeetingWorkspace {
     }
 
     var store: MeetingSessionStore { controller.store }
-    var transcriptEvents: [TranscriptEvent] {
-        (store.finals + store.partials).sorted { $0.startOffset < $1.startOffset }
+    var transcriptEvents: MeetingTranscriptTimeline<[TranscriptEvent]> {
+        MeetingTranscriptTimeline(finals: store.finals, partials: store.partials)
     }
     var phase: SessionPhase { controller.phase }
     var isBusy: Bool { isStarting || isTransitioning || controller.isStopping }

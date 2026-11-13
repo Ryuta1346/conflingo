@@ -1,0 +1,10 @@
+case,finals,updates,median_total_ms,checksum
+conference-c0,300,200,0.672958,368440
+conference-c20,300,200,0.576375,368440
+meeting-timeline-and-revision,300,200,0.714167,184220
+conference-c0,3000,200,0.262291,3662440
+conference-c20,3000,200,0.254666,3662440
+meeting-timeline-and-revision,3000,200,0.278875,1831220
+conference-c0,30000,200,0.275083,36602440
+conference-c20,30000,200,0.265375,36602440
+meeting-timeline-and-revision,30000,200,0.334208,18301220
