@@ -1,0 +1,330 @@
+[
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "gemini",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8192
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "gemini",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 571902
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "openai",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8191
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "openai",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 459159
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "claude",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8250
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "claude",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 716914
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "kimi",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "kimi",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 628303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "deepseek",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "deepseek",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 628303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "custom",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "custom",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 628303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "local",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 8222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "en",
+    "payloadBytes" : 8054,
+    "provider" : "local",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 628303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "gemini",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24192
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "gemini",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 587902
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "openai",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24191
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "openai",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 475159
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "claude",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24250
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "claude",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 732914
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "kimi",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "kimi",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 644303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "deepseek",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "deepseek",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 644303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "custom",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "custom",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 644303
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "local",
+    "split" : false,
+    "status" : "success",
+    "wireBytes" : 24222
+  },
+  {
+    "decodedCharacters" : 8000,
+    "kind" : "SSE",
+    "language" : "ja",
+    "payloadBytes" : 24054,
+    "provider" : "local",
+    "split" : true,
+    "status" : "success",
+    "wireBytes" : 644303
+  },
+  {
+    "kind" : "researchJSON",
+    "padded" : false,
+    "provider" : "gemini",
+    "status" : "success",
+    "textCharacters" : 7,
+    "wireBytes" : 405
+  },
+  {
+    "kind" : "researchJSON",
+    "padded" : true,
+    "provider" : "gemini",
+    "status" : "success",
+    "textCharacters" : 7,
+    "wireBytes" : 262145
+  },
+  {
+    "kind" : "researchJSON",
+    "padded" : false,
+    "provider" : "openai",
+    "status" : "success",
+    "textCharacters" : 7,
+    "wireBytes" : 277
+  },
+  {
+    "kind" : "researchJSON",
+    "padded" : true,
+    "provider" : "openai",
+    "status" : "success",
+    "textCharacters" : 7,
+    "wireBytes" : 262145
+  },
+  {
+    "kind" : "researchJSON",
+    "padded" : false,
+    "provider" : "claude",
+    "status" : "success",
+    "textCharacters" : 7,
+    "wireBytes" : 424
+  },
+  {
+    "kind" : "researchJSON",
+    "padded" : true,
+    "provider" : "claude",
+    "status" : "success",
+    "textCharacters" : 7,
+    "wireBytes" : 262145
+  }
+]

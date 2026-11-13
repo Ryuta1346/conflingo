@@ -12,14 +12,14 @@ struct GeminiStreamDecoder {
 
     mutating func consume(_ data: Data) throws {
         totalBytes += data.count
-        guard totalBytes <= 262_144 else { throw InsightFailure.oversized }
+        guard totalBytes <= LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
         for byte in data {
             if byte == 10 {
                 try acceptLine()
                 line.removeAll(keepingCapacity: true)
             } else {
                 line.append(byte)
-                guard line.count <= 65_536 else { throw InsightFailure.oversized }
+                guard line.count <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
             }
         }
     }
@@ -40,7 +40,7 @@ struct GeminiStreamDecoder {
             var value = String(text.dropFirst(5))
             if value.first == " " { value.removeFirst() }
             frame.append(value)
-            guard frame.reduce(0, { $0 + $1.utf8.count }) <= 65_536 else { throw InsightFailure.oversized }
+            guard frame.reduce(0, { $0 + $1.utf8.count }) <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
         }
     }
 
@@ -62,7 +62,7 @@ struct GeminiStreamDecoder {
               candidate.index == nil || candidate.index == 0 else { throw InsightFailure.invalidResponse }
         for part in candidate.content?.parts ?? [] where part.thought != true {
             content += part.text ?? ""
-            guard content.utf8.count <= 65_536 else { throw InsightFailure.oversized }
+            guard content.utf8.count <= LLMResponseLimits.payloadBytes else { throw InsightFailure.oversized }
         }
         if let reason = candidate.finishReason {
             guard reason == "STOP" else { throw reason == "MAX_TOKENS" ? InsightFailure.oversized : .blocked }

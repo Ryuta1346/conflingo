@@ -18,12 +18,12 @@ struct LLMStreamDecoder {
 
     mutating func consume(_ data: Data) throws {
         totalBytes += data.count
-        guard totalBytes <= 262_144 else { throw InsightFailure.oversized }
+        guard totalBytes <= LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
         for byte in data {
             if byte == 10 { try acceptLine(); line.removeAll(keepingCapacity: true) }
             else {
                 line.append(byte)
-                guard line.count <= 65_536 else { throw InsightFailure.oversized }
+                guard line.count <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
             }
         }
     }
@@ -44,7 +44,7 @@ struct LLMStreamDecoder {
             var value = String(text.dropFirst(5))
             if value.first == " " { value.removeFirst() }
             frameBytes += value.utf8.count
-            guard frameBytes <= 65_536 else { throw InsightFailure.oversized }
+            guard frameBytes <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
             frame.append(value)
         }
     }
@@ -66,7 +66,7 @@ struct LLMStreamDecoder {
         if provider == .openai { try acceptResponses(object) }
         else if provider == .claude { try acceptAnthropic(object) }
         else { try acceptChat(object) }
-        guard content.utf8.count <= 65_536 else { throw InsightFailure.oversized }
+        guard content.utf8.count <= LLMResponseLimits.payloadBytes else { throw InsightFailure.oversized }
     }
 
     private mutating func acceptResponses(_ object: [String: Any]) throws {
