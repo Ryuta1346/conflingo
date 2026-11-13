@@ -57,5 +57,5 @@ XcodeのAppIntentsメタデータ省略警告と、合成UIのScrollGeometry更�
 
 ## 完了範囲・残件
 
-R3はPR #34マージとユーザーのレビュー完了確認を反映済み。R4はローカル実装・自動検証済みのREVIEW。本作業での自己レビューを実施し、独立レビュー・コミット・PR・マージは未実施。
+R3はPR #34マージとユーザーのレビュー完了確認を反映済み。R4はローカル実装・自動検証済みのREVIEW。自己レビュー後、ユーザー「コミットしてPR作成」に基づき`refactor/conference-transcription`で`2310f7a`をコミット・pushし、[Draft PR #35](https://github.com/Ryuta1346/conflingo/pull/35)を作成した（担当Ryuta1346）。独立レビュー・マージは未実施。
 音声取得・追加実APIは0。fake入力の検証をGate Aの実機合格とは扱わず、実翻訳・権限拒否／復旧・機器抜き差し・実字幕・辞書・言語切替の受入は[Conference回帰表](conference-baseline.md#conference回帰表)で継続する。

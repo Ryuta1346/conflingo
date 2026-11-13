@@ -48,7 +48,7 @@ GitHub APIとローカルmainでPR #34のマージを確認済み。GitHubのレ
 3. 最小実装で全選択を共通経路へ委譲し、Conferenceの購読・終了処理だけを残す。時刻仕様を変えず、旧storeと不要な注入・状態を整理する。
 4. 上記回帰ケースを既存テストと対応付け、不足分を追加する。内部状態だけを手動で作るテストは、fakeで開始するテストへ移行する。テストの期待値を変更する場合は契約上の理由を記録する。
 5. 関連テスト→全テスト（実API評価無効）→SwiftLint→Releaseビルドを実施する。R3の固定fixtureは変更しない。
-6. `docs/validation/r4-transcription-unification.md`へRed/Green・回帰結果と実機未検証を記録し、不要コード・資料整合性を最終確認する。コミット・PR作成は今回の承認対象に含めない。
+6. `docs/validation/r4-transcription-unification.md`へRed/Green・回帰結果と実機未検証を記録し、不要コード・資料整合性を最終確認する。実装時点ではコミット・PR作成を含めず、後続のユーザー「コミットしてPR作成」で別途承認された。
 
 実行コマンド（予定）:
 
@@ -76,4 +76,4 @@ xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo \
 
 全入力を共通controllerへ統合し、旧マイク経路と未使用storeを削除した。adapter自体の変更は不要だった。入力選択に応じた字幕時刻を既存引数で指定する。共通controllerには、先行テストで失われることを確認したマイク権限拒否時の設定案内だけを追加した。
 
-経路選択と権限案内のRedを確認後、関連51テスト成功。全609件中602成功・実API7skip、Lint236ファイル違反0、Release arm64／x86_64成功。[検証記録](../validation/r4-transcription-unification.md)。実機受入・独立レビュー・コミット・PR・マージは未実施。
+経路選択と権限案内のRedを確認後、関連51テスト成功。全609件中602成功・実API7skip、Lint236ファイル違反0、Release arm64／x86_64成功。[検証記録](../validation/r4-transcription-unification.md)。ユーザーの依頼により`2310f7a`をコミット・pushし、[Draft PR #35](https://github.com/Ryuta1346/conflingo/pull/35)を作成済み（担当Ryuta1346）。実機受入・独立レビュー・マージは未実施。

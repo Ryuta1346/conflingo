@@ -1,4 +1,4 @@
-> 2026-11-14 R4: Conferenceの全入力を共通の文字起こし経路へ統合し、旧マイク処理・未使用storeを削除。全609件中602成功・実API7skip、Lint236ファイル違反0、Release成功。ローカル検証済み、独立レビュー・コミット・PR・マージと実機受入は未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md)。R3はPR #34マージ・レビュー完了（ユーザー確認）。
+> 2026-11-14 R4: Conferenceの全入力を共通の文字起こし経路へ統合し、旧マイク処理・未使用storeを削除。全609件中602成功・実API7skip、Lint236ファイル違反0、Release成功。ローカル検証済み、[Draft PR #35](https://github.com/Ryuta1346/conflingo/pull/35)提出済み。独立レビュー・マージと実機受入は未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md)。R3はPR #34マージ・レビュー完了（ユーザー確認）。
 
 > 2026-11-13 R2: 受信全体の予算を2 MiBへ分離し、長文のSSE分割による拒否を修正。全599件中592成功・実API7skip、Lint233ファイル違反0、Release成功。Gemini実測4/4要求は成功（旧上限超過なし）。PR #33はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md)。
 
@@ -23,7 +23,7 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-14／main `8fd8144`**。R1-1〜3とR2（[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)）はマージ済み。R2のGemini実測4要求完了、他社実測・独立レビューは未完了。R3は[ローカル実装・検証済み](docs/validation/r3-persistence-golden.md)、[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)マージ・レビュー完了。R4は[ローカル実装・検証済み](docs/validation/r4-transcription-unification.md)。次はR4の独立レビュー・PR提出準備とGate A実機受入。実機受入・品質ゲートは引き続き未完了。
+- 更新: **2026-11-14／`refactor/conference-transcription`（基点`8fd8144`）**。R1-1〜3とR2（[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)）はマージ済み。R2のGemini実測4要求完了、他社実測・独立レビューは未完了。R3は[ローカル実装・検証済み](docs/validation/r3-persistence-golden.md)、[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)マージ・レビュー完了。R4は[ローカル実装・検証済み](docs/validation/r4-transcription-unification.md)。[Draft PR #35](https://github.com/Ryuta1346/conflingo/pull/35)提出済み。次はR4の独立レビュー・マージとGate A実機受入。実機受入・品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** R4の全609件中602成功・実API7skip、Lint236ファイル違反0、Release成功。3入力・Clear／再開・翻訳確定・停止再試行・保存／MarkdownとR3固定JSONの回帰を確認。[最新結果](docs/validation/r4-transcription-unification.md)。実音声・実モデル品質・VoiceOver全経路の残件は継続。
@@ -35,7 +35,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** [レビュー対応](#レビュー対応2026-11-13承認)はR3のマージ・レビューが完了（レビューはユーザー確認）。R4は[ローカル実装・検証済み](docs/validation/r4-transcription-unification.md)。次はR4の独立レビュー・PR提出準備とGate A実機受入。R2は修正・Gemini実測・PRマージ済みで、他社実測・独立レビューを残す。R1-1（マイクの機器変更）はGate Bの機器変更・切断/復旧受入の前提。R1-2の実モデル再試行とR4はGate AのConference回帰と合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
+**先行:** [レビュー対応](#レビュー対応2026-11-13承認)はR3のマージ・レビューが完了（レビューはユーザー確認）。R4は[ローカル実装・検証済み](docs/validation/r4-transcription-unification.md)。[Draft PR #35](https://github.com/Ryuta1346/conflingo/pull/35)提出済み。次はR4の独立レビュー・マージとGate A実機受入。R2は修正・Gemini実測・PRマージ済みで、他社実測・独立レビューを残す。R1-1（マイクの機器変更）はGate Bの機器変更・切断/復旧受入の前提。R1-2の実モデル再試行とR4はGate AのConference回帰と合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -55,7 +55,7 @@
 | R1-3 | ClaudeのWeb調査本文 | 複数textブロックの空白・改行・引用位置を保って連結するよう修正。日英・絵文字・重複出典・保存/Markdownを合成応答で検証済み。[PR #32](https://github.com/Ryuta1346/conflingo/pull/32)マージ済み。[結果](docs/design/r1-3-claude-research-text-plan.md) | REVIEW |
 | R2 | 受信上限の分離 | 総受信2 MiBと既存の本文上限を分離し、合成長文の拒否を修正。全回帰・Lint・Release成功。Gemini4要求測定済み。[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md) | REVIEW |
 | R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)はmain `8fd8144`へマージ済み。レビュー完了はユーザー確認済み。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | DONE |
-| R4 | 文字起こし経路の一本化 | 全入力を`DualTranscriptionController`へ統合し、旧マイク処理・未使用storeを削除。全テスト・Lint・Release成功。独立レビュー・PR・マージ、実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md) | REVIEW |
+| R4 | 文字起こし経路の一本化 | 全入力を`DualTranscriptionController`へ統合し、旧マイク処理・未使用storeを削除。全テスト・Lint・Release成功。[Draft PR #35](https://github.com/Ryuta1346/conflingo/pull/35)提出済み。独立レビュー・マージ、実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md) | REVIEW |
 | R5 | 中優先の残り | 要約の600発話上限の扱い、ライブ表示が部分結果ごとに全履歴を再計算する負荷、資料検索語の選択（アルファベット順の先頭32語） | TODO |
 | R6 | 低優先・構造の残り | 同文の確定発話の破棄、Meeting翻訳のセッション再利用と用語保護、Keychainのプロセス全体設定、LLM失敗の診断ログ、検証用ウィンドウの同梱。構造は`ContentView`からの構成ルート分離、共通支援のモジュール切り出し、単一スロット通知の統一、LLMプロバイダ分岐とSSE解析の集約、CIとREADME構成図の更新 | TODO |
 
