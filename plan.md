@@ -1,4 +1,4 @@
-> 2026-11-13 R1-3: Claudeの複数textブロック間に余分な段落が入る問題を修正。全580件中574成功・実API評価6skip、Lint228ファイル違反0、Release成功。[結果](docs/design/r1-3-claude-research-text-plan.md)。R1-2もローカル検証済みで、両修正はコミット済み・PR提出準備中。R1-2の実モデル再試行は未受入。[R1-2の結果](docs/design/r1-2-translation-preparation-plan.md)。R1-1はmain `ab2c4ae`で[PR #31](https://github.com/Ryuta1346/conflingo/pull/31)のマージを確認。実機の機器切替・Gate Bは未受入。[R1-1の結果](docs/design/r1-1-microphone-configuration-plan.md)。
+> 2026-11-13 R1-3: Claudeの複数textブロック間に余分な段落が入る問題を修正。全580件中574成功・実API評価6skip、Lint228ファイル違反0、Release成功。[結果](docs/design/r1-3-claude-research-text-plan.md)。R1-2もローカル検証済みで、両修正を[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。R1-2の実モデル再試行は未受入。[R1-2の結果](docs/design/r1-2-translation-preparation-plan.md)。R1-1はmain `ab2c4ae`で[PR #31](https://github.com/Ryuta1346/conflingo/pull/31)のマージを確認。実機の機器切替・Gate Bは未受入。[R1-1の結果](docs/design/r1-1-microphone-configuration-plan.md)。
 
 > 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1はマージ済み（実機受入待ち）、R1-2・R1-3はローカル検証済み、次はR2。
 
@@ -17,7 +17,7 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-13／`fix/translation-retry-claude-citations`（基点`ab2c4ae`）**。R1-1はマージ済み、R1-2・R1-3は修正・ローカル検証済みでコミット済み・PR提出準備中。実機受入・品質ゲートは引き続き未完了。
+- 更新: **2026-11-13／`fix/translation-retry-claude-citations`（基点`ab2c4ae`）**。R1-1はマージ済み、R1-2・R1-3は修正・ローカル検証済みで[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。実機受入・品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** R1-3の580件／103 suites中574件成功・実API評価6件skip、Lint228ファイル違反0、Release成功。[最新結果](docs/design/r1-3-claude-research-text-plan.md)。以前の[共通支援](docs/validation/shared-session-assistance.md)・[Meeting翻訳検証](docs/validation/meeting-translation.md)と実機結果は保持。新規機能の実音声・実API品質とVoiceOver全経路は未確認。
@@ -45,8 +45,8 @@
 | 順 | 対象 | 内容・完了条件 | 状態 |
 |---|---|---|---|
 | R1-1 | マイクの機器・構成変更 | 構成変更を検知し、入力停止・エラー表示・再開始案内へ接続。合成通知・Conference／Meeting結合・全回帰成功。PRマージ済み、実機の抜き差し等は未受入。[結果](docs/design/r1-1-microphone-configuration-plan.md)・[PR #31](https://github.com/Ryuta1346/conflingo/pull/31) | REVIEW |
-| R1-2 | 翻訳モデル準備失敗の表示 | 準備失敗の通知・訳文表示・再試行を実装。文字起こし継続、未翻訳分の再投入、取消・旧実行の無視を自動検証。実モデル失敗→再試行は未受入・コミット済み。[結果](docs/design/r1-2-translation-preparation-plan.md) | REVIEW |
-| R1-3 | ClaudeのWeb調査本文 | 複数textブロックの空白・改行・引用位置を保って連結するよう修正。日英・絵文字・重複出典・保存/Markdownを合成応答で検証済み・コミット済み。[結果](docs/design/r1-3-claude-research-text-plan.md) | REVIEW |
+| R1-2 | 翻訳モデル準備失敗の表示 | 準備失敗の通知・訳文表示・再試行を実装。文字起こし継続、未翻訳分の再投入、取消・旧実行の無視を自動検証。実モデル失敗→再試行は未受入。[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)提出済み。[結果](docs/design/r1-2-translation-preparation-plan.md) | REVIEW |
+| R1-3 | ClaudeのWeb調査本文 | 複数textブロックの空白・改行・引用位置を保って連結するよう修正。日英・絵文字・重複出典・保存/Markdownを合成応答で検証済み。[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)提出済み。[結果](docs/design/r1-3-claude-research-text-plan.md) | REVIEW |
 | R2 | 受信上限262,144 bytes | 生バイト基準のため、長い要約やWeb調査で上限超過になる可能性がある（未実測）。各社の実応答サイズを確認し、必要なら復号後の本文基準へ変更する。追加実APIは送信範囲・要求上限の承認後 | TODO |
 | R3 | 保存形式の固定 | Sessions・資料ライブラリのv1 JSONをゴールデンファイルで固定し、型名・フィールド名の変更で既存データが読めなくなる回帰を検出する。R4の前提 | TODO |
 | R4 | 文字起こし経路の一本化 | Conferenceのマイク専用の旧経路を`DualTranscriptionController`経路へ統合し、未使用の`SessionController.meetingStore`を除く。Conferenceの字幕・翻訳・停止/再開の無回帰を維持する | TODO |

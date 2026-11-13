@@ -34,4 +34,4 @@
 
 ## PR提出
 
-ユーザー「コミットand PR作成」に基づき、`fix/translation-retry-claude-citations`でR1-2を`3669f1e`、R1-3を`ad634c0`にコミット。main向けDraft PRを準備中。未受入事項を保持し、REVIEWを維持する。
+ユーザー「コミットand PR作成」に基づき、`fix/translation-retry-claude-citations`でR1-2を`3669f1e`、R1-3を`ad634c0`にコミット。ブランチをpushし、main向け[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)を作成。担当はRyuta1346。未受入事項を保持し、REVIEWを維持する。
