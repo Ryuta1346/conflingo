@@ -19,7 +19,7 @@ struct ResearchTransportTests {
 
     @Test(arguments: [false, true])
     func successfulTransportDecodesOnlyBoundedJSON(oversized: Bool) async throws {
-        let payload = oversized ? Data(repeating: 65, count: 262_145) : Data(#"{"status":"completed"}"#.utf8)
+        let payload = oversized ? Data(repeating: 65, count: 2 * 1_024 * 1_024 + 1) : Data(#"{"status":"completed"}"#.utf8)
         WebProtocol.response.withLock { $0 = .init(status: 200, mime: "application/json", data: payload) }
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [WebProtocol.self]
@@ -29,6 +29,21 @@ struct ResearchTransportTests {
         } else {
             #expect(try await transport.fetch(URLRequest(url: try #require(URL(string: LLMProvider.openai.baseURL + "/responses")))) == payload)
         }
+        #expect(WebProtocol.response.withLock { $0.calls } == 1)
+    }
+
+    @Test func fullWireBudgetReachesResearchDecoder() async throws {
+        var payload = try nativeResearchFixture(.openai)
+        payload.append(Data(repeating: 32, count: 2 * 1_024 * 1_024 - payload.count))
+        WebProtocol.response.withLock { $0 = .init(status: 200, mime: "application/json", data: payload) }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [WebProtocol.self]
+        let base = try #require(URL(string: LLMProvider.openai.baseURL))
+        let transport = URLSessionResearchTransport(allowedBaseURL: base, configuration: config)
+        let data = try await transport.fetch(URLRequest(url: base.appendingPathComponent("responses")))
+        let request = try InsightRequest(sessionID: UUID(), question: "topic", trigger: .manual, events: [])
+        #expect(try LLMResearchResponse.decode(data, provider: .openai, request: request).webReferences?.count == 1)
+        #expect(data.count == payload.count)
         #expect(WebProtocol.response.withLock { $0.calls } == 1)
     }
 

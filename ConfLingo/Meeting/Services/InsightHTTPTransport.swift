@@ -46,7 +46,7 @@ struct URLSessionInsightTransport: InsightHTTPTransport {
         for try await byte in bytes {
             try Task.checkCancellation()
             count += 1
-            guard count <= 262_144 else { throw InsightFailure.oversized }
+            guard count <= LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
             buffer.append(byte)
             if byte == 10 || buffer.count >= 1_024 {
                 try receive(buffer)

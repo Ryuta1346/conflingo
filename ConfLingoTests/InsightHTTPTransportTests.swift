@@ -37,6 +37,55 @@ struct InsightHTTPTransportTests {
         #expect(result.evidenceIDs == [event.id])
     }
 
+    @Test func fragmentedLongAnswerPassesThroughRealTransportAndDecoder() async throws {
+        let url = try #require(URL(string: "https://generativelanguage.googleapis.com/test/\(UUID())"))
+        let answer = String(repeating: "あ", count: 8_000)
+        let stream = try responseStream(.gemini, payload: responsePayload(answer), charactersPerEvent: 1)
+        TestInsightURLProtocol.fixtures.withLock { $0[url.path] = .init(status: 200, body: stream) }
+        defer { TestInsightURLProtocol.fixtures.withLock { $0[url.path] = nil } }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [TestInsightURLProtocol.self]
+        var decoder = GeminiStreamDecoder()
+        try await URLSessionInsightTransport(configuration: config).stream(URLRequest(url: url)) { try decoder.consume($0) }
+        #expect(try decoder.finish().text == answer)
+    }
+
+    @Test(arguments: [false, true])
+    func transportRetainsFiniteWireBudget(overflow: Bool) async throws {
+        let url = try #require(URL(string: "https://generativelanguage.googleapis.com/test/\(UUID())"))
+        let budget = 2 * 1_024 * 1_024
+        let data = Data(repeating: 32, count: budget + (overflow ? 1 : 0))
+        TestInsightURLProtocol.fixtures.withLock { $0[url.path] = .init(status: 200, body: data) }
+        defer { TestInsightURLProtocol.fixtures.withLock { $0[url.path] = nil } }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [TestInsightURLProtocol.self]
+        let transport = URLSessionInsightTransport(configuration: config)
+        var received = 0
+        if overflow {
+            await #expect(throws: InsightFailure.oversized) { try await transport.stream(URLRequest(url: url)) { received += $0.count } }
+        } else {
+            try await transport.stream(URLRequest(url: url)) { received += $0.count }
+        }
+        #expect(received == budget)
+        #expect(TestInsightURLProtocol.fixtures.withLock { $0[url.path]?.calls } == 1)
+    }
+
+    @Test func decoderFailureStopsCallbacksImmediately() async throws {
+        let url = try #require(URL(string: "https://generativelanguage.googleapis.com/test/\(UUID())"))
+        TestInsightURLProtocol.fixtures.withLock { $0[url.path] = .init(status: 200, body: Data(repeating: 32, count: 300_000)) }
+        defer { TestInsightURLProtocol.fixtures.withLock { $0[url.path] = nil } }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [TestInsightURLProtocol.self]
+        var calls = 0
+        await #expect(throws: InsightFailure.oversized) {
+            try await URLSessionInsightTransport(configuration: config).stream(URLRequest(url: url)) { _ in
+                calls += 1
+                throw InsightFailure.oversized
+            }
+        }
+        #expect(calls == 1)
+    }
+
     @Test func redirectsNeverForwardCredentials() async throws {
         let source = try #require(URL(string: "https://generativelanguage.googleapis.com/test"))
         let target = try #require(URL(string: "https://example.invalid/collect"))

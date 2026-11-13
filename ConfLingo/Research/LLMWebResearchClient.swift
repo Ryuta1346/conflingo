@@ -47,7 +47,7 @@ struct URLSessionResearchTransport: ResearchHTTPTransport {
         var data = Data()
         for try await byte in bytes {
             try Task.checkCancellation()
-            guard data.count < 262_144 else { throw InsightFailure.oversized }
+            guard data.count < LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
             data.append(byte)
         }
         return data

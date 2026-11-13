@@ -5,7 +5,7 @@ struct LLMResearchResponse {
     private let fetchedAt = Date()
 
     static func decode(_ data: Data, provider: LLMProvider, request: InsightRequest) throws -> MeetingInsight {
-        guard data.count <= 262_144 else { throw InsightFailure.oversized }
+        guard data.count <= LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
         guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any], root["error"] == nil else {
             throw InsightFailure.invalidResponse
         }
