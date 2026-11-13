@@ -40,7 +40,8 @@ enum TranscriptPresentation {
         return entries
     }
 
-    static func translation(_ store: SessionStore, corrections: [ConferenceCorrection] = []) -> [TranscriptEntry] {
+    static func translation(_ store: SessionStore, corrections: [ConferenceCorrection] = [],
+                            preparation: TranslationCoordinator.PreparationState = .idle) -> [TranscriptEntry] {
         var entries = store.units.map { unit in
             if let correction = corrections.first(where: { $0.adopted && $0.unitID == unit.id }), let translation = correction.translation {
                 return TranscriptEntry(id: unit.id.uuidString, text: translation + " （補正採用）", status: .final,
@@ -56,8 +57,13 @@ enum TranscriptPresentation {
                 text = "この部分を翻訳できませんでした。原文をご確認ください。"
                 status = .failed
             case .pending, .translating:
-                text = "翻訳を待っています…"
-                status = .translating
+                if case .failed = preparation {
+                    text = "翻訳モデルを準備できませんでした。上の「翻訳を再試行」を操作してください。"
+                    status = .failed
+                } else {
+                    text = preparation == .preparing ? "翻訳モデルを準備しています…" : "翻訳を待っています…"
+                    status = .translating
+                }
             }
             return TranscriptEntry(id: unit.id.uuidString, text: text, status: status, time: unit.startTime, reservationText: unit.english)
         }
