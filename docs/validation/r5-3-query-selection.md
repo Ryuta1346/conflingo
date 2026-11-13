@@ -1,5 +1,7 @@
 # R5-3 — 検索語の初出順選択・検証結果
 
+> 2026-11-14提出追記: ユーザー「コミットand PR作成」に基づき、実装 `bd01b29`を[Draft PR #37](https://github.com/Ryuta1346/conflingo/pull/37)へ提出済み。未マージ・独立レビュー待ち。以下の「未コミット・未PR」はローカル検証完了時点の記録。
+
 2026-11-14 / 基点: ローカルmain `a607f6e`＋今回の未コミット変更。
 状態: **承認済み範囲をローカル実装・検証済み（REVIEW相当）。未コミット・未PR**。
 [実装計画](../design/r5-3-query-selection-plan.md)・[変更前の再現記録](r5-3-query-selection-investigation.md)。

@@ -1,5 +1,7 @@
 # R5-3 — 資料検索語を入力順に選択する計画
 
+> 2026-11-14提出追記: ユーザー「コミットand PR作成」に基づき、実装 `bd01b29`を[Draft PR #37](https://github.com/Ryuta1346/conflingo/pull/37)へ提出済み。未マージ・独立レビュー待ち。以下の「未コミット・未PR」はローカル検証完了時点の記録。
+
 2026-11-14 / 基点: ローカルmain `a607f6e`（PR #36マージ済み）。
 状態: **2026-11-14、ユーザー「進めて」で承認済み。ローカル実装・検証済み（REVIEW相当）。未コミット・未PR**。
 正本: `~/.coding-agents/docs/conflingo/main/r5-3-query-selection-plan.md`。

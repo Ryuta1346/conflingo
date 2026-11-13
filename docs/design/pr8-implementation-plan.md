@@ -136,4 +136,4 @@ PR7はローカルGit履歴でmainへのマージを確認済み。実API要約�
 
 文字順で選んでいた最大32語を、正規化・stop word除去後の初出順で重複除去して選ぶよう変更した。先頭に指定した検索対象が後続語の綴りだけで脱落する問題を修正した。入力2,000文字、32語、OR検索、パス重み付きBM25・rowid順、最大10件を維持する。33語目以降の重要語を必ず検索できる保証はない。[実装計画](r5-3-query-selection-plan.md)。
 
-全637件中630成功・実API7skip、Lint244ファイル違反0、Release成功。未コミット・未PR、独立レビュー・実機受入は未実施。[検証結果](../validation/r5-3-query-selection.md)。
+全637件中630成功・実API7skip、Lint244ファイル違反0、Release成功。[Draft PR #37](https://github.com/Ryuta1346/conflingo/pull/37)へ提出済み・未マージ。独立レビュー・実機受入は未実施。[検証結果](../validation/r5-3-query-selection.md)。
