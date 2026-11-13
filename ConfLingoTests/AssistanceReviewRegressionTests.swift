@@ -6,7 +6,7 @@ import Testing
 @MainActor
 @Suite(.serialized, .timeLimit(.minutes(1)))
 struct AssistanceReviewRegressionTests {
-    @Test(arguments: [AudioInputSelection.systemAudio, .both])
+    @Test(arguments: [AudioInputSelection.microphone, .systemAudio, .both])
     func conferenceStopFailureIsVisibleUntilSuccessfulRetry(selection: AudioInputSelection) async {
         let fixture = DualFixture()
         let dual = fixture.controller(owner: .conference)
@@ -14,12 +14,16 @@ struct AssistanceReviewRegressionTests {
         let store = SessionStore()
         let translation = TranslationCoordinator()
         await controller.start(store: store, coordinator: translation, locale: Locale(identifier: "en"), selection: selection)
-        fixture.system.stopError = .stop
+        let failingInput = selection == .microphone ? fixture.microphone : fixture.system
+        failingInput.stopError = .stop
         await controller.stop(store: store, coordinator: translation)
         #expect(dual.lastError != nil)
         #expect(controller.lastError == dual.lastError)
         #expect(store.phase == .stopping)
-        fixture.system.stopError = nil
+        #expect(fixture.activity.owner == .conference)
+        await controller.start(store: store, coordinator: translation, locale: Locale(identifier: "en"), selection: selection)
+        #expect(failingInput.starts == 1)
+        failingInput.stopError = nil
         await controller.stop(store: store, coordinator: translation)
         #expect(controller.lastError == nil)
         #expect(store.phase == .idle)

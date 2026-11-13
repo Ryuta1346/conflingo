@@ -81,6 +81,6 @@ xcodebuild -project ConfLingo.xcodeproj -scheme ConfLingo \
 
 ## 完了範囲・残件
 
-自己レビューで、ランダムな期待値の生成がfixtureに混入しないこと、実ユーザーデータへのアクセスがないこと、非互換変更による情報欠落を検出すること、テスト資源がReleaseへ入らないことを確認した。ユーザー「コミットand PR作成」に基づき、`test/persistence-v1-golden`で`a59f0d6`をコミット・pushし、[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)を作成した（担当Ryuta1346）。独立レビュー・マージは未実施。R3はローカル検証済みのREVIEWを維持する。
+自己レビューで、ランダムな期待値の生成がfixtureに混入しないこと、実ユーザーデータへのアクセスがないこと、非互換変更による情報欠落を検出すること、テスト資源がReleaseへ入らないことを確認した。ユーザー「コミットand PR作成」に基づき、`test/persistence-v1-golden`で`a59f0d6`をコミット・pushし、[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)を作成した（担当Ryuta1346）。2026-11-14にGitHub APIとローカルmainで、PR #34が`8fd8144a85900717bf5ca328af12dc559e9dc544`へマージ済みと確認した（GitHubのmerged_atは2026-11-13 15:29:35 UTC）。レビュー提出・コメントはともに0件だったが、同日にユーザー「レビューは完了してR4進めてる」からレビュー完了を確認した。レビュー本文・手段は未取得。R3はDONEとし、R4へ進む。今回の状態確認ではテストを再実行していない。
 
 R4、実会議の品質ゲート、R2の他社実測などは今回の対象外。追加実API・音声取得は0。固定JSONでの互換性確認は実ユーザーデータ全件の検証を意味しない。

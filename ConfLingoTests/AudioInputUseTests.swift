@@ -9,16 +9,14 @@ struct AudioInputUseTests {
         let activity = AudioInputUse()
         let other = activity.acquire(.dualTranscription)
         let speech = DualFakeSpeech()
-        var requests = 0
-        let controller = SessionController(speechService: speech, requestPermission: {
-            requests += 1
-            return true
-        }, activity: activity)
+        let permission = StubMicrophonePermission(status: .undetermined)
+        let controller = SessionController(audioSource: permission.source(capture: StubAudioCapture()),
+            speechService: speech, activity: activity)
         let store = SessionStore()
         let translations = TranslationCoordinator()
         await controller.start(store: store, coordinator: translations, locale: .current)
         #expect(store.phase == .idle)
-        #expect(requests == 0)
+        #expect(permission.requests == 0)
         #expect(speech.starts == 0)
         #expect(controller.lastError?.contains("使用中") == true)
         activity.release(other)
@@ -30,7 +28,8 @@ struct AudioInputUseTests {
 
     @Test func deniedConferencePermissionReleasesOwnership() async {
         let activity = AudioInputUse()
-        let controller = SessionController(speechService: DualFakeSpeech(), requestPermission: { false }, activity: activity)
+        let controller = SessionController(audioSource: StubMicrophonePermission(status: .denied).source(capture: StubAudioCapture()),
+            speechService: DualFakeSpeech(), activity: activity)
         await controller.start(store: SessionStore(), coordinator: TranslationCoordinator(), locale: .current)
         #expect(activity.owner == nil)
     }

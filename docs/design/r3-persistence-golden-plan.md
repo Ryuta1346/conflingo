@@ -5,7 +5,7 @@
 
 ## 状態・承認範囲
 
-ユーザー「進めて」により具体的な実装計画を承認済み。R3はローカル実装・検証済み、REVIEW。R1→R4の実施順も承認済み。
+ユーザー「進めて」により具体的な実装計画を承認済み。R3は実装・検証・PR #34マージ済み、ユーザー確認によりレビュー完了、DONE。R1→R4の実施順も承認済み。
 利用可能なPlanモード切替ツールがないため、この文書で計画と承認状態を管理する。
 今回はR3のみを対象とし、R4は次工程とする。
 
@@ -65,4 +65,4 @@ fixtureは基点の形式から作る合成データであり、実ユーザー�
 - ローカルmain `0314aed`でPR #33のマージを確認し、plan.mdの現在地とR2残件を整理した。
 - 計画承認後、固定JSON6種と5テスト（12ケース）、テスト専用Resourcesを追加。製品コードの変更は不要だった。
 - 全604件中597成功・実API7skip、Lint236ファイル違反0、Release arm64/x86_64成功。変異2組で非互換変更を検出し、元へ戻して追加テストの再成功を確認。
-- [検証記録](../validation/r3-persistence-golden.md)。自己レビュー済み。`test/persistence-v1-golden`で`a59f0d6`をコミット・pushし、[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)を作成済み。担当はRyuta1346。独立レビュー・マージは未実施。次の実装はR3レビュー・マージ後のR4。
+- [検証記録](../validation/r3-persistence-golden.md)。自己レビュー済み。`test/persistence-v1-golden`で`a59f0d6`をコミット・pushし、[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)を作成済み。担当はRyuta1346。2026-11-14にGitHub APIとローカルmainで`8fd8144`へのマージを確認。GitHubレビュー提出・コメントはともに0件だったが、ユーザーからレビュー完了を確認済み（本文・手段は未取得）。R3はDONE。R4も[承認済み計画](r4-transcription-unification-plan.md)に基づきローカル実装・検証済み。

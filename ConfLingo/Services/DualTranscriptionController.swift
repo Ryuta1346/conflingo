@@ -301,9 +301,13 @@ final class DualTranscriptionController {
         failed = true
         captureActivityChanged?(false)
         let prefix = origin.map { "\($0.label)：" } ?? ""
-        lastError = error as? TranscriptEventHub.Failure == .overflow
-            ? "\(prefix)字幕の処理が追いつかないため入力を停止します。最後の発話が欠けている可能性があります。"
-            : "\(prefix)文字起こしを継続できません: \(error.localizedDescription)"
+        if origin == .microphone, error as? AudioSourceError == .permissionDenied {
+            lastError = "マイクへのアクセスが許可されていません。システム設定 > プライバシーとセキュリティ > マイク で ConfLingo を許可してください。"
+        } else {
+            lastError = error as? TranscriptEventHub.Failure == .overflow
+                ? "\(prefix)字幕の処理が追いつかないため入力を停止します。最後の発話が欠けている可能性があります。"
+                : "\(prefix)文字起こしを継続できません: \(error.localizedDescription)"
+        }
         // A result callback must return before stop waits for the recognition task.
         Task { [weak self] in
             guard let self, self.runID == run, self.phase != .stopping else { return }
