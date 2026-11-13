@@ -8,9 +8,8 @@ struct MeetingTranscriptView: View {
     @State private var atBottom = true
     @State private var scrollPosition = ScrollPosition(edge: .bottom)
 
-    private var events: [TranscriptEvent] { meeting.transcriptEvents }
-
     var body: some View {
+        let events = meeting.transcriptEvents
         VStack(spacing: 0) {
             HStack {
                 Text("会話の流れ").font(.headline)
@@ -54,7 +53,7 @@ struct MeetingTranscriptView: View {
                 }
                 .defaultScrollAnchor(.bottom, for: .initialOffset)
                 .scrollPosition($scrollPosition)
-                .onScrollGeometryChange(for: CGFloat.self) { $0.contentSize.height } action: { _, _ in
+                .onScrollGeometryChange(for: [CGSize].self) { [$0.contentSize, $0.containerSize] } action: { _, _ in
                     if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
                 }
                 .onScrollGeometryChange(for: Bool.self) { $0.visibleRect.maxY >= $0.contentSize.height - 24 } action: { _, bottom in
@@ -65,10 +64,10 @@ struct MeetingTranscriptView: View {
                     userScrolling = phase == .interacting || phase == .decelerating || phase == .tracking
                     if userScrolling { followsLatest = atBottom }
                 }
-                .onChange(of: events) {
+                .onChange(of: meeting.store.displayRevision) {
                     if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
                 }
-                .onChange(of: meeting.translations.completed) {
+                .onChange(of: meeting.translations.displayRevision) {
                     if followsLatest { scrollPosition.scrollTo(edge: .bottom) }
                 }
                 .task(id: meeting.evidenceRequest) {

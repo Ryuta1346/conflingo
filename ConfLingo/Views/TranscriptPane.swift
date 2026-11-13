@@ -2,7 +2,7 @@ import SwiftUI
 
 struct TranscriptPane: View {
     let title: String
-    let entries: [TranscriptEntry]
+    let entries: TranscriptEntries
     let fontSize: Double
     @State private var followsLatest = true
     @State private var userScrolling = false
@@ -73,7 +73,7 @@ struct TranscriptPane: View {
                     userScrolling = phase == .interacting || phase == .decelerating || phase == .tracking
                     if userScrolling { followsLatest = atBottom }
                 }
-                .onChange(of: entries) {
+                .onChange(of: entries.update) {
                     if followsLatest { proxy.scrollTo("latest", anchor: .bottom) }
                 }
                 .overlay(alignment: .bottomTrailing) {

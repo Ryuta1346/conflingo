@@ -1,0 +1,10 @@
+{
+  "ConfLingo/Models/TranscriptEvent.swift": "a045f2cd41593c9a7bbe0a0b22ec4734b7f293b22fbee4193f517756d481ff26",
+  "ConfLingo/Models/TranscriptSegment.swift": "219a715fcc2f7b34d2551301af07801ef02912edb0cdd87fb33d5c304c218a0c",
+  "ConfLingo/Models/TranslationUnit.swift": "e6bf7fbbe690f38feedc129d89567fd691950d19e058600a768c0e48d7ddf4e6",
+  "ConfLingo/Models/KeywordParser.swift": "baa9ea7c1ddbe936603d0fdf51438a707061a16e4d30d0392665df30ebf8d444",
+  "ConfLingo/Models/SentenceBoundary.swift": "b6ba3a0016fa01b6270acf1cd579e8ab91d17b742bf5f9897cc8c7aeea7d3853",
+  "ConfLingo/Models/SessionStore.swift": "33373e46cb8d4e9b7dc04a3628e2fe5340eafab578ab27db411c1ad7452d7ee0",
+  "ConfLingo/Models/MeetingSessionStore.swift": "ff0cdcab509f355cc0eaef1ffed95bedb070e685f4008c2e621f28c1a41a079d",
+  "ConfLingo/Conference/TranscriptPresentation.swift": "50b62d5794c7f00b01102c967745dd5764bf8196dbd83ff9632ca424fcde171d"
+}
