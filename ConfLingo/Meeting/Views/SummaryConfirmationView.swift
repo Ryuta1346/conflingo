@@ -50,6 +50,10 @@ struct SummaryConfirmationView: View {
                 Text("対象が変更されました。確認画面を開き直してください。").foregroundStyle(DesignTokens.warning)
             }
             Text("回答言語：\(plan.answerLanguage.label) · \(plan.requests.count)区間／最大\(plan.requests.count)要求。クラウドでは利用料金が発生する場合があります。自動再送はしません。")
+            if plan.requests.count > 20 {
+                Text("区間が多いため、処理に時間がかかります。区間ごとに順に送信し、利用料金も増える場合があります。開始後も「要約の送信を停止」で止められます。")
+                    .font(.callout).foregroundStyle(DesignTokens.warning)
+            }
             if includingKnowledge {
                 Text("資料名・相対パス・版・位置・抜粋も送ります。最大5箇所・6,000文字/区間。今回の資料本文：\(plan.requests.flatMap(\.knowledge).reduce(0) { $0 + $1.snippet.count })文字。")
                     .font(.caption)

@@ -15,6 +15,8 @@ struct MeetingReviewControls: View {
                     MeetingSaveControls(meeting: meeting, sessions: sessions)
                     Text("要約は任意です。AIを使わず、候補と発話だけを書き出すこともできます。")
                         .font(.callout).foregroundStyle(DesignTokens.secondary)
+                    Text("要約は最大\(MeetingSummaryPlan.maximumSections)区間です。1区間は30発話・12,000文字まで。上限を超えても、発話の全文をMarkdownに書き出せます。")
+                        .font(.callout).foregroundStyle(DesignTokens.secondary)
                     summaryButton
                     if let preparationError { Text(preparationError).font(.callout).foregroundStyle(DesignTokens.warning) }
                     if meeting.summary.state == .sending {

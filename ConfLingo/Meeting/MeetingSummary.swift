@@ -1,6 +1,7 @@
 import Foundation
 
 struct MeetingSummaryPlan: Identifiable, Sendable {
+    static let maximumSections = 100
     let id = UUID()
     let sessionID: UUID
     let events: [TranscriptEvent]
@@ -30,7 +31,7 @@ struct MeetingSummaryPlan: Identifiable, Sendable {
             length += event.text.count
         }
         if !chunk.isEmpty { chunks.append(chunk) }
-        guard chunks.count <= 20 else { throw PlanError.tooManySections }
+        guard chunks.count <= Self.maximumSections else { throw PlanError.tooManySections }
         self.sessionID = sessionID
         self.events = finals
         self.answerLanguage = answerLanguage
@@ -55,7 +56,7 @@ struct MeetingSummaryPlan: Identifiable, Sendable {
             case .empty: "要約できる確定発話がありません。"
             case .invalid: "発話の範囲を確認できないため送信できません。"
             case .longUtterance: "12,000文字を超える発話があるため要約できません。発話はMarkdownに書き出せます。"
-            case .tooManySections: "要約の上限（20区間）を超えています。発話を省略せずMarkdownに書き出せます。"
+            case .tooManySections: "要約の上限（\(MeetingSummaryPlan.maximumSections)区間）を超えています。発話を省略せずMarkdownに書き出せます。"
             }
         }
     }

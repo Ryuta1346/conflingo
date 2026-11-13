@@ -38,7 +38,7 @@ struct MeetingSummaryTests {
             try MeetingSummaryPlan(sessionID: session, events: [insightEvent(session: session, text: String(repeating: "a", count: 12_001))], answerLanguage: .japanese)
         }
         #expect(throws: (any Error).self) {
-            try MeetingSummaryPlan(sessionID: session, events: (0..<601).map { insightEvent(session: session, offset: Double($0)) }, answerLanguage: .japanese)
+            try MeetingSummaryPlan(sessionID: session, events: (0..<3_001).map { insightEvent(session: session, offset: Double($0)) }, answerLanguage: .japanese)
         }
         #expect(throws: (any Error).self) {
             try MeetingSummaryPlan(sessionID: session, events: [], answerLanguage: .japanese)
