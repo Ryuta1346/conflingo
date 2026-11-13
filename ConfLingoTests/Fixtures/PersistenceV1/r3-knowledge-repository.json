@@ -1,0 +1,42 @@
+{
+  "version": 1,
+  "id": "00000000-0000-0000-0000-000000000003",
+  "revision": "00000000-0000-0000-0000-000000000004",
+  "title": "料金資料",
+  "createdAt": 100,
+  "updatedAt": 200,
+  "content": {
+    "documents": [
+      {
+        "document": {
+          "id": "00000000-0000-0000-0000-000000000401",
+          "title": "Price.swift",
+          "importedAt": 50,
+          "characterCount": 16,
+          "source": {
+            "snapshotID": "00000000-0000-0000-0000-000000000500",
+            "name": "Demo",
+            "path": "Sources/Price.swift",
+            "contentHash": "779c9d85a21ed134a3a98c566ab34e73204b0e6adc1f26c23d79006eedfdd3f3"
+          }
+        },
+        "body": "let price = 100\n"
+      },
+      {
+        "document": {
+          "id": "00000000-0000-0000-0000-000000000402",
+          "title": "price.md",
+          "importedAt": 50,
+          "characterCount": 34,
+          "source": {
+            "snapshotID": "00000000-0000-0000-0000-000000000500",
+            "name": "Demo",
+            "path": "Docs/price.md",
+            "contentHash": "e523468db2b92db321634184ce4289eaa57a057c43957a0eb653ef494a5cc886"
+          }
+        },
+        "body": "# Price\nMonthly price is 100 yen.\n"
+      }
+    ]
+  }
+}

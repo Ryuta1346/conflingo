@@ -1,0 +1,216 @@
+{
+  "version": 1,
+  "createdAt": 100,
+  "updatedAt": 200,
+  "snapshot": {
+    "meeting": {
+      "_0": {
+        "title": "設計 Review",
+        "startedAt": 50,
+        "microphoneLocale": "ja-JP",
+        "systemLocale": "en-US",
+        "sessionID": "00000000-0000-0000-0000-000000000001",
+        "events": [
+          {
+            "id": "00000000-0000-0000-0000-000000000101",
+            "sessionID": "00000000-0000-0000-0000-000000000001",
+            "origin": "microphone",
+            "languageCode": "ja-JP",
+            "startOffset": 1.25,
+            "endOffset": 2.5,
+            "text": "次回に料金を確認します",
+            "isFinal": true,
+            "revision": 2,
+            "sourceStartTime": 0.25
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000102",
+            "sessionID": "00000000-0000-0000-0000-000000000001",
+            "origin": "systemAudio",
+            "languageCode": "en-US",
+            "startOffset": 3.5,
+            "text": "We will review the price.",
+            "isFinal": true,
+            "revision": 1
+          }
+        ],
+        "candidates": [
+          {
+            "sessionID": "00000000-0000-0000-0000-000000000001",
+            "insight": {
+              "id": "00000000-0000-0000-0000-000000000711",
+              "kind": "actionCandidate",
+              "text": "料金を確認する",
+              "priority": 1,
+              "evidenceIDs": [
+                "00000000-0000-0000-0000-000000000101"
+              ],
+              "status": "complete",
+              "hasInvalidEvidence": false,
+              "knowledgeReferences": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000601",
+                  "documentID": "00000000-0000-0000-0000-000000000401",
+                  "title": "料金資料",
+                  "importedAt": 50,
+                  "startLine": 2,
+                  "characterOffset": 5,
+                  "snippet": "料金は100円です。"
+                }
+              ]
+            },
+            "review": "confirmed"
+          },
+          {
+            "sessionID": "00000000-0000-0000-0000-000000000001",
+            "insight": {
+              "id": "00000000-0000-0000-0000-000000000712",
+              "kind": "decisionCandidate",
+              "text": "次回の料金確認",
+              "priority": 1,
+              "evidenceIDs": [
+                "00000000-0000-0000-0000-000000000102"
+              ],
+              "status": "complete",
+              "hasInvalidEvidence": false,
+              "knowledgeReferences": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000601",
+                  "documentID": "00000000-0000-0000-0000-000000000401",
+                  "title": "料金資料",
+                  "importedAt": 50,
+                  "startLine": 2,
+                  "characterOffset": 5,
+                  "snippet": "料金は100円です。"
+                }
+              ]
+            },
+            "review": "unreviewed"
+          },
+          {
+            "sessionID": "00000000-0000-0000-0000-000000000001",
+            "insight": {
+              "id": "00000000-0000-0000-0000-000000000713",
+              "kind": "actionCandidate",
+              "text": "今すぐ確定する",
+              "priority": 1,
+              "evidenceIDs": [
+                "00000000-0000-0000-0000-000000000101"
+              ],
+              "status": "complete",
+              "hasInvalidEvidence": false,
+              "knowledgeReferences": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000601",
+                  "documentID": "00000000-0000-0000-0000-000000000401",
+                  "title": "料金資料",
+                  "importedAt": 50,
+                  "startLine": 2,
+                  "characterOffset": 5,
+                  "snippet": "料金は100円です。"
+                }
+              ]
+            },
+            "review": "rejected"
+          }
+        ],
+        "summary": {
+          "sessionID": "00000000-0000-0000-0000-000000000001",
+          "answerLanguage": "ja",
+          "sections": [
+            {
+              "id": "00000000-0000-0000-0000-000000000720",
+              "text": "料金確認を予定",
+              "evidenceIDs": [
+                "00000000-0000-0000-0000-000000000101",
+                "00000000-0000-0000-0000-000000000102"
+              ],
+              "startOffset": 1.25,
+              "endOffset": 5,
+              "supplement": "料金資料の補足",
+              "knowledgeReferences": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000601",
+                  "documentID": "00000000-0000-0000-0000-000000000401",
+                  "title": "料金資料",
+                  "importedAt": 50,
+                  "startLine": 2,
+                  "characterOffset": 5,
+                  "snippet": "料金は100円です。"
+                }
+              ]
+            }
+          ]
+        }
+      },
+      "_1": [
+        {
+          "id": "00000000-0000-0000-0000-000000000731",
+          "kind": "answerSuggestion",
+          "text": "料金資料を確認してください",
+          "priority": 1,
+          "evidenceIDs": [
+            "00000000-0000-0000-0000-000000000101"
+          ],
+          "status": "complete",
+          "hasInvalidEvidence": false,
+          "knowledgeReferences": [
+            {
+              "id": "00000000-0000-0000-0000-000000000601",
+              "documentID": "00000000-0000-0000-0000-000000000401",
+              "title": "料金資料",
+              "importedAt": 50,
+              "startLine": 2,
+              "characterOffset": 5,
+              "snippet": "料金は100円です。"
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000732",
+          "kind": "followUpQuestion",
+          "text": "いつ確認しますか？",
+          "priority": 1,
+          "evidenceIDs": [
+            "00000000-0000-0000-0000-000000000101"
+          ],
+          "status": "complete",
+          "hasInvalidEvidence": false,
+          "knowledgeReferences": [
+            {
+              "id": "00000000-0000-0000-0000-000000000601",
+              "documentID": "00000000-0000-0000-0000-000000000401",
+              "title": "料金資料",
+              "importedAt": 50,
+              "startLine": 2,
+              "characterOffset": 5,
+              "snippet": "料金は100円です。"
+            }
+          ]
+        },
+        {
+          "id": "00000000-0000-0000-0000-000000000733",
+          "kind": "risk",
+          "text": "料金は未確定です",
+          "priority": 1,
+          "evidenceIDs": [
+            "00000000-0000-0000-0000-000000000101"
+          ],
+          "status": "complete",
+          "hasInvalidEvidence": false,
+          "knowledgeReferences": [
+            {
+              "id": "00000000-0000-0000-0000-000000000601",
+              "documentID": "00000000-0000-0000-0000-000000000401",
+              "title": "料金資料",
+              "importedAt": 50,
+              "startLine": 2,
+              "characterOffset": 5,
+              "snippet": "料金は100円です。"
+            }
+          ]
+        }
+      ]
+    }
+  }
+}
