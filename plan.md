@@ -1,3 +1,5 @@
+> 2026-11-13 R1-3レビュー追補: 検索ツール前後の段落を保持するよう修正。全583件中577成功・実API評価6skip、Lint228ファイル違反0。[追補](docs/design/r1-3-claude-research-text-plan.md)。
+
 > 2026-11-13 R1-3: Claudeの複数textブロック間に余分な段落が入る問題を修正。全580件中574成功・実API評価6skip、Lint228ファイル違反0、Release成功。[結果](docs/design/r1-3-claude-research-text-plan.md)。R1-2もローカル検証済みで、両修正を[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。R1-2の実モデル再試行は未受入。[R1-2の結果](docs/design/r1-2-translation-preparation-plan.md)。R1-1はmain `ab2c4ae`で[PR #31](https://github.com/Ryuta1346/conflingo/pull/31)のマージを確認。実機の機器切替・Gate Bは未受入。[R1-1の結果](docs/design/r1-1-microphone-configuration-plan.md)。
 
 > 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1はマージ済み（実機受入待ち）、R1-2・R1-3はローカル検証済み、次はR2。
@@ -20,7 +22,7 @@
 - 更新: **2026-11-13／`fix/translation-retry-claude-citations`（基点`ab2c4ae`）**。R1-1はマージ済み、R1-2・R1-3は修正・ローカル検証済みで[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。実機受入・品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** R1-3の580件／103 suites中574件成功・実API評価6件skip、Lint228ファイル違反0、Release成功。[最新結果](docs/design/r1-3-claude-research-text-plan.md)。以前の[共通支援](docs/validation/shared-session-assistance.md)・[Meeting翻訳検証](docs/validation/meeting-translation.md)と実機結果は保持。新規機能の実音声・実API品質とVoiceOver全経路は未確認。
+- **直近の検証記録:** R1-3レビュー追補の583件／103 suites中577件成功・実API評価6件skip、Lint228ファイル違反0。追補のRelease再ビルドは未実施。[最新結果](docs/design/r1-3-claude-research-text-plan.md)。以前の[共通支援](docs/validation/shared-session-assistance.md)・[Meeting翻訳検証](docs/validation/meeting-translation.md)と実機結果は保持。新規機能の実音声・実API品質とVoiceOver全経路は未確認。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。

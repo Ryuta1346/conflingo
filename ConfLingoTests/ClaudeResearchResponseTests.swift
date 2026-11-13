@@ -14,6 +14,33 @@ struct ClaudeResearchResponseTests {
     private let firstURL = "https://example.com/first"
     private let secondURL = "https://example.com/second"
 
+    @Test func searchPreambleIsSeparatedFromCitationBlocksThroughPersistenceAndMarkdown() throws {
+        let blocks = [text("I'll search for the answer.")] + searchBlocks(id: "search1") + [
+            text("Based on the results, "), text("Swift", citing: firstURL), text(" handles Unicode.")
+        ]
+        let answer = try decodeContent(blocks)
+        let restored = try JSONDecoder().decode(MeetingInsight.self, from: JSONEncoder().encode(answer))
+        #expect(String(ResearchAnswerText.attributed(restored).characters)
+                == "I'll search for the answer.\n\nBased on the results, Swift[1] handles Unicode.")
+        #expect(AssistanceMarkdown.render([restored]).contains(
+            "> I'll search for the answer.\n> \n> Based on the results, Swift[1](<\(firstURL)>) handles Unicode."))
+    }
+
+    @Test func repeatedSearchesSeparateParagraphsWithoutSplittingCitations() throws {
+        let blocks = searchBlocks(id: "search1") + [text("最初の結果", citing: firstURL), text("。追加で調べます。")]
+            + searchBlocks(id: "search2") + [text(""), text("次の"), text("結果", citing: secondURL), text("です。")]
+        let answer = try decodeContent(blocks)
+        #expect(String(ResearchAnswerText.attributed(answer).characters) == "最初の結果[1]。追加で調べます。\n\n次の結果[2]です。")
+        #expect(answer.webReferences?.map { $0.url.absoluteString } == [firstURL, secondURL])
+    }
+
+    @Test func leadingAndTrailingToolsDoNotAddParagraphs() throws {
+        let blocks = [text("")] + searchBlocks(id: "search1") + [text("Answer", citing: firstURL)]
+            + searchBlocks(id: "search2") + [text("")]
+        let answer = try decodeContent(blocks)
+        #expect(String(ResearchAnswerText.attributed(answer).characters) == "Answer[1]")
+    }
+
     @Test(arguments: [
         Sentence(prefix: "Based on the results, ", claim: "Swift", suffix: " handles Unicode.",
                  expected: "Based on the results, Swift[1] handles Unicode."),
@@ -67,13 +94,20 @@ struct ClaudeResearchResponseTests {
     }
 
     private func decode(_ blocks: [[String: Any]]) throws -> MeetingInsight {
-        let content: [[String: Any]] = [
-            ["type": "server_tool_use", "name": "web_search", "id": "search1"],
-            ["type": "web_search_tool_result", "tool_use_id": "search1", "content": [
+        try decodeContent(searchBlocks(id: "search1") + blocks)
+    }
+
+    private func searchBlocks(id: String) -> [[String: Any]] {
+        [
+            ["type": "server_tool_use", "name": "web_search", "id": id],
+            ["type": "web_search_tool_result", "tool_use_id": id, "content": [
                 ["type": "web_search_result", "url": firstURL, "title": "First source"],
                 ["type": "web_search_result", "url": secondURL, "title": "Second source"]
             ]]
-        ] + blocks
+        ]
+    }
+
+    private func decodeContent(_ content: [[String: Any]]) throws -> MeetingInsight {
         let data = try JSONSerialization.data(withJSONObject: ["stop_reason": "end_turn", "content": content])
         let request = try InsightRequest(sessionID: UUID(), question: "topic", trigger: .manual, events: [], purpose: .webResearch)
         return try LLMResearchResponse.decode(data, provider: .claude, request: request)
