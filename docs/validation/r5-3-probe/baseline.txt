@@ -1,0 +1,10 @@
+english-short: chars=5, found=true
+english-32-unique: chars=202, found=true
+english-33-unique: chars=209, found=false
+english-leading-target: chars=262, found=false
+english-trailing-target: chars=262, found=false
+japanese-short: chars=2, found=true
+japanese-leading-target: chars=259, found=false
+repeated-target: chars=286, found=false
+restored-japanese-leading-target: found=false
+repository-identifier: short=1, long=0

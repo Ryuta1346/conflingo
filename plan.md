@@ -1,6 +1,4 @@
-> 2026-11-14 R5-2: ライブ表示の確定履歴を再利用し、途中更新時の全件整形・ソート・比較を削減。全629件中622成功・実API7skip、Lint243ファイル違反0、Release成功。合成UIと旧出力との一致を確認。[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み・未マージ、実機長時間耐久・独立レビューは未実施。[結果](docs/validation/r5-2-live-presentation.md)・[計画](docs/design/r5-2-live-presentation-plan.md)。次は資料検索語選択の調査・計画。
-
-> 2026-11-14 R5-1: 要約を最大100区間へ拡張。全617件中610成功・実API7skip、Lint238ファイル違反0、Release成功。100区間の保存・再読込、途中停止、狭幅の確認・取消・停止を合成検証。[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み・未マージ。実モデル品質・独立レビューは未確認。[結果](docs/validation/r5-1-summary-limit.md)・[計画](docs/design/r5-1-summary-limit-plan.md)。R4はPR #35マージ済み、独立レビュー完了確認・Gate A実機受入は継続。
+> 2026-11-14 R5-3: 資料検索語を文字順から初出順の32語へ変更。英語・日本語・識別子の検索漏れを修正し、全637件中630成功・実API7skip、Lint244ファイル違反0、Release成功。ローカル実装・検証済み、[Draft PR #37](https://github.com/Ryuta1346/conflingo/pull/37)へ提出済み・未マージ。R5-1/2は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)でローカルmain `a607f6e`へマージ済み。次はR5のレビューと残る実機受入。[結果](docs/validation/r5-3-query-selection.md)・[計画](docs/design/r5-3-query-selection-plan.md)。
 
 > 2026-11-13 R2: 受信全体の予算を2 MiBへ分離し、長文のSSE分割による拒否を修正。全599件中592成功・実API7skip、Lint233ファイル違反0、Release成功。Gemini実測4/4要求は成功（旧上限超過なし）。PR #33はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md)。
 
@@ -25,10 +23,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-14／main `7888730`**。R1-1〜3とR2（[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)）はマージ済み。R2のGemini実測4要求完了、他社実測・独立レビューは未完了。R3は[ローカル実装・検証済み](docs/validation/r3-persistence-golden.md)、[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)マージ・レビュー完了。R4は[ローカル実装・検証済み](docs/validation/r4-transcription-unification.md)。[PR #35](https://github.com/Ryuta1346/conflingo/pull/35)はmain `7888730`へマージ済み。R4の独立レビュー完了確認とGate A実機受入を残す。R5-1は最大100区間への要約拡張をローカル実装・検証済み、[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み（[結果](docs/validation/r5-1-summary-limit.md)）。R5-2のライブ表示も[ローカル実装・検証済み](docs/validation/r5-2-live-presentation.md)、[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み。次は資料検索語選択の調査・計画。実機受入・品質ゲートは引き続き未完了。
+- 更新: **2026-11-14／main `a607f6e`基点／R5-3 `bd01b29`**。R1-1〜3・R2・R3・R4・R5-1/2はマージ済み。R3はレビューも完了。R5-3の検索語選択は[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[Draft PR #37](https://github.com/Ryuta1346/conflingo/pull/37)へ提出済み・未マージ。R2の他社実測・独立レビュー、R4の独立レビュー完了確認とGate A実機受入、R5の独立レビュー・実モデル品質・長時間耐久は継続。品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** R5-2の全629件中622成功・実API7skip、Lint243ファイル違反0、Release成功。履歴再利用・表示順・補正・スクロールの合成UIと処理量を検証。R5-1の100区間要約、R3固定JSONとR4の回帰も成功。[最新結果](docs/validation/r5-2-live-presentation.md)。実音声・実モデル品質・VoiceOver全経路の残件は継続。
+- **直近の検証記録:** R5-3の全637件中630成功・実API7skip、Lint244ファイル違反0、Release成功。検索語の順序・32語境界・正規化・保存復元・引用・既存順位を確認。[結果](docs/validation/r5-3-query-selection.md)。実音声・実モデル品質・VoiceOver全経路の残件は継続。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
@@ -37,7 +35,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** [レビュー対応](#レビュー対応2026-11-13承認)はR3のマージ・レビューが完了（レビューはユーザー確認）。R4は[ローカル実装・検証済み](docs/validation/r4-transcription-unification.md)。[PR #35](https://github.com/Ryuta1346/conflingo/pull/35)はmain `7888730`へマージ済み。R4の独立レビュー完了確認とGate A実機受入を残す。R5-1は最大100区間への要約拡張をローカル実装・検証済み、[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み（[結果](docs/validation/r5-1-summary-limit.md)）。R5-2のライブ表示も[ローカル実装・検証済み](docs/validation/r5-2-live-presentation.md)、[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み。次は資料検索語選択の調査・計画。R2は修正・Gemini実測・PRマージ済みで、他社実測・独立レビューを残す。R1-1（マイクの機器変更）はGate Bの機器変更・切断/復旧受入の前提。R1-2の実モデル再試行とR4はGate AのConference回帰と合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
+**先行:** R5-1/2は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)でマージ済み。R5-3も[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)。**次はR5-3のPRレビューと、R5の残る実機受入**。後続の実装候補はR6の調査・計画。R4の独立レビュー完了確認とGate A、R2の他社実測・独立レビューは継続。R1-1の機器変更・切断/復旧はGate B、R1-2の実モデル再試行はGate Aと合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -58,7 +56,7 @@
 | R2 | 受信上限の分離 | 総受信2 MiBと既存の本文上限を分離し、合成長文の拒否を修正。全回帰・Lint・Release成功。Gemini4要求測定済み。[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md) | REVIEW |
 | R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)はmain `8fd8144`へマージ済み。レビュー完了はユーザー確認済み。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | DONE |
 | R4 | 文字起こし経路の一本化 | 全入力を`DualTranscriptionController`へ統合し、旧マイク処理・未使用storeを削除。全テスト・Lint・Release成功。[PR #35](https://github.com/Ryuta1346/conflingo/pull/35)はmain `7888730`へマージ済み。独立レビュー完了は未確認、実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md) | REVIEW |
-| R5 | 中優先の残り | 要約は最大100区間への拡張をローカル実装・検証済み、[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み（[R5-1結果](docs/validation/r5-1-summary-limit.md)）。ライブ表示もローカル実装・検証済み、[Draft PR #36](https://github.com/Ryuta1346/conflingo/pull/36)へ提出済み（[R5-2結果](docs/validation/r5-2-live-presentation.md)）。資料検索語の選択（アルファベット順の先頭32語）は未着手 | DOING |
+| R5 | 中優先の残り | 最大100区間要約・ライブ表示は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)マージ済み（[R5-1結果](docs/validation/r5-1-summary-limit.md)・[R5-2結果](docs/validation/r5-2-live-presentation.md)）。検索語選択も[R5-3でローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[Draft PR #37](https://github.com/Ryuta1346/conflingo/pull/37)へ提出済み・未マージ。独立レビュー・実モデル品質・長時間耐久等の実機受入は継続 | REVIEW |
 | R6 | 低優先・構造の残り | 同文の確定発話の破棄、Meeting翻訳のセッション再利用と用語保護、Keychainのプロセス全体設定、LLM失敗の診断ログ、検証用ウィンドウの同梱。構造は`ContentView`からの構成ルート分離、共通支援のモジュール切り出し、単一スロット通知の統一、LLMプロバイダ分岐とSSE解析の集約、CIとREADME構成図の更新 | TODO |
 
 ## PR進捗

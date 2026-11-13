@@ -175,7 +175,8 @@ actor KnowledgeIndex {
         try Task.checkCancellation()
         let terms = Self.words(String(query.prefix(2_000))).filter { !Self.stopWords.contains($0) }
         guard !terms.isEmpty else { return [] }
-        let expression = Array(Set(terms)).sorted().prefix(32).map { "\"" + $0.replacingOccurrences(of: "\"", with: "\"\"") + "\"" }
+        var seen: Set<String> = []
+        let expression = terms.filter { seen.insert($0).inserted }.prefix(32).map { "\"" + $0.replacingOccurrences(of: "\"", with: "\"\"") + "\"" }
             .joined(separator: " OR ")
         let ids = try connection().query("SELECT id FROM chunks WHERE chunks MATCH ? ORDER BY bm25(chunks, 0, 0, 5, 1), rowid LIMIT 10", [expression])
         try Task.checkCancellation()
