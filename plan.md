@@ -1,4 +1,4 @@
-> 2026-11-14 R3: Sessions・資料ライブラリのv1 JSONを6種の固定fixtureで検証。全604件中597成功・実API7skip、Lint236ファイル違反0、Release成功。非互換変更の検出と復元後の成功を確認。レビュー・PR提出・マージは未完了。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md)。次の実装はR4。
+> 2026-11-14 R3: Sessions・資料ライブラリのv1 JSONを6種の固定fixtureで検証。全604件中597成功・実API7skip、Lint236ファイル違反0、Release成功。非互換変更の検出と復元後の成功を確認。[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)提出済み。独立レビュー・マージは未完了。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md)。次の実装はR4。
 
 > 2026-11-13 R2: 受信全体の予算を2 MiBへ分離し、長文のSSE分割による拒否を修正。全599件中592成功・実API7skip、Lint233ファイル違反0、Release成功。Gemini実測4/4要求は成功（旧上限超過なし）。PR #33はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md)。
 
@@ -23,7 +23,7 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-14／`test/persistence-v1-golden`（基点`0314aed`）**。R1-1〜3とR2（[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)）はマージ済み。R2のGemini実測4要求完了、他社実測・独立レビューは未完了。R3は[ローカル実装・検証済み](docs/validation/r3-persistence-golden.md)、レビュー・PR提出・マージ待ち。次の実装はR4。実機受入・品質ゲートは引き続き未完了。
+- 更新: **2026-11-14／`test/persistence-v1-golden`（基点`0314aed`）**。R1-1〜3とR2（[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)）はマージ済み。R2のGemini実測4要求完了、他社実測・独立レビューは未完了。R3は[ローカル実装・検証済み](docs/validation/r3-persistence-golden.md)、[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)提出済み、独立レビュー・マージ待ち。次の実装はR4。実機受入・品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** R3の全604件中597成功・実API7skip、Lint236ファイル違反0、Release成功。固定JSON6種の読込・再保存・Markdown／検索と、非互換変更の検出を確認。[最新結果](docs/validation/r3-persistence-golden.md)。実音声・実モデル品質・VoiceOver全経路の残件は継続。
@@ -54,7 +54,7 @@
 | R1-2 | 翻訳モデル準備失敗の表示 | 準備失敗の通知・訳文表示・再試行を実装。文字起こし継続、未翻訳分の再投入、取消・旧実行の無視を自動検証。実モデル失敗→再試行は未受入。[PR #32](https://github.com/Ryuta1346/conflingo/pull/32)マージ済み。[結果](docs/design/r1-2-translation-preparation-plan.md) | REVIEW |
 | R1-3 | ClaudeのWeb調査本文 | 複数textブロックの空白・改行・引用位置を保って連結するよう修正。日英・絵文字・重複出典・保存/Markdownを合成応答で検証済み。[PR #32](https://github.com/Ryuta1346/conflingo/pull/32)マージ済み。[結果](docs/design/r1-3-claude-research-text-plan.md) | REVIEW |
 | R2 | 受信上限の分離 | 総受信2 MiBと既存の本文上限を分離し、合成長文の拒否を修正。全回帰・Lint・Release成功。Gemini4要求測定済み。[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md) | REVIEW |
-| R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。レビュー・PR提出・マージは未完了。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | REVIEW |
+| R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)提出済み。独立レビュー・マージは未完了。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | REVIEW |
 | R4 | 文字起こし経路の一本化 | Conferenceのマイク専用の旧経路を`DualTranscriptionController`経路へ統合し、未使用の`SessionController.meetingStore`を除く。Conferenceの字幕・翻訳・停止/再開の無回帰を維持する | TODO |
 | R5 | 中優先の残り | 要約の600発話上限の扱い、ライブ表示が部分結果ごとに全履歴を再計算する負荷、資料検索語の選択（アルファベット順の先頭32語） | TODO |
 | R6 | 低優先・構造の残り | 同文の確定発話の破棄、Meeting翻訳のセッション再利用と用語保護、Keychainのプロセス全体設定、LLM失敗の診断ログ、検証用ウィンドウの同梱。構造は`ContentView`からの構成ルート分離、共通支援のモジュール切り出し、単一スロット通知の統一、LLMプロバイダ分岐とSSE解析の集約、CIとREADME構成図の更新 | TODO |

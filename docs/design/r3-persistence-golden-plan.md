@@ -65,4 +65,4 @@ fixtureは基点の形式から作る合成データであり、実ユーザー�
 - ローカルmain `0314aed`でPR #33のマージを確認し、plan.mdの現在地とR2残件を整理した。
 - 計画承認後、固定JSON6種と5テスト（12ケース）、テスト専用Resourcesを追加。製品コードの変更は不要だった。
 - 全604件中597成功・実API7skip、Lint236ファイル違反0、Release arm64/x86_64成功。変異2組で非互換変更を検出し、元へ戻して追加テストの再成功を確認。
-- [検証記録](../validation/r3-persistence-golden.md)。自己レビュー済み。独立レビュー・コミット・push・PR提出・マージは未実施。次の実装はR3レビュー・マージ後のR4。
+- [検証記録](../validation/r3-persistence-golden.md)。自己レビュー済み。`test/persistence-v1-golden`で`a59f0d6`をコミット・pushし、[Draft PR #34](https://github.com/Ryuta1346/conflingo/pull/34)を作成済み。担当はRyuta1346。独立レビュー・マージは未実施。次の実装はR3レビュー・マージ後のR4。
