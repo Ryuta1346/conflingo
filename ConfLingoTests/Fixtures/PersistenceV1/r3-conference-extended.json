@@ -1,0 +1,206 @@
+{
+  "version": 1,
+  "createdAt": 100,
+  "updatedAt": 200,
+  "snapshot": {
+    "conference": {
+      "_0": {
+        "id": "00000000-0000-0000-0000-000000000002",
+        "title": "字幕 Conference",
+        "startedAt": 50,
+        "sourceLanguage": "en-US",
+        "targetLanguage": "ja",
+        "segments": [
+          {
+            "id": "00000000-0000-0000-0000-000000000201",
+            "index": 1,
+            "english": "Welcome.",
+            "finalizedAt": 51,
+            "origin": "microphone",
+            "sessionOffset": 1.5,
+            "languageCode": "en-US"
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000202",
+            "index": 2,
+            "english": "Please wait.",
+            "finalizedAt": 52,
+            "startTime": 1.25,
+            "origin": "systemAudio",
+            "sessionOffset": 2.5,
+            "languageCode": "en-US"
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000203",
+            "index": 3,
+            "english": "The price is 100 yen.",
+            "finalizedAt": 53,
+            "startTime": 2.25,
+            "origin": "microphone",
+            "sessionOffset": 3.5,
+            "languageCode": "en-US"
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000204",
+            "index": 4,
+            "english": "Retry later.",
+            "finalizedAt": 54,
+            "startTime": 3.25,
+            "origin": "systemAudio",
+            "sessionOffset": 4.5,
+            "languageCode": "en-US"
+          }
+        ],
+        "units": [
+          {
+            "id": "00000000-0000-0000-0000-000000000301",
+            "index": 1,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000201"
+            ],
+            "english": "Welcome.",
+            "translationState": {
+              "pending": {}
+            }
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000302",
+            "index": 2,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000202"
+            ],
+            "english": "Please wait.",
+            "translationState": {
+              "translating": {}
+            },
+            "startTime": 1.25
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000303",
+            "index": 3,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000203"
+            ],
+            "english": "The price is 100 yen.",
+            "translationState": {
+              "done": {}
+            },
+            "startTime": 2.25,
+            "japanese": "料金は100円です。"
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000304",
+            "index": 4,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000204"
+            ],
+            "english": "Retry later.",
+            "translationState": {
+              "failed": {
+                "_0": "モデル準備失敗"
+              }
+            },
+            "startTime": 3.25
+          }
+        ],
+        "support": {
+          "answers": [
+            {
+              "id": "00000000-0000-0000-0000-000000000701",
+              "kind": "answerSuggestion",
+              "text": "資料とWebの回答 🔎\n確認してください。",
+              "priority": 1,
+              "evidenceIDs": [
+                "00000000-0000-0000-0000-000000000203"
+              ],
+              "status": "complete",
+              "hasInvalidEvidence": false,
+              "knowledgeReferences": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000601",
+                  "documentID": "00000000-0000-0000-0000-000000000401",
+                  "title": "料金資料",
+                  "importedAt": 50,
+                  "startLine": 2,
+                  "characterOffset": 5,
+                  "snippet": "料金は100円です。",
+                  "source": {
+                    "snapshotID": "00000000-0000-0000-0000-000000000500",
+                    "name": "Demo",
+                    "path": "Sources/Price.swift",
+                    "contentHash": "779c9d85a21ed134a3a98c566ab34e73204b0e6adc1f26c23d79006eedfdd3f3"
+                  }
+                }
+              ],
+              "webReferences": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000602",
+                  "url": "https://example.com/price?q=100",
+                  "title": "Price reference",
+                  "fetchedAt": 75
+                }
+              ],
+              "searchSuggestionsHTML": "<div>price &amp; plan</div>"
+            }
+          ],
+          "corrections": [
+            {
+              "id": "00000000-0000-0000-0000-000000000801",
+              "unitID": "00000000-0000-0000-0000-000000000303",
+              "original": {
+                "sourceText": "The price is 100 yen.",
+                "translation": "料金は100円です。",
+                "sourceLanguage": "en-US",
+                "targetLanguage": "ja",
+                "terms": [
+                  {
+                    "term": "price",
+                    "target": "料金",
+                    "sourceLanguage": "en",
+                    "targetLanguage": "ja",
+                    "documentID": "00000000-0000-0000-0000-000000000401",
+                    "documentTitle": "料金資料",
+                    "line": 2,
+                    "snippet": "price = 料金"
+                  }
+                ]
+              },
+              "sourceText": "The monthly price is 100 yen.",
+              "translation": "月額は100円です。",
+              "references": [
+                {
+                  "id": "00000000-0000-0000-0000-000000000601",
+                  "documentID": "00000000-0000-0000-0000-000000000401",
+                  "title": "料金資料",
+                  "importedAt": 50,
+                  "startLine": 2,
+                  "characterOffset": 5,
+                  "snippet": "料金は100円です。",
+                  "source": {
+                    "snapshotID": "00000000-0000-0000-0000-000000000500",
+                    "name": "Demo",
+                    "path": "Sources/Price.swift",
+                    "contentHash": "779c9d85a21ed134a3a98c566ab34e73204b0e6adc1f26c23d79006eedfdd3f3"
+                  }
+                }
+              ],
+              "adopted": true
+            }
+          ],
+          "terms": [
+            {
+              "term": "price",
+              "target": "料金",
+              "sourceLanguage": "en",
+              "targetLanguage": "ja",
+              "documentID": "00000000-0000-0000-0000-000000000401",
+              "documentTitle": "料金資料",
+              "line": 2,
+              "snippet": "price = 料金"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

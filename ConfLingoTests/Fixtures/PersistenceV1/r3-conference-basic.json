@@ -1,0 +1,97 @@
+{
+  "version": 1,
+  "createdAt": 100,
+  "updatedAt": 200,
+  "snapshot": {
+    "conference": {
+      "_0": {
+        "id": "00000000-0000-0000-0000-000000000002",
+        "title": "字幕 Conference",
+        "startedAt": 50,
+        "sourceLanguage": "en-US",
+        "targetLanguage": "ja",
+        "segments": [
+          {
+            "id": "00000000-0000-0000-0000-000000000201",
+            "index": 1,
+            "english": "Welcome.",
+            "finalizedAt": 51
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000202",
+            "index": 2,
+            "english": "Please wait.",
+            "finalizedAt": 52,
+            "startTime": 1.25
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000203",
+            "index": 3,
+            "english": "The price is 100 yen.",
+            "finalizedAt": 53,
+            "startTime": 2.25
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000204",
+            "index": 4,
+            "english": "Retry later.",
+            "finalizedAt": 54,
+            "startTime": 3.25
+          }
+        ],
+        "units": [
+          {
+            "id": "00000000-0000-0000-0000-000000000301",
+            "index": 1,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000201"
+            ],
+            "english": "Welcome.",
+            "translationState": {
+              "pending": {}
+            }
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000302",
+            "index": 2,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000202"
+            ],
+            "english": "Please wait.",
+            "translationState": {
+              "translating": {}
+            },
+            "startTime": 1.25
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000303",
+            "index": 3,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000203"
+            ],
+            "english": "The price is 100 yen.",
+            "translationState": {
+              "done": {}
+            },
+            "startTime": 2.25,
+            "japanese": "料金は100円です。"
+          },
+          {
+            "id": "00000000-0000-0000-0000-000000000304",
+            "index": 4,
+            "segmentIDs": [
+              "00000000-0000-0000-0000-000000000204"
+            ],
+            "english": "Retry later.",
+            "translationState": {
+              "failed": {
+                "_0": "モデル準備失敗"
+              }
+            },
+            "startTime": 3.25
+          }
+        ]
+      }
+    }
+  }
+}
