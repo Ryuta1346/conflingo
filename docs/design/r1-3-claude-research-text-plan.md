@@ -30,4 +30,8 @@
 - `release.log`: Releaseビルド成功（`CODE_SIGNING_ALLOWED=NO`、arm64・x86_64）。既存のSDK非推奨・AppIntents等の警告は残る。
 - ログ: `/private/tmp/conflingo-r1-3/`。ビルドキャッシュはR1-2と共用。全回帰xcresult: `/private/tmp/conflingo-r1-2/build/Logs/Test/Test-ConfLingo-2026.11.13_21-41-50-+0900.xcresult`。
 
-実Claude APIへの送信は0。今回のフィクスチャは合成応答であり、実モデルの回答・検索品質を保証するものではない。差分は自己レビュー済み、独立レビューは未実施。コミット・push・PR作成・インストール済みアプリ更新は未実施。plan.mdはREVIEWとし、次の実装タスクをR2とする。
+実Claude APIへの送信は0。今回のフィクスチャは合成応答であり、実モデルの回答・検索品質を保証するものではない。差分は自己レビュー済み、独立レビューは未実施。実装・検証時点ではコミット・push・PR作成・インストール済みアプリ更新は未実施。plan.mdはREVIEWとし、次の実装タスクをR2とする。
+
+## PR提出
+
+ユーザー「コミットand PR作成」に基づき、`fix/translation-retry-claude-citations`でR1-2を`3669f1e`、R1-3を`ad634c0`にコミット。main向けDraft PRを準備中。未受入事項を保持し、REVIEWを維持する。
