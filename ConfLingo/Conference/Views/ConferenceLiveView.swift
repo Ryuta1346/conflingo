@@ -9,6 +9,7 @@ struct ConferenceLiveView: View {
     let editSettings: () -> Void
     let clear: () -> Void
     var corrections: [ConferenceCorrection] = []
+    var translationPreparation: TranslationCoordinator.PreparationState = .idle
 
     var body: some View {
         GeometryReader { geometry in
@@ -83,7 +84,7 @@ struct ConferenceLiveView: View {
 
     private var translationPane: some View {
         TranscriptPane(title: "翻訳 · \(LanguageCatalog.displayName(for: targetLanguage ?? "ja"))",
-                       entries: TranscriptPresentation.translation(store, corrections: corrections), fontSize: fontSize)
+                       entries: TranscriptPresentation.translation(store, corrections: corrections, preparation: translationPreparation), fontSize: fontSize)
             .frame(minWidth: 220, minHeight: minimumPaneHeight)
     }
 }

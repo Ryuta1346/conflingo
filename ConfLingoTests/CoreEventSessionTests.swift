@@ -5,6 +5,33 @@ import Testing
 @MainActor
 @Suite(.timeLimit(.minutes(1)))
 struct CoreEventSessionTests {
+    @Test func translationPreparationFailureAndRetryKeepSpeechRunning() async throws {
+        let speech = StubSpeechInput()
+        let store = SessionStore()
+        store.mode = .translation
+        let coordinator = TranslationCoordinator()
+        let controller = SessionController(speechService: speech, requestPermission: { true })
+        await controller.start(store: store, coordinator: coordinator, locale: .current)
+        let generation = coordinator.beginPreparation()
+        coordinator.preparationFailed(generation: generation, reason: "download cancelled")
+        try await speech.emit(text: "Speech during failure.")
+        let retry = coordinator.beginPreparation()
+        try await speech.emit(text: "Speech during retry.")
+        let stream = try #require(coordinator.prepared(generation: retry, store: store))
+        try await speech.emit(text: "Speech after recovery.")
+        #expect(store.phase == .listening)
+        #expect(controller.lastError == nil)
+        #expect(speech.starts == 1)
+        #expect(speech.stops == 0)
+        // StopでEvent Hubをdrainし、認識の非同期配送をすべて待つ。
+        await controller.stop(store: store, coordinator: coordinator)
+        coordinator.finish()
+        var items: [String] = []
+        for await item in stream { items.append(item.text) }
+        #expect(items == ["Speech during failure.", "Speech during retry.", "Speech after recovery."])
+        #expect(store.segments.map(\.english) == items)
+    }
+
     @Test func injectedSourceControlsSessionPermissionWithoutOpeningDeniedInput() async {
         let permission = StubMicrophonePermission(status: .undetermined)
         permission.decision = false

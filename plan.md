@@ -1,6 +1,8 @@
-> 2026-11-13 R1-1: マイク構成変更時の停止・エラー通知・再開始を修正し、[Draft PR #31](https://github.com/Ryuta1346/conflingo/pull/31)を作成。全568件中562成功・実API評価6skip、Lint224ファイル違反0、Release成功。実機の機器切替・Gate Bは未受入。[計画・検証結果](docs/design/r1-1-microphone-configuration-plan.md)。
+> 2026-11-13 R1-3レビュー追補: 検索ツール前後の段落を保持するよう修正。全583件中577成功・実API評価6skip、Lint228ファイル違反0。[追補](docs/design/r1-3-claude-research-text-plan.md)。
 
-> 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1はDraft PR #31提出済み（実機受入待ち）、R1-2以降は未着手。
+> 2026-11-13 R1-3: Claudeの複数textブロック間に余分な段落が入る問題を修正。全580件中574成功・実API評価6skip、Lint228ファイル違反0、Release成功。[結果](docs/design/r1-3-claude-research-text-plan.md)。R1-2もローカル検証済みで、両修正を[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。R1-2の実モデル再試行は未受入。[R1-2の結果](docs/design/r1-2-translation-preparation-plan.md)。R1-1はmain `ab2c4ae`で[PR #31](https://github.com/Ryuta1346/conflingo/pull/31)のマージを確認。実機の機器切替・Gate Bは未受入。[R1-1の結果](docs/design/r1-1-microphone-configuration-plan.md)。
+
+> 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1はマージ済み（実機受入待ち）、R1-2・R1-3はローカル検証済み、次はR2。
 
 > 2026-11-13 レビュー指摘2件を修正: 英語検索の大小文字・アポストロフィと、狭幅の根拠リンクからの発話表示を回帰確認。全558件中552成功・実API評価6skip、Lint・Release成功。[詳細](docs/design/review-followup-fix-plan.md)。
 
@@ -17,10 +19,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-12／`feature/shared-session-assistance`**。共通支援を実装・ローカル検証。以下のPRマージ・全体受入の記録は既存の履歴で、今回の変更はPR #27をベースとする独立ブランチへ分離。
+- 更新: **2026-11-13／`fix/translation-retry-claude-citations`（基点`ab2c4ae`）**。R1-1はマージ済み、R1-2・R1-3は修正・ローカル検証済みで[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。実機受入・品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** 共通支援の542件／96 suites中536件成功・実API評価6件skip、Lint217ファイル違反0。[最新結果](docs/validation/shared-session-assistance.md)。以前の[Meeting翻訳検証](docs/validation/meeting-translation.md)と実機結果は保持。新規機能の実音声・実API品質とVoiceOver全経路は未確認。
+- **直近の検証記録:** R1-3レビュー追補の583件／103 suites中577件成功・実API評価6件skip、Lint228ファイル違反0。追補のRelease再ビルドは未実施。[最新結果](docs/design/r1-3-claude-research-text-plan.md)。以前の[共通支援](docs/validation/shared-session-assistance.md)・[Meeting翻訳検証](docs/validation/meeting-translation.md)と実機結果は保持。新規機能の実音声・実API品質とVoiceOver全経路は未確認。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
@@ -29,7 +31,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** [レビュー対応](#レビュー対応2026-11-13承認)のR1〜R4。R1-1（マイクの機器変更）はGate Bの機器変更・切断/復旧受入の前提、R4はGate AのConference回帰と合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
+**先行:** [レビュー対応](#レビュー対応2026-11-13承認)の残るR2→R3→R4。R1-1（マイクの機器変更）はGate Bの機器変更・切断/復旧受入の前提。R1-2の実モデル再試行とR4はGate AのConference回帰と合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -44,9 +46,9 @@
 
 | 順 | 対象 | 内容・完了条件 | 状態 |
 |---|---|---|---|
-| R1-1 | マイクの機器・構成変更 | 構成変更を検知し、入力停止・エラー表示・再開始案内へ接続。合成通知・Conference／Meeting結合・全回帰成功。実機の抜き差し等は未受入。[結果](docs/design/r1-1-microphone-configuration-plan.md)・[PR #31](https://github.com/Ryuta1346/conflingo/pull/31) | REVIEW |
-| R1-2 | 翻訳モデル準備失敗の表示 | `prepareTranslation()`の失敗後、訳文欄が「翻訳を待っています…」のまま残る（`ContentView`・`TranslationCoordinator`）。失敗を表示して再試行でき、文字起こしは継続する | TODO |
-| R1-3 | ClaudeのWeb調査本文 | 引用ごとに分かれるtextブロックを`"\n\n"`で結合し、文の途中で段落が切れる（`LLMResearchResponse`）。複数ブロックのフィクスチャを追加して修正する | TODO |
+| R1-1 | マイクの機器・構成変更 | 構成変更を検知し、入力停止・エラー表示・再開始案内へ接続。合成通知・Conference／Meeting結合・全回帰成功。PRマージ済み、実機の抜き差し等は未受入。[結果](docs/design/r1-1-microphone-configuration-plan.md)・[PR #31](https://github.com/Ryuta1346/conflingo/pull/31) | REVIEW |
+| R1-2 | 翻訳モデル準備失敗の表示 | 準備失敗の通知・訳文表示・再試行を実装。文字起こし継続、未翻訳分の再投入、取消・旧実行の無視を自動検証。実モデル失敗→再試行は未受入。[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)提出済み。[結果](docs/design/r1-2-translation-preparation-plan.md) | REVIEW |
+| R1-3 | ClaudeのWeb調査本文 | 複数textブロックの空白・改行・引用位置を保って連結するよう修正。日英・絵文字・重複出典・保存/Markdownを合成応答で検証済み。[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)提出済み。[結果](docs/design/r1-3-claude-research-text-plan.md) | REVIEW |
 | R2 | 受信上限262,144 bytes | 生バイト基準のため、長い要約やWeb調査で上限超過になる可能性がある（未実測）。各社の実応答サイズを確認し、必要なら復号後の本文基準へ変更する。追加実APIは送信範囲・要求上限の承認後 | TODO |
 | R3 | 保存形式の固定 | Sessions・資料ライブラリのv1 JSONをゴールデンファイルで固定し、型名・フィールド名の変更で既存データが読めなくなる回帰を検出する。R4の前提 | TODO |
 | R4 | 文字起こし経路の一本化 | Conferenceのマイク専用の旧経路を`DualTranscriptionController`経路へ統合し、未使用の`SessionController.meetingStore`を除く。Conferenceの字幕・翻訳・停止/再開の無回帰を維持する | TODO |

@@ -17,6 +17,7 @@ struct ContentView: View {
     @State private var controller: SessionController
     @State private var navigation: ConferenceNavigation
     @State private var translationConfiguration: TranslationSession.Configuration?
+    @State private var translationGeneration: UUID?
     @State private var profileStore: KeywordProfileStore
     @State private var showDictionary = false
     @State private var showClearConfirmation = false
@@ -81,6 +82,9 @@ struct ContentView: View {
                 Divider()
                 if let error = controller.lastError {
                     SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
+                }
+                if !transcriptionOnly && (navigation.destination == .live || navigation.destination == .setup) {
+                    TranslationPreparationNotice(state: coordinator.preparationState, retry: retryTranslation)
                 }
                 ZStack {
                     page
@@ -156,21 +160,19 @@ struct ContentView: View {
             guard !isPreview else { return }
             // 起動時・言語ペア変更時・文字起こしのみモード切替時に利用可能性を再チェックする
             translationConfiguration = nil
+            translationGeneration = nil
+            coordinator.finish()
             let ready = await availability.checkAndPrepare(
                 sourceLocaleID: sourceLocaleID,
                 targetLanguageID: transcriptionOnly ? nil : targetLanguageID,
                 recognitionMode: conferenceKnowledge.recognitionMode
             )
-            guard ready, !Task.isCancelled else { return }
-            if transcriptionOnly {
-                // 消費されないキューにバッファが溜まらないよう finish し、以降の enqueue を no-op にする
-                coordinator.finish()
-            } else {
-                translationConfiguration = TranslationSession.Configuration(
-                    source: (availability.speechLocale ?? Locale(identifier: sourceLocaleID)).language,
-                    target: Locale.Language(identifier: targetLanguageID)
-                )
-            }
+            guard ready, !Task.isCancelled, !transcriptionOnly else { return }
+            translationGeneration = coordinator.beginPreparation()
+            translationConfiguration = TranslationSession.Configuration(
+                source: (availability.speechLocale ?? Locale(identifier: sourceLocaleID)).language,
+                target: Locale.Language(identifier: targetLanguageID)
+            )
         }
         .onChange(of: sourceLocaleID) {
             conferenceKnowledge.cancel()
@@ -186,22 +188,24 @@ struct ContentView: View {
         // @Sendable でクロージャを nonisolated にし、非 Sendable な session を
         // MainActor 領域に取り込まずタスク領域に留める（translate 呼び出しに必須）。
         .background { MeetingTranslationPreparation(translations: meeting.translations) }
-        .translationTask(translationConfiguration) { @Sendable session in
-            guard !isPreview else { return }
+        .translationTask(translationConfiguration) { @Sendable [translationGeneration] session in
+            guard !isPreview, let generation = translationGeneration,
+                  await coordinator.isCurrent(generation) else { return }
             do {
                 try await session.prepareTranslation()
             } catch {
-                // 翻訳モデルのダウンロードがキャンセルされた等。文字起こしのみで継続する。
+                await coordinator.preparationFailed(generation: generation, reason: error.localizedDescription)
                 return
             }
-            let stream = await coordinator.attach()
-            for unit in await store.untranslatedUnits {
-                await coordinator.enqueue(id: unit.id, text: unit.english)
-            }
+            guard let stream = await coordinator.prepared(generation: generation, store: store) else { return }
             // session は隔離ドメインを跨げないため、翻訳ループはこの場で回す。
             // 個別の翻訳失敗は failed を記録して続行する（セッションは落とさない）。
             for await item in stream {
-                await store.beginTranslating(item.id)
+                guard await MainActor.run(body: {
+                    guard coordinator.isCurrent(generation) else { return false }
+                    store.beginTranslating(item.id)
+                    return true
+                }) else { return }
                 do {
                     // 専門用語をプレースホルダで保護してから翻訳し、訳文で原文表記（または指定訳語）に復元する
                     let glossary = await store.activeGlossary
@@ -215,9 +219,15 @@ struct ContentView: View {
                         // （用語保護より「壊れたトークンを表示しない」ことを優先。再翻訳も失敗なら寛容パス適用済みを採用）
                         japanese = retry.targetText
                     }
-                    await store.applyTranslation(id: item.id, japanese: japanese)
+                    await MainActor.run { [japanese] in
+                        guard coordinator.isCurrent(generation) else { return }
+                        store.applyTranslation(id: item.id, japanese: japanese)
+                    }
                 } catch {
-                    await store.markTranslationFailed(id: item.id, reason: error.localizedDescription)
+                    await MainActor.run {
+                        guard coordinator.isCurrent(generation) else { return }
+                        store.markTranslationFailed(id: item.id, reason: error.localizedDescription)
+                    }
                 }
             }
         }
@@ -255,7 +265,8 @@ struct ContentView: View {
                             targetLanguage: transcriptionOnly ? nil : targetLanguageID,
                             profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
                             editSettings: { navigate(.setup) },
-                            clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections
+                            clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections,
+                            translationPreparation: coordinator.preparationState
                         )
                         if geometry.size.width >= 1_000 && !showConferenceKnowledge {
                             Divider()
@@ -326,6 +337,13 @@ struct ContentView: View {
     }
 
     private var modelState: ModelAvailabilityService.State { isPreview ? .ready : availability.state }
+
+    private func retryTranslation() {
+        guard !transcriptionOnly, translationConfiguration != nil,
+              case .failed = coordinator.preparationState else { return }
+        translationGeneration = coordinator.beginPreparation()
+        translationConfiguration?.invalidate()
+    }
 
     private var sourceLocales: [Locale] {
         if isPreview { return [Locale(identifier: "en-US"), Locale(identifier: "ja-JP"), Locale(identifier: "de-DE")] }

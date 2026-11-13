@@ -119,15 +119,25 @@ struct LLMResearchResponse {
         }
         guard !sourceURLs.isEmpty else { throw ResearchFailure.noSources }
         var texts: [String] = []
-        for block in content where block["type"] as? String == "text" {
+        var needsParagraph = false
+        for block in content {
+            let type = block["type"] as? String
+            guard type == "text" else {
+                if type == "server_tool_use" || type == "web_search_tool_result" { needsParagraph = true }
+                continue
+            }
             var text = try checkedText(block["text"] as? String)
             for citation in block["citations"] as? [[String: Any]] ?? [] where citation["type"] as? String == "web_search_result_location" {
                 guard let url = citation["url"] as? String, sourceURLs.contains(url) else { throw InsightFailure.invalidResponse }
                 text += try marker(url, title: citation["title"] as? String)
             }
+            guard !text.isEmpty else { continue }
+            if needsParagraph && !texts.isEmpty { texts.append("\n\n") }
             texts.append(text)
+            needsParagraph = false
         }
-        return texts.joined(separator: "\n\n")
+        // 連続textは引用の文中分割を保持し、検索ツールを挟む文章だけ段落を分ける。
+        return texts.joined()
     }
 
     private static func localCitations(_ text: String, request: InsightRequest) throws -> (String, [UUID], [UUID]) {
