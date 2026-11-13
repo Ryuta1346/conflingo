@@ -1,6 +1,6 @@
-> 2026-11-13 R1-1: マイク構成変更時の停止・エラー通知・再開始をローカル修正。全568件中562成功・実API評価6skip、Lint224ファイル違反0、Release成功。実機の機器切替・Gate Bは未受入。[計画・検証結果](docs/design/r1-1-microphone-configuration-plan.md)。
+> 2026-11-13 R1-1: マイク構成変更時の停止・エラー通知・再開始を修正し、[Draft PR #31](https://github.com/Ryuta1346/conflingo/pull/31)を作成。全568件中562成功・実API評価6skip、Lint224ファイル違反0、Release成功。実機の機器切替・Gate Bは未受入。[計画・検証結果](docs/design/r1-1-microphone-configuration-plan.md)。
 
-> 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1はローカル修正済み、R1-2以降は未着手。
+> 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1はDraft PR #31提出済み（実機受入待ち）、R1-2以降は未着手。
 
 > 2026-11-13 レビュー指摘2件を修正: 英語検索の大小文字・アポストロフィと、狭幅の根拠リンクからの発話表示を回帰確認。全558件中552成功・実API評価6skip、Lint・Release成功。[詳細](docs/design/review-followup-fix-plan.md)。
 
@@ -44,7 +44,7 @@
 
 | 順 | 対象 | 内容・完了条件 | 状態 |
 |---|---|---|---|
-| R1-1 | マイクの機器・構成変更 | 構成変更を検知し、入力停止・エラー表示・再開始案内へ接続。合成通知・Conference／Meeting結合・全回帰成功。実機の抜き差し等は未受入。[結果](docs/design/r1-1-microphone-configuration-plan.md) | REVIEW |
+| R1-1 | マイクの機器・構成変更 | 構成変更を検知し、入力停止・エラー表示・再開始案内へ接続。合成通知・Conference／Meeting結合・全回帰成功。実機の抜き差し等は未受入。[結果](docs/design/r1-1-microphone-configuration-plan.md)・[PR #31](https://github.com/Ryuta1346/conflingo/pull/31) | REVIEW |
 | R1-2 | 翻訳モデル準備失敗の表示 | `prepareTranslation()`の失敗後、訳文欄が「翻訳を待っています…」のまま残る（`ContentView`・`TranslationCoordinator`）。失敗を表示して再試行でき、文字起こしは継続する | TODO |
 | R1-3 | ClaudeのWeb調査本文 | 引用ごとに分かれるtextブロックを`"\n\n"`で結合し、文の途中で段落が切れる（`LLMResearchResponse`）。複数ブロックのフィクスチャを追加して修正する | TODO |
 | R2 | 受信上限262,144 bytes | 生バイト基準のため、長い要約やWeb調査で上限超過になる可能性がある（未実測）。各社の実応答サイズを確認し、必要なら復号後の本文基準へ変更する。追加実APIは送信範囲・要求上限の承認後 | TODO |

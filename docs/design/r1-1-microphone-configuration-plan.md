@@ -58,3 +58,8 @@ R1-1で認められた「エラーを表示して停止」を採用する。構�
 ### 残る実機受入
 
 実機のヘッドフォン抜き差し・Bluetooth切替・機器切断、OSのSpeechAnalyzerを含む認識、会議アプリ別のGate Bは未実施。実音声・実API送信は行っていない。これらの合格を合成通知テストから推定しない。実装・検証時点ではコミット・push・インストール済みアプリの更新は未実施。続くユーザー「コミットしてPR作成」により、R1-1の変更をコミット・pushし、main向けDraft PRを作成する承認を得た。
+
+
+## PR提出
+
+ユーザー「コミットしてPR作成」に基づき、`fix/microphone-configuration-change`で実装を`bf55731`へコミット・pushし、[Draft PR #31](https://github.com/Ryuta1346/conflingo/pull/31)をmain向けに作成。担当はRyuta1346。実機受入待ちのREVIEWを維持する。
