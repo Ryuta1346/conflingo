@@ -1,5 +1,7 @@
 # R6-1 — 同文の別発話をConferenceで保持する計画
 
+> 2026-11-14提出追記: ユーザー「コミットand PR作成」に基づき、実装 `0ec3d3f`を[Draft PR #38](https://github.com/Ryuta1346/conflingo/pull/38)へ提出済み。未マージ・独立レビュー待ち。以下の未コミット・未PR等の記述はローカル検証完了時点の記録。
+
 2026-11-14 / 基点: ローカルmain `dab817e`（PR #37マージ済み）。
 状態: **2026-11-14、ユーザー「進めて」で本計画を承認済み。ローカル実装・検証済み（REVIEW相当）。未コミット・未PR**。
 正本: `~/.coding-agents/docs/conflingo/main/r6-1-repeated-final-plan.md`。
