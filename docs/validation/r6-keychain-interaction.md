@@ -1,5 +1,7 @@
 # R6-4 — Keychain操作の排他制御・設定復元
 
+> 2026-11-14提出追記: ユーザー「コミットand PR作成」に基づき、実装 `5fad038`を[Draft PR #40](https://github.com/Ryuta1346/conflingo/pull/40)へ提出済み。未マージ・独立レビュー待ち。以下の未コミット・未PRはローカル検証完了時点の記録。
+
 2026-11-14 / 基点: ローカルmain `18d0fcb`＋未コミット変更。
 状態: **承認済み範囲をローカル実装・自動検証済み（REVIEW相当）。未コミット・未PR。独立レビュー・実機受入は未実施。**
 [実装計画](../design/r6-keychain-interaction-plan.md)。
