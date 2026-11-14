@@ -1,4 +1,5 @@
 import Foundation
+import Security
 import Testing
 @testable import ConfLingo
 
@@ -62,6 +63,42 @@ struct LLMSettingsTests {
         #expect(try connection.endpoint("models").scheme == "http")
         connection.baseURL = "http://192.168.1.10:1234/v1"
         #expect(throws: InsightFailure.invalidEndpoint) { try connection.endpoint("models") }
+    }
+
+    @Test(arguments: [false, true])
+    func keychainRecoveryFailureDoesNotCommitConnectionChanges(deleting: Bool) async throws {
+        let name = UUID().uuidString
+        let defaults = UserDefaults(suiteName: name)!
+        defer { defaults.removePersistentDomain(forName: name) }
+        let security = FakeKeychainSecurity()
+        let operations = KeychainOperations(security: security)
+        let settings = LLMSettings(defaults: defaults, keyStore: { KeychainAPIKeyStore(service: $0, operations: operations) })
+        var connection = LLMConnection.preset(.custom)
+        connection.baseURL = "https://first.example/v1"
+        connection.model = "model"
+        try settings.save(connection)
+        let connections = settings.connections
+        let saved = defaults.data(forKey: LLMSettings.storageKey)
+        let revision = settings.revision
+        security.state.withLock { $0.setStatuses = [errSecSuccess, errSecAuthFailed, errSecAuthFailed] }
+        await #expect(throws: InsightFailure.keyStorage) { try await settings.credentials.store.read() }
+
+        connection.baseURL = "https://second.example/v1"
+        #expect(throws: InsightFailure.keyStorage) {
+            if deleting { try settings.delete(connection.id) }
+            else { try settings.save(connection) }
+        }
+        #expect(settings.connections == connections)
+        #expect(settings.selectedID == connection.id)
+        #expect(settings.revision == revision)
+        #expect(defaults.data(forKey: LLMSettings.storageKey) == saved)
+        #expect(!security.events.contains(where: { $0.hasPrefix("delete:") }))
+
+        if deleting { try settings.delete(connection.id) }
+        else { try settings.save(connection) }
+        #expect(settings.revision == revision + 1)
+        #expect(settings.connections != connections)
+        #expect(security.events.contains(where: { $0.hasPrefix("delete:") }))
     }
 }
 

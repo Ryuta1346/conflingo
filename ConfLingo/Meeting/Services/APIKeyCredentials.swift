@@ -1,7 +1,5 @@
 import Foundation
-import LocalAuthentication
 import Observation
-import Security
 
 @MainActor
 protocol APIKeyStore {
@@ -12,56 +10,22 @@ protocol APIKeyStore {
 
 @MainActor
 struct KeychainAPIKeyStore: APIKeyStore {
-    var service = "com.gavrri.conflingo.gemini-api"
-    private nonisolated static let readLock = NSLock()
-    private var query: [String: Any] { Self.query(service: service) }
+    var service: String
+    private let operations: KeychainOperations
 
-    private nonisolated static func query(service: String) -> [String: Any] {
-        let context = LAContext()
-        context.interactionNotAllowed = true
-        return [kSecClass as String: kSecClassGenericPassword, kSecAttrService as String: service,
-                kSecAttrAccount as String: "user-api-key", kSecUseAuthenticationContext as String: context]
+    init(service: String = "com.gavrri.conflingo.gemini-api", operations: KeychainOperations = .shared) {
+        self.service = service
+        self.operations = operations
     }
 
     func read() async throws -> String? {
         let service = service
-        return try await Task.detached { try Self.readSynchronously(service: service) }.value
+        let operations = operations
+        return try await Task.detached { try operations.read(service: service) }.value
     }
 
-    private nonisolated static func readSynchronously(service: String) throws -> String? {
-        // Existing file-based Keychain items ignore LAContext's UI prohibition.
-        readLock.lock()
-        defer { readLock.unlock() }
-        var interactionAllowed: DarwinBoolean = false
-        guard SecKeychainGetUserInteractionAllowed(&interactionAllowed) == errSecSuccess,
-              SecKeychainSetUserInteractionAllowed(false) == errSecSuccess else { throw InsightFailure.keyStorage }
-        defer { SecKeychainSetUserInteractionAllowed(interactionAllowed.boolValue) }
-        var attributes = query(service: service)
-        attributes[kSecReturnData as String] = true
-        attributes[kSecMatchLimit as String] = kSecMatchLimitOne
-        var result: CFTypeRef?
-        let status = SecItemCopyMatching(attributes as CFDictionary, &result)
-        if status == errSecItemNotFound { return nil }
-        guard status == errSecSuccess, let data = result as? Data,
-              let key = String(data: data, encoding: .utf8) else { throw InsightFailure.keyStorage }
-        return key
-    }
-
-    func save(_ key: String) throws {
-        let values = [kSecValueData as String: Data(key.utf8)]
-        let status = SecItemUpdate(query as CFDictionary, values as CFDictionary)
-        if status == errSecSuccess { return }
-        guard status == errSecItemNotFound else { throw InsightFailure.keyStorage }
-        var attributes = query
-        attributes[kSecValueData as String] = Data(key.utf8)
-        attributes[kSecAttrSynchronizable as String] = false
-        guard SecItemAdd(attributes as CFDictionary, nil) == errSecSuccess else { throw InsightFailure.keyStorage }
-    }
-
-    func delete() throws {
-        let status = SecItemDelete(query as CFDictionary)
-        guard status == errSecSuccess || status == errSecItemNotFound else { throw InsightFailure.keyStorage }
-    }
+    func save(_ key: String) throws { try operations.save(key, service: service) }
+    func delete() throws { try operations.delete(service: service) }
 }
 
 @MainActor
