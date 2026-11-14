@@ -1,6 +1,6 @@
 # 共通支援・通知統一の検証
 
-2026-11-14。基点: main `ed0a08b`（PR #41マージ済み）。[計画](../design/shared-assistance-notifications-plan.md)。ローカル実装・自動検証完了、未コミット。
+2026-11-14。基点: main `ed0a08b`（PR #41マージ済み）。[計画](../design/shared-assistance-notifications-plan.md)。実装コミット`3e4e27b`。ローカル実装・自動検証完了、[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ。
 
 ## 変更
 
@@ -36,3 +36,5 @@
 
 初回sandbox内の実行はObservationマクロの起動制限でビルド不能だったため、通常のXcode権限で再実行してRed/Greenを確認した。これは製品不具合のRedには含めない。
 全実API評価フラグ0。実音声・実API評価・実機VoiceOver・配布署名・リモートCIは未実施。テストのweak参照ローカル変数に対する未変更警告、既存のKeychain/AX非推奨警告、AppIntents未使用警告は残る。実機受入ゲートの完了とは扱わない。
+
+PR提出時にSwift16ファイルと検証時ハッシュの一致を確認。公開するxcresult集計から端末識別子のみ除去した。テスト・製品コードの変更なし。

@@ -20,7 +20,7 @@ Conference/MeetingがそれぞれKnowledgeStore・InsightCoordinator・WebResear
 - 許可は初期オフ。設定変更でAI/Web許可を取り消す。資料内容変更成功時に資料送信許可・自動資料許可と用語をリセットし、失敗時は既存資料/許可を維持する。無効化時の要約取消・Conferenceの補正取消を維持する。
 - 音声停止前にAI/Web送信を停止し、古い応答は採用しない。再開は同じ会議の記録を保持し、破棄は新sessionへ切り替える。
 - 保存形式・保存先・引用根拠・Markdown・UIの表示契約を変更しない。購読の追加で同じ発話を二重にAIへ渡さない。
-- SSE/LLM分岐整理、CI、実API/実音声評価、コミット・pushは今回の範囲外。
+- SSE/LLM分岐整理、CI、実API/実音声評価は今回の範囲外。コミット・push・PR作成は後続のユーザー「コミットand PR作成」で承認。
 
 ## 検証予定
 
@@ -34,4 +34,4 @@ Conference/MeetingがそれぞれKnowledgeStore・InsightCoordinator・WebResear
 
 ## 完了記録
 
-ローカル実装・自動検証完了、未コミット。先行2テストの通知上書き不具合を修正し、全698定義中691成功・実API7skip、Lint263ファイル違反0、Release arm64/x86_64成功。[結果](../validation/shared-assistance-notifications-2026-11-14.md)。主担当の差分確認済み、独立レビュー・実機受入は未実施。
+実装コミット`3e4e27b`。ローカル実装・自動検証完了、[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ。先行2テストの通知上書き不具合を修正し、全698定義中691成功・実API7skip、Lint263ファイル違反0、Release arm64/x86_64成功。[結果](../validation/shared-assistance-notifications-2026-11-14.md)。主担当の差分確認済み、独立レビュー・実機受入は未実施。
