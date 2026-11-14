@@ -91,6 +91,8 @@ final class MeetingWorkspace {
         self.summary = summary
         ai.knowledge.onInvalidation = { [weak self] in self?.cancelSummary() }
         ai.knowledge.onContentChange = { [weak self] in
+            self?.setKnowledgeAllowed(false)
+            self?.setAutomaticKnowledgeAllowed(false)
             self?.documentTerms.reset()
             Task { [weak self] in await self?.applyDocumentTerms() }
         }
@@ -200,16 +202,12 @@ final class MeetingWorkspace {
 
     func importKnowledge(_ url: URL) async {
         guard canEditKnowledge else { return }
-        let count = knowledge.documents.count
         await knowledge.add(url: url)
-        if knowledge.documents.count > count { setKnowledgeAllowed(false); setAutomaticKnowledgeAllowed(false) }
     }
 
     func importRepository(_ scan: RepositoryScan, selected: Set<String>) async {
         guard canEditKnowledge else { return }
-        let count = knowledge.documents.count
         await knowledge.importRepository(scan, selected: selected)
-        if knowledge.documents.count > count { setKnowledgeAllowed(false); setAutomaticKnowledgeAllowed(false) }
     }
 
     func setAutomaticAI(_ allowed: Bool) {

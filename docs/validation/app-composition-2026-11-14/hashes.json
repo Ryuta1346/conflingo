@@ -1,0 +1,9 @@
+{
+  "ConfLingo/AppComposition.swift": "4f7ba899fd71a22b4834345c256e8c77b401efb0f894b9f17199d65e94e37faf",
+  "ConfLingo/ConfLingoApp.swift": "cd947758fdb296eddafc281b65274790224616f6bffd99d37fe509fa8c9df92c",
+  "ConfLingo/Views/ContentView.swift": "b4f2a982de7f64e89b8bd8e14a51b3a6c0bfe40c881d4a30dc26bcd547ec97cc",
+  "ConfLingo/Meeting/MeetingPreview.swift": "5046285730f82fcbbde8f2006784d51e8325fc7594bcfd613d3a6a7addd8a833",
+  "ConfLingoTests/AppCompositionTests.swift": "2c07de15c7f7f6e23ccd5eeed02221e1820a3ad16fe15deaeab778310306a86f",
+  "ConfLingoTests/NarrowWorkspaceLayoutTests.swift": "e725ff329242b1787b1a2ea0d8b08fe4bfea584de83df3a0be9ad9eabc3a3ad2",
+  "ConfLingoTests/SharedAssistanceLayoutTests.swift": "a0e0aceeb81536abccc5de9548d20f92eb0550fb8f6bd252010cfa84783ef3b9"
+}

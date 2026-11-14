@@ -3,22 +3,22 @@ import SwiftUI
 import Translation
 
 struct ContentView: View {
-    @State private var sessions: SessionsLibrary
-    @State private var library: KnowledgeLibrary
-    @State private var meeting: MeetingWorkspace
-    @State private var conferenceKnowledge: ConferenceKnowledgeWorkspace
+    private let sessions: SessionsLibrary
+    private let library: KnowledgeLibrary
+    private let meeting: MeetingWorkspace
+    private let conferenceKnowledge: ConferenceKnowledgeWorkspace
     @State private var showConferenceKnowledge = false
     @State private var conferenceInput: AudioInputSelection = .microphone
-    @State private var floatingPanel: MeetingFloatingPanel
+    private let floatingPanel: MeetingFloatingPanel
     @Environment(\.openWindow) private var openWindow
-    @State private var store: SessionStore
-    @State private var coordinator = TranslationCoordinator()
-    @State private var availability = ModelAvailabilityService()
-    @State private var controller: SessionController
-    @State private var navigation: ConferenceNavigation
+    @Bindable private var store: SessionStore
+    private let coordinator: TranslationCoordinator
+    private let availability: ModelAvailabilityService
+    private let controller: SessionController
+    @Bindable private var navigation: ConferenceNavigation
     @State private var translationConfiguration: TranslationSession.Configuration?
     @State private var translationGeneration: UUID?
-    @State private var profileStore: KeywordProfileStore
+    private let profileStore: KeywordProfileStore
     @State private var showDictionary = false
     @State private var showClearConfirmation = false
     @State private var preparationRetry = 0
@@ -34,45 +34,26 @@ struct ContentView: View {
     @AppStorage("appearance") private var appearance = "system"
     private let isPreview: Bool
 
-    init(activity: AudioInputUse = AudioInputUse(), preview: Bool = false, defaults: UserDefaults = .standard,
-         meeting: MeetingWorkspace? = nil, floatingPanel: MeetingFloatingPanel? = nil, meetingPreview: Bool = false, sessions: SessionsLibrary? = nil) {
-        #if DEBUG
-        isPreview = preview
-        #else
-        isPreview = false
-        #endif
-        _library = State(initialValue: KnowledgeLibrary.make(preview: isPreview))
-        _sessions = State(initialValue: sessions ?? SessionsLibrary.make(preview: isPreview))
-        let session = SessionStore()
-        let settings: UserDefaults
-        #if DEBUG
-        settings = isPreview ? (meetingPreview ? MeetingPreview.defaults : ConferencePreview.defaults) : defaults
-        if isPreview { ConferencePreview.populate(session) }
-        #else
-        settings = defaults
-        #endif
+    init(composition: AppComposition) {
+        isPreview = composition.isPreview
+        sessions = composition.sessions
+        library = composition.library
+        meeting = composition.meeting
+        conferenceKnowledge = composition.conferenceKnowledge
+        floatingPanel = composition.floatingPanel
+        store = composition.store
+        coordinator = composition.coordinator
+        availability = composition.availability
+        controller = composition.controller
+        navigation = composition.navigation
+        profileStore = composition.profileStore
+        let settings = composition.defaults
         _fontSize = AppStorage(wrappedValue: 16, "fontSize", store: settings)
         _sourceLocaleID = AppStorage(wrappedValue: "en-US", "sourceLocaleID", store: settings)
         _targetLanguageID = AppStorage(wrappedValue: "ja", "targetLanguageID", store: settings)
         _fastFinalization = AppStorage(wrappedValue: false, "fastFinalization", store: settings)
         _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: settings)
         _appearance = AppStorage(wrappedValue: "system", "appearance", store: settings)
-        #if DEBUG
-        let meetingWorkspace = meeting ?? (isPreview ? MeetingPreview.make(activity: activity, defaults: settings)
-            : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings))
-        _meeting = State(initialValue: meetingWorkspace)
-        _conferenceKnowledge = State(initialValue: ConferenceKnowledgeWorkspace(store: session, settings: meetingWorkspace.llmSettings,
-            client: isPreview ? PreviewInsightClient() : nil))
-        #else
-        let meetingWorkspace = meeting ?? MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: settings)
-        _meeting = State(initialValue: meetingWorkspace)
-        _conferenceKnowledge = State(initialValue: ConferenceKnowledgeWorkspace(store: session, settings: meetingWorkspace.llmSettings))
-        #endif
-        _floatingPanel = State(initialValue: floatingPanel ?? MeetingFloatingPanel(defaults: settings))
-        _store = State(initialValue: session)
-        _controller = State(initialValue: SessionController(activity: activity))
-        _navigation = State(initialValue: ConferenceNavigation(destination: meetingPreview ? .meeting : isPreview ? .live : .home))
-        _profileStore = State(initialValue: KeywordProfileStore(defaults: settings))
     }
 
     var body: some View {
@@ -434,6 +415,6 @@ struct ContentView: View {
 }
 
 #Preview {
-    ContentView(preview: true)
+    ContentView(composition: AppComposition(arguments: ["--ui-preview"]))
         .frame(width: 1280, height: 800)
 }

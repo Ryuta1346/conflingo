@@ -1,7 +1,7 @@
 ---
 title: ConfLingo Usage Guide
 created: 2026-06-10
-updated: 2026-11-12
+updated: 2026-11-14
 status: active
 type: user-guide
 ---
@@ -152,6 +152,8 @@ Both modes offer microphone/external devices, system audio, or both, plus docume
 
 See [README](../README.md#distribution) for distribution builds and [PR5-B validation](validation/pr5-b-conference.md) for the verification scope.
 
+For AI failures, macOS Console can show logs for subsystem `com.gavrri.conflingo`, category `LLM`. Entries contain only the provider type, operation, failure category and a numeric code. They exclude transcript/document/answer text, API keys, connection URLs and model names. Cancellation is recorded separately from ordinary failures.
+
 ## Repository context in Meeting
 
 Before or during a Meeting, open **資料 → リポジトリを追加** and select a local working folder. Review the source, tests, and documents, exclude files or directories, then import. Hidden files, dependencies, generated output, and known credential files are excluded. Full `.gitignore` semantics and detection of secrets embedded in source are not provided.
@@ -159,6 +161,8 @@ Before or during a Meeting, open **資料 → リポジトリを追加** and sel
 One repository per meeting supports up to 1,000 files, five million characters, and 20 MiB; each file is limited to 1 MiB and 100,000 characters. Ordinary Markdown/Text documents retain their separate limits. Import and local search send nothing externally.
 
 Manual questions require both meeting AI and document permission; at most five matching excerpts / 6,000 characters plus their names and locations are sent to the selected LLM. Automatic suggestions can use the same material when **自動提案にも資料を使う** is enabled in AI settings. This defaults off and is independent of manual and summary permissions. The triggering final utterance searches for up to five excerpts / 6,000 characters. No matches means transcript-only generation; a search failure sends nothing and disables automatic suggestions. The existing two-per-minute and 12-second minimum interval remain, with one 30-second deadline covering search and generation. A manual question preempts automatic work. Input token usage may increase. After the meeting, select **この要約では資料も参照する** in summary confirmation to review excerpts and request counts before sending. This choice is independent of the live meeting permission and defaults to transcript only.
+
+Each summary supports at most 100 sections, each with up to 30 utterances / 12,000 characters. Short utterances can total up to 3,000; longer text reduces that count. Review the actual request count before sending. Sections run sequentially, so cost and time grow with the count. You can stop generation; there is no automatic retry. Full Markdown export remains available when the summary limit is exceeded.
 
 Summary output separates spoken content from document/implementation supplements. Citations open the imported snapshot with relative paths, line numbers, and content hashes, and are included in Markdown export. A working-tree snapshot is not a verified Git commit or deployed state. Original files are unchanged. In-memory meeting copies are discarded with the meeting or app exit; bodies explicitly saved to the library remain. Existing answer citations remain until meeting disposal even after a source is removed.
 

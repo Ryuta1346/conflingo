@@ -2,13 +2,22 @@
 
 [English](README.md) | [日本語](README.ja.md) | **简体中文** | [한국어](README.ko.md) | [Español](README.es.md)
 
-一款个人用 macOS 应用：在会议现场使用 Apple/macOS 内置 API 对 MacBook 麦克风音频进行实时转写，并以翻译字幕的形式显示。识别语言与目标语言可从操作系统支持的语言中自由选择（默认：英语 → 日语）。
+一款提供会议字幕与会话辅助的个人用 macOS 应用。Conference 和 Meeting 均可选择麦克风、系统音频或两者。转写与可选翻译通过 Apple API 在本机处理；可选 AI 辅助使用用户选择的 LLM 连接。新会话默认使用转写模式。
 
 - 语音转写：`Speech.framework`（macOS 26 的 `SpeechAnalyzer` / `SpeechTranscriber`，设备端处理）
 - 翻译：`Translation.framework`（`TranslationSession`，设备端处理）
-- UI：SwiftUI 双窗格布局（原文转写 / 译文）
+- UI：SwiftUI Conference / Meeting 界面、浮动小窗与共享资料库
 
 📖 **详细使用方法（专业术语注册、现场技巧、故障排查）请参阅 [docs/usage.md](docs/usage.md)（英文，另有[日语版](docs/usage.ja.md)）。**
+
+## 当前功能
+
+- **Meeting：** 双输入转写、按输入选择翻译、浮动小窗、带来源的问答、可选自动建议、决策/行动候选确认及结束后的手动摘要。翻译尽可能保留所选术语的原文拼写；Meeting 尚不支持指定固定译词。
+- **Sessions：** 通过「このMacに保存」显式保存确定的转写、译文、已完成的 AI 回答、候选确认状态、摘要和引用片段。支持按名称搜索、重启后只读查看、Markdown 导出与删除。不保存音频、完整源文档、API 密钥或 AI 授权。没有自动保存或云同步；删除会话不会删除导出的 Markdown 和原始文件。
+- **资料库：** 会话前或进行中可导入 Markdown/Text 或选中的仓库文件。用「ライブラリに保存」将文档显式保存在本机，再通过「ライブラリから選択」复用。AI 发送授权不会保存。尚不支持 PDF/OCR。
+- **两种模式的 AI 辅助：** 可选择 Gemini、OpenAI、Claude、Kimi、DeepSeek、OpenAI 兼容云服务，以及通过兼容服务器连接的 Qwen 等本地模型。密钥按连接分别存入 Keychain。只发送经授权的文本与资料片段，不发送音频；自动建议默认关闭。手动网页调查使用 Gemini/OpenAI/Claude 模型自带的搜索工具和现有密钥，无需另一搜索密钥。不支持 ChatGPT 订阅登录。
+
+各服务的实际模型质量、Zoom/Meet/Teams 分别验收、VoiceOver 全流程以及 60 分钟耐久性仍待验证。请参阅[验收进度](plan.md)及[英文使用指南](docs/usage.md)。
 
 ## 运行要求
 
@@ -34,7 +43,7 @@ xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -destination 'pla
 
 ## 权限授予
 
-1. **麦克风**：首次按下 Start 时会显示麦克风使用权限对话框。不授权则无法转写
+1. **麦克风**：首次按下 Start 时会显示麦克风使用权限对话框。仅使用麦克风输入时需要；仅采集系统音频时不请求此权限
 2. **语音识别模型**：首次启动时若识别模型未安装，会自动开始下载（带进度显示）
 3. **翻译模型**：若翻译模型未安装，会显示操作系统标准的下载确认对话框
 
@@ -98,32 +107,13 @@ ditto -c -k --sequesterRsrc --keepParent \
 
 ## 限制事项
 
-- 假定使用 MacBook 内置麦克风拾取会场声音。无法捕获 Zoom / YouTube 等 Mac 内部音频（系统音频）
-- 设计上不翻译识别中的句子（partial）（防止译文抖动）。翻译以确定句为单位，延迟约 2〜5 秒
+- 两种模式均支持麦克风、系统音频或双输入；Zoom/Meet/Teams 的分别验收仍待完成
+- 设计上不翻译识别中的句子（partial）（防止译文抖动）。翻译延迟取决于模型、文本和设备；实际会议中的延迟验收仍待完成
 - 仅停止状态下可切换语言。切换语言后已有的字幕历史会保留（Markdown 头部记录保存时的语言对）
-- 不支持说话人分离、摘要、录音保存
+- 不支持独立说话人识别或录音保存。Meeting 提供可选 AI 摘要
 - 未进行分发用签名/公证（以本地构建的个人使用为前提）
 - 识别准确率受麦克风位置和环境噪音影响较大。建议将 MacBook 朝向扬声器方向，尽量坐在前排
 
 ## 架构
 
-```
-AVAudioEngine 麦克风输入（硬件格式）
-  └ AVAudioConverter 转换为 SpeechAnalyzer 推荐格式
-    └ AsyncStream<AnalyzerInput> → SpeechAnalyzer / SpeechTranscriber（volatileResults）
-        ├ partial → SessionStore.volatileText（在识别窗格中浅色显示）
-        └ final  → 确定后存入 SessionStore.segments → TranslationCoordinator 队列
-            └ .translationTask 闭包内的 TranslationSession 逐条翻译
-                └ SessionStore.applyTranslation → 显示在翻译窗格
-```
-
-| 文件 | 职责 |
-|---|---|
-| `Models/SessionStore.swift` | UI 的单一数据源。片段历史、partial、去重 |
-| `Models/KeywordParser.swift` | 专业术语栏解析 + 活动预置术语 |
-| `Models/LanguageCatalog.swift` | 语言显示名称与目标语言候选过滤 |
-| `Services/AudioCaptureService.swift` | 麦克风输入、格式转换、权限请求 |
-| `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber 接线 |
-| `Services/TranslationCoordinator.swift` | 翻译队列（ID 去重 + AsyncStream） |
-| `Services/ModelAvailabilityService.swift` | 启动时的可用性检查与模型下载 |
-| `Export/MarkdownExporter.swift` | Markdown 生成（纯函数） |
+共享转写路径、AI 辅助、资料库和 Sessions 的结构请参阅[最新架构图](README.md#architecture)。

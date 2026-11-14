@@ -1,0 +1,17 @@
+# UIテスト安定化・Debug検証画面の独立レビュー
+
+固定入力: implementation.diff / hashes.json。対象7ファイルのSHA-256一致を確認。
+
+- TestAccessibility.swift、TestAccessibilityTests.swift
+- AssistanceReviewRegressionTests.swift、LiveTranscriptLayoutTests.swift、LongSummaryLayoutTests.swift、MeetingTermLayoutTests.swift
+- ConfLingoApp.swift
+
+関連確認: TestGate/TestSignal/FakeMeetingTranslator、MeetingTranslationsのqueue・完了反映、MeetingLayoutTests、XcodeのDEBUG定義、検証Window IDの呼出し元。
+
+結果: 指摘0件。AX設定を変更する全既知呼出し元はshared leaseへ統一。2つのleaseをどちらの順序で解放しても最終解放までは有効であり、元のtrue/falseの復元を4ケースで検証するテストを確認。解放クロージャは重複解放を無視する。取得・解放はMainActorで直列化され、sleep中に別suiteが開始しても一方の終了で設定をfalseにしない。
+
+非同期翻訳はgateで開始・保留を観察してから解放し、3秒以内の完了を必須条件にしている。AXテキストはレイアウトを更新しながら期待値を期限付きで待つ。既存の履歴可視性・最新復帰・消去後の旧本文不在の検証は保持している。TestSignalの待機はAsyncStream経由で取消可能、suiteは1分制限を維持する。原文テストの200msレイアウト待ち自体は残るが、問題の翻訳完了判定とAX本文反映は固定時間のみで判定しなくなった。
+
+Releaseでは検証用2controllerの所有・生成と2つのScene宣言を除外し、通常Meeting、Conference、主画面の設定と小窓のメニューは維持。検証Window IDへの参照は検証View内に限られ、通常UIから削除済みWindowを呼ぶ経路は見当たらない。
+
+静的レビューのみで、本担当によるテスト実行・ビルド・実機操作は未実施。全体並列テストでの安定性は主担当の実行結果で判断する。VoiceOver実操作やRelease実機受入の完了を意味しない。

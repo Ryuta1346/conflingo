@@ -31,12 +31,10 @@ struct MeetingTermLayoutTests {
         window.isReleasedWhenClosed = false
         window.contentView = host
         window.orderFront(nil)
-        let attribute = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
-        let previous = NSApp.accessibilityAttributeValue(attribute)
-        NSApp.accessibilitySetValue(true, forAttribute: attribute)
+        let releaseAccessibility = TestAccessibility.shared.enable()
         defer {
             window.close()
-            NSApp.accessibilitySetValue(previous ?? false, forAttribute: attribute)
+            releaseAccessibility()
             meeting.translations.reset(sessionID: UUID())
         }
         await layout(host)

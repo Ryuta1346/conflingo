@@ -1,4 +1,10 @@
-> 2026-11-14 R6-4: Keychainの全操作の排他制御と認証UI設定の復元失敗処理を実装。全667件中660成功・実API7skip（最終はXcode並列テスト無効）、Lint251ファイル違反0、Release成功。ローカル実装・自動検証済み、[Draft PR #40](https://github.com/Ryuta1346/conflingo/pull/40)へ提出済み・未マージ。独立レビュー・実機受入は継続。[結果](docs/validation/r6-keychain-interaction.md)・[計画](docs/design/r6-keychain-interaction-plan.md)。
+> 提出対象: 第1段階 `a36bac5`、構成ルート分離 `50e479c`。2026-11-14のユーザー「コミットand PR作成」により、検証記録と合わせてPR提出する。マージ・実機受入は未完了。
+
+> 2026-11-14 第2段階・構成ルート分離: `AppComposition`へサービス生成を集約し、主画面・小窓・検証画面で共有。通常並列の全688件中681成功・実API7skip、Lint259ファイル違反0、arm64/x86_64 Release成功。独立レビュー2観点の指摘0件。実装コミット済み・未マージ。[計画](docs/design/app-composition-plan.md)・[結果](docs/validation/app-composition-2026-11-14.md)。
+
+> 2026-11-14 第1段階完了: レビュー4指摘（SSE上限・UI待機・用語更新競合・資料許可解除）、LLM失敗診断、開発画面Debug限定を承認後に実装。通常並列の全682件中675成功・実API7skip、Lint257ファイル違反0、arm64/x86_64 Release成功。修正後の独立レビュー指摘0件。実装コミット済み・未マージ。[結果](docs/validation/remaining-implementation-2026-11-14.md)・[計画](docs/design/remaining-work-plan.md)。構造整理と実機受入は継続。
+
+> 2026-11-14 R6-4: Keychainの全操作の排他制御と認証UI設定の復元失敗処理を実装。全667件中660成功・実API7skip（最終はXcode並列テスト無効）、Lint251ファイル違反0、Release成功。ローカル実装・自動検証済み、[PR #40](https://github.com/Ryuta1346/conflingo/pull/40)でローカルmain `33c8ae6`へマージ済み。独立レビュー・実機受入は継続。[結果](docs/validation/r6-keychain-interaction.md)・[計画](docs/design/r6-keychain-interaction-plan.md)。
 
 > 2026-11-14 R6-2/3: Meeting翻訳の言語ペア別セッション再利用と採用用語の原文表記保持を実装。全656件中649成功・実API7skip、Lint249ファイル違反0、Release成功。ローカル実装・自動検証済み、[PR #39](https://github.com/Ryuta1346/conflingo/pull/39)でローカルmain `18d0fcb`へマージ済み。独立レビュー・実モデル品質・実音声受入は継続。[結果](docs/validation/r6-meeting-translation.md)・[計画](docs/design/r6-meeting-translation-plan.md)。
 
@@ -27,10 +33,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-14／ローカルmain `18d0fcb`**。R1-1〜3・R2・R3・R4・R5-1/2/3・R6-1/2/3はマージ済み。R3はレビューも完了。R5-3の検索語選択は[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[PR #37](https://github.com/Ryuta1346/conflingo/pull/37)でローカルmain `dab817e`へマージ済み。R2の他社実測・独立レビュー、R4の独立レビュー完了確認とGate A実機受入、R5の独立レビュー・実モデル品質・長時間耐久は継続。品質ゲートは引き続き未完了。
+- 更新: **2026-11-14／main `33c8ae6`を基点とする`fix/review-followups-app-composition`**。R1-1〜3・R2・R3・R4・R5-1/2/3・R6-1/2/3/4はマージ済み。独立レビュー4指摘の修正とR6の診断ログ・開発画面Debug限定はローカル実装・検証済み、修正後レビュー指摘0件。[結果](docs/validation/remaining-implementation-2026-11-14.md)。実モデル・実機受入と品質ゲートは継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** R6-4の全667件中660成功・実API7skip、Lint251ファイル違反0、Release成功。最終全体はXcode並列テスト無効。Keychainの競合・復元失敗・回復と接続設定を確認。途中の既存UI2件のタイミング失敗は単独・最終全体で成功したが不安定性を記録。[結果](docs/validation/r6-keychain-interaction.md)。独立レビュー・実機受入、実モデル品質・実音声・VoiceOver全経路の残件は継続。
+- **直近の検証記録:** 構成ルート分離後、通常並列の全688件中681成功・実API7skip・失敗0、Lint259ファイル違反0、arm64/x86_64 Release成功。[結果](docs/validation/app-composition-2026-11-14.md)。前段階の字幕AX空状態・翻訳待機不足の修正も全体回帰に含む。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
@@ -39,7 +45,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** R5-1/2は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)でマージ済み。R5-3も[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)。**PR #37はローカルmain `dab817e`へマージ済み。次はR5の独立レビュー完了確認と残る実機受入**。R6-1の同文発話欠落は[ローカル実装・検証済み](docs/validation/r6-1-repeated-final.md)、[PR #38](https://github.com/Ryuta1346/conflingo/pull/38)はローカルmain `b526a1b`へマージ済み。R6-1の独立レビュー完了確認・実音声受入は継続。**R6-2/3のMeeting翻訳セッション再利用・採用用語の原文表記保持は[ローカル実装・自動検証済み](docs/validation/r6-meeting-translation.md)、[PR #39](https://github.com/Ryuta1346/conflingo/pull/39)でローカルmain `18d0fcb`へマージ済み**。次は独立レビューと残る実機受入。Keychain対応は[R6-4でローカル実装・自動検証済み](docs/validation/r6-keychain-interaction.md)、[Draft PR #40](https://github.com/Ryuta1346/conflingo/pull/40)へ提出済み・未マージ。次は独立レビュー・実機受入。後続の実装候補はLLM失敗診断ログの調査・計画。固定訳語UIは別途検討。R4の独立レビュー完了確認とGate A、R2の他社実測・独立レビューは継続。R1-1の機器変更・切断/復旧はGate B、R1-2の実モデル再試行はGate Aと合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
+**先行:** PR #40までマージ済み。独立レビュー4指摘とLLM失敗診断・開発画面Debug限定は[ローカル実装・検証・レビュー完了](docs/validation/remaining-implementation-2026-11-14.md)、実装コミット済み・未マージ。構成ルート分離は[ローカル実装・自動検証・独立レビュー完了](docs/validation/app-composition-2026-11-14.md)。次の実装候補は共通支援/通知整理、LLM分岐/SSE集約、CIで、[計画第2段階](docs/design/remaining-work-plan.md)の具体化から進める。以下の実音声・実モデル受入は継続。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -57,11 +63,11 @@
 | R1-1 | マイクの機器・構成変更 | 構成変更を検知し、入力停止・エラー表示・再開始案内へ接続。合成通知・Conference／Meeting結合・全回帰成功。PRマージ済み、実機の抜き差し等は未受入。[結果](docs/design/r1-1-microphone-configuration-plan.md)・[PR #31](https://github.com/Ryuta1346/conflingo/pull/31) | REVIEW |
 | R1-2 | 翻訳モデル準備失敗の表示 | 準備失敗の通知・訳文表示・再試行を実装。文字起こし継続、未翻訳分の再投入、取消・旧実行の無視を自動検証。実モデル失敗→再試行は未受入。[PR #32](https://github.com/Ryuta1346/conflingo/pull/32)マージ済み。[結果](docs/design/r1-2-translation-preparation-plan.md) | REVIEW |
 | R1-3 | ClaudeのWeb調査本文 | 複数textブロックの空白・改行・引用位置を保って連結するよう修正。日英・絵文字・重複出典・保存/Markdownを合成応答で検証済み。[PR #32](https://github.com/Ryuta1346/conflingo/pull/32)マージ済み。[結果](docs/design/r1-3-claude-research-text-plan.md) | REVIEW |
-| R2 | 受信上限の分離 | 総受信2 MiBと既存の本文上限を分離し、合成長文の拒否を修正。全回帰・Lint・Release成功。Gemini4要求測定済み。[PR #33](https://github.com/Ryuta1346/conflingo/pull/33)はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md) | REVIEW |
+| R2 | 受信上限の分離 | 総受信2 MiBはPR #33マージ済み。独立レビューで見つかったSSE結合改行のイベント予算算入漏れもローカル修正・境界テスト・レビュー完了、実装コミット済み。他社実測は未完了。[修正結果](docs/validation/remaining-implementation-2026-11-14.md) | REVIEW |
 | R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)はmain `8fd8144`へマージ済み。レビュー完了はユーザー確認済み。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | DONE |
-| R4 | 文字起こし経路の一本化 | 全入力を`DualTranscriptionController`へ統合し、旧マイク処理・未使用storeを削除。全テスト・Lint・Release成功。[PR #35](https://github.com/Ryuta1346/conflingo/pull/35)はmain `7888730`へマージ済み。独立レビュー完了は未確認、実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md) | REVIEW |
-| R5 | 中優先の残り | 最大100区間要約・ライブ表示は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)マージ済み（[R5-1結果](docs/validation/r5-1-summary-limit.md)・[R5-2結果](docs/validation/r5-2-live-presentation.md)）。検索語選択も[R5-3でローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[PR #37](https://github.com/Ryuta1346/conflingo/pull/37)でローカルmain `dab817e`へマージ済み。独立レビュー・実モデル品質・長時間耐久等の実機受入は継続 | REVIEW |
-| R6 | 低優先・構造の残り | R6-1の同文確定発話欠落は[ローカル実装・検証済み](docs/validation/r6-1-repeated-final.md)、[PR #38](https://github.com/Ryuta1346/conflingo/pull/38)でローカルmain `b526a1b`へマージ済み。独立レビュー・実音声受入は未確認。Meeting翻訳のセッション再利用と採用用語の原文表記保持は[R6-2/3でローカル実装・自動検証済み](docs/validation/r6-meeting-translation.md)、[PR #39](https://github.com/Ryuta1346/conflingo/pull/39)でローカルmain `18d0fcb`へマージ済み。独立レビュー・実モデル品質・実音声受入は継続。固定訳語UIは別途検討。Keychainのプロセス全体設定は[R6-4でローカル実装・自動検証済み](docs/validation/r6-keychain-interaction.md)、[Draft PR #40](https://github.com/Ryuta1346/conflingo/pull/40)へ提出済み・未マージ。独立レビュー・実機受入は継続。その後はLLM失敗の診断ログ、検証用ウィンドウの同梱。構造は`ContentView`からの構成ルート分離、共通支援のモジュール切り出し、単一スロット通知の統一、LLMプロバイダ分岐とSSE解析の集約、CIとREADME構成図の更新 | DOING |
+| R4 | 文字起こし経路の一本化 | `DualTranscriptionController`統合はPR #35でマージ済み。独立静的レビューの製品指摘0件。実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[レビュー](docs/validation/remaining-review-2026-11-14.md) | REVIEW |
+| R5 | 中優先の残り | 最大100区間要約・ライブ表示・検索語選択はPR #36/#37でマージ済み。UIテストの翻訳完了待機不足と共有AX設定の競合をローカル修正。通常並列全体成功、修正後レビュー指摘0件、実装コミット済み。実モデル品質・長時間耐久は継続。[結果](docs/validation/remaining-implementation-2026-11-14.md) | REVIEW |
+| R6 | 低優先・構造の残り | R6-1〜4はPR #38〜40でマージ済み、独立レビュー指摘0件。LLM失敗診断・検証画面Debug限定もローカル実装・検証・レビュー完了、実装コミット済み。README構成図は更新済み。構成ルート分離も[ローカル実装・自動検証・独立レビュー完了](docs/validation/app-composition-2026-11-14.md)。残る構造課題は共通支援モジュール化、通知統一、LLM分岐/SSE集約、CI。実モデル・Keychain実認証・実音声は未受入。[結果](docs/validation/remaining-implementation-2026-11-14.md) | DOING |
 
 ## PR進捗
 
@@ -100,22 +106,22 @@
 |---|---|---|---|
 | [x] | PR8／レビュー・修正マージ | 独立レビュー・MEDIUM 2件の修正検証・実API評価を完了。PR #19はmain `7efbd3f`でマージ確認済み。PR8全体の受入は継続 | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
 | [x] | PR4（短時間ローカル） | 新しい文による再開と通常Meetingの開始・一時停止・再開・終了を確認。会議アプリ別・Gate B全体は次行で継続 | [実入力受入](docs/validation/meeting-real-input-2026-11-11.md)・[診断結果](docs/validation/microphone-diagnostics.md) |
-| [ ] | 資料追加導線／新規受入 | 通常／語彙モードの日英精度・ライブ更新と2入力、実モデル質問・補正、狭幅・文字拡大・キーボード・VoiceOverと独立レビュー。ローカル実装・fake UI成功とは区別 | [検証記録](docs/validation/knowledge-entry-points.md) |
+| [ ] | 資料追加導線／新規受入 | 用語ライブ更新競合・資料取り外し後の許可解除漏れをローカル修正し、自動検証・独立レビュー完了、実装コミット済み。日英精度・2入力・実モデル質問/補正・UI全経路は継続 | [検証記録](docs/validation/knowledge-entry-points.md)・[修正結果](docs/validation/remaining-implementation-2026-11-14.md) |
 | [ ] | Sessions／UI受入 | 通常幅の主要操作と再起動後の復元は確認済み。狭幅・拡大文字・キーボード全経路・VoiceOverを確認。Windowメニューの操作ツールエラーで当該実操作は未完了 | [Sessions検証](docs/validation/sessions.md) |
-| [ ] | 資料ライブラリ／UI・レビュー | L12の狭幅・最大文字・キーボード・VoiceOver全経路と独立レビュー。100項目・1,000ファイルの保存版読込／索引復元は測定済み、最大容量の測定は未実施 | [資料ライブラリ検証](docs/validation/knowledge-library.md) |
+| [ ] | 資料ライブラリ／UI・レビュー | L12の狭幅・最大文字・キーボード・VoiceOver全経路。独立レビューは実施済み（資料導線の2指摘は修正済み、実装コミット済み）。100項目・1,000ファイルの保存版読込／索引復元は測定済み、最大容量の測定は未実施 | [資料ライブラリ検証](docs/validation/knowledge-library.md) |
 | [ ] | LLM選択／実モデル・UI | 新規クラウド各社・Qwenの実生成、構造化応答・回答/引用品質・速度を確認。モデル一覧から選択して保存する一連の操作、狭幅・VoiceOver全経路も未確認。ローカル模擬API成功と実モデル成功を区別 | [LLM選択検証](docs/validation/llm-selection.md) |
 | [ ] | PR0・5-B／Gate A | Conferenceの実翻訳・文字起こし専用・字幕・停止/再開・辞書・言語切替・Clear・Markdown保存・権限拒否/復旧など、回帰表の未実施項目を実機確認 | [Conference回帰表](docs/validation/conference-baseline.md#conference回帰表) |
 | [ ] | PR3・4／Gate B | Zoom/Meet/Teamsそれぞれで内部音声とマイクを識別。入力切替・機器/権限変更・切断/復旧・検証画面閉鎖時の停止、2系統STTの精度・時刻誤差・遅延・CPU/メモリを確認 | [2入力検証](docs/validation/dual-transcription.md)・[詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR5-C・6・7・8／Gate C | 通常Meetingの開始・一時停止/再開・終了は実音声で確認済み。候補確認/却下・要約・Markdown保存との結合受入が残る。根拠表示・誤確定防止・提案連発防止、通信断時の音声継続とAIのみの縮退、資料検索との結合を確認 | [PR5-C](docs/validation/pr5-c-meeting.md)・[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-meeting-state.md)・[PR8](docs/validation/pr8-local-rag.md) |
 | [x] | PR7（合成要約品質） | 要約60秒化後の3会議・8区間が合格。過去評価と合わせ固定16会議・22区間の品質条件を確認。過去2回のtimeoutは保持し、実音声・Gate Cは別途受入 | [修正・評価結果](docs/validation/pr7-summary-deadline.md) |
 | [x] | PR8／合成引用品質 | 日英16/16ケースの意味・言語・引用が合格。命令・矛盾・不足資料を含む。Gate C全体とは区別 | [PR8品質評価](docs/validation/pr8-quality-acceptance.md) |
-| [ ] | PR #20／追加機能の品質・レビュー | リポジトリを使う手動質問・自動提案・資料付き要約を実モデルで評価。自然言語からコードへの検索精度、補足と引用の正確さ、実音声との結合を確認。独立レビューと1,000ファイル級の原本走査→選択→索引化の時間・メモリ・操作性も未確認。ライブラリ保存版の索引復元の測定とは区別 | [リポジトリ資料化](docs/validation/repository-knowledge.md)・[自動提案](docs/validation/automatic-knowledge.md) |
-| [ ] | PR5-A/B/C・6〜8／Gate U | 承認モックと実装画像の比較、未確認の画面/空・失敗状態、全操作の受入記録を完成。VoiceOver全経路、画面共有・複数画面・高コントラスト等を確認。PR5-Cの独立コード/画像レビューを実施 | [設計検証](docs/design/validation.md)・[PR5-B](docs/validation/pr5-b-conference.md)・[PR5-C](docs/validation/pr5-c-meeting.md)・[確認済み範囲](docs/validation/pr6-focus-stability.md) |
+| [ ] | PR #20／追加機能の品質・レビュー | リポジトリを使う手動質問・自動提案・資料付き要約を実モデルで評価。自然言語からコードへの検索精度、補足と引用の正確さ、実音声との結合を確認。独立レビューは実施済み・指摘0件。1,000ファイル級の原本走査→選択→索引化の時間・メモリ・操作性も未確認。ライブラリ保存版の索引復元の測定とは区別 | [リポジトリ資料化](docs/validation/repository-knowledge.md)・[自動提案](docs/validation/automatic-knowledge.md) |
+| [ ] | PR5-A/B/C・6〜8／Gate U | 承認モックと実装画像の比較、未確認の画面/空・失敗状態、全操作の受入記録を完成。VoiceOver全経路、画面共有・複数画面・高コントラスト等を確認。PR5-Cの独立コード/履歴画像レビューは完了。現行版の画像・実操作受入は継続 | [設計検証](docs/design/validation.md)・[PR5-B](docs/validation/pr5-b-conference.md)・[PR5-C](docs/validation/pr5-c-meeting.md)・[確認済み範囲](docs/validation/pr6-focus-stability.md) |
 | [ ] | PR0・3・9／Gate B・D | ScreenCaptureKit/Process Tapの権限・Sandbox・配布条件と配布署名での動作を検証 | [詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR9／Gate D | 60分実会議の耐久、クラッシュ・メモリ増加・処理滞留、入力切断/再接続、APIタイムアウト・連続開始/停止を確認。発話終了→AI完成のp95目標8秒とSTT遅延を実測し、質問検知率・誤提案率・根拠正確性を記録 | [Gate D・テスト計画](docs/meeting-copilot-plan.md#4-フェーズごとの受入基準) |
 | [ ] | PR5-C・6・8・9／Gate D | 参加者への通知・同意、発話/資料の外部送信許可と解除、停止後の取得/送信停止、保持/破棄、ログへの本文/秘密情報非出力を確認 | [詳細計画](docs/meeting-copilot-plan.md)・[PR8検証](docs/validation/pr8-local-rag.md) |
 | [ ] | 費用確認／別工程 | 実API評価・取消分を含む使用量と実請求額を照合。推定予算管理額を実請求額と区別する | [PR6モデル採用](docs/validation/pr6-model-adoption.md)・[小窓停止](docs/validation/pr6-final-ui.md) |
-| [ ] | 利用案内・資料整合 | 日本語/英語READMEはSessionsとMeetingの現行仕様へ更新済み。他の言語版と利用ガイドを確認。詳細計画・過去の検証記録に残る当時の未検証記述と、現在の残件を区別する | [日本語README](README.ja.md#制限事項)・[英語README](README.md)・[詳細計画](docs/meeting-copilot-plan.md) |
+| [x] | 利用案内・資料整合（今回範囲） | README5言語の現行機能・構成、英語要約上限、日英の診断ログ案内を更新。実装結果・未受入を進捗資料へ反映。今後の構造/仕様変更時は再整合する | [更新記録](docs/validation/remaining-review-2026-11-14.md)・[修正結果](docs/validation/remaining-implementation-2026-11-14.md) |
 
 **開始条件・持ち越し:** 短時間実入力と通常Meeting操作を確認し、両入力・素材再生を停止済み。今回追加API0・本文保存0。PR7合成要約品質は3回の評価を通じ確認済み（合計54要求）。旧2回の不明使用量予約US$0.084528を保持し、累計推定管理額US$0.25228725。追加実APIは自動実行しない。#19の変更はmainへマージ済み。PR8の32要求は使用済み。合成試験を実会議・60分耐久・Gate Cの合格に置き換えない。
 

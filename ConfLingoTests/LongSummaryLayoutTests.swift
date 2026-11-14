@@ -8,10 +8,8 @@ import Testing
 struct LongSummaryLayoutTests {
     @Test(arguments: [440.0, 620.0])
     func hundredSectionConfirmationFitsAndCanCancel(width: Double) async throws {
-        let enhancedUI = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
-        let previous = NSApp.accessibilityAttributeValue(enhancedUI)
-        NSApp.accessibilitySetValue(true, forAttribute: enhancedUI)
-        defer { NSApp.accessibilitySetValue(previous ?? false, forAttribute: enhancedUI) }
+        let releaseAccessibility = TestAccessibility.shared.enable()
+        defer { releaseAccessibility() }
         let meeting = makeMeeting(count: 3_000, client: FakeInsightClient())
         await meeting.end()
         let plan = try meeting.summaryPlan()
@@ -34,10 +32,8 @@ struct LongSummaryLayoutTests {
     }
 
     @Test func narrowReviewShowsLimitAndCanStopLongSummary() async throws {
-        let enhancedUI = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
-        let previous = NSApp.accessibilityAttributeValue(enhancedUI)
-        NSApp.accessibilitySetValue(true, forAttribute: enhancedUI)
-        defer { NSApp.accessibilitySetValue(previous ?? false, forAttribute: enhancedUI) }
+        let releaseAccessibility = TestAccessibility.shared.enable()
+        defer { releaseAccessibility() }
         let client = FakeInsightClient()
         let gate = TestGate()
         client.gate = gate

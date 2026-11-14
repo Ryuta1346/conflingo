@@ -2,11 +2,11 @@
 
 [English](README.md) | **日本語** | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | [Español](README.es.md)
 
-カンファレンス会場で、MacBook のマイク音声を Apple/macOS 組み込み API でリアルタイム文字起こしし、翻訳字幕として表示する自分用 macOS アプリ。認識言語・翻訳先言語は OS が対応する言語から自由に選択できる（既定は文字起こし。翻訳モードの初期候補は英語 → 日本語）。
+Conferenceの字幕とMeetingの会議支援を提供する個人用macOSアプリです。両モードでマイク・システム音声・両方を選択できます。文字起こしと任意の翻訳はAppleのAPIでMac内処理し、任意のAI支援には選択したLLM接続を使います。新規セッションは文字起こしモードで開始します。
 
 - 文字起こし: `Speech.framework`（macOS 26 の `SpeechAnalyzer` / `SpeechTranscriber`、オンデバイス）
 - 翻訳: `Translation.framework`（`TranslationSession`、オンデバイス）
-- UI: SwiftUI 2ペイン（英語原文 / 日本語訳）
+- UI: SwiftUIのConference／Meeting画面、小窓、共通ライブラリ
 
 📖 **詳しい使い方（専門用語の登録方法・当日の Tips・トラブルシューティング）は [docs/usage.ja.md](docs/usage.ja.md) を参照。**
 
@@ -135,7 +135,7 @@ ditto -c -k --sequesterRsrc --keepParent \
 ## 制限事項
 
 - 両モードともマイク・外部入力機器／Mac内部音声／両方に対応し、Zoom/Meet/Teams別の受入検証は継続中
-- 認識途中の文（partial）は翻訳しない設計（訳揺れ防止）。翻訳は確定文単位で 2〜5 秒程度遅延する
+- 認識途中の文（partial）は翻訳しない設計（訳揺れ防止）。翻訳の遅延はモデル・文章・端末によって変わり、実会議での遅延受入は未完了
 - 言語の変更は停止中のみ。言語を切り替えても既存の字幕履歴は保持される（Markdown ヘッダには保存時点の言語ペアが記録される）
 - 人物名による話者分離・音声ファイルの録音保存は非対応。MeetingのAI要約は任意操作で利用可能
 - 配布用の署名・notarize はしていない（ローカルビルドでの自分用利用前提）
@@ -143,25 +143,45 @@ ditto -c -k --sequesterRsrc --keepParent \
 
 ## アーキテクチャ
 
-```
-AVAudioEngine マイク入力（ハードウェアフォーマット）
-  └ AVAudioConverter で SpeechAnalyzer 推奨フォーマットへ変換
-    └ AsyncStream<AnalyzerInput> → SpeechAnalyzer / SpeechTranscriber（en-US, volatileResults）
-        ├ partial → SessionStore.volatileText（英語ペインに薄く表示）
-        └ final  → SessionStore.segments に確定 → TranslationCoordinator のキューへ
-            └ .translationTask クロージャ内の TranslationSession が逐次翻訳
-                └ SessionStore.applyTranslation → 日本語ペインに表示
+```mermaid
+flowchart TD
+    App[ConfLingoApp / AppComposition] --> Main[ContentView]
+    App --> Floating[MeetingFloatingPanel]
+    App --> Meeting
+    App --> Library
+    App --> Sessions
+    Mic[MicrophoneAudioSource / AVAudioEngine] --> STT[SpeechTranscriptionService]
+    System[SystemAudioSource / ScreenCaptureKit] --> STT
+    STT --> Dual[DualTranscriptionController]
+    Dual --> Hub[TranscriptEventHub]
+    Hub --> Adapter[SessionController / LegacyTranslationAdapter]
+    Adapter --> Conference[SessionStore / TranslationCoordinator]
+    Hub --> Meeting[MeetingSessionStore / MeetingWorkspace]
+    Meeting --> Translation[MeetingTranslations / TranslationSession]
+    Conference --> Assistance[ConferenceKnowledgeWorkspace]
+    Meeting --> AI[InsightCoordinator / MeetingSummaryCoordinator]
+    Knowledge[KnowledgeStore / KnowledgeIndex] --> Assistance
+    Knowledge --> AI
+    Library[KnowledgeLibrary / local archives] --> Knowledge
+    Assistance --> LLM[SelectedLLMClient / LLMInsightClient]
+    AI --> LLM
+    Research[WebResearchCoordinator] --> Web[SelectedLLMResearchClient]
+    Conference --> Save[SessionSnapshot / SessionFiles]
+    Meeting --> Save
+    Save --> Sessions[SessionsLibrary / Markdown export]
 ```
 
-| ファイル | 責務 |
+パスは `ConfLingo/` からの相対位置です。R4の文字起こし経路統合後の現行構成を示しています。
+
+| ファイル／ディレクトリ | 責務 |
 |---|---|
-| `Models/SessionStore.swift` | UI の単一情報源。セグメント履歴・翻訳単位・partial |
-| `Models/KeywordParser.swift` | 専門用語欄のパース + イベント用プリセット |
-| `Models/LanguageCatalog.swift` | 言語の表示名・翻訳先候補の整形 |
-| `Services/AudioCaptureService.swift` | マイク入力・フォーマット変換・権限要求 |
-| `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber 配線 |
-| `Services/TranslationCoordinator.swift` | 翻訳キュー（ID dedup + AsyncStream） |
-| `Services/ModelAvailabilityService.swift` | 起動時の利用可能性チェック・モデル DL |
-| `Export/MarkdownExporter.swift` | Markdown 生成（純関数） |
+| `AppComposition.swift` | Appが所有するサービス、音声排他の共有、設定とプレビューの選択 |
+| `Services/DualTranscriptionController.swift` | 入力の所有、認識の開始・停止、イベント配信と停止順序 |
+| `Services/SessionController.swift` | 共通入力コントローラとConferenceの接続 |
+| `Meeting/MeetingWorkspace.swift` | Meetingの状態、翻訳、AI支援、振り返り |
+| `Meeting/Services/` | AI要求、応答解析、要約、接続別Keychain操作 |
+| `Research/` | 明示的なWeb調査とプロバイダ由来の引用 |
+| `Knowledge/` / `KnowledgeLibrary/` | 資料取込、ローカル検索、引用snapshot、資料の再利用 |
+| `Sessions/` / `Export/` | 明示的なローカル保存、読取専用の履歴、Markdown出力 |
 
 MeetingのLLMはGemini・OpenAI・Claude・Kimi・DeepSeek・その他OpenAI互換クラウド・ローカルモデル（Qwen等）から選択できます。APIキーは接続別にKeychainへ保存。ローカルモデルはOllama / LM Studio等へ接続します。[設定方法](docs/usage.ja.md#meetingのai支援llm選択)と[検証範囲](docs/validation/llm-selection.md)を参照してください。

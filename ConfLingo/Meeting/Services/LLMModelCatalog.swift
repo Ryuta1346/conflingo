@@ -39,31 +39,34 @@ struct URLSessionLLMCatalogTransport: LLMCatalogTransport {
 @MainActor
 struct LLMModelCatalog {
     var transport: any LLMCatalogTransport = URLSessionLLMCatalogTransport()
+    var diagnostics = LLMDiagnostics()
 
     func models(for connection: LLMConnection, key: String?) async throws -> [LLMModel] {
-        var request = URLRequest(url: try connection.endpoint("models"), cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
-        if connection.requiresKey && (key?.isEmpty ?? true) { throw InsightFailure.missingKey }
-        connection.authenticate(&request, key: key)
-        let data = try await transport.data(request, connection: connection)
-        try Task.checkCancellation()
-        guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any],
-              let entries = root[connection.provider == .gemini ? "models" : "data"] as? [[String: Any]] else {
-            throw InsightFailure.invalidResponse
-        }
-        var seen: Set<String> = []
-        return entries.prefix(1000).compactMap { entry in
-            let id: String
-            if connection.provider == .gemini {
-                guard let name = entry["name"] as? String,
-                      let methods = entry["supportedGenerationMethods"] as? [String], methods.contains("generateContent") else { return nil }
-                id = name.hasPrefix("models/") ? String(name.dropFirst(7)) : name
-            } else {
-                guard let value = entry["id"] as? String else { return nil }
-                id = value
+        try await diagnostics.capture(provider: connection.provider, operation: .models) {
+            var request = URLRequest(url: try connection.endpoint("models"), cachePolicy: .reloadIgnoringLocalCacheData, timeoutInterval: 15)
+            if connection.requiresKey && (key?.isEmpty ?? true) { throw InsightFailure.missingKey }
+            connection.authenticate(&request, key: key)
+            let data = try await transport.data(request, connection: connection)
+            try Task.checkCancellation()
+            guard let root = try JSONSerialization.jsonObject(with: data) as? [String: Any],
+                  let entries = root[connection.provider == .gemini ? "models" : "data"] as? [[String: Any]] else {
+                throw InsightFailure.invalidResponse
             }
-            guard !id.isEmpty, id.count <= 200, seen.insert(id).inserted else { return nil }
-            let label = entry["displayName"] as? String ?? entry["display_name"] as? String ?? id
-            return LLMModel(id: id, name: String(label.prefix(200)))
+            var seen: Set<String> = []
+            return entries.prefix(1000).compactMap { entry in
+                let id: String
+                if connection.provider == .gemini {
+                    guard let name = entry["name"] as? String,
+                          let methods = entry["supportedGenerationMethods"] as? [String], methods.contains("generateContent") else { return nil }
+                    id = name.hasPrefix("models/") ? String(name.dropFirst(7)) : name
+                } else {
+                    guard let value = entry["id"] as? String else { return nil }
+                    id = value
+                }
+                guard !id.isEmpty, id.count <= 200, seen.insert(id).inserted else { return nil }
+                let label = entry["displayName"] as? String ?? entry["display_name"] as? String ?? id
+                return LLMModel(id: id, name: String(label.prefix(200)))
+            }
         }
     }
 }

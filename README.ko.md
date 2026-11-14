@@ -2,13 +2,22 @@
 
 [English](README.md) | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | **한국어** | [Español](README.es.md)
 
-컨퍼런스 현장에서 MacBook 마이크 음성을 Apple/macOS 내장 API로 실시간 전사하고, 번역 자막으로 표시하는 개인용 macOS 앱입니다. 인식 언어와 번역 대상 언어는 OS가 지원하는 언어 중에서 자유롭게 선택할 수 있습니다(기본값: 영어 → 일본어).
+컨퍼런스 자막과 회의 지원을 제공하는 개인용 macOS 앱입니다. Conference와 Meeting에서 마이크, 시스템 오디오 또는 두 입력을 함께 선택할 수 있습니다. 전사와 선택적 번역은 Apple API로 이 Mac에서 처리하고, 선택적 AI 지원은 사용자가 지정한 LLM 연결을 사용합니다. 새 세션은 전사 모드로 시작합니다.
 
 - 전사: `Speech.framework` (macOS 26의 `SpeechAnalyzer` / `SpeechTranscriber`, 온디바이스)
 - 번역: `Translation.framework` (`TranslationSession`, 온디바이스)
-- UI: SwiftUI 2분할 화면 (원문 전사 / 번역문)
+- UI: SwiftUI Conference / Meeting 화면, 작은 창과 공통 라이브러리
 
 📖 **자세한 사용법(전문 용어 등록 방법, 현장 팁, 문제 해결)은 [docs/usage.md](docs/usage.md)(영어, [일본어판](docs/usage.ja.md)도 있음)를 참조하세요.**
+
+## 현재 기능
+
+- **Meeting:** 두 입력 전사, 입력별 선택적 번역, 작은 창, 근거가 있는 질문/답변, 선택적 자동 제안, 결정/할 일 후보 확인과 종료 후 수동 요약을 제공합니다. 선택한 용어의 원문 표기를 가능한 한 유지하지만, Meeting에서 고정 번역어를 지정하는 기능은 없습니다.
+- **Sessions:** 「このMacに保存」으로 확정 전사, 번역, 완료된 AI 답변, 후보 확인 상태, 요약과 인용 발췌를 명시적으로 저장합니다. 이름 검색, 재시작 후 읽기, Markdown 내보내기와 삭제가 가능합니다. 음성, 원본 문서 전체, API 키와 AI 허용 상태는 저장하지 않습니다. 자동 저장·클라우드 동기화는 없으며 세션 삭제는 내보낸 Markdown이나 원본 파일을 삭제하지 않습니다.
+- **자료 라이브러리:** 세션 전이나 도중에 Markdown/Text 또는 선택한 저장소 파일을 가져옵니다. 「ライブラリに保存」으로 문서를 이 Mac에 저장하고 「ライブラリから選択」으로 재사용합니다. AI 전송 허용 상태는 저장하지 않습니다. PDF/OCR은 아직 지원하지 않습니다.
+- **양쪽 모드의 AI 지원:** Gemini, OpenAI, Claude, Kimi, DeepSeek, OpenAI 호환 클라우드와 호환 서버를 통한 Qwen 등의 로컬 모델을 선택합니다. API 키는 연결별로 Keychain에 저장합니다. 허용한 텍스트·자료 발췌를 전송하며 음성은 보내지 않습니다. 자동 제안은 기본 꺼짐입니다. 수동 웹 조사는 Gemini/OpenAI/Claude 모델의 검색 도구와 기존 키를 사용하며 별도 검색 키가 필요 없습니다. ChatGPT 구독 로그인은 지원하지 않습니다.
+
+제공자별 품질, Zoom/Meet/Teams별 실사용, VoiceOver 전체 경로와 60분 내구성 검증은 남아 있습니다. [검증 현황](plan.md)과 [영문 사용 안내](docs/usage.md)를 확인하세요.
 
 ## 동작 요건
 
@@ -34,7 +43,7 @@ xcodebuild test -project ConfLingo.xcodeproj -scheme ConfLingo -destination 'pla
 
 ## 권한 허용
 
-1. **마이크**: 처음 Start를 누를 때 마이크 사용 권한 대화상자가 표시됩니다. 허용하지 않으면 전사할 수 없습니다
+1. **마이크**: 처음 Start를 누를 때 마이크 사용 권한 대화상자가 표시됩니다. 마이크 입력을 사용할 때만 필요하며 시스템 오디오만 사용하는 경우에는 요청하지 않습니다
 2. **음성 인식 모델**: 최초 실행 시 인식 모델이 설치되어 있지 않으면 자동으로 다운로드가 시작됩니다(진행 상황 표시)
 3. **번역 모델**: 번역 모델이 설치되어 있지 않으면 OS 표준 다운로드 확인 대화상자가 표시됩니다
 
@@ -98,32 +107,13 @@ ditto -c -k --sequesterRsrc --keepParent \
 
 ## 제한 사항
 
-- 행사장 소리는 MacBook 내장 마이크로 수음하는 것을 전제로 합니다. Zoom / YouTube 등 Mac 내부 음성(시스템 오디오)은 캡처할 수 없습니다
-- 인식 중인 문장(partial)은 번역하지 않는 설계입니다(번역 흔들림 방지). 번역은 확정 문장 단위로 약 2〜5초 지연됩니다
+- 양쪽 모드에서 마이크·시스템 오디오·두 입력을 지원합니다. Zoom/Meet/Teams별 실사용 검증은 남아 있습니다
+- 인식 중인 문장(partial)은 번역하지 않는 설계입니다(번역 흔들림 방지). 번역 지연은 모델·문장·기기에 따라 달라지며 실회의 지연 검증은 남아 있습니다
 - 언어 변경은 정지 중에만 가능합니다. 언어를 전환해도 기존 자막 기록은 유지됩니다(Markdown 헤더에는 저장 시점의 언어 쌍이 기록됨)
-- 화자 분리, 요약, 녹음 저장은 지원하지 않습니다
+- 개별 화자 식별과 녹음 저장은 지원하지 않습니다. Meeting에서는 선택적 AI 요약을 제공합니다
 - 배포용 서명·공증은 하지 않았습니다(로컬 빌드 개인 사용 전제)
 - 인식 정확도는 마이크 위치와 주변 소음의 영향을 크게 받습니다. MacBook을 스피커 방향으로 향하게 하고 가능하면 앞좌석을 권장합니다
 
 ## 아키텍처
 
-```
-AVAudioEngine 마이크 입력 (하드웨어 포맷)
-  └ AVAudioConverter로 SpeechAnalyzer 권장 포맷으로 변환
-    └ AsyncStream<AnalyzerInput> → SpeechAnalyzer / SpeechTranscriber (volatileResults)
-        ├ partial → SessionStore.volatileText (인식 패널에 흐리게 표시)
-        └ final  → SessionStore.segments에 확정 → TranslationCoordinator 큐로
-            └ .translationTask 클로저 내의 TranslationSession이 순차 번역
-                └ SessionStore.applyTranslation → 번역 패널에 표시
-```
-
-| 파일 | 책임 |
-|---|---|
-| `Models/SessionStore.swift` | UI의 단일 정보원. 세그먼트 기록·partial·중복 제거 |
-| `Models/KeywordParser.swift` | 전문 용어란 파싱 + 이벤트용 프리셋 |
-| `Models/LanguageCatalog.swift` | 언어 표시명·번역 대상 후보 정리 |
-| `Services/AudioCaptureService.swift` | 마이크 입력·포맷 변환·권한 요청 |
-| `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber 연결 |
-| `Services/TranslationCoordinator.swift` | 번역 큐 (ID 중복 제거 + AsyncStream) |
-| `Services/ModelAvailabilityService.swift` | 시작 시 가용성 확인·모델 다운로드 |
-| `Export/MarkdownExporter.swift` | Markdown 생성 (순수 함수) |
+공통 전사 경로, AI 지원, 자료 라이브러리와 Sessions의 구성은 [최신 아키텍처 다이어그램](README.md#architecture)을 참조하세요.

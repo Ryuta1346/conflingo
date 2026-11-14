@@ -3,53 +3,24 @@ import SwiftUI
 @main
 struct ConfLingoApp: App {
     @AppStorage("alwaysOnTop") private var alwaysOnTop = false
-    private let isPreview: Bool
-    private let isMeetingPreview: Bool
-    private let defaults: UserDefaults
-    @State private var audioUse: AudioInputUse
-    @State private var systemAudioProbe: SystemAudioProbeController
-    @State private var dualTranscription: DualTranscriptionController
-    @State private var meeting: MeetingWorkspace
-    @State private var floatingPanel: MeetingFloatingPanel
+    @State private var composition: AppComposition
     @State private var previewPrepared = false
 
     init() {
-        #if DEBUG
-        isMeetingPreview = ProcessInfo.processInfo.arguments.contains("--meeting-preview")
-        isPreview = isMeetingPreview || ProcessInfo.processInfo.arguments.contains("--ui-preview")
-        defaults = isMeetingPreview ? MeetingPreview.defaults : isPreview ? ConferencePreview.defaults : .standard
-        #else
-        isPreview = false
-        isMeetingPreview = false
-        defaults = .standard
-        #endif
-        _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: defaults)
-        let activity = AudioInputUse()
-        _audioUse = State(initialValue: activity)
-        _systemAudioProbe = State(initialValue: SystemAudioProbeController(activity: activity))
-        _dualTranscription = State(initialValue: DualTranscriptionController(activity: activity))
-        #if DEBUG
-        _meeting = State(initialValue: isPreview
-                         ? MeetingPreview.make(activity: activity, scenario: MeetingPreview.scenario,
-                                               liveAI: MeetingPreview.liveAIEnabled(arguments: ProcessInfo.processInfo.arguments),
-                                               defaults: defaults)
-                         : MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: defaults))
-        #else
-        _meeting = State(initialValue: MeetingWorkspace(controller: DualTranscriptionController(activity: activity, owner: .meeting), defaults: defaults))
-        #endif
-        _floatingPanel = State(initialValue: MeetingFloatingPanel(defaults: defaults))
+        let composition = AppComposition(arguments: ProcessInfo.processInfo.arguments)
+        _composition = State(initialValue: composition)
+        _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: composition.defaults)
     }
 
     var body: some Scene {
-        Window(isPreview ? "ConfLingo — UI Preview" : "ConfLingo", id: "main") {
-            ContentView(activity: audioUse, preview: isPreview, defaults: defaults,
-                        meeting: meeting, floatingPanel: floatingPanel, meetingPreview: isMeetingPreview)
+        Window(composition.isPreview ? "ConfLingo — UI Preview" : "ConfLingo", id: "main") {
+            ContentView(composition: composition)
                 .frame(minWidth: 640, minHeight: 520)
                 .task {
                     #if DEBUG
-                    if isMeetingPreview && !previewPrepared {
+                    if composition.isMeetingPreview && !previewPrepared {
                         previewPrepared = true
-                        await MeetingPreview.prepare(meeting, scenario: MeetingPreview.scenario)
+                        await MeetingPreview.prepare(composition.meeting, scenario: composition.previewScenario)
                     }
                     #endif
                 }
@@ -58,22 +29,24 @@ struct ConfLingoApp: App {
         .windowLevel(alwaysOnTop ? .floating : .normal)
         .commands {
             CommandGroup(after: .windowArrangement) {
-                Button("Meetingの小窓を表示") { floatingPanel.show(meeting: meeting) }
+                Button("Meetingの小窓を表示") { composition.floatingPanel.show(meeting: composition.meeting) }
             }
         }
 
+        #if DEBUG
         Window("システム音声の確認", id: "system-audio-probe") {
-            SystemAudioProbeView(controller: systemAudioProbe)
+            SystemAudioProbeView(controller: composition.systemAudioProbe)
         }
         .windowResizability(.contentSize)
         .defaultLaunchBehavior(.suppressed)
         .restorationBehavior(.disabled)
 
         Window("2入力文字起こしの確認", id: "dual-transcription-probe") {
-            DualTranscriptionProbeView(controller: dualTranscription)
+            DualTranscriptionProbeView(controller: composition.dualTranscription)
         }
         .defaultSize(width: 800, height: 600)
         .defaultLaunchBehavior(.suppressed)
         .restorationBehavior(.disabled)
+        #endif
     }
 }

@@ -122,17 +122,18 @@ struct AssistanceReviewRegressionTests {
             styleMask: [.titled, .resizable], backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.contentView = host
-        let enhancedUI = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
-        let previous = NSApp.accessibilityAttributeValue(enhancedUI)
-        NSApp.accessibilitySetValue(true, forAttribute: enhancedUI)
+        let releaseAccessibility = TestAccessibility.shared.enable()
         window.orderFront(nil)
         defer {
             window.close()
-            NSApp.accessibilitySetValue(previous ?? false, forAttribute: enhancedUI)
+            releaseAccessibility()
         }
         host.layoutSubtreeIfNeeded()
-        try await Task.sleep(for: .milliseconds(150))
-        host.layoutSubtreeIfNeeded()
+        let ready = try await waitForTestCondition {
+            host.layoutSubtreeIfNeeded()
+            return self.accessibilityText(host).contains("Meeting")
+        }
+        try #require(ready, "The Meeting accessibility tree must become available")
         let text = accessibilityText(host)
         #expect(text.contains("Meeting"), "The accessibility tree must include the Meeting heading")
         return text

@@ -1,5 +1,7 @@
 # ローカルリポジトリ資料化・資料付き要約の検証
 
+> 2026-11-14独立レビュー追記: 固定main `33c8ae6`で[残件レビュー](remaining-review-2026-11-14.md)を実施済み。指摘・未修正項目・確認範囲は同記録を参照。以下の「独立レビュー未実施」は当時の履歴で、実機受入の未完了は継続。
+
 2026-11-11 / `feature/local-repository-knowledge` / 基準main `7efbd3f`。
 [承認済み計画](../design/repository-knowledge-implementation-plan.md)を実装。**ローカル実装・自動検証・主要な無通信UI操作を確認。[PR #20](https://github.com/Ryuta1346/conflingo/pull/20)は2026-11-11にマージ済み（ローカルmain `294bd0c`で確認）。**
 

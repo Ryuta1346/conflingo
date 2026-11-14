@@ -230,8 +230,12 @@ final class DualFakeSpeech: SpeechTranscribing {
     var fastResults = false
     var keywords: [String] = []
     var contextFails = false
+    var contextGate: TestGate?
     func prepare(mode: SpeechRecognitionMode, locale: Locale) async throws { preparedMode = mode }
     func updateContext(_ values: [String]) async throws {
+        let gate = contextGate
+        contextGate = nil
+        await gate?.wait()
         if contextFails { throw VocabularyFailure.unavailable }
         keywords = values
     }

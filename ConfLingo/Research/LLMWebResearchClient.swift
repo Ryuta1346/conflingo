@@ -59,19 +59,22 @@ struct LLMWebResearchClient: LLMWebResearching {
     let connection: LLMConnection
     let key: () async throws -> String?
     var transport: (any ResearchHTTPTransport)?
+    var diagnostics = LLMDiagnostics()
 
     func generate(_ request: InsightRequest) async throws -> MeetingInsight {
-        guard connection.provider.supportsWebResearch else { throw ResearchFailure.unsupported }
-        try connection.validate()
-        try Task.checkCancellation()
-        let token = try await key()
-        try Task.checkCancellation()
-        guard let token, APIKeyCredentials.isValid(token) else { throw InsightFailure.missingKey }
-        let sent = try makeRequest(request, key: token)
-        let transport = try transport ?? URLSessionResearchTransport(allowedBaseURL: connection.endpoint(""))
-        let data = try await transport.fetch(sent)
-        try Task.checkCancellation()
-        return try LLMResearchResponse.decode(data, provider: connection.provider, request: request)
+        try await diagnostics.capture(provider: connection.provider, operation: .webResearch) {
+            guard connection.provider.supportsWebResearch else { throw ResearchFailure.unsupported }
+            try connection.validate()
+            try Task.checkCancellation()
+            let token = try await key()
+            try Task.checkCancellation()
+            guard let token, APIKeyCredentials.isValid(token) else { throw InsightFailure.missingKey }
+            let sent = try makeRequest(request, key: token)
+            let transport = try transport ?? URLSessionResearchTransport(allowedBaseURL: connection.endpoint(""))
+            let data = try await transport.fetch(sent)
+            try Task.checkCancellation()
+            return try LLMResearchResponse.decode(data, provider: connection.provider, request: request)
+        }
     }
 
     private func makeRequest(_ request: InsightRequest, key: String) throws -> URLRequest {

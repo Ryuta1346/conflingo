@@ -1,0 +1,4 @@
+HEAD: 33c8ae6
+Source: actual LLMStreamDecoder.swift + LLMResponseLimits.swift, surrounding model/payload types stubbed only.
+Result: accepted wire=420204, decoded frame approximately=70119, limit=65536; valid response JSON returned.
+No real API, microphone, Xcode test execution, or production changes.

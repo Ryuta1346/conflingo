@@ -17,7 +17,7 @@ struct SharedAssistanceLayoutTests {
     }
 
     @Test func conferenceShowsSubtitlesBesideAssistance() async throws {
-        try await render(ContentView(preview: true), size: NSSize(width: 1440, height: 900), filename: "conference-wide")
+        try await render(ContentView(composition: AppComposition(arguments: ["--ui-preview"])), size: NSSize(width: 1440, height: 900), filename: "conference-wide")
     }
 
     private func render<V: View>(_ view: V, size: NSSize, filename: String) async throws {
