@@ -107,14 +107,15 @@ struct NarrowWorkspaceLayoutTests {
 
     @Test(arguments: [false, true])
     func mainMeetingWindowKeepsTranscriptReadableBelowToolbar(review: Bool) async throws {
-        let meeting = MeetingPreview.make(activity: AudioInputUse())
+        let composition = AppComposition(arguments: ["--meeting-preview"])
+        let meeting = composition.meeting
         meeting.mode = .translation
         meeting.consentConfirmed = true
         await meeting.start()
         MeetingPreview.populate(meeting, count: 40)
         if review { await meeting.end() }
         defer { meeting.translations.reset(sessionID: UUID()) }
-        let host = NSHostingView(rootView: ContentView(preview: true, meeting: meeting, meetingPreview: true))
+        let host = NSHostingView(rootView: ContentView(composition: composition))
         let window = makeWindow(host)
         defer { window.close() }
         await resize(window, width: 1180, height: 780)

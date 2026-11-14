@@ -8,11 +8,6 @@ enum MeetingPreview {
         UserDefaults(suiteName: "com.gavrri.conflingo.meeting-preview") ?? .standard
     }
 
-    static var scenario: String {
-        ProcessInfo.processInfo.arguments.first { $0.hasPrefix("--meeting-state=") }?
-            .replacingOccurrences(of: "--meeting-state=", with: "") ?? "setup"
-    }
-
     static func liveAIEnabled(arguments: [String]) -> Bool {
         arguments.contains("--meeting-preview") && arguments.contains("--meeting-live-ai")
     }
