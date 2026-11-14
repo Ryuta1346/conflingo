@@ -1,4 +1,4 @@
-> 2026-11-14 共通支援/通知統一: ユーザー「共通支援の切り出し・通知統一すすめて」により着手。`SessionAssistance`と解除可能な型付き通知を実装。全698定義中691成功・実API7skip、Lint263ファイル違反0、Release両CPU成功。[結果](docs/validation/shared-assistance-notifications-2026-11-14.md)。[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ、独立レビュー・実機受入は継続。
+> 2026-11-14 LLM分岐/SSE集約・CI: 要求生成と各社イベント解釈を分離し、SSE・送受信・取消確認を共通化。macOS CIを追加。700定義成功・実API7定義除外、Lint272ファイル違反0、Release両CPU成功。[結果](docs/validation/llm-sse-ci-2026-11-14.md)。未コミット・未PR、独立レビュー・リモートCI・実機受入は継続。共通支援/通知統一はPR #42でmain `50f59d4`へマージ済み。
 
 > 第1段階のレビュー修正・LLM診断・Debug限定と構成ルート分離は、PR #41でローカルmain `ed0a08b`へマージ済み。[第1段階の結果](docs/validation/remaining-implementation-2026-11-14.md)・[構成ルート分離の結果](docs/validation/app-composition-2026-11-14.md)。実機受入は継続。
 
@@ -31,10 +31,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-14／main `ed0a08b`基点**。R1〜R6の既存修正・構成ルート分離までPR #41でマージ済み。共通支援/通知統一はローカル実装・自動検証完了、[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ。実モデル・実機受入と品質ゲートは継続。
+- 更新: **2026-11-14／main `50f59d4`基点**。共通支援/通知統一までPR #42でマージ済み。LLM分岐/SSE集約・CIはローカル実装・自動検証完了、未コミット・未PR。独立レビュー・初回リモートCI・実モデル/実機受入は継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** 共通支援/通知統一後、通常並列の全698定義中691成功・実API7skip・失敗0、Lint263ファイル違反0、arm64/x86_64 Release成功。[結果](docs/validation/shared-assistance-notifications-2026-11-14.md)。
+- **直近の検証記録:** CIと同じスクリプトで通常並列700定義成功・実API7定義除外・失敗0、Lint272ファイル違反0、arm64/x86_64 Release成功。workflow/シェル静的検証も成功。[結果](docs/validation/llm-sse-ci-2026-11-14.md)。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
@@ -43,7 +43,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** PR #41までローカルmainへマージ済み。共通支援/通知統一は[ローカル実装・自動検証完了](docs/validation/shared-assistance-notifications-2026-11-14.md)、[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ。独立レビュー・実機受入は継続。次の実装候補はLLM分岐/SSE集約、CI。以下の実音声・実モデル受入は継続。
+**先行:** PR #42までローカルmainへマージ済み。LLM分岐/SSE集約・CIは[ローカル実装・自動検証完了](docs/validation/llm-sse-ci-2026-11-14.md)、未コミット・未PR。次は今回差分の独立レビュー・提出と、GitHubでの初回CI確認。共通支援/通知統一の独立レビュー・以下の実音声/実モデル受入も継続。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -65,7 +65,7 @@
 | R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)はmain `8fd8144`へマージ済み。レビュー完了はユーザー確認済み。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | DONE |
 | R4 | 文字起こし経路の一本化 | `DualTranscriptionController`統合はPR #35でマージ済み。独立静的レビューの製品指摘0件。実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[レビュー](docs/validation/remaining-review-2026-11-14.md) | REVIEW |
 | R5 | 中優先の残り | 最大100区間要約・ライブ表示・検索語選択はPR #36/#37でマージ済み。UIテストの翻訳完了待機不足と共有AX設定の競合をローカル修正。通常並列全体成功、修正後レビュー指摘0件、PR #41マージ済み。実モデル品質・長時間耐久は継続。[結果](docs/validation/remaining-implementation-2026-11-14.md) | REVIEW |
-| R6 | 低優先・構造の残り | R6-1〜4はPR #38〜40、LLM失敗診断・検証画面Debug限定・構成ルート分離はPR #41でマージ済み。共通支援/通知統一は[ローカル実装・自動検証完了](docs/validation/shared-assistance-notifications-2026-11-14.md)、[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ・独立レビュー未実施。残る構造課題はLLM分岐/SSE集約、CI。実モデル・Keychain実認証・実音声は未受入 | DOING |
+| R6 | 低優先・構造の残り | R6-1〜4、診断・Debug限定・構成ルート分離はPR #38〜41、共通支援/通知統一はPR #42でマージ済み。LLM分岐/SSE集約・CIも[ローカル実装・自動検証完了](docs/validation/llm-sse-ci-2026-11-14.md)、未コミット・未PR。独立レビュー・初回リモートCI、実モデル・Keychain実認証・実音声の受入は継続 | DOING |
 
 ## PR進捗
 

@@ -68,6 +68,8 @@ swiftlint lint --strict --no-cache
 
 導入・検証コマンドと結果は [Conference回帰基準](docs/validation/conference-baseline.md)、音声素材・実機確認は [音声試験手順](docs/validation/audio-benchmark.md) を参照。
 
+CIはmacOS 26・Xcode 26.6でLint、実API評価を除くローカルテスト、署名なしarm64/x86_64 Releaseビルドを実行します。`bash scripts/ci.sh`で同じ検証ができます。[環境・成果物・検証範囲](docs/validation/ci.md)を参照してください。リモートCIの実行結果はローカル検証と区別します。
+
 ## 権限許可
 
 1. **マイク**: 初回の Start 押下時にマイク使用許可ダイアログが表示される。マイクを使う場合に必要。システム音声のみの場合はマイク許可を要求しない
@@ -170,6 +172,10 @@ flowchart TD
     AI --> LLM
     Summary --> LLM
     Research --> Web[SelectedLLMResearchClient]
+    LLM --> Requests[LLMInsightRequest / LLMHTTPRequest]
+    Web --> WebRequests[LLMResearchRequest / LLMHTTPRequest]
+    LLM --> Stream[LLMStreamDecoder / SSEFramer]
+    Stream --> Events[Gemini / OpenAI / Claude / Chat events]
     Conference --> Save[SessionSnapshot / SessionFiles]
     Meeting --> Save
     Save --> Sessions[SessionsLibrary / Markdown export]

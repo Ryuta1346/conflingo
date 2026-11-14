@@ -66,6 +66,8 @@ Lint (SwiftLint 0.65.1):
 swiftlint lint --strict --no-cache
 ```
 
+CI runs Lint, local tests with live API evaluations disabled, and an unsigned arm64/x86_64 Release build on macOS 26 with Xcode 26.6. Run the same checks with `bash scripts/ci.sh`; see [environment, outputs and limits](docs/validation/ci.md). Remote CI execution is tracked separately from local validation.
+
 See the [Conference baseline](docs/validation/conference-baseline.md) for setup, reproducible checks, and results, and the [audio test procedure](docs/validation/audio-benchmark.md) for fixtures and manual validation (Japanese).
 
 ## Permissions
@@ -171,6 +173,10 @@ flowchart TD
     AI --> LLM
     Summary --> LLM
     Research --> Web[SelectedLLMResearchClient]
+    LLM --> Requests[LLMInsightRequest / LLMHTTPRequest]
+    Web --> WebRequests[LLMResearchRequest / LLMHTTPRequest]
+    LLM --> Stream[LLMStreamDecoder / SSEFramer]
+    Stream --> Events[Gemini / OpenAI / Claude / Chat events]
     Conference --> Save[SessionSnapshot / SessionFiles]
     Meeting --> Save
     Save --> Sessions[SessionsLibrary / Markdown export]
