@@ -16,7 +16,7 @@
 - Geminiのschema・thinking設定、OpenAIのstore=false・strict schema、Claudeのschema/version、互換APIのschema/json/prompt選択、モデル・タイムアウト・認証先を維持。
 - [DONE]だけ/正常終端なし/終端後不正イベント、拒否、長さ超過、usageのthinking/cache計上、引用ID・本文/補足・改行を既存テストで確認。
 - 取消・設定revision変更による古い応答棄却、部分プレビュー、失敗診断の1回記録を維持。新たな再試行や送信先を追加しない。
-- コミット・push・リモートworkflow実行は含めない。実機ゲートは継続する。
+- 実装時はコミット・pushを対象外とし、後続のユーザー「コミットしてPR作成」により承認を受領。実機ゲートは継続する。
 
 ## 実装・検証順
 
@@ -32,4 +32,6 @@ GitHub公式[macOS 26 arm64イメージ](https://github.com/actions/runner-image
 
 ## 完了記録
 
-ローカル実装・自動検証完了。全700定義成功（実API7定義除外）、Lint272ファイル違反0、Release arm64/x86_64成功、actionlint/ShellCheck/bash構文検証成功。先行テストで再現したGemini取消後プレビューも修正。未コミット・未PR。独立レビュー・初回リモートCI・実機/実モデル受入は継続。[検証記録](../validation/llm-sse-ci-2026-11-14.md)。
+ローカル実装・自動検証完了。全700定義成功（実API7定義除外）、Lint272ファイル違反0、Release arm64/x86_64成功、actionlint/ShellCheck/bash構文検証成功。先行テストで再現したGemini取消後プレビューも修正。[Draft PR #43](https://github.com/Ryuta1346/conflingo/pull/43)提出済み・未マージ。独立レビュー・初回リモートCI・実機/実モデル受入は継続。[検証記録](../validation/llm-sse-ci-2026-11-14.md)。
+
+提出時: `bed5023`（LLM/SSE整理）、`6ec128b`（CI・検証記録）をコミット・push。Draft PR #43をmain向けに作成。独立レビュー・実機受入は継続。

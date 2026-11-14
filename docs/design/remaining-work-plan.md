@@ -3,7 +3,7 @@
 2026-11-14。調査基点: main `33c8ae6`。依頼: 「残っていること片付けて」。
 正本: `~/.coding-agents/docs/conflingo/main/remaining-work-plan.md`。
 
-状態: 調査・資料訂正・独立レビュー完了。2026-11-14のユーザー「進めて」により第1段階（レビュー4指摘、LLM失敗診断、開発画面Debug限定）の計画を承認済み。ローカル実装・自動検証・独立レビュー完了、PR #41でmain `ed0a08b`へマージ済み。[結果](../validation/remaining-implementation-2026-11-14.md)。第2段階の構成ルート分離も同PRでマージ済み。共通支援/通知統一もユーザーの明示依頼によりローカル実装・自動検証完了、[PR #42](https://github.com/Ryuta1346/conflingo/pull/42)はmain `50f59d4`へマージ済み。LLM分岐/SSE集約・CIも今回の明示依頼によりローカル実装・自動検証完了、未コミット・未PR。[結果](../validation/llm-sse-ci-2026-11-14.md)。独立レビュー・リモートCIと第3段階は継続。
+状態: 調査・資料訂正・独立レビュー完了。2026-11-14のユーザー「進めて」により第1段階（レビュー4指摘、LLM失敗診断、開発画面Debug限定）の計画を承認済み。ローカル実装・自動検証・独立レビュー完了、PR #41でmain `ed0a08b`へマージ済み。[結果](../validation/remaining-implementation-2026-11-14.md)。第2段階の構成ルート分離も同PRでマージ済み。共通支援/通知統一もユーザーの明示依頼によりローカル実装・自動検証完了、[PR #42](https://github.com/Ryuta1346/conflingo/pull/42)はmain `50f59d4`へマージ済み。LLM分岐/SSE集約・CIも今回の明示依頼によりローカル実装・自動検証完了、[Draft PR #43](https://github.com/Ryuta1346/conflingo/pull/43)提出済み・未マージ。[結果](../validation/llm-sse-ci-2026-11-14.md)。独立レビュー・リモートCIと第3段階は継続。
 Planモード切替機能がないため、この文書を実装前の計画として使う。
 完了はコード、レビュー、実機受入を分けて記録する。実装時の計画にはコミット・pushを含めず、共通支援/通知統一の提出は後続のユーザー「コミットand PR作成」により承認。
 
@@ -71,7 +71,7 @@ Planモード切替機能がないため、この文書を実装前の計画と�
 3. 各社固有の要求/イベント契約を維持しつつSSEフレーミング・受信上限の重複を集約する。異常終端・UTF-8境界・引用位置・取消・本文上限を回帰検証する。
 4. macOS/Xcodeの前提を固定した無通信CIを追加する。README構成図は今回更新済みで、構造変更後に再整合する。CI料金やリモート実行はworkflow作成と区別する。
 
-   3・4はユーザー「LLM分岐／SSE集約 → CIの対応すすめて」により実施。[具体計画](llm-sse-ci-plan.md)に従い、ローカル700定義成功・実API7定義除外、Lint272ファイル違反0、Release両CPU成功。workflow/シェル静的検証済み。未コミット・未PR、独立レビュー・リモートCI未実施。[結果](../validation/llm-sse-ci-2026-11-14.md)。
+   3・4はユーザー「LLM分岐／SSE集約 → CIの対応すすめて」により実施。[具体計画](llm-sse-ci-plan.md)に従い、ローカル700定義成功・実API7定義除外、Lint272ファイル違反0、Release両CPU成功。workflow/シェル静的検証済み。[Draft PR #43](https://github.com/Ryuta1346/conflingo/pull/43)提出済み・未マージ、独立レビュー未実施・リモートCI成功未確認。[結果](../validation/llm-sse-ci-2026-11-14.md)。
 
 ## 第3段階: 受入完了
 
