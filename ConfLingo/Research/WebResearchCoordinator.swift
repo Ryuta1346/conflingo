@@ -18,6 +18,7 @@ final class WebResearchCoordinator {
     let knowledge: KnowledgeStore
     private let client: any LLMWebResearching
     private let timeout: Duration
+    @ObservationIgnored private var subscriptions: [EventSubscription<Void>] = []
     private var requestID: UUID?
     @ObservationIgnored private var operation: Task<Void, Never>?
     @ObservationIgnored private var deadline: Task<Void, Never>?
@@ -29,8 +30,10 @@ final class WebResearchCoordinator {
         self.settings = settings
         self.client = client ?? SelectedLLMResearchClient(settings: settings)
         self.timeout = timeout
-        settings.observeChanges { [weak self] in self?.setPermission(false) }
-        knowledge.observeInvalidation { [weak self] in self?.setPermission(false) }
+        subscriptions = [
+            settings.changes.observe { [weak self] in self?.setPermission(false) },
+            knowledge.invalidations.observe { [weak self] in self?.setPermission(false) }
+        ]
     }
 
     deinit { operation?.cancel(); deadline?.cancel() }

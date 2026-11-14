@@ -160,25 +160,31 @@ flowchart TD
     Hub --> Meeting[MeetingSessionStore / MeetingWorkspace]
     Meeting --> Translation[MeetingTranslations / TranslationSession]
     Conference --> Assistance[ConferenceKnowledgeWorkspace]
-    Meeting --> AI[InsightCoordinator / MeetingSummaryCoordinator]
-    Knowledge[KnowledgeStore / KnowledgeIndex] --> Assistance
-    Knowledge --> AI
+    Meeting --> Support[SessionAssistance]
+    Assistance --> Support
+    Support --> AI[InsightCoordinator]
+    Support --> Research[WebResearchCoordinator]
+    Support --> Knowledge[KnowledgeStore / KnowledgeIndex]
+    Meeting --> Summary[MeetingSummaryCoordinator]
     Library[KnowledgeLibrary / local archives] --> Knowledge
     Assistance --> LLM[SelectedLLMClient / LLMInsightClient]
     AI --> LLM
-    Research[WebResearchCoordinator] --> Web[SelectedLLMResearchClient]
+    Summary --> LLM
+    Research --> Web[SelectedLLMResearchClient]
     Conference --> Save[SessionSnapshot / SessionFiles]
     Meeting --> Save
     Save --> Sessions[SessionsLibrary / Markdown export]
 ```
 
-Paths below are relative to `ConfLingo/`. The graph describes the current implementation, including the shared transcription path introduced in R4.
+Paths below are relative to `ConfLingo/`. The graph includes the shared transcription path and the assistance services owned by each workspace. Synchronous changes use subscriber-owned `EventSignal` subscriptions; audio delivery continues to use `TranscriptEventHub`.
 
 | File / directory | Responsibility |
 |---|---|
 | `AppComposition.swift` | App-owned service instances, shared audio ownership, settings and preview selection |
 | `Services/DualTranscriptionController.swift` | Input ownership, recognition lifecycle, event delivery and stop ordering |
 | `Services/SessionController.swift` | Connects the shared input controller to Conference |
+| `Assistance/SessionAssistance.swift` | Shared AI, research, knowledge and terminology lifecycle |
+| `Services/EventSignal.swift` | Typed synchronous notifications with cancellation and subscriber ownership |
 | `Meeting/MeetingWorkspace.swift` | Meeting lifecycle, translation, assistance and review |
 | `Meeting/Services/` | AI requests, response decoding, summaries and per-connection Keychain access |
 | `Research/` | Explicit Web research and provider citations |

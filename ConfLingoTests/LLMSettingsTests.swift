@@ -40,7 +40,8 @@ struct LLMSettingsTests {
         try settings.save(connection)
         settings.credentials.save("private-key")
         var changes = 0
-        settings.onChange = { changes += 1 }
+        let subscription = settings.changes.observe { changes += 1 }
+        defer { subscription.cancel() }
         connection.baseURL = "https://two.example/v1"
         try settings.save(connection)
         #expect(try await settings.credentials.store.read() == nil)

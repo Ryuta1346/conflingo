@@ -39,7 +39,8 @@ struct SessionStoreTests {
     func appendFinalPreservesRepeatedUtterances(text: String, origin: AudioOrigin?) throws {
         let store = SessionStore()
         var delivered: [TranscriptSegment] = []
-        store.onFinal = { delivered.append($0) }
+        let subscription = store.finalEvents.observe { delivered.append($0) }
+        defer { subscription.cancel() }
         let first = try #require(store.appendFinal(text, startTime: 1, origin: origin))
         store.updateVolatile(text)
         let second = try #require(store.appendFinal(" \(text)\n", startTime: 5, origin: origin))

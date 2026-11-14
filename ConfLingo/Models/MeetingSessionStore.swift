@@ -8,7 +8,7 @@ final class MeetingSessionStore {
     private(set) var finals: [TranscriptEvent] = []
     private(set) var partials: [TranscriptEvent] = []
     private(set) var displayRevision = 0
-    var onFinal: ((TranscriptEvent) -> Void)?
+    let finalEvents = EventSignal<TranscriptEvent>()
     private var latest: [UUID: TranscriptEvent] = [:]
 
     init(sessionID: UUID) {
@@ -28,7 +28,7 @@ final class MeetingSessionStore {
             let position = finals.firstIndex { $0.startOffset > event.startOffset } ?? finals.endIndex
             finals.insert(event, at: position)
             displayRevision &+= 1
-            onFinal?(event)
+            finalEvents.emit(event)
         } else {
             partials.append(event)
             displayRevision &+= 1

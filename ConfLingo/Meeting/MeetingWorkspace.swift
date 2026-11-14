@@ -27,14 +27,15 @@ final class MeetingWorkspace {
     var systemLocaleID = "en-US"
     var consentConfirmed = false
     var showsDiscardConfirmation = false
-    var knowledge: KnowledgeStore { ai.knowledge }
+    var knowledge: KnowledgeStore { support.knowledge }
     var selectedKnowledge: KnowledgeReference?
     var isUsingLibrary = false
-    let documentTerms = DocumentTerms()
+    var documentTerms: DocumentTerms { support.terms }
     var recognitionMode: SpeechRecognitionMode = .standard
     var recognitionStatus = "認識用語は次回の開始時に適用します。"
-    let ai: InsightCoordinator
-    let research: WebResearchCoordinator
+    let support: SessionAssistance
+    var ai: InsightCoordinator { support.ai }
+    var research: WebResearchCoordinator { support.research }
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
     var startedAt: Date? { controller.startedAt }
@@ -68,6 +69,9 @@ final class MeetingWorkspace {
     private(set) var isStarting = false
     private(set) var isTransitioning = false
     private var pendingCompletion: Completion?
+    @ObservationIgnored private var subscriptions: [EventSubscription<Void>] = []
+    @ObservationIgnored private var finalSubscription: EventSubscription<TranscriptEvent>?
+    @ObservationIgnored private var captureSubscription: EventSubscription<Bool>?
 
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
          credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil,
@@ -83,35 +87,29 @@ final class MeetingWorkspace {
         let settings = llmSettings ?? LLMSettings(defaults: defaults, legacyCredentials: credentials)
         self.llmSettings = settings
         let client = insightClient ?? SelectedLLMClient(settings: settings)
-        let ai = InsightCoordinator(store: controller.store, client: client)
-        ai.answerLanguage = language
-        self.ai = ai
-        research = WebResearchCoordinator(store: controller.store, knowledge: ai.knowledge, settings: settings, client: researchClient)
-        let summary = MeetingSummaryCoordinator(store: controller.store, client: client)
-        self.summary = summary
-        ai.knowledge.onInvalidation = { [weak self] in self?.cancelSummary() }
-        ai.knowledge.onContentChange = { [weak self] in
-            self?.setKnowledgeAllowed(false)
-            self?.setAutomaticKnowledgeAllowed(false)
-            self?.documentTerms.reset()
-            Task { [weak self] in await self?.applyDocumentTerms() }
-        }
+        let support = SessionAssistance(store: controller.store, settings: settings, client: client, researchClient: researchClient)
+        self.support = support
+        support.ai.answerLanguage = language
+        summary = MeetingSummaryCoordinator(store: controller.store, client: client)
+        subscriptions = [
+            knowledge.invalidations.observe { [weak self] in self?.cancelSummary() },
+            knowledge.contentChanges.observe { [weak self] in
+                Task { [weak self] in await self?.applyDocumentTerms() }
+            },
+            settings.changes.observe { [weak self] in self?.cancelSummary() }
+        ]
         translations.termsForRequest = { [weak self] request in
             self?.documentTerms.glossary(sourceLanguage: request.event.languageCode,
                 targetLanguage: request.targetLanguage, manual: []).map(\.term) ?? []
         }
-        controller.store.onFinal = { [weak self] event in
+        finalSubscription = controller.store.finalEvents.observe { [weak self] event in
             guard let self else { return }
             let target = event.origin == .microphone ? self.microphoneTranslationLanguage : self.systemTranslationLanguage
             self.translations.receive(event, targetLanguage: self.mode.translationTarget(source: event.languageCode, target: target))
         }
-        controller.prepareOptionalConsumer = { [weak ai] hub in await ai?.attach(to: hub) }
-        controller.captureActivityChanged = { [weak ai, weak research] active in
-            if active { ai?.resume() } else { ai?.suspend(); research?.cancel() }
-        }
-        settings.onChange = { [weak self] in
-            self?.ai.setPermission(false, after: 0)
-            self?.cancelSummary()
+        controller.prepareOptionalConsumer = { [weak support] hub in await support?.ai.attach(to: hub) }
+        captureSubscription = controller.captureActivityChanges.observe { [weak support] active in
+            if active { support?.resume() } else { support?.suspend() }
         }
     }
 
@@ -180,14 +178,14 @@ final class MeetingWorkspace {
 
     func askAssistance(_ question: String) async {
         guard canAskAssistance else { return }
-        if phase == .idle { ai.resume() }
+        if phase == .idle { support.resume() }
         await ai.ask(question)
     }
 
     func setAIAllowed(_ allowed: Bool) {
-        if !allowed { cancelSummary(); research.setPermission(false) }
+        if !allowed { cancelSummary() }
         guard !allowed || (page != .review && phase != .stopping) else { return }
-        ai.setPermission(allowed, after: controller.elapsedOffset)
+        support.setPermission(allowed, after: controller.elapsedOffset)
     }
 
     func setKnowledgeAllowed(_ allowed: Bool) {
@@ -276,8 +274,7 @@ final class MeetingWorkspace {
 
     func editPreparation() {
         guard canDiscard, page != .review else { return }
-        research.cancel()
-        ai.suspend()
+        support.suspend()
         page = .setup
     }
 
@@ -298,8 +295,7 @@ final class MeetingWorkspace {
     private func complete(_ completion: Completion) async {
         guard !isTransitioning, page != .review else { return }
         knowledge.cancelPendingImports()
-        research.cancel()
-        ai.suspend()
+        support.suspend()
         isTransitioning = true
         pendingCompletion = completion
         defer { isTransitioning = false }
@@ -317,8 +313,7 @@ final class MeetingWorkspace {
         cancelSummary()
         summary.reset()
         export.reset()
-        research.reset()
-        ai.reset()
+        support.reset()
         controller.clear()
         translations.reset(sessionID: store.sessionID)
         mode = .transcription

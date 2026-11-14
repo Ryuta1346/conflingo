@@ -1,0 +1,18 @@
+{
+  "ConfLingo/Assistance/SessionAssistance.swift": "6ff87671700564029defd04bf83b1888f6aa86836a23c83fd2ef9569e3ecab95",
+  "ConfLingo/Conference/ConferenceKnowledgeWorkspace.swift": "1130ecd29858f9f2e80b8fd297969a802f3b1c2fe0228c9c2fc3838a25bb43c2",
+  "ConfLingo/Knowledge/KnowledgeStore.swift": "21935e3d5afcc4e8a07b9701fc44dc998585ac8c9a7405ac26b5d8e5a65fe601",
+  "ConfLingo/Meeting/MeetingWorkspace.swift": "7ac96a4b6624a98d572cf339f33e85e93b036e3ce3cd5271b56d461f9639b380",
+  "ConfLingo/Meeting/Services/InsightCoordinator.swift": "1d5ad948fd5ae103ed278bcc149e348e364872bcaf3d56c93c361701fb94330d",
+  "ConfLingo/Meeting/Services/LLMSettings.swift": "f88dc0b020596f8e8048451f4fccdd76e63e83f4e1958a256e46b05bc68fbfed",
+  "ConfLingo/Models/MeetingSessionStore.swift": "be44d668f469f51c662c83d5e98b151f6e85e3cc68e3215a9fcef996d3263ad8",
+  "ConfLingo/Models/SessionStore.swift": "64179e76beddc9988f87efe9d0459a863c74cb81dc77b175577043ffb6a936a2",
+  "ConfLingo/Research/WebResearchCoordinator.swift": "c6d450aa276b47cc5f75b8530b8976aa7ac74187fbb48408a3aa9d1d4a92b152",
+  "ConfLingo/Services/DualTranscriptionController.swift": "14a547fc5f14a772fc93a180c1a89033347e74db53a751aeb0e2236a830e16d3",
+  "ConfLingo/Services/EventSignal.swift": "da9ea886c3103704fc061c1a4ca6e959a0415bc75c141b1faf617bc68698c6e1",
+  "ConfLingo/Services/SessionController.swift": "d46c658454ee3f061252189acd1b3da92bbb1a46a16b63a7f54e0b51e158beaf",
+  "ConfLingoTests/AssistanceLifecycleTests.swift": "ca12b7e38126b04c0788cbef378add3d8f5c0bbd095e2065a9b0add15d99c924",
+  "ConfLingoTests/EventSignalTests.swift": "c6294667e89e7ded3fd43bb9ea5acf8dfbdb0e5831362365855b9990b182aa39",
+  "ConfLingoTests/LLMSettingsTests.swift": "4a09d7b26984ed2d45f3c9d76fc0b50ba5bd4e6d32644acf70b42725fe6e178f",
+  "ConfLingoTests/SessionStoreTests.swift": "9b75bcb9041b66098d36bea4f84cc43d41e598d0c2b22bc6c41e6e9c3d794c3e"
+}

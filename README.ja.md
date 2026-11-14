@@ -159,25 +159,31 @@ flowchart TD
     Hub --> Meeting[MeetingSessionStore / MeetingWorkspace]
     Meeting --> Translation[MeetingTranslations / TranslationSession]
     Conference --> Assistance[ConferenceKnowledgeWorkspace]
-    Meeting --> AI[InsightCoordinator / MeetingSummaryCoordinator]
-    Knowledge[KnowledgeStore / KnowledgeIndex] --> Assistance
-    Knowledge --> AI
+    Meeting --> Support[SessionAssistance]
+    Assistance --> Support
+    Support --> AI[InsightCoordinator]
+    Support --> Research[WebResearchCoordinator]
+    Support --> Knowledge[KnowledgeStore / KnowledgeIndex]
+    Meeting --> Summary[MeetingSummaryCoordinator]
     Library[KnowledgeLibrary / local archives] --> Knowledge
     Assistance --> LLM[SelectedLLMClient / LLMInsightClient]
     AI --> LLM
-    Research[WebResearchCoordinator] --> Web[SelectedLLMResearchClient]
+    Summary --> LLM
+    Research --> Web[SelectedLLMResearchClient]
     Conference --> Save[SessionSnapshot / SessionFiles]
     Meeting --> Save
     Save --> Sessions[SessionsLibrary / Markdown export]
 ```
 
-パスは `ConfLingo/` からの相対位置です。R4の文字起こし経路統合後の現行構成を示しています。
+パスは `ConfLingo/` からの相対位置です。共通の文字起こし経路と、各Workspaceが所有する共通支援を示しています。同期通知は利用側が購読を保持・解除する`EventSignal`、音声イベント配信は`TranscriptEventHub`を使います。
 
 | ファイル／ディレクトリ | 責務 |
 |---|---|
 | `AppComposition.swift` | Appが所有するサービス、音声排他の共有、設定とプレビューの選択 |
 | `Services/DualTranscriptionController.swift` | 入力の所有、認識の開始・停止、イベント配信と停止順序 |
 | `Services/SessionController.swift` | 共通入力コントローラとConferenceの接続 |
+| `Assistance/SessionAssistance.swift` | AI・Web調査・資料・用語の共通ライフサイクル |
+| `Services/EventSignal.swift` | 型付き同期通知、購読の所有・解除 |
 | `Meeting/MeetingWorkspace.swift` | Meetingの状態、翻訳、AI支援、振り返り |
 | `Meeting/Services/` | AI要求、応答解析、要約、接続別Keychain操作 |
 | `Research/` | 明示的なWeb調査とプロバイダ由来の引用 |
