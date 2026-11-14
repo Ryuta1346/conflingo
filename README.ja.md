@@ -153,7 +153,7 @@ AVAudioEngine マイク入力（ハードウェアフォーマット）
 
 | ファイル | 責務 |
 |---|---|
-| `Models/SessionStore.swift` | UI の単一情報源。セグメント履歴・partial・重複排除 |
+| `Models/SessionStore.swift` | UI の単一情報源。セグメント履歴・翻訳単位・partial |
 | `Models/KeywordParser.swift` | 専門用語欄のパース + イベント用プリセット |
 | `Models/LanguageCatalog.swift` | 言語の表示名・翻訳先候補の整形 |
 | `Services/AudioCaptureService.swift` | マイク入力・フォーマット変換・権限要求 |

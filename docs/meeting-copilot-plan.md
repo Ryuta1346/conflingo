@@ -157,6 +157,7 @@ ConfLingoを別製品として作り直さず、既存の「文字起こし・�
 - 計画の保存先: `~/.coding-agents/docs/conflingo/feature-dual-transcription/000_pr4-dual-transcription-plan.md`。ユーザー承認済み（「進めて」）。TDDで実装し、[検証記録](validation/dual-transcription.md)に結果を記録した。
 - 2入力に独立した認識系統・入力別言語を割り当て、共通Timeline・Hub・MeetingSessionStoreへ接続する。入力開始通知を時刻基準とするため、サンプル時刻の厳密同期と時刻誤差は実機検証が必要。
 - 発話ID/revisionによる重複除外と時刻順の安定整列を行う。別入力の同じ発話内容は保持する。片系失敗時は両入力を停止し、停止失敗の再試行・最後のfinalの取り込みを保証する。
+- R6-1ローカル実装・自動検証済み: Conferenceも同一入力元の別IDによる同文を保持する。本文一致で除外せず、adapterの発話ID/revisionで再送を拒否する。保存形式v1は維持する。実音声受入は継続。[計画](design/r6-1-repeated-final-plan.md)・[検証](validation/r6-1-repeated-final.md)。
 - 独立した2入力検証画面を用意し、既存Conference・単独音声検証との競合起動を防ぐ。完成Meeting UIはPR5-C。実機受入までGate BとPR4のDONE判定は保留する。
 
 ### 2.2 会話イベントモデル

@@ -43,13 +43,12 @@ final class SessionStore {
     }
 
     /// final transcript を確定セグメントとして追加する。
-    /// 空文字・直前セグメントと同一文は破棄して nil を返す（重複翻訳ガード）。
+    /// 空文字は nil を返す。同文の別発話は保持し、イベントの再送除外は入力adapterが担う。
     @discardableResult
     func appendFinal(_ text: String, startTime: TimeInterval? = nil, origin: AudioOrigin? = nil,
                      sessionOffset: TimeInterval? = nil, languageCode: String? = nil) -> UUID? {
         let trimmed = text.trimmingCharacters(in: .whitespacesAndNewlines)
         guard !trimmed.isEmpty else { return nil }
-        guard segments.last?.english != trimmed || (origin != nil && segments.last?.origin != origin) else { return nil }
 
         let segment = TranscriptSegment(
             id: UUID(),

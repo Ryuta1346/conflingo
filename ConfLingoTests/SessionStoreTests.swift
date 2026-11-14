@@ -35,13 +35,21 @@ struct SessionStoreTests {
         #expect(store.segments.isEmpty)
     }
 
-    @Test func appendFinalRejectsConsecutiveDuplicate() {
+    @Test(arguments: ["Yes.", "はい。"], [nil, AudioOrigin.microphone, .systemAudio] as [AudioOrigin?])
+    func appendFinalPreservesRepeatedUtterances(text: String, origin: AudioOrigin?) throws {
         let store = SessionStore()
-        let first = store.appendFinal("Same sentence")
-        let second = store.appendFinal("Same sentence")
-        #expect(first != nil)
-        #expect(second == nil)
-        #expect(store.segments.count == 1)
+        var delivered: [TranscriptSegment] = []
+        store.onFinal = { delivered.append($0) }
+        let first = try #require(store.appendFinal(text, startTime: 1, origin: origin))
+        store.updateVolatile(text)
+        let second = try #require(store.appendFinal(" \(text)\n", startTime: 5, origin: origin))
+        #expect(first != second)
+        #expect(store.segments.map(\.english) == [text, text])
+        #expect(store.segments.map(\.index) == [1, 2])
+        #expect(store.segments.map(\.startTime) == [1, 5])
+        #expect(store.segments.map(\.origin) == [origin, origin])
+        #expect(delivered == store.segments)
+        #expect(store.volatileText.isEmpty)
     }
 
     @Test func appendFinalAllowsNonConsecutiveDuplicate() {
