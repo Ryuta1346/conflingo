@@ -39,7 +39,7 @@ struct LiveTranscriptLayoutTests {
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
         let meeting = MeetingWorkspace(controller: DualFixture().controller(), insightClient: FakeInsightClient(),
-            defaults: defaults, translationClient: FakeMeetingTranslator(), prepareTranslationModels: false)
+            defaults: defaults, translationClientFactory: { _, _ in FakeMeetingTranslator() }, prepareTranslationModels: false)
         for index in 0..<100 {
             meeting.store.receive(insightEvent(session: meeting.store.sessionID, text: "History row \(index)", offset: Double(index)))
         }

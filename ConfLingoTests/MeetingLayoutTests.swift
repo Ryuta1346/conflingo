@@ -8,7 +8,7 @@ import Testing
 struct MeetingLayoutTests {
     @Test func lateTranslationsKeepLatestVisibleAtLargeFontInNarrowWindow() async throws {
         let fixture = DualFixture()
-        let meeting = MeetingWorkspace(controller: fixture.controller(), translationClient: FakeMeetingTranslator())
+        let meeting = MeetingWorkspace(controller: fixture.controller(), translationClientFactory: { _, _ in FakeMeetingTranslator() })
         meeting.mode = .translation
         for index in 0..<8 {
             meeting.store.receive(TranscriptEvent(id: UUID(), sessionID: meeting.store.sessionID, origin: .systemAudio,

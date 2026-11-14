@@ -28,6 +28,8 @@ Web research uses the selected Gemini, OpenAI or Claude model’s built-in searc
 
 Meeting and Conference default to transcription for each new session. Select **リアルタイム翻訳** in setup to enable translation. Meeting initially offers English for the microphone and Japanese for system audio; target choices are remembered separately from the mode. Space is reserved below source text before translations arrive, reducing layout shifts. Translations that exceed the reserved space expand to remain readable. Original text and completed translations are retained, including in the floating panel, saved sessions and Markdown exports. Each input can disable translation. Translation runs on this Mac without an API key; a model download may be needed. Translation failures do not stop transcription. See [validation](docs/validation/meeting-translation.md) for the tested scope.
 
+Meeting protects the original spelling of selected terms during translation. Changes apply when the next utterance starts translating; completed translations stay unchanged. Fixed target translations are not supported in Meeting. If term restoration fails, the original text is translated again, so exact term preservation is not guaranteed.
+
 ## Knowledge library
 
 From the knowledge library, or before/during Meeting and Conference, import Markdown/Text or selected repository files, then choose **ライブラリに保存** to explicitly save the document bodies on this Mac. Ordinary documents are saved individually; a repository entry contains the files currently attached to the meeting.

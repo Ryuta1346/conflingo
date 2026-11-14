@@ -580,3 +580,7 @@ ConfLingoTests/
 ## LLM選択の拡張（2026-11-12承認・実装済み）
 
 Gemini / OpenAI / Claude / Kimi / DeepSeek / その他OpenAI互換クラウド / PC内のQwen等を利用者が選択する。[承認済み計画](design/llm-selection-implementation-plan.md)に従い、接続別KeychainとローカルAPI接続を実装。462テスト・lint・Releaseビルド合格。署名済みアプリのローカル模擬接続を確認し、実クラウド各社／Qwenの生成品質は未検証。[検証記録](validation/llm-selection.md)。ChatGPTログインは今回除外。既存PR6のGemini品質評価とは分けて扱う。
+
+## 2026-11-14 R6-2/3（ローカル実装・自動検証済み）
+
+Meeting翻訳の言語ペア別セッション再利用と、採用済み用語の原文表記保持を実装した。用語は翻訳開始時に固定し、待機中の変更は次の処理から適用する。復元不能なら原文で1回再翻訳し、再失敗は翻訳失敗として扱う。固定訳語UIは別途検討。保存形式・原文・AI送信は維持する。受入条件と検証範囲は[R6-2/3計画](design/r6-meeting-translation-plan.md)を参照。実モデル品質・速度改善・実音声受入は未検証。

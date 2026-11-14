@@ -8,7 +8,7 @@ struct MeetingTranslationTests {
     @Test func translatesBothInputsWithoutChangingOriginalsOrTranslatingPartials() async throws {
         let client = FakeMeetingTranslator()
         let session = UUID()
-        let translations = MeetingTranslations(sessionID: session, client: client)
+        let translations = MeetingTranslations(sessionID: session, clientFactory: { _, _ in client })
         let microphone = event(session, origin: .microphone, text: "こんにちは", language: "ja-JP")
         let system = event(session, origin: .systemAudio, text: "Hello", language: "en-US")
         translations.receive(event(session, text: "Hel", final: false), targetLanguage: "ja")
@@ -27,7 +27,7 @@ struct MeetingTranslationTests {
 
     @Test func skipsDisabledSameLanguageAndForeignSession() {
         let session = UUID()
-        let translations = MeetingTranslations(sessionID: session, client: FakeMeetingTranslator())
+        let translations = MeetingTranslations(sessionID: session, clientFactory: { _, _ in FakeMeetingTranslator() })
         translations.receive(event(session), targetLanguage: nil)
         translations.receive(event(session), targetLanguage: "en")
         translations.receive(event(UUID()), targetLanguage: "ja")
@@ -37,7 +37,7 @@ struct MeetingTranslationTests {
 
     @Test func failureOnOnePairDoesNotBlockOtherPairAndRetryPreservesCompletedResults() async throws {
         let session = UUID()
-        let translations = MeetingTranslations(sessionID: session, client: FakeMeetingTranslator())
+        let translations = MeetingTranslations(sessionID: session, clientFactory: { _, _ in FakeMeetingTranslator() })
         let first = event(session)
         let other = event(session, origin: .microphone, text: "こんにちは", language: "ja-JP")
         translations.receive(first, targetLanguage: "ja")
@@ -64,7 +64,7 @@ struct MeetingTranslationTests {
         let session = UUID()
         let client = FakeMeetingTranslator()
         await client.failNext()
-        let translations = MeetingTranslations(sessionID: session, client: client)
+        let translations = MeetingTranslations(sessionID: session, clientFactory: { _, _ in client })
         let first = event(session, text: "first")
         let second = event(session, text: "second")
         translations.receive(first, targetLanguage: "ja")
@@ -84,7 +84,7 @@ struct MeetingTranslationTests {
         let session = UUID()
         let gate = TestGate()
         let client = FakeMeetingTranslator(gate: gate)
-        let translations = MeetingTranslations(sessionID: session, client: client)
+        let translations = MeetingTranslations(sessionID: session, clientFactory: { _, _ in client })
         translations.receive(event(session), targetLanguage: "ja")
         prepare(translations)
         await gate.entered.next()
@@ -105,7 +105,7 @@ struct MeetingTranslationTests {
 
     @Test func meetingDrainsStopFinalsAndResumeKeepsCompletedTranslations() async throws {
         let fixture = DualFixture()
-        let meeting = MeetingWorkspace(controller: fixture.controller(), translationClient: FakeMeetingTranslator())
+        let meeting = MeetingWorkspace(controller: fixture.controller(), translationClientFactory: { _, _ in FakeMeetingTranslator() })
         meeting.mode = .translation
         meeting.consentConfirmed = true
         await meeting.start()
@@ -152,10 +152,17 @@ actor FakeMeetingTranslator: MeetingTranslating {
     init(gate: TestGate? = nil) { self.gate = gate }
     func failNext() { shouldFail = true }
 
-    func translate(_ request: MeetingTranslationRequest) async throws -> String {
+    func run(_ ids: AsyncStream<UUID>, source: String, target: String,
+             begin: @escaping MeetingTranslationBegin, complete: @escaping MeetingTranslationComplete) async {
+        await processMeetingTranslations(ids, begin: begin, complete: complete) { request in
+            try await self.translate(request)
+        }
+    }
+
+    private func translate(_ request: MeetingTranslationRequest) async throws -> String {
         requests.append(request)
         if let gate { await gate.wait() }
         if shouldFail { shouldFail = false; throw CocoaError(.fileReadUnknown) }
-        return "\(request.targetLanguage):\(request.event.text)"
+        return "\(request.targetLanguage):\(request.text)"
     }
 }

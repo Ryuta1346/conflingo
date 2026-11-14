@@ -16,7 +16,9 @@ struct DocumentTermsView: View {
     var body: some View {
         DisclosureGroup("資料から専門用語を適用（\(terms.applied.count)語）") {
             VStack(alignment: .leading, spacing: 12) {
-                Text("見出し・強調語・コード表記・原語/訳語の表から候補を抽出します。使う語と訳語を確認してください。既存辞書と合わせて100語まで。")
+                Text(targetLanguage == nil
+                    ? "見出し・強調語・コード表記・用語表から候補を抽出します。使う語を確認してください。合計100語まで。"
+                    : "見出し・強調語・コード表記・原語/訳語の表から候補を抽出します。使う語と訳語を確認してください。既存辞書と合わせて100語まで。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Button("資料から用語を抽出") {
                     extracting = true
@@ -33,7 +35,7 @@ struct DocumentTermsView: View {
                 Picker("原語の言語", selection: $sourceLanguage) {
                     ForEach(Array(Set(sourceLanguages)).sorted(), id: \.self) { Text(LanguageCatalog.displayName(for: $0)).tag($0) }
                 }
-                Text(targetLanguage.map { "訳語の言語：\(LanguageCatalog.displayName(for: $0))" } ?? "認識用語のみ")
+                Text(targetLanguage.map { "訳語の言語：\(LanguageCatalog.displayName(for: $0))" } ?? "認識ヒントと、翻訳時の原文表記保持に使います。固定訳語の指定はできません。")
                     .font(.caption)
                 Text("適用・解除は選択中の原語言語だけを変更します。別の言語に適用した用語は保持します。")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
@@ -62,7 +64,9 @@ struct DocumentTermsView: View {
                     Button("選択した用語を適用") {
                         do {
                             try terms.apply(sourceLanguage: sourceLanguage, targetLanguage: targetLanguage, manual: manual)
-                            message = "用語を適用しました。翻訳は以降の処理に反映します。"
+                            message = targetLanguage == nil
+                                ? "用語を適用しました。以降の翻訳で原文表記を保護します。"
+                                : "用語を適用しました。翻訳は以降の処理に反映します。"
                             applied()
                         } catch { message = error.localizedDescription }
                     }.disabled(extracting || knowledge.isBusy || sourceLanguage.isEmpty)

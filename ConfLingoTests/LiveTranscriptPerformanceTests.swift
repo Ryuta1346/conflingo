@@ -130,7 +130,7 @@ struct LiveTranscriptPerformanceTests {
 
     @Test func translationNotificationsCoverFailureRetryCompletionAndReset() async throws {
         let client = FakeMeetingTranslator()
-        let translations = MeetingTranslations(sessionID: UUID(), client: client)
+        let translations = MeetingTranslations(sessionID: UUID(), clientFactory: { _, _ in client })
         let event = insightEvent(session: translations.sessionID)
         let initial = translations.displayRevision
         translations.receive(event, targetLanguage: "ja")
