@@ -114,7 +114,7 @@ func responsePayload(_ text: String) throws -> String {
 }
 
 func decodeResponse(_ provider: LLMProvider, stream: Data, chunkBytes: Int = 4_096) throws -> InsightResult {
-    var gemini = GeminiStreamDecoder()
+    var gemini = LLMStreamDecoder(provider: .gemini)
     var llm = LLMStreamDecoder(provider: provider)
     for offset in stride(from: 0, to: stream.count, by: chunkBytes) {
         let data = stream.subdata(in: offset..<min(offset + chunkBytes, stream.count))

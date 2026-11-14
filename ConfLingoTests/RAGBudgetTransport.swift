@@ -32,7 +32,7 @@ struct RAGBudgetTransport: InsightHTTPTransport {
         // Reserve the full approved input allowance, including schema/framing overhead.
         let reservation = RAGBudgetLedger.cost(input: 6_000, output: 8_192, thinking: 0) * 1.2
         try ledger.begin(caseID: caseID, operation: .generate, hash: hash, reservation: reservation)
-        var decoder = GeminiStreamDecoder()
+        var decoder = LLMStreamDecoder(provider: .gemini)
         try await downstream.stream(request) { chunk in
             try decoder.consume(chunk)
             try receive(chunk)

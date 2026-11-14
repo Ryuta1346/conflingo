@@ -62,7 +62,7 @@ struct LLMPreviewIntegrationTests {
         let payload = #"{"kind":"answerSuggestion","evidenceIDs":[],"text":"途中🙂"#
         let frame: [String: Any] = ["candidates": [["content": ["parts": [["text": payload]]]]]]
         let data = Data("data: ".utf8) + (try JSONSerialization.data(withJSONObject: frame)) + Data("\n\n".utf8)
-        var decoder = GeminiStreamDecoder()
+        var decoder = LLMStreamDecoder(provider: .gemini)
         for byte in data { try decoder.consume(Data([byte])) }
         #expect(decoder.previewText == "途中🙂")
         #expect(throws: InsightFailure.invalidResponse) { try decoder.finish() }

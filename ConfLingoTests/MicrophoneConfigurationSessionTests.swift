@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import Testing
 @testable import ConfLingo
 
@@ -18,7 +19,7 @@ struct MicrophoneConfigurationSessionTests {
         await controller.start(store: store, coordinator: coordinator, locale: .current)
         #expect(store.phase == .listening)
         center.post(name: .AVAudioEngineConfigurationChange, object: engine.notificationObject)
-        await waitForConfigurationStop { store.phase == .idle }
+        try await waitForConfigurationStop { store.phase == .idle }
         #expect(store.phase == .idle)
         #expect(source.state == .idle)
         #expect(activity.owner == nil)
@@ -48,7 +49,7 @@ struct MicrophoneConfigurationSessionTests {
         #expect(microphone.state == .running)
         #expect(system.state == .running)
         center.post(name: .AVAudioEngineConfigurationChange, object: engine.notificationObject)
-        await waitForConfigurationStop { controller.phase == .idle }
+        try await waitForConfigurationStop { controller.phase == .idle }
         #expect(controller.phase == .idle)
         #expect(microphone.state == .idle)
         #expect(system.state == .idle)
@@ -87,9 +88,10 @@ private final class StreamOnlySpeech: SpeechTranscribing {
 }
 
 @MainActor
-private func waitForConfigurationStop(_ stopped: () -> Bool) async {
-    let deadline = ContinuousClock.now.advanced(by: .seconds(2))
-    while !stopped(), ContinuousClock.now < deadline {
-        try? await Task.sleep(for: .milliseconds(1))
+private func waitForConfigurationStop(_ stopped: @escaping @MainActor @Sendable () -> Bool) async throws {
+    for await isStopped in Observations({ stopped() }) {
+        try Task.checkCancellation()
+        if isStopped { return }
     }
+    throw CancellationError()
 }

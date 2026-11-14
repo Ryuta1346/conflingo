@@ -34,4 +34,4 @@ Conference/MeetingがそれぞれKnowledgeStore・InsightCoordinator・WebResear
 
 ## 完了記録
 
-実装コミット`3e4e27b`。ローカル実装・自動検証完了、[Draft PR #42](https://github.com/Ryuta1346/conflingo/pull/42)提出済み・未マージ。先行2テストの通知上書き不具合を修正し、全698定義中691成功・実API7skip、Lint263ファイル違反0、Release arm64/x86_64成功。[結果](../validation/shared-assistance-notifications-2026-11-14.md)。主担当の差分確認済み、独立レビュー・実機受入は未実施。
+実装コミット`3e4e27b`。ローカル実装・自動検証完了、[PR #42](https://github.com/Ryuta1346/conflingo/pull/42)はmain `50f59d4`へマージ済み。先行2テストの通知上書き不具合を修正し、全698定義中691成功・実API7skip、Lint263ファイル違反0、Release arm64/x86_64成功。[結果](../validation/shared-assistance-notifications-2026-11-14.md)。主担当の差分確認済み、独立レビュー・実機受入は未実施。

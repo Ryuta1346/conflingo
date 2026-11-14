@@ -36,7 +36,7 @@ struct SummaryBudgetTransport: InsightHTTPTransport {
         // Reserve the full approved input allowance, including schema/framing overhead.
         let reservation = SummaryBudgetLedger.reservation
         try ledger.begin(caseID: caseID, operation: .generate, hash: hash, reservation: reservation)
-        var decoder = GeminiStreamDecoder()
+        var decoder = LLMStreamDecoder(provider: .gemini)
         timing?.mark(.generationStart)
         try await downstream.stream(request) { chunk in
             timing?.receive(bytes: chunk.count)
