@@ -1,0 +1,114 @@
+{
+  "head": "33c8ae6",
+  "method": "Independent static review with parent verification; no real API or audio",
+  "results": [
+    {
+      "agent": "review_r2",
+      "findings": [
+        {
+          "file": "ConfLingo/Meeting/Services/LLMStreamDecoder.swift",
+          "line": 47,
+          "severity": "MEDIUM",
+          "category": "Response size boundary",
+          "message": "SSEイベントの上限が結合時の改行を数えないため、64 KiB超のイベントを受理する。frameBytesには各data行の値だけを足し、acceptFrameでは改行で結合する。実デコーダーを用いたローカルプローブで、空のdata行70,000行を挟む420,204 bytesのSSEが成功し、結合後イベントは約70,119 bytesとなった。旧262,144 bytesの通信上限なら拒否されるサイズだが、今回の2 MiB化後は通る。GeminiStreamDecoder.swift:43にも同じ欠落があり、行数に応じたreduceの再走査も増える。計画の『イベント64 KiBを維持』を満たさない。",
+          "evidence": "guard frameBytes <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }",
+          "suggestion": "両デコーダーで、最初のdata行以外に結合区切り1 byteを加えた累積イベントbytesを追跡し、append前に上限判定する。Geminiも累積カウンタへ変更してreduceの再走査を除く。空data行と複数行JSONを含め、結合後65,536 bytesは成功、65,537 bytesはoversizedになる回帰試験を追加する。",
+          "confidence": "high"
+        }
+      ],
+      "positive_feedback": [
+        "通信層2か所とデコーダー3か所の総受信上限はLLMResponseLimits.wireBytesに統一され、本文・行・意味上の文字数上限は別に残る。",
+        "通信予算の境界/1 byte超過、UTF-8分割、本文上限、終端不足、デコーダー失敗後のコールバック停止をローカル試験でカバーしている。",
+        "実API計測は明示環境フラグと固定4要求のpreflight、重複台帳拒否、本文を含まないメトリクスに分離されている。"
+      ]
+    },
+    {
+      "agent": "review_r4r5",
+      "findings": [
+        {
+          "file": "ConfLingoTests/LiveTranscriptLayoutTests.swift",
+          "line": 59,
+          "severity": "MEDIUM",
+          "category": "Test reliability",
+          "message": "翻訳処理の完了を待たず、固定200msのレイアウト待ちの直後に completed.count == 1 を検証している。FakeMeetingTranslatorはactor上で非同期実行されるため、負荷の高い全体実行では未完了のまま判定される。docs/validation/r6-keychain-interaction.mdにも同じテストの0件/期待1件の失敗が記録されており、製品回帰がなくても全体チェックを失敗させる。",
+          "evidence": "        #expect(meeting.translations.completed.count == 1)",
+          "suggestion": "receive後に対象発話の翻訳完了を期限付きで待機し、未完了ならその時点で明示的に失敗させる。完了後にレイアウトを更新して履歴の可視性を検証する。固定sleepの延長だけで解消しない。",
+          "confidence": "high"
+        }
+      ],
+      "positive_feedback": [
+        "R4は入力停止・認識完了・Hub終了・Conference購読終了の順序を共通controllerへ委譲し、入力別時刻の既存契約をテストしている。",
+        "R5-1は100区間の送信・保存復元と21区間目での取消・失敗を公開動作で検証している。",
+        "R5-2/3は表示コレクションの列挙量・キャッシュ無効化と32語境界・引用保持を決定論的に検証している。"
+      ]
+    },
+    {
+      "agent": "review_r6",
+      "findings": [],
+      "positive_feedback": [
+        "Conferenceは同文の別発話を保持し、再送・旧revisionの排除をLegacyTranslationAdapterへ残している。保存/Markdownと再開・Clearの回帰テストがある。",
+        "翻訳workerは言語ペアごとに生成され、処理開始時の用語snapshotとsession/generation検査で旧結果の混入を防止している。",
+        "Keychain全操作が共通Mutexを通り、復元失敗の保持と次操作前の復元、Update→Addの一体化をテストしている。"
+      ]
+    },
+    {
+      "agent": "review_repository",
+      "findings": [],
+      "positive_feedback": [
+        "リポジトリ読込はfd相対openat/O_NOFOLLOW、root inode照合、読込前後stamp比較を使い、選択後のリンク置換と途中変更を拒否する。固定除外・エントリ/深さ/容量上限とsecurity-scoped accessの解放も確認した。",
+        "索引追加はトランザクションと取消確認を経て公開し、資料revisionと操作IDによって自動提案・要約の古い検索/応答を棄却する。現行mainには後続のimportGeneration取消処理も存在する。",
+        "手動/自動/要約の資料許可、最大5抜粋/6,000文字、要約の補足と引用の相互条件、相対パス・行・hash・snapshotの表示/Markdownエスケープを確認した。"
+      ]
+    },
+    {
+      "agent": "review_library_entry",
+      "findings": [
+        {
+          "file": "ConfLingo/Services/DualTranscriptionController.swift",
+          "line": 172,
+          "severity": "MEDIUM",
+          "category": "Concurrency",
+          "message": "語彙ライブ更新が同一run内で競合すると古い用語が最後に反映される。旧更新Aが最初の入力のupdateContextで待機中、新更新Bが両入力への反映を完了し、その後Aが再開するとAは次の入力へ旧keywordsを書き込む。MeetingWorkspace/ContentViewのterms revision判定は表示更新のみを抑止し、認識エンジンの書込み順を保護しない。適用後すぐ解除・資料変更した際、UIは最新状態でも片方の入力が古い語彙を使い続け得る。",
+          "evidence": "do { try await input.speech.updateContext(keywords[input.origin] ?? []) }",
+          "suggestion": "同じrunのcontext更新を直列化し、完了待ち中の新要求は最新値を最後に反映する。stop/restartで旧runの更新を破棄する。最初の入力だけgateで遅延させ、A→Bを重ねても最終的に両入力がBになる無通信テストを追加する。",
+          "confidence": "high"
+        },
+        {
+          "file": "ConfLingo/KnowledgeLibrary/KnowledgeMaterialsView.swift",
+          "line": 117,
+          "severity": "MEDIUM",
+          "category": "Consent contract",
+          "message": "Meetingで資料を取り外すと手動資料許可knowledge.permittedと自動資料許可automaticKnowledgeEnabledが維持される。ここはKnowledgeStoreへ直接removeを送り、MeetingのonContentChangeは用語reset、onInvalidationは要約取消だけなので、追加/ライブラリ選択とは異なり許可解除へ到達しない。承認計画knowledge-entry-points-implementation-plan.md §3/§8の「資料変更で送信許可を無効化」と不整合で、残った資料による自動送信が再確認なしで継続する。新しい資料の漏洩を示す指摘ではない。",
+          "evidence": "if removing.source == nil { await knowledge.remove(removing.id) } else { await knowledge.removeRepository() }",
+          "suggestion": "Meetingの成功した内容変更通知で手動・自動の資料許可を解除するなど、ファイル/リポジトリ取り外しを含めて契約を統一する。取り外し成功時に両許可がfalse、失敗時は既存内容・許可を保持し、音声と既存引用は維持されるテストを追加する。取り外し時の許可保持を意図するなら承認済み契約変更として資料側を明確にする。",
+          "confidence": "high"
+        }
+      ],
+      "positive_feedback": [
+        "保存内容は版・ID・相対パス・ハッシュ・容量を検証し、会議への復元はSQL transaction後に状態を更新する。",
+        "ライブラリ更新/削除と会議内コピーの寿命を分離し、旧revisionによる上書き・遅延attachの棄却をテストしている。",
+        "Conference補正は原文を保持し、明示採用と有効引用がある候補だけを保存・出力する。"
+      ]
+    },
+    {
+      "agent": "review_meeting_ui",
+      "findings": [
+        {
+          "file": "ConfLingo/Meeting/Views/MeetingWorkspaceView.swift",
+          "line": 236,
+          "severity": "LOW",
+          "category": "Optional UX improvement",
+          "message": "小窓の引用ボタンは対象IDを選択し、別の「発話をメイン画面で確認」で主画面を展開する2段操作になっている。引用の本文自体はカード内に表示済みで、現行計画に「引用クリック単独で主画面を展開する」という明示契約はないため、不具合ではなく任意の操作短縮案。主画面を隠している場合、引用クリックだけでは可視ウィンドウは変わらない。",
+          "evidence": "                            meeting.revealEvidence(id)",
+          "suggestion": "任意改善として、小窓からの発話参照を「展開して対象IDを選択する」1操作にまとめるか、現状の2段操作をボタン文言で明確にする。既存設計の完了条件や今回の修正必須項目には数えない。変更する場合は会議ID・入力状態・Conferenceの停止確認を維持する。",
+          "confidence": "high"
+        }
+      ],
+      "positive_feedback": [
+        "主画面・小窓で同じMeetingWorkspaceを共有し、展開時はConferenceの停止契約を維持する。",
+        "停止失敗を成功やReviewへ置き換えず、主画面・小窓の双方に停止再試行を出す。",
+        "歴史画像では停止操作が本文スクロール外に置かれ、狭幅・48ptでも操作領域が残る。"
+      ]
+    }
+  ]
+}

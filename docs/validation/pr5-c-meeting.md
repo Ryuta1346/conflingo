@@ -1,5 +1,7 @@
 # PR5-C — Meeting UI・フローティングUI 検証記録
 
+> 2026-11-14独立レビュー追記: 固定main `33c8ae6`で[残件レビュー](remaining-review-2026-11-14.md)を実施済み。指摘・未修正項目・確認範囲は同記録を参照。以下の「独立レビュー未実施」は当時の履歴で、実機受入の未完了は継続。
+
 2026-11-08 / `feature/meeting-ui` / **PR #11マージ済み、残る受入待ち（REVIEW）。** 初期実装: `fa5f515` / レビュー修正: `4c1902d` / マージ: `e167765` / [PR #11](https://github.com/Ryuta1346/conflingo/pull/11)
 
 ユーザー「進めて」により[実装計画](../design/pr5-c-implementation-plan.md)を承認。基点main `c34ddd1`。PR4の実機受入を持ち越し、接続コードとfake結合検証を先行する方針を含む。実音声試験の延期は継続している。

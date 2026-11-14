@@ -1,0 +1,9 @@
+{
+  "agent": "composition_contracts_review",
+  "findings": [],
+  "positive_feedback": [
+    "AppCompositionTestsは共有AudioInputUseの参照確認に加え、合成Meeting開始中のConference開始拒否と停止後の所有権解放を振る舞いで検証している。",
+    "共有LLMSettings/SessionStore、字幕イベント接続、固有UserDefaultsへの設定保存、プレビュー初期画面と無開始状態を契約として確認している。",
+    "通常プレビューのfake key storeと既存MeetingLivePreviewTestsの2フラグ条件・fake生成を組み合わせ、構成抽出後もKeychain/AIの隔離を確認できる。"
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "ConfLingo/ConfLingoApp.swift": "0644db414aa730d62f95a26beda4c0750f9830d112a7910a521d7470c154a5aa",
+  "ConfLingo/Knowledge/KnowledgeStore.swift": "1c6fba8fc9b12c7569b8afd809ef3b34766a89a91191311aefaed2d21d10a897",
+  "ConfLingo/Meeting/MeetingWorkspace.swift": "741152ac3fa2955b0c74b64d633f170966ed124c3b18c22ccf87d6cfd6ffb5aa",
+  "ConfLingo/Meeting/Services/GeminiStreamDecoder.swift": "6008e9766843a9cc56e576472de84efec50c273cee88533c6a08a39f1f879326",
+  "ConfLingo/Meeting/Services/LLMInsightClient.swift": "b2886a96bb4b1215d465fc6f1c14652946d8d1bb4078a72968cfb05afe33fef1",
+  "ConfLingo/Meeting/Services/LLMModelCatalog.swift": "c8fa6bffa82d3eb510f481f9c107a6613922e43a2d43806b5e4c3d73e5ee8931",
+  "ConfLingo/Meeting/Services/LLMStreamDecoder.swift": "c075faa3497a1071cc0f443259c8fcfff4f05013840ec6743c5ad9d70454d148",
+  "ConfLingo/Research/LLMWebResearchClient.swift": "1fe2c55623fe075b2708b0b9db82a7d36f49a9dd0b13fcfcd6810ea1f4d54c7f",
+  "ConfLingo/Services/DualTranscriptionController.swift": "4eea7389c5886769123c8e1a93191d41dd7e84c29a3d5bac55f187d369039efe",
+  "ConfLingoTests/AssistanceReviewRegressionTests.swift": "6337934a5aa33af649b273dc26c58f6cdef0101aee2cd48385a332af3ca56df8",
+  "ConfLingoTests/DualTranscriptionTests.swift": "419ecbaa2847e02380b0af19209616c937f3dcb66e6639f05ee4fef175395b01",
+  "ConfLingoTests/LiveTranscriptLayoutTests.swift": "4cffd9ea3c4a663d516a1db0e1fe9bdca8374cf5ead3dd16afaab18c8db07ffa",
+  "ConfLingoTests/LongSummaryLayoutTests.swift": "68da73559ae466986b3621c18243842e75faf1d8ccbe310b07e400a5552288bf",
+  "ConfLingoTests/MeetingTermLayoutTests.swift": "d239f0265112ee2b9ec9c9f18a68d177b90e0d0d6638cc2e6adeec802abf266d",
+  "ConfLingoTests/ResponseLimitTests.swift": "eddb0620b6f65df0afc2a8453e5899a491effacd29de7ad441f081e0daf72815",
+  "ConfLingo/Meeting/Services/LLMDiagnostics.swift": "09eb4aabc4f55d5d0d2fb0500175ee5d44aec608a58d82cc6a515bd524abfdee",
+  "ConfLingoTests/KnowledgeRemovalConsentTests.swift": "f6abf84633bad4d90c35fda21e5c748af3d01aa70a21cc6ed462665bc9720549",
+  "ConfLingoTests/LLMDiagnosticsTests.swift": "79a1a64a460914df37995280e4859780046108e55238d2ee8e01695816eca7c7",
+  "ConfLingoTests/LiveContextOrderingTests.swift": "ce518bba26bb2ff36eeb402949396efe51b56d27e8761d9f1bd1833594207e79",
+  "ConfLingoTests/TestAccessibility.swift": "e30520fa9be28e885aa028fe5ebb0c98dba0bac4af1c348f5812320bc6acd963",
+  "ConfLingoTests/TestAccessibilityTests.swift": "490ac686948921cfbe69c98066c3aed7162e3f78f4ad3bbb8c2fabe3c3b9b360"
+}

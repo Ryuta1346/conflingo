@@ -2,11 +2,11 @@
 
 **English** | [日本語](README.ja.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | [Español](README.es.md)
 
-A personal macOS app that transcribes MacBook microphone audio in real time at conference venues using Apple's built-in macOS APIs, and displays the result as translated subtitles. The recognition language and target language can be freely chosen from the languages supported by the OS (default: English → Japanese).
+A personal macOS app for conference subtitles and meeting assistance. Conference and Meeting support microphone audio, system audio, or both. Transcription and optional translation run on this Mac using Apple's APIs; optional AI assistance uses the LLM connection you select. New sessions default to transcription.
 
 - Transcription: `Speech.framework` (`SpeechAnalyzer` / `SpeechTranscriber` on macOS 26, on-device)
 - Translation: `Translation.framework` (`TranslationSession`, on-device)
-- UI: SwiftUI two-pane layout (source transcript / translated text)
+- UI: SwiftUI Conference / Meeting workspaces, floating panel and shared libraries
 
 📖 **For detailed usage (registering technical terms, on-site tips, troubleshooting), see [docs/usage.md](docs/usage.md).**
 
@@ -136,7 +136,7 @@ Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad
 ## Limitations
 
 - Both modes support microphone/external devices, system audio, or both; Zoom/Meet/Teams-specific acceptance checks remain outstanding.
-- In-progress (partial) sentences are not translated by design (to avoid unstable translations). Translation lags finalized sentences by roughly 2–5 seconds
+- In-progress (partial) sentences are not translated by design (to avoid unstable translations). Translation latency depends on the model, text and device; real-meeting latency acceptance is still pending
 - Languages can only be changed while stopped. Switching languages keeps the existing subtitle history (the Markdown header records the language pair at save time)
 - Speaker identification and audio file recording are not supported. Optional AI summaries are available in Meeting.
 - No code signing / notarization for distribution (intended for personal use with local builds)
@@ -144,25 +144,45 @@ Send the resulting `dist/ConfLingo-1.0.zip` via AirDrop. **Because the app is ad
 
 ## Architecture
 
-```
-AVAudioEngine microphone input (hardware format)
-  └ AVAudioConverter converts to SpeechAnalyzer's preferred format
-    └ AsyncStream<AnalyzerInput> → SpeechAnalyzer / SpeechTranscriber (volatileResults)
-        ├ partial → SessionStore.volatileText (shown dimmed in the recognition pane)
-        └ final  → finalized into SessionStore.segments → TranslationCoordinator queue
-            └ TranslationSession inside the .translationTask closure translates sequentially
-                └ SessionStore.applyTranslation → shown in the translation pane
+```mermaid
+flowchart TD
+    App[ConfLingoApp / AppComposition] --> Main[ContentView]
+    App --> Floating[MeetingFloatingPanel]
+    App --> Meeting
+    App --> Library
+    App --> Sessions
+    Mic[MicrophoneAudioSource / AVAudioEngine] --> STT[SpeechTranscriptionService]
+    System[SystemAudioSource / ScreenCaptureKit] --> STT
+    STT --> Dual[DualTranscriptionController]
+    Dual --> Hub[TranscriptEventHub]
+    Hub --> Adapter[SessionController / LegacyTranslationAdapter]
+    Adapter --> Conference[SessionStore / TranslationCoordinator]
+    Hub --> Meeting[MeetingSessionStore / MeetingWorkspace]
+    Meeting --> Translation[MeetingTranslations / TranslationSession]
+    Conference --> Assistance[ConferenceKnowledgeWorkspace]
+    Meeting --> AI[InsightCoordinator / MeetingSummaryCoordinator]
+    Knowledge[KnowledgeStore / KnowledgeIndex] --> Assistance
+    Knowledge --> AI
+    Library[KnowledgeLibrary / local archives] --> Knowledge
+    Assistance --> LLM[SelectedLLMClient / LLMInsightClient]
+    AI --> LLM
+    Research[WebResearchCoordinator] --> Web[SelectedLLMResearchClient]
+    Conference --> Save[SessionSnapshot / SessionFiles]
+    Meeting --> Save
+    Save --> Sessions[SessionsLibrary / Markdown export]
 ```
 
-| File | Responsibility |
+Paths below are relative to `ConfLingo/`. The graph describes the current implementation, including the shared transcription path introduced in R4.
+
+| File / directory | Responsibility |
 |---|---|
-| `Models/SessionStore.swift` | Single source of truth for the UI. Segment history, partials, dedup |
-| `Models/KeywordParser.swift` | Parses the technical terms field + event presets |
-| `Models/LanguageCatalog.swift` | Language display names and target candidate filtering |
-| `Services/AudioCaptureService.swift` | Microphone input, format conversion, permission requests |
-| `Services/SpeechTranscriptionService.swift` | SpeechAnalyzer / SpeechTranscriber wiring |
-| `Services/TranslationCoordinator.swift` | Translation queue (ID dedup + AsyncStream) |
-| `Services/ModelAvailabilityService.swift` | Availability checks and model downloads at launch |
-| `Export/MarkdownExporter.swift` | Markdown generation (pure function) |
+| `AppComposition.swift` | App-owned service instances, shared audio ownership, settings and preview selection |
+| `Services/DualTranscriptionController.swift` | Input ownership, recognition lifecycle, event delivery and stop ordering |
+| `Services/SessionController.swift` | Connects the shared input controller to Conference |
+| `Meeting/MeetingWorkspace.swift` | Meeting lifecycle, translation, assistance and review |
+| `Meeting/Services/` | AI requests, response decoding, summaries and per-connection Keychain access |
+| `Research/` | Explicit Web research and provider citations |
+| `Knowledge/` / `KnowledgeLibrary/` | Import, local search, cited snapshots and reusable local materials |
+| `Sessions/` / `Export/` | Explicit local saves, read-only history and Markdown output |
 
 Meeting supports Gemini, OpenAI, Claude, Kimi, DeepSeek, other OpenAI-compatible clouds, and local models such as Qwen through Ollama / LM Studio. API keys are stored per connection in Keychain. See [setup](docs/usage.md#meeting-ai-assistance-and-llm-selection) and [validation scope](docs/validation/llm-selection.md).

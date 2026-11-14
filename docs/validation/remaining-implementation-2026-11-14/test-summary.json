@@ -1,0 +1,9 @@
+{
+  "result": "Passed",
+  "totalTestCount": 682,
+  "passedTests": 675,
+  "failedTests": 0,
+  "skippedTests": 7,
+  "testFailures": [],
+  "xcresult": "/tmp/conflingo-remaining-build/Logs/Test/Test-ConfLingo-2026.11.14_22-15-04-+0900.xcresult"
+}

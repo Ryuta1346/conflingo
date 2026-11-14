@@ -1,0 +1,17 @@
+{
+  "result": "Failed",
+  "totalTestCount": 667,
+  "passedTests": 659,
+  "failedTests": 1,
+  "skippedTests": 7,
+  "testFailures": [
+    {
+      "failureText": "Expectation failed: (text(host) → \"\").contains(\"Partial two\")",
+      "targetName": "ConfLingoTests",
+      "testIdentifier": 389,
+      "testIdentifierString": "LiveTranscriptLayoutTests/conferenceCacheHitsStillObserveFinalsTranslationsAndClear()",
+      "testIdentifierURL": "test://com.apple.xcode/ConfLingo/ConfLingoTests/LiveTranscriptLayoutTests/conferenceCacheHitsStillObserveFinalsTranslationsAndClear()",
+      "testName": "conferenceCacheHitsStillObserveFinalsTranslationsAndClear()"
+    }
+  ]
+}
