@@ -23,9 +23,9 @@ final class KnowledgeStore {
     init(lookup: (@MainActor (KnowledgeIndex, String) async throws -> [KnowledgeReference])? = nil) {
         self.lookup = lookup ?? { index, query in try await index.search(query) }
     }
-    @ObservationIgnored var onChange: (() -> Void)?
-    @ObservationIgnored var onInvalidation: (() -> Void)?
-    @ObservationIgnored var onContentChange: (() -> Void)?
+    let changes = EventSignal<Void>()
+    let invalidations = EventSignal<Void>()
+    let contentChanges = EventSignal<Void>()
     @ObservationIgnored private var repositoryTask: Task<[KnowledgeDocument], Error>?
 
     var hasRepository: Bool { documents.contains { $0.source != nil } }
@@ -53,7 +53,7 @@ final class KnowledgeStore {
             }
             guard mutationID == mutation else { return }
             documents += imported
-            onContentChange?()
+            contentChanges.emit(())
             message = "リポジトリを取り込みました。取り込み時点の作業ツリーをこの会議で参照します。"
         } catch {
             guard mutationID == mutation else { return }
@@ -90,7 +90,7 @@ final class KnowledgeStore {
             documents.removeAll { $0.source != nil }
             let remaining = Set(documents.map(\.id))
             librarySources = librarySources.filter { remaining.contains($0.key) }
-            onContentChange?()
+            contentChanges.emit(())
             message = "リポジトリを取り外しました。生成済みの引用は会議破棄まで残ります。"
         } catch {
             guard mutationID == mutation else { return }
@@ -172,7 +172,7 @@ final class KnowledgeStore {
         guard mutationID == mutation else { throw CancellationError() }
         documents += restored
         markSaved(saved)
-        onContentChange?()
+        contentChanges.emit(())
         message = "保存資料を追加しました。資料の送信許可を確認してください。"
     }
 
@@ -180,7 +180,7 @@ final class KnowledgeStore {
         guard permitted != value else { return }
         permitted = value
         consentRevision = UUID()
-        onChange?()
+        changes.emit(())
     }
 
     func add(url: URL) async {
@@ -208,7 +208,7 @@ final class KnowledgeStore {
             }
             guard mutationID == mutation else { return }
             documents.append(document)
-            onContentChange?()
+            contentChanges.emit(())
             message = "資料を取り込みました。この会議の終了後も、破棄するまで参照できます。"
         } catch {
             guard mutationID == mutation else { return }
@@ -229,7 +229,7 @@ final class KnowledgeStore {
             guard mutationID == mutation else { return }
             documents.removeAll { $0.id == id }
             librarySources[id] = nil
-            onContentChange?()
+            contentChanges.emit(())
             message = "資料を取り外しました。既存の回答にある引用は会議破棄まで残ります。"
         } catch {
             guard mutationID == mutation else { return }
@@ -280,19 +280,15 @@ final class KnowledgeStore {
         permitted = false
         isBusy = false
         message = ""
-        onContentChange?()
+        contentChanges.emit(())
     }
-
-    @ObservationIgnored private var invalidationObservers: [() -> Void] = []
-    func observeInvalidation(_ action: @escaping () -> Void) { invalidationObservers.append(action) }
 
     private func invalidate() {
         revision = UUID()
-        onInvalidation?()
-        for observer in invalidationObservers { observer() }
+        invalidations.emit(())
         searchID = UUID()
         results = []
         searchState = .idle
-        onChange?()
+        changes.emit(())
     }
 }

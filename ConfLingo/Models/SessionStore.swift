@@ -26,13 +26,13 @@ final class SessionStore {
     /// 文末待ちで翻訳単位に未確定のセグメント ID（出現順）
     private(set) var bufferedSegmentIDs: [UUID] = []
     private(set) var volatileText: String = ""
-    var phase: SessionPhase = .idle { didSet { phaseChanged?(phase) } }
-    var phaseChanged: ((SessionPhase) -> Void)?
+    var phase: SessionPhase = .idle { didSet { phaseChanges.emit(phase) } }
+    let phaseChanges = EventSignal<SessionPhase>()
     var mode: SessionMode = .transcription
     var sessionName: String = ""
     var sourceLanguage = "en-US"
-    var onFinal: ((TranscriptSegment) -> Void)?
-    var onReset: (() -> Void)?
+    let finalEvents = EventSignal<TranscriptSegment>()
+    let resets = EventSignal<Void>()
     private(set) var startedAt: Date?
 
     /// Start 時点で確定した専門用語辞書。翻訳時の do-not-translate / 訳語固定リストとして参照する。
@@ -59,7 +59,7 @@ final class SessionStore {
         )
         segments.append(segment)
         segmentByID[segment.id] = segment
-        onFinal?(segment)
+        finalEvents.emit(segment)
         volatileText = ""
         return segment.id
     }
@@ -150,6 +150,6 @@ final class SessionStore {
         volatileText = ""
         startedAt = nil
         transcriptCache = TranscriptPresentation.Cache()
-        onReset?()
+        resets.emit(())
     }
 }

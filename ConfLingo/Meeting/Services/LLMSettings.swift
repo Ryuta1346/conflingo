@@ -11,17 +11,7 @@ final class LLMSettings {
     private let defaults: UserDefaults
     private let keyStore: (String) -> any APIKeyStore
     @ObservationIgnored private var credentialCache: [UUID: APIKeyCredentials] = [:]
-    var onChange: (() -> Void)?
-    @ObservationIgnored private var observers: [UUID: () -> Void] = [:]
-
-    @discardableResult
-    func observeChanges(_ action: @escaping () -> Void) -> UUID {
-        let id = UUID()
-        observers[id] = action
-        return id
-    }
-
-    func removeObserver(_ id: UUID) { observers[id] = nil }
+    let changes = EventSignal<Void>()
 
     var selected: LLMConnection { connections.first { $0.id == selectedID } ?? connections[0] }
     var credentials: APIKeyCredentials { credentials(for: selected) }
@@ -88,7 +78,7 @@ final class LLMSettings {
         persist()
     }
 
-    private func changed() { revision += 1; onChange?(); for action in observers.values { action() } }
+    private func changed() { revision += 1; changes.emit(()) }
     private func persist() {
         guard let data = try? JSONEncoder().encode(Saved(connections: connections, selectedID: selectedID)) else { return }
         defaults.set(data, forKey: Self.storageKey)

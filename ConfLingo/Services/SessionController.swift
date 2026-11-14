@@ -12,6 +12,7 @@ final class SessionController {
     private var sessionError: String?
     private var adapter: LegacyTranslationAdapter?
     private var consumer: Task<Void, Never>?
+    @ObservationIgnored private var phaseSubscription: EventSubscription<SessionPhase>?
 
     init(
         audioSource: any AudioSource = MicrophoneAudioSource(),
@@ -38,7 +39,9 @@ final class SessionController {
         store.sourceLanguage = locale.identifier
         sessionError = nil
         store.setActiveGlossary(glossary)
-        dual.phaseChanged = { phase in
+        phaseSubscription?.cancel()
+        phaseSubscription = dual.phaseChanges.observe { [weak store] phase in
+            guard let store else { return }
             store.phase = phase
             if phase == .listening { store.markSessionStarted() }
         }

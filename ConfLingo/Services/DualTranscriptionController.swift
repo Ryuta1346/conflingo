@@ -10,7 +10,7 @@ final class DualTranscriptionController {
         var origin: AudioOrigin { source.origin }
     }
 
-    private(set) var phase: SessionPhase = .idle { didSet { phaseChanged?(phase) } }
+    private(set) var phase: SessionPhase = .idle { didSet { phaseChanges.emit(phase) } }
     private(set) var lastError: String?
     private(set) var preparation = ""
     private(set) var permissions: [AudioOrigin: AudioPermissionStatus] = [:]
@@ -20,7 +20,7 @@ final class DualTranscriptionController {
     let activity: AudioInputUse
     var prepareOptionalConsumer: (@MainActor (TranscriptEventHub) async -> Void)?
     var finishOptionalConsumer: (@MainActor () async -> Void)?
-    var captureActivityChanged: (@MainActor (Bool) -> Void)?
+    let captureActivityChanges = EventSignal<Bool>()
     var elapsedOffset: TimeInterval { timeline.offset }
     var isStopping: Bool { stopTask != nil }
 
@@ -28,7 +28,7 @@ final class DualTranscriptionController {
     private(set) var diagnosticSaveFailed = false
     private let inputs: [Input]
     private var selectedOrigins: Set<AudioOrigin> = [.microphone, .systemAudio]
-    var phaseChanged: ((SessionPhase) -> Void)?
+    let phaseChanges = EventSignal<SessionPhase>()
     private let timeline: MeetingTimeline
     private let owner: AudioInputUse.Owner
     private let prepareModel: @MainActor (Locale) async throws -> Locale
@@ -126,7 +126,7 @@ final class DualTranscriptionController {
         guard phase != .idle else { return }
         phase = .stopping
         diagnostics?.mark(.stopStarted)
-        captureActivityChanged?(false)
+        captureActivityChanges.emit(false)
         let pendingContext = contextTask
         pendingContext?.cancel()
         let pendingStart = startTask
@@ -268,7 +268,7 @@ final class DualTranscriptionController {
             guard !failed, phase == .preparing else { throw CancellationError() }
             preparation = ""
             phase = .listening
-            captureActivityChanged?(true)
+            captureActivityChanges.emit(true)
         } catch {
             if !(error is CancellationError) { recordFailure(error, origin: currentOrigin, run: run) }
         }
@@ -316,7 +316,7 @@ final class DualTranscriptionController {
     private func recordFailure(_ error: any Error, origin: AudioOrigin?, run: UUID) {
         guard runID == run, !failed else { return }
         failed = true
-        captureActivityChanged?(false)
+        captureActivityChanges.emit(false)
         let prefix = origin.map { "\($0.label)：" } ?? ""
         if origin == .microphone, error as? AudioSourceError == .permissionDenied {
             lastError = "マイクへのアクセスが許可されていません。システム設定 > プライバシーとセキュリティ > マイク で ConfLingo を許可してください。"

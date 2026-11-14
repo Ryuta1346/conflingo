@@ -35,6 +35,7 @@ final class InsightCoordinator {
     @ObservationIgnored private var deadline: Task<Void, Never>?
     @ObservationIgnored private var consumer: Task<Void, Never>?
     private var subscriptionID = UUID()
+    @ObservationIgnored private var knowledgeSubscription: EventSubscription<Void>?
 
     init(store: MeetingSessionStore, client: any InsightClient,
          now: @escaping () -> TimeInterval = { ProcessInfo.processInfo.systemUptime }, timeout: Duration = .seconds(30), knowledge: KnowledgeStore? = nil) {
@@ -46,7 +47,7 @@ final class InsightCoordinator {
         let knowledge = knowledge ?? KnowledgeStore()
         self.knowledge = knowledge
         var knowledgeRevision = knowledge.revision
-        knowledge.onChange = { [weak self] in
+        knowledgeSubscription = knowledge.changes.observe { [weak self] in
             guard let self else { return }
             let contentChanged = knowledgeRevision != self.knowledge.revision
             knowledgeRevision = self.knowledge.revision
