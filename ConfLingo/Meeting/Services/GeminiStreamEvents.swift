@@ -1,56 +1,11 @@
 import Foundation
 
-struct GeminiStreamDecoder {
-    private var line = Data()
-    private var frame: [String] = []
-    private var frameBytes = 0
-    private var totalBytes = 0
-    private var content = ""
-    private var ended = false
-    private var usage: InsightUsage?
+struct GeminiStreamEvents: LLMStreamEvents {
+    private(set) var content = ""
+    private(set) var ended = false
+    private(set) var usage: InsightUsage?
 
-    var previewText: String? { InsightPayload.preview(content) }
-
-    mutating func consume(_ data: Data) throws {
-        totalBytes += data.count
-        guard totalBytes <= LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
-        for byte in data {
-            if byte == 10 {
-                try acceptLine()
-                line.removeAll(keepingCapacity: true)
-            } else {
-                line.append(byte)
-                guard line.count <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
-            }
-        }
-    }
-
-    mutating func finish() throws -> InsightResult {
-        if !line.isEmpty { try acceptLine(); line.removeAll() }
-        if !frame.isEmpty { try acceptFrame() }
-        guard ended else { throw InsightFailure.invalidResponse }
-        return try InsightPayload.decode(content, usage: usage)
-    }
-
-    private mutating func acceptLine() throws {
-        guard var text = String(data: line, encoding: .utf8) else { throw InsightFailure.invalidResponse }
-        if text.last == "\r" { text.removeLast() }
-        if text.isEmpty {
-            if !frame.isEmpty { try acceptFrame() }
-        } else if text.hasPrefix("data:") {
-            var value = String(text.dropFirst(5))
-            if value.first == " " { value.removeFirst() }
-            let nextBytes = frameBytes + value.utf8.count + (frame.isEmpty ? 0 : 1)
-            guard nextBytes <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
-            frameBytes = nextBytes
-            frame.append(value)
-        }
-    }
-
-    private mutating func acceptFrame() throws {
-        let text = frame.joined(separator: "\n")
-        frame.removeAll(keepingCapacity: true)
-        frameBytes = 0
+    mutating func consume(_ text: String) throws {
         if text == "[DONE]" {
             guard ended else { throw InsightFailure.invalidResponse }
             return

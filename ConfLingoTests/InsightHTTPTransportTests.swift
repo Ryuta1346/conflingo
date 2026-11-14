@@ -45,7 +45,7 @@ struct InsightHTTPTransportTests {
         defer { TestInsightURLProtocol.fixtures.withLock { $0[url.path] = nil } }
         let config = URLSessionConfiguration.ephemeral
         config.protocolClasses = [TestInsightURLProtocol.self]
-        var decoder = GeminiStreamDecoder()
+        var decoder = LLMStreamDecoder(provider: .gemini)
         try await URLSessionInsightTransport(configuration: config).stream(URLRequest(url: url)) { try decoder.consume($0) }
         #expect(try decoder.finish().text == answer)
     }

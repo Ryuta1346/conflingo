@@ -44,7 +44,7 @@ struct SizeMeasurement: Encodable {
                 }
             }
             if !frame.isEmpty { try result.acceptFrame(frame, into: &objects) }
-            var decoder = GeminiStreamDecoder()
+            var decoder = LLMStreamDecoder(provider: .gemini)
             do { try decoder.consume(data); _ = try decoder.finish(); result.productDecode = "success" }
             catch { result.productDecode = String(describing: InsightFailure.sanitized(error)) }
         } else {
