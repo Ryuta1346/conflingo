@@ -1,4 +1,5 @@
 import Foundation
+import Observation
 import Testing
 @testable import ConfLingo
 
@@ -79,7 +80,11 @@ struct InsightRecoveryTests {
         ai.resume()
         ai.setPermission(true, after: 0)
         try await hub.publishBurst((0..<5).map { insightEvent(session: store.sessionID, text: "plain \($0)") })
-        try #require(await eventually { ai.state == .failed(.queueOverflow) })
+        for await state in Observations({ ai.state }) {
+            if state == .failed(.queueOverflow) { break }
+        }
+        try Task.checkCancellation()
+        try #require(ai.state == .failed(.queueOverflow))
         ai.setAutomatic(true, after: 0)
         #expect(!ai.automaticEnabled)
         #expect(ai.statusText.contains("一時停止"))

@@ -44,12 +44,18 @@ struct URLSessionResearchTransport: ResearchHTTPTransport {
         guard let response = response as? HTTPURLResponse else { throw InsightFailure.invalidResponse }
         guard response.statusCode == 200 else { throw InsightFailure.http(response.statusCode) }
         guard response.mimeType == "application/json" else { throw InsightFailure.invalidResponse }
+        return try await Self.read(bytes)
+    }
+
+    @concurrent
+    private static func read(_ bytes: URLSession.AsyncBytes) async throws -> Data {
         var data = Data()
         for try await byte in bytes {
             try Task.checkCancellation()
             guard data.count < LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
             data.append(byte)
         }
+        try Task.checkCancellation()
         return data
     }
 }

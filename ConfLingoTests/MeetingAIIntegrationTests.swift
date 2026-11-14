@@ -10,7 +10,7 @@ struct MeetingAIIntegrationTests {
         let client = FakeInsightClient()
         let gate = TestGate()
         client.gate = gate
-        let meeting = MeetingWorkspace(controller: fixture.controller(), insightClient: client,
+        let meeting = MeetingWorkspace(controller: fixture.controller(timeline: MeetingTimeline(now: { 0 })), insightClient: client,
                                        credentials: APIKeyCredentials(store: MemoryAPIKeyStore()))
         meeting.consentConfirmed = true
         await meeting.start()

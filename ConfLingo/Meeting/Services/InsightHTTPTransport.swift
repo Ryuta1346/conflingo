@@ -41,6 +41,15 @@ struct URLSessionInsightTransport: InsightHTTPTransport {
         guard let response = response as? HTTPURLResponse else { throw InsightFailure.invalidResponse }
         guard response.statusCode == 200 else { throw InsightFailure.http(response.statusCode) }
         guard response.mimeType == "text/event-stream" else { throw InsightFailure.invalidResponse }
+        try await Self.read(bytes) { data in
+            try Task.checkCancellation()
+            try receive(data)
+        }
+    }
+
+    // Keep per-byte iteration off MainActor; only complete chunks cross back for delivery.
+    @concurrent
+    private static func read(_ bytes: URLSession.AsyncBytes, receive: @escaping @MainActor (Data) throws -> Void) async throws {
         var buffer = Data()
         var count = 0
         for try await byte in bytes {
@@ -49,10 +58,11 @@ struct URLSessionInsightTransport: InsightHTTPTransport {
             guard count <= LLMResponseLimits.wireBytes else { throw InsightFailure.oversized }
             buffer.append(byte)
             if byte == 10 || buffer.count >= 1_024 {
-                try receive(buffer)
+                try await receive(buffer)
                 buffer.removeAll(keepingCapacity: true)
             }
         }
-        if !buffer.isEmpty { try receive(buffer) }
+        if !buffer.isEmpty { try await receive(buffer) }
+        try Task.checkCancellation()
     }
 }

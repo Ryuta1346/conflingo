@@ -86,6 +86,26 @@ struct InsightHTTPTransportTests {
         #expect(calls == 1)
     }
 
+    @Test(arguments: [3, 2_048])
+    func callbackCancellationStopsDeliveryIncludingAtEOF(byteCount: Int) async throws {
+        let url = try #require(URL(string: "https://generativelanguage.googleapis.com/test/\(UUID())"))
+        TestInsightURLProtocol.fixtures.withLock { $0[url.path] = .init(status: 200, body: Data(repeating: 32, count: byteCount)) }
+        defer { TestInsightURLProtocol.fixtures.withLock { $0[url.path] = nil } }
+        let config = URLSessionConfiguration.ephemeral
+        config.protocolClasses = [TestInsightURLProtocol.self]
+        let transport = URLSessionInsightTransport(configuration: config)
+        var calls = 0
+        let operation = Task {
+            try await transport.stream(URLRequest(url: url)) { _ in
+                MainActor.assertIsolated()
+                calls += 1
+                withUnsafeCurrentTask { $0?.cancel() }
+            }
+        }
+        await #expect(throws: CancellationError.self) { try await operation.value }
+        #expect(calls == 1)
+    }
+
     @Test func redirectsNeverForwardCredentials() async throws {
         let source = try #require(URL(string: "https://generativelanguage.googleapis.com/test"))
         let target = try #require(URL(string: "https://example.invalid/collect"))
