@@ -1,4 +1,6 @@
-> 2026-11-14 R6-1: Conferenceで同文の別発話が欠落する問題を修正。全640件中633成功・実API7skip、Lint245ファイル違反0、Release成功。ローカル実装・検証済み、[Draft PR #38](https://github.com/Ryuta1346/conflingo/pull/38)へ提出済み・未マージ。R5-3はPR #37でmain `dab817e`へマージ済み。R5のレビュー・実機受入とR6の残項目は継続。[結果](docs/validation/r6-1-repeated-final.md)・[計画](docs/design/r6-1-repeated-final-plan.md)。
+> 2026-11-14 R6-2/3: Meeting翻訳の言語ペア別セッション再利用と採用用語の原文表記保持を実装。全656件中649成功・実API7skip、Lint249ファイル違反0、Release成功。ローカル実装・自動検証済み、未コミット・未PR。独立レビュー・実モデル品質・実音声受入は継続。[結果](docs/validation/r6-meeting-translation.md)・[計画](docs/design/r6-meeting-translation-plan.md)。
+
+> 2026-11-14 R6-1: Conferenceで同文の別発話が欠落する問題を修正。全640件中633成功・実API7skip、Lint245ファイル違反0、Release成功。ローカル実装・検証済み、[PR #38](https://github.com/Ryuta1346/conflingo/pull/38)はローカルmain `b526a1b`へマージ済み。独立レビュー・実音声受入は未確認。R5-3はPR #37でmain `dab817e`へマージ済み。R5のレビュー・実機受入とR6の残項目は継続。[結果](docs/validation/r6-1-repeated-final.md)・[計画](docs/design/r6-1-repeated-final-plan.md)。
 
 > 2026-11-13 R2: 受信全体の予算を2 MiBへ分離し、長文のSSE分割による拒否を修正。全599件中592成功・実API7skip、Lint233ファイル違反0、Release成功。Gemini実測4/4要求は成功（旧上限超過なし）。PR #33はmain `0314aed`へマージ済み。他社実測・独立レビューは未完了。[結果](docs/validation/r2-response-size-investigation.md)・[計画](docs/design/r2-response-limit-plan.md)。
 
@@ -23,10 +25,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-14／ローカルmain `dab817e`基点／R6-1 `0ec3d3f`**。R1-1〜3・R2・R3・R4・R5-1/2/3はマージ済み。R3はレビューも完了。R5-3の検索語選択は[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[PR #37](https://github.com/Ryuta1346/conflingo/pull/37)でローカルmain `dab817e`へマージ済み。R2の他社実測・独立レビュー、R4の独立レビュー完了確認とGate A実機受入、R5の独立レビュー・実モデル品質・長時間耐久は継続。品質ゲートは引き続き未完了。
+- 更新: **2026-11-14／ローカルmain `b526a1b`**。R1-1〜3・R2・R3・R4・R5-1/2/3・R6-1はマージ済み。R3はレビューも完了。R5-3の検索語選択は[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[PR #37](https://github.com/Ryuta1346/conflingo/pull/37)でローカルmain `dab817e`へマージ済み。R2の他社実測・独立レビュー、R4の独立レビュー完了確認とGate A実機受入、R5の独立レビュー・実モデル品質・長時間耐久は継続。品質ゲートは引き続き未完了。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **直近の検証記録:** R6-1の全640件中633成功・実API7skip、Lint245ファイル違反0、Release成功。同文の別発話保持、再送除外、入力3構成・停止/再開、翻訳・保存復元・Markdownを確認。[結果](docs/validation/r6-1-repeated-final.md)。実音声・実モデル品質・VoiceOver全経路の残件は継続。
+- **直近の検証記録:** R6-2/3の全656件中649成功・実API7skip、Lint249ファイル違反0、Release成功。セッション再利用、用語版の固定・復元・再翻訳、保存復元・Markdown、420pt/780ptの合成UIを確認。[結果](docs/validation/r6-meeting-translation.md)。実モデル品質・実音声・VoiceOver全経路の残件は継続。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
@@ -35,7 +37,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** R5-1/2は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)でマージ済み。R5-3も[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)。**PR #37はローカルmain `dab817e`へマージ済み。次はR5の独立レビュー完了確認と残る実機受入**。R6-1の同文発話欠落は[ローカル実装・検証済み](docs/validation/r6-1-repeated-final.md)、[Draft PR #38](https://github.com/Ryuta1346/conflingo/pull/38)へ提出済み・未マージ。次はR6-1のレビュー、後続の実装候補はMeeting翻訳のセッション再利用・用語保護の調査・計画。R4の独立レビュー完了確認とGate A、R2の他社実測・独立レビューは継続。R1-1の機器変更・切断/復旧はGate B、R1-2の実モデル再試行はGate Aと合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
+**先行:** R5-1/2は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)でマージ済み。R5-3も[ローカル実装・検証済み](docs/validation/r5-3-query-selection.md)。**PR #37はローカルmain `dab817e`へマージ済み。次はR5の独立レビュー完了確認と残る実機受入**。R6-1の同文発話欠落は[ローカル実装・検証済み](docs/validation/r6-1-repeated-final.md)、[PR #38](https://github.com/Ryuta1346/conflingo/pull/38)はローカルmain `b526a1b`へマージ済み。R6-1の独立レビュー完了確認・実音声受入は継続。**R6-2/3のMeeting翻訳セッション再利用・採用用語の原文表記保持は[ローカル実装・自動検証済み](docs/validation/r6-meeting-translation.md)、未コミット・未PR**。次は差分レビューとPR反映、残る実機受入。後続の実装候補はKeychainのプロセス全体設定の調査・計画。固定訳語UIは別途検討。R4の独立レビュー完了確認とGate A、R2の他社実測・独立レビューは継続。R1-1の機器変更・切断/復旧はGate B、R1-2の実モデル再試行はGate Aと合わせて確認する。以下の受入は実音声の準備が整い次第、並行して進める。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -57,7 +59,7 @@
 | R3 | 保存形式の固定 | 固定JSON6種でv1の読込・保存契約を検証。全回帰・Lint・Release成功、非互換変更の検出を確認。R4の前提。[PR #34](https://github.com/Ryuta1346/conflingo/pull/34)はmain `8fd8144`へマージ済み。レビュー完了はユーザー確認済み。[結果](docs/validation/r3-persistence-golden.md)・[計画](docs/design/r3-persistence-golden-plan.md) | DONE |
 | R4 | 文字起こし経路の一本化 | 全入力を`DualTranscriptionController`へ統合し、旧マイク処理・未使用storeを削除。全テスト・Lint・Release成功。[PR #35](https://github.com/Ryuta1346/conflingo/pull/35)はmain `7888730`へマージ済み。独立レビュー完了は未確認、実機Gate Aは未完了。[結果](docs/validation/r4-transcription-unification.md)・[計画](docs/design/r4-transcription-unification-plan.md) | REVIEW |
 | R5 | 中優先の残り | 最大100区間要約・ライブ表示は[PR #36](https://github.com/Ryuta1346/conflingo/pull/36)マージ済み（[R5-1結果](docs/validation/r5-1-summary-limit.md)・[R5-2結果](docs/validation/r5-2-live-presentation.md)）。検索語選択も[R5-3でローカル実装・検証済み](docs/validation/r5-3-query-selection.md)、[PR #37](https://github.com/Ryuta1346/conflingo/pull/37)でローカルmain `dab817e`へマージ済み。独立レビュー・実モデル品質・長時間耐久等の実機受入は継続 | REVIEW |
-| R6 | 低優先・構造の残り | R6-1の同文確定発話欠落は[ローカル実装・検証済み](docs/validation/r6-1-repeated-final.md)、[Draft PR #38](https://github.com/Ryuta1346/conflingo/pull/38)へ提出済み・未マージ、レビュー・実音声受入待ち。残りはMeeting翻訳のセッション再利用と用語保護、Keychainのプロセス全体設定、LLM失敗の診断ログ、検証用ウィンドウの同梱。構造は`ContentView`からの構成ルート分離、共通支援のモジュール切り出し、単一スロット通知の統一、LLMプロバイダ分岐とSSE解析の集約、CIとREADME構成図の更新 | DOING |
+| R6 | 低優先・構造の残り | R6-1の同文確定発話欠落は[ローカル実装・検証済み](docs/validation/r6-1-repeated-final.md)、[PR #38](https://github.com/Ryuta1346/conflingo/pull/38)でローカルmain `b526a1b`へマージ済み。独立レビュー・実音声受入は未確認。Meeting翻訳のセッション再利用と採用用語の原文表記保持は[R6-2/3でローカル実装・自動検証済み](docs/validation/r6-meeting-translation.md)、未コミット・未PR。独立レビュー・実モデル品質・実音声受入は継続。固定訳語UIは別途検討。残りはKeychainのプロセス全体設定、LLM失敗の診断ログ、検証用ウィンドウの同梱。構造は`ContentView`からの構成ルート分離、共通支援のモジュール切り出し、単一スロット通知の統一、LLMプロバイダ分岐とSSE解析の集約、CIとREADME構成図の更新 | DOING |
 
 ## PR進捗
 

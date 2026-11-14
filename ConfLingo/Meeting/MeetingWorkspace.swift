@@ -71,12 +71,12 @@ final class MeetingWorkspace {
 
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
          credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil,
-         translationClient: any MeetingTranslating = AppleMeetingTranslator(), prepareTranslationModels: Bool = true,
+         translationClientFactory: @escaping (String, String) -> any MeetingTranslating = { _, _ in AppleMeetingTranslator() }, prepareTranslationModels: Bool = true,
          researchClient: (any LLMWebResearching)? = nil) {
         self.defaults = defaults
         microphoneTranslationLanguage = defaults.string(forKey: "meetingMicrophoneTranslation") ?? "en"
         systemTranslationLanguage = defaults.string(forKey: "meetingSystemTranslation") ?? "ja"
-        translations = MeetingTranslations(sessionID: controller.store.sessionID, client: translationClient, requiresPreparation: prepareTranslationModels)
+        translations = MeetingTranslations(sessionID: controller.store.sessionID, clientFactory: translationClientFactory, requiresPreparation: prepareTranslationModels)
         let language = AnswerLanguage(rawValue: defaults.string(forKey: "aiAnswerLanguage") ?? "") ?? .japanese
         answerLanguage = language
         self.controller = controller
@@ -93,6 +93,10 @@ final class MeetingWorkspace {
         ai.knowledge.onContentChange = { [weak self] in
             self?.documentTerms.reset()
             Task { [weak self] in await self?.applyDocumentTerms() }
+        }
+        translations.termsForRequest = { [weak self] request in
+            self?.documentTerms.glossary(sourceLanguage: request.event.languageCode,
+                targetLanguage: request.targetLanguage, manual: []).map(\.term) ?? []
         }
         controller.store.onFinal = { [weak self] event in
             guard let self else { return }

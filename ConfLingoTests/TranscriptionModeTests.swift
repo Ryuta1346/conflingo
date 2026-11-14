@@ -30,7 +30,7 @@ struct TranscriptionModeTests {
         let suite = "TranscriptionModeTests.\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
-        let meeting = MeetingWorkspace(controller: fixture.controller(), defaults: defaults, translationClient: client, prepareTranslationModels: false)
+        let meeting = MeetingWorkspace(controller: fixture.controller(), defaults: defaults, translationClientFactory: { _, _ in client }, prepareTranslationModels: false)
         meeting.mode = .translation
         meeting.microphoneTranslationLanguage = ""
         meeting.systemTranslationLanguage = "ja"
@@ -94,7 +94,7 @@ struct TranscriptionModeTests {
         let fixture = DualFixture()
         let client = FakeMeetingTranslator()
         let meeting = MeetingWorkspace(controller: fixture.controller(), defaults: defaults,
-                                       translationClient: client, prepareTranslationModels: false)
+                                       translationClientFactory: { _, _ in client }, prepareTranslationModels: false)
         meeting.consentConfirmed = true
         await meeting.start()
         try await fixture.microphone.emit("こんにちは", time: 1)

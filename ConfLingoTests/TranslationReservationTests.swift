@@ -7,7 +7,7 @@ import Testing
 @Suite(.serialized)
 struct TranslationReservationTests {
     @Test func partialMeetingReservesSpaceBeforeTranslationEntryExists() async throws {
-        let translations = MeetingTranslations(sessionID: UUID(), client: FakeMeetingTranslator())
+        let translations = MeetingTranslations(sessionID: UUID(), clientFactory: { _, _ in FakeMeetingTranslator() })
         let event = TranscriptEvent(id: UUID(), sessionID: translations.sessionID, origin: .systemAudio, languageCode: "en-US",
             startOffset: 1, endOffset: 2, text: "The same words before and after finalization.", isFinal: true, revision: 2, sourceStartTime: 1)
         let host = NSHostingView(rootView: MeetingTranslationText(translations: translations, eventID: event.id,
@@ -100,7 +100,7 @@ struct TranslationReservationTests {
     @Test(arguments: [16.0, 32.0])
     func meetingTranslationArrivalKeepsReservedHeight(fontSize: Double) async throws {
         let session = UUID()
-        let translations = MeetingTranslations(sessionID: session, client: FakeMeetingTranslator())
+        let translations = MeetingTranslations(sessionID: session, clientFactory: { _, _ in FakeMeetingTranslator() })
         let event = TranscriptEvent(id: UUID(), sessionID: session, origin: .systemAudio, languageCode: "en-US",
                                     startOffset: 1, endOffset: 2,
                                     text: "A sentence whose translation arrives later.", isFinal: true,
