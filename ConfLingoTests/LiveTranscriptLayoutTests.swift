@@ -13,24 +13,24 @@ struct LiveTranscriptLayoutTests {
         let host = NSHostingView(rootView: ConferenceLiveView(store: store, sourceLanguage: "en", targetLanguage: "ja",
             profileName: "Synthetic", fontSize: .constant(16), editSettings: {}, clear: {}))
         let window = makeWindow(host, width: 1100)
-        let previous = enableAccessibility()
-        defer { window.close(); restoreAccessibility(previous) }
+        let releaseAccessibility = TestAccessibility.shared.enable()
+        defer { window.close(); releaseAccessibility() }
         await layout(host)
         store.updateVolatile("Partial one")
         await layout(host)
         store.updateVolatile("Partial two")
         await layout(host)
-        #expect(text(host).contains("Partial two"))
+        try await expectText("Partial two", in: host)
         store.applyTranslation(id: unit.id, japanese: "最初の訳文")
         await layout(host)
-        #expect(text(host).contains("最初の訳文"))
+        try await expectText("最初の訳文", in: host)
         let next = try #require(store.appendFinal("Second source."))
         _ = try #require(store.bufferSegment(next))
         await layout(host)
-        #expect(text(host).contains("Second source."))
+        try await expectText("Second source.", in: host)
         store.reset()
         await layout(host)
-        #expect(text(host).contains("字幕を待っています"))
+        try await expectText("字幕を待っています", in: host)
         #expect(!text(host).contains("Second source."))
     }
 
@@ -38,16 +38,19 @@ struct LiveTranscriptLayoutTests {
         let suite = "r5-2-layout-\(UUID())"
         let defaults = try #require(UserDefaults(suiteName: suite))
         defer { defaults.removePersistentDomain(forName: suite) }
+        let translationGate = TestGate()
+        let translator = FakeMeetingTranslator(gate: translationGate)
+        defer { translationGate.release() }
         let meeting = MeetingWorkspace(controller: DualFixture().controller(), insightClient: FakeInsightClient(),
-            defaults: defaults, translationClientFactory: { _, _ in FakeMeetingTranslator() }, prepareTranslationModels: false)
+            defaults: defaults, translationClientFactory: { _, _ in translator }, prepareTranslationModels: false)
         for index in 0..<100 {
             meeting.store.receive(insightEvent(session: meeting.store.sessionID, text: "History row \(index)", offset: Double(index)))
         }
         meeting.mode = .translation
         let host = NSHostingView(rootView: MeetingTranscriptView(meeting: meeting, fontSize: 16))
         let window = makeWindow(host, width: 620)
-        let previous = enableAccessibility()
-        defer { window.close(); restoreAccessibility(previous) }
+        let releaseAccessibility = TestAccessibility.shared.enable()
+        defer { window.close(); releaseAccessibility() }
         await layout(host)
         meeting.revealEvidence(meeting.store.finals[3].id)
         await layout(host)
@@ -56,13 +59,18 @@ struct LiveTranscriptLayoutTests {
         #expect(text(host).contains("履歴を表示中"))
         meeting.store.receive(insightEvent(session: meeting.store.sessionID, text: "New partial", offset: 101, final: false))
         meeting.translations.receive(try #require(meeting.store.finals.last), targetLanguage: "ja")
+        await translationGate.entered.next()
+        #expect(meeting.translations.completed.isEmpty)
+        translationGate.release()
+        let translated = try await waitForTestCondition { meeting.translations.completed.count == 1 }
+        try #require(translated, "The synthetic translation must finish before checking the layout")
         await layout(host)
         #expect(try viewport(of: scroll).intersects(frame(of: "History row 3", in: host)))
         #expect(text(host).contains("履歴を表示中"))
         #expect(meeting.translations.completed.count == 1)
         try press("最新へ", in: host)
         await layout(host)
-        #expect(text(host).contains("New partial"))
+        try await expectText("New partial", in: host)
         #expect(!text(host).contains("履歴を表示中"))
         window.setContentSize(NSSize(width: 540, height: 650))
         await layout(host)
@@ -76,8 +84,8 @@ struct LiveTranscriptLayoutTests {
         let host = NSHostingView(rootView: ConferenceLiveView(store: store, sourceLanguage: "en", targetLanguage: nil,
             profileName: "Synthetic", fontSize: .constant(16), editSettings: {}, clear: {}))
         let window = makeWindow(host, width: 620)
-        let previous = enableAccessibility()
-        defer { window.close(); restoreAccessibility(previous) }
+        let releaseAccessibility = TestAccessibility.shared.enable()
+        defer { window.close(); releaseAccessibility() }
         await layout(host)
         let scroll = try transcriptScroll(in: host)
         for phase in [CGScrollPhase.began, .changed, .ended] {
@@ -102,18 +110,7 @@ struct LiveTranscriptLayoutTests {
         #expect(text(host).contains("履歴を表示中"))
         try press("最新へ", in: host)
         await layout(host)
-        #expect(text(host).contains("New conference partial"))
-    }
-
-    private func enableAccessibility() -> Any? {
-        let attribute = NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface")
-        let previous = NSApp.accessibilityAttributeValue(attribute)
-        NSApp.accessibilitySetValue(true, forAttribute: attribute)
-        return previous
-    }
-
-    private func restoreAccessibility(_ previous: Any?) {
-        NSApp.accessibilitySetValue(previous ?? false, forAttribute: NSAccessibility.Attribute(rawValue: "AXEnhancedUserInterface"))
+        try await expectText("New conference partial", in: host)
     }
 
     private func makeWindow(_ host: NSView, width: Double) -> NSWindow {
@@ -129,6 +126,14 @@ struct LiveTranscriptLayoutTests {
         host.layoutSubtreeIfNeeded()
         try? await Task.sleep(for: .milliseconds(200))
         host.layoutSubtreeIfNeeded()
+    }
+
+    private func expectText(_ expected: String, in host: NSView) async throws {
+        let visible = try await waitForTestCondition {
+            host.layoutSubtreeIfNeeded()
+            return text(host).contains(expected)
+        }
+        try #require(visible, "Expected accessibility text: \(expected)")
     }
 
     private func transcriptScroll(in root: NSView) throws -> NSScrollView {

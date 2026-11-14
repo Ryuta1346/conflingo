@@ -3,6 +3,24 @@ import Testing
 @testable import ConfLingo
 
 struct ResponseLimitTests {
+    @Test(arguments: [LLMProvider.gemini, .openai, .claude, .local], [1, 1_023])
+    func multilineFrameCountsSeparatorsAndResetsBetweenEvents(provider: LLMProvider, chunkBytes: Int) throws {
+        let stream = String(decoding: try responseStream(provider, payload: responsePayload("回答😀")), as: UTF8.self)
+        let boundary = try #require(stream.range(of: "\n\n"))
+        let json = String(stream[..<boundary.lowerBound].dropFirst(6))
+        let remaining = String(stream[boundary.upperBound...])
+        func paddedFrame(bytes: Int) -> Data {
+            let lines = ["{", "", String(repeating: " ", count: 32_700),
+                         String(repeating: " ", count: bytes - json.utf8.count - 32_700 - 4), String(json.dropFirst())]
+            #expect(lines.joined(separator: "\n").utf8.count == bytes)
+            return Data((lines.map { "data: " + $0 }.joined(separator: "\n") + "\n\n" + remaining).utf8)
+        }
+        #expect(try decodeResponse(provider, stream: paddedFrame(bytes: 65_536), chunkBytes: chunkBytes).text == "回答😀")
+        #expect(throws: InsightFailure.oversized) {
+            try decodeResponse(provider, stream: paddedFrame(bytes: 65_537), chunkBytes: chunkBytes)
+        }
+    }
+
     @Test(arguments: LLMProvider.allCases)
     func allowedAnswerSurvivesSmallSSEEventsAndUTF8Chunks(provider: LLMProvider) throws {
         let text = String(repeating: "あ", count: 7_999) + "😀"

@@ -7,8 +7,10 @@ struct ConfLingoApp: App {
     private let isMeetingPreview: Bool
     private let defaults: UserDefaults
     @State private var audioUse: AudioInputUse
+    #if DEBUG
     @State private var systemAudioProbe: SystemAudioProbeController
     @State private var dualTranscription: DualTranscriptionController
+    #endif
     @State private var meeting: MeetingWorkspace
     @State private var floatingPanel: MeetingFloatingPanel
     @State private var previewPrepared = false
@@ -26,9 +28,9 @@ struct ConfLingoApp: App {
         _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: defaults)
         let activity = AudioInputUse()
         _audioUse = State(initialValue: activity)
+        #if DEBUG
         _systemAudioProbe = State(initialValue: SystemAudioProbeController(activity: activity))
         _dualTranscription = State(initialValue: DualTranscriptionController(activity: activity))
-        #if DEBUG
         _meeting = State(initialValue: isPreview
                          ? MeetingPreview.make(activity: activity, scenario: MeetingPreview.scenario,
                                                liveAI: MeetingPreview.liveAIEnabled(arguments: ProcessInfo.processInfo.arguments),
@@ -62,6 +64,7 @@ struct ConfLingoApp: App {
             }
         }
 
+        #if DEBUG
         Window("システム音声の確認", id: "system-audio-probe") {
             SystemAudioProbeView(controller: systemAudioProbe)
         }
@@ -75,5 +78,6 @@ struct ConfLingoApp: App {
         .defaultSize(width: 800, height: 600)
         .defaultLaunchBehavior(.suppressed)
         .restorationBehavior(.disabled)
+        #endif
     }
 }

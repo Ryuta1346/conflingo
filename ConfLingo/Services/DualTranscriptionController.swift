@@ -41,6 +41,8 @@ final class DualTranscriptionController {
     private var consumer: Task<Void, Never>?
     private var startTask: Task<Void, Never>?
     private var stopTask: Task<Void, Never>?
+    private var contextTask: Task<Bool, Never>?
+    private var contextUpdateID: UUID?
     private var stopFailureMessage: String?
 
     init(
@@ -125,6 +127,8 @@ final class DualTranscriptionController {
         phase = .stopping
         diagnostics?.mark(.stopStarted)
         captureActivityChanged?(false)
+        let pendingContext = contextTask
+        pendingContext?.cancel()
         let pendingStart = startTask
         pendingStart?.cancel()
         let task = Task {
@@ -132,6 +136,8 @@ final class DualTranscriptionController {
             if let stopFailureMessage, lastError == stopFailureMessage { lastError = nil }
             stopFailureMessage = nil
             await finishInputs()
+            // Stop capture first, then drain context writes before allowing another run.
+            _ = await pendingContext?.value
             runID = nil
             await hub?.finish()
             await consumer?.value
@@ -165,14 +171,25 @@ final class DualTranscriptionController {
     }
 
     func updateContext(_ keywords: [AudioOrigin: [String]]) async -> Bool {
-        guard phase == .listening, let run = runID else { return false }
-        var succeeded = true
-        for input in inputs where activeInputs.contains(input.origin) {
-            guard runID == run, phase == .listening else { return false }
-            do { try await input.speech.updateContext(keywords[input.origin] ?? []) }
-            catch { succeeded = false }
+        guard phase == .listening, let run = runID, !Task.isCancelled else { return false }
+        let previous = contextTask
+        previous?.cancel()
+        let id = UUID()
+        contextUpdateID = id
+        let task = Task {
+            _ = await previous?.value
+            var succeeded = true
+            for input in inputs where activeInputs.contains(input.origin) {
+                guard runID == run, phase == .listening, !Task.isCancelled else { return false }
+                do { try await input.speech.updateContext(keywords[input.origin] ?? []) }
+                catch { succeeded = false }
+            }
+            return succeeded && runID == run && phase == .listening && !Task.isCancelled
         }
-        return succeeded && runID == run && phase == .listening
+        contextTask = task
+        let result = await withTaskCancellationHandler { await task.value } onCancel: { task.cancel() }
+        if contextUpdateID == id { contextTask = nil; contextUpdateID = nil }
+        return result
     }
 
     private func prepareAndStart(run: UUID, locales: [AudioOrigin: Locale], fastResults: Bool,

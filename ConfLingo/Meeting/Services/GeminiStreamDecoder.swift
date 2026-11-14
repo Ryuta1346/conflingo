@@ -3,6 +3,7 @@ import Foundation
 struct GeminiStreamDecoder {
     private var line = Data()
     private var frame: [String] = []
+    private var frameBytes = 0
     private var totalBytes = 0
     private var content = ""
     private var ended = false
@@ -39,14 +40,17 @@ struct GeminiStreamDecoder {
         } else if text.hasPrefix("data:") {
             var value = String(text.dropFirst(5))
             if value.first == " " { value.removeFirst() }
+            let nextBytes = frameBytes + value.utf8.count + (frame.isEmpty ? 0 : 1)
+            guard nextBytes <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
+            frameBytes = nextBytes
             frame.append(value)
-            guard frame.reduce(0, { $0 + $1.utf8.count }) <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
         }
     }
 
     private mutating func acceptFrame() throws {
         let text = frame.joined(separator: "\n")
         frame.removeAll(keepingCapacity: true)
+        frameBytes = 0
         if text == "[DONE]" {
             guard ended else { throw InsightFailure.invalidResponse }
             return

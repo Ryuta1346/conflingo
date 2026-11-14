@@ -43,8 +43,9 @@ struct LLMStreamDecoder {
         } else if text.hasPrefix("data:") {
             var value = String(text.dropFirst(5))
             if value.first == " " { value.removeFirst() }
-            frameBytes += value.utf8.count
-            guard frameBytes <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
+            let nextBytes = frameBytes + value.utf8.count + (frame.isEmpty ? 0 : 1)
+            guard nextBytes <= LLMResponseLimits.eventBytes else { throw InsightFailure.oversized }
+            frameBytes = nextBytes
             frame.append(value)
         }
     }

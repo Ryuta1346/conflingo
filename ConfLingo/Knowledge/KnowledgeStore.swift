@@ -79,7 +79,7 @@ final class KnowledgeStore {
     }
 
     func removeRepository() async {
-        guard !isBusy, hasRepository else { return }
+        guard !isBusy, hasRepository, !Task.isCancelled else { return }
         invalidate()
         isBusy = true
         let mutation = UUID()
@@ -219,7 +219,7 @@ final class KnowledgeStore {
     }
 
     func remove(_ id: UUID) async {
-        guard !isBusy, documents.contains(where: { $0.id == id }) else { return }
+        guard !isBusy, !Task.isCancelled, documents.contains(where: { $0.id == id }) else { return }
         invalidate()
         let mutation = UUID()
         mutationID = mutation
