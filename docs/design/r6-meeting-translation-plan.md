@@ -1,5 +1,7 @@
 # R6-2/3 — Meeting翻訳のセッション再利用と用語保護
 
+> 2026-11-14提出追記: ユーザー「コミットしてPR作成」に基づき、実装 `dee4d81`を[Draft PR #39](https://github.com/Ryuta1346/conflingo/pull/39)へ提出済み。未マージ・独立レビュー待ち。以下の未コミット・未PRはローカル検証完了時点の記録。
+
 2026-11-14 / 調査基点: ローカルmain `b526a1b`（PR #38マージ済み）。
 状態: **2026-11-14、ユーザー「進めて」によりR6-2/3の実装を承認済み。ローカル実装・自動検証済み。未コミット・未PR**。
 正本: `~/.coding-agents/docs/conflingo/main/r6-meeting-translation-plan.md`。
