@@ -1,4 +1,4 @@
-> 2026-11-16 DR5追補: 選択済み資料のアクセシビリティ名を修正・再受入。全783テスト・Lint・両CPU Release成功。合成会議の終了確定も確認済み。小窓復帰後のキーフォーカスは継続。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
+> 2026-11-16 DR5追補: 選択済み資料のアクセシビリティ名を修正・再受入。全783テスト・Lint・両CPU Release成功。合成会議の終了確定も確認済み。[Draft PR #51](https://github.com/Ryuta1346/conflingo/pull/51)でレビュー中。小窓復帰後のキーフォーカスは継続。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
 
 > 2026-11-16 追補: DR3・DR4修正差分の独立レビューは追加指摘なし、DR5はMEDIUM 1件を確認。PR #48〜#50はマージ済み。現行mainのローカル検証成功、追加UI受入の確認済み範囲と残件は[レビュー・追加UI受入](docs/validation/dr-review-ui-2026-11-15.md)を参照。以下の過去日付の記録は当時の結果。
 
