@@ -24,3 +24,13 @@
 - 640×520ptの入口、16／32／48ptの比較、実際のContentViewからシートを開く経路を維持。3秒の条件待機上限は変更していない。失敗時はサイズ・シート枠・AX本文を記録する。
 - 修正後の関連2テスト・2スイートは3.591秒で成功。Lint305ファイル違反0、`git diff --check`成功。製品コードの変更なし。
 - リモートCI成功はpush後に確認する。
+
+## リモート再検証とコマンドテストの競合
+
+[run 43716109191](https://github.com/Ryuta1346/conflingo/actions/runs/43716109191)では、資料抜粋テストが5.549秒で成功した。一方、770テスト中`DR4CommandTests.commandsCannotStartWithoutConsentAndPauseInsteadOfEnding`が終了要求の未実行で失敗。
+
+テストは`phase == .idle`だけを待って終了操作を呼んでいた。`MeetingWorkspace.complete`は`controller.stop()`の後に状態を整理し、deferで`isTransitioning`を解除するため、phaseがidleでも処理中の時間がある。この間は製品の`canEnd`ガードが正しく操作を拒否する。
+
+テストを開始・一時停止のphaseと`!isBusy`の両方を待つ形に変更し、一時停止完了後にコマンドのスナップショットを再取得する。製品のガード、同意・一時停止・終了確認の検証条件は維持する。
+
+修正後はローカル関連3テスト・3スイート成功（3.593秒）、Lint305ファイル違反0、差分チェック成功。最新HEADのリモートCIを再確認する。
