@@ -11,13 +11,12 @@ struct KnowledgeLibraryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(choose == nil ? "資料ライブラリ" : "ライブラリから追加").font(DesignTokens.Typography.title)
+                PageHeading(title: choose == nil ? "資料ライブラリ" : "ライブラリから追加",
+                            subtitle: "このMacに保存した資料。閲覧・追加だけでは外部送信しません。", eyebrow: "ConfLingo")
                 Spacer()
                 if choose == nil { Button("資料を追加", systemImage: "doc.badge.plus") { importing = true } }
                 if library.isBusy { ProgressView().controlSize(.small) }
             }
-            Text("このMacに保存した資料です。会議で選んだ保存版を使います。閲覧・追加だけでは外部送信しません。")
-                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             if let failure = library.failure { InlineMessage(failure) }
             if let selected = library.selected {
                 HStack {
@@ -30,7 +29,7 @@ struct KnowledgeLibraryView: View {
                 HStack {
                     TextField("保存名で検索", text: $library.query).textFieldStyle(.roundedBorder)
                         .accessibilityLabel("資料ライブラリの名前検索")
-                    Button("再読込") { Task { await library.reload() } }
+                    Button("再読込", systemImage: "arrow.clockwise") { Task { await library.reload() } }
                 }
                 if library.entries.isEmpty && !library.isBusy {
                     ContentUnavailableView("保存した資料はありません", systemImage: "books.vertical",
@@ -41,23 +40,17 @@ struct KnowledgeLibraryView: View {
                 ScrollView {
                     LazyVStack(alignment: .leading, spacing: 12) {
                         ForEach(library.filtered) { entry in
-                            Surface {
-                                VStack(alignment: .leading, spacing: 8) {
-                                    Text(entry.title).font(DesignTokens.Typography.heading).lineLimit(3)
-                                    Text("\(entry.kind) · \(entry.count)文書 · \(entry.updatedAt?.formatted() ?? "日時不明")")
-                                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                                    if let failure = entry.failure { InlineMessage(.failure, "保存内容を読み込めません。元の保存データは保持しています。", details: failure) }
-                                    HStack {
-                                        Button("内容を見る") { Task { await library.open(entry.id) } }.disabled(entry.failure != nil)
-                                        if let choose {
-                                            Button(attachedIDs.contains(entry.id) ? "選択済み" : "追加") { choose(entry) }
-                                                .disabled(entry.failure != nil || attachedIDs.contains(entry.id))
-                                        } else {
-                                            Button("削除", role: .destructive) { removing = entry }
-                                        }
-                                    }
-                                    .accessibilityElement(children: .contain)
-                                    .accessibilityLabel(entry.title)
+                            LibraryEntryRow(title: entry.title, symbol: "books.vertical",
+                                            subtitle: "\(entry.kind) · \(entry.count)文書",
+                                            detail: entry.updatedAt.map { "保存更新 \($0.formatted(date: .abbreviated, time: .shortened))" },
+                                            failure: entry.failure, open: { Task { await library.open(entry.id) } }) {
+                                if let choose {
+                                    Button(attachedIDs.contains(entry.id) ? "選択済み" : "追加") { choose(entry) }
+                                        .disabled(entry.failure != nil || attachedIDs.contains(entry.id))
+                                        .accessibilityLabel("\(entry.title)を追加")
+                                } else {
+                                    Button("削除", systemImage: "trash", role: .destructive) { removing = entry }
+                                        .buttonStyle(AppButtonStyle(.destructive)).accessibilityLabel("\(entry.title)を削除")
                                 }
                             }
                         }
@@ -65,7 +58,7 @@ struct KnowledgeLibraryView: View {
                 }
             }
         }
-        .padding(24)
+        .padding(24).frame(maxWidth: 1000).frame(maxWidth: .infinity)
         .disabled(library.isBusy)
         .task { library.close(); await library.reload() }
         .sheet(isPresented: $importing) { LibraryImportView(library: library, fontSize: fontSize) }
@@ -111,7 +104,7 @@ private struct KnowledgeLibraryDetail: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(saved.title).font(DesignTokens.Typography.heading).textSelection(.enabled)
-            Text("保存更新 \(saved.updatedAt.formatted()) · 保存版 \(saved.revision.uuidString.prefix(8)) · 読み取り専用")
+            Text("保存更新 \(saved.updatedAt.formatted()) · 読み取り専用")
                 .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             if saved.content.isRepository {
                 ScrollView {
@@ -130,10 +123,18 @@ private struct KnowledgeLibraryDetail: View {
                 Text(document.document.displayTitle).font(DesignTokens.Typography.heading).textSelection(.enabled)
                 Text("元の取り込み \(document.document.importedAt.formatted()) · \(document.document.characterCount)文字")
                     .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                if let source = document.document.source {
-                    Text("作業ツリー \(source.contentHash.prefix(12)) · snapshot \(source.snapshotID)")
-                        .font(DesignTokens.Typography.supporting).textSelection(.enabled)
-                }
+                DisclosureGroup("技術情報") {
+                    ScrollView {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("保存版 \(saved.revision.uuidString)")
+                            if let source = document.document.source {
+                                Text("ハッシュ \(source.contentHash)")
+                                Text("snapshot \(source.snapshotID)")
+                            }
+                        }.frame(maxWidth: .infinity, alignment: .leading)
+                            .font(DesignTokens.Typography.supporting).textSelection(.enabled)
+                    }.frame(maxHeight: 100)
+                }.font(DesignTokens.Typography.supporting)
                 KnowledgeBodyView(text: document.body, fontSize: fontSize)
                     .frame(minHeight: fontSize * 1.5 + 8)
                     .layoutPriority(1)

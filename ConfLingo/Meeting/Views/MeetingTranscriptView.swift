@@ -3,6 +3,7 @@ import SwiftUI
 struct MeetingTranscriptView: View {
     @Bindable var meeting: MeetingWorkspace
     let fontSize: Double
+    @State private var showsInputInfo = false
     @State private var followsLatest = true
     @State private var userScrolling = false
     @State private var atBottom = true
@@ -14,8 +15,18 @@ struct MeetingTranscriptView: View {
             HStack {
                 Text("会話の流れ").font(DesignTokens.Typography.heading)
                 Spacer()
-                Text(followsLatest ? "入力元ごとに表示" : "履歴を表示中")
-                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
+                if !followsLatest {
+                    Text("履歴を表示中").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
+                }
+                Button("入力元の表示について", systemImage: "info.circle") { showsInputInfo = true }
+                    .labelStyle(.iconOnly).buttonStyle(AppButtonStyle(.link))
+                    .popover(isPresented: $showsInputInfo) {
+                        VStack(alignment: .leading, spacing: 12) {
+                            SheetHeader(title: "入力元の表示") { showsInputInfo = false }
+                            Text("マイクと内部音声を記号と名前で区別します。人物名の自動識別は行いません。")
+                                .font(DesignTokens.Typography.body)
+                        }.sheetSurface().frame(width: 320)
+                    }
             }
             .padding(14)
             Divider()
@@ -29,16 +40,23 @@ struct MeetingTranscriptView: View {
                         ForEach(events) { event in
                             VStack(alignment: .leading, spacing: 8) {
                                 HStack {
-                                    Text(event.origin.label)
+                                    Label(event.origin.label, systemImage: event.origin == .microphone ? "mic" : "speaker.wave.2")
                                     if !event.isFinal { Text("認識中") }
                                     Spacer()
                                     Text(MarkdownExporter.timestamp(event.startOffset)).monospacedDigit()
+                                    if event.isFinal && meeting.page != .review {
+                                        Menu {
+                                            MeetingUtteranceActions(meeting: meeting, event: event)
+                                        } label: {
+                                            Image(systemName: "ellipsis")
+                                        }
+                                        .menuStyle(.borderlessButton).fixedSize()
+                                        .accessibilityLabel("\(MarkdownExporter.timestamp(event.startOffset))の発話の操作")
+                                        .help("発話の操作")
+                                    }
                                 }
                                 .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).lineSpacing(5).textSelection(.enabled)
-                                if event.isFinal && meeting.page != .review {
-                                    Button("この発話をWebで調べる") { meeting.research.open(event.text, evidenceIDs: [event.id]) }.font(DesignTokens.Typography.supporting)
-                                }
                                 MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,
                                                        sourceText: event.text, targetLanguage: meeting.translationTarget(for: event))
                             }
@@ -46,6 +64,7 @@ struct MeetingTranscriptView: View {
                             .padding(12)
                             .background(meeting.selectedEvidence == event.id ? DesignTokens.accent.opacity(0.09) : .clear,
                                         in: RoundedRectangle(cornerRadius: 8))
+                            .contextMenu { MeetingUtteranceActions(meeting: meeting, event: event) }
                             .id(event.id)
                         }
                     }
@@ -90,11 +109,21 @@ struct MeetingTranscriptView: View {
                     }
                 }
             }
-            Divider()
-            Text("入力元を表示しています。人物名の自動識別は行いません。")
-                .font(DesignTokens.Typography.note).foregroundStyle(DesignTokens.secondary).padding(10)
         }
         .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: DesignTokens.radius))
         .overlay(RoundedRectangle(cornerRadius: DesignTokens.radius).stroke(DesignTokens.border))
+    }
+}
+
+struct MeetingUtteranceActions: View {
+    let meeting: MeetingWorkspace
+    let event: TranscriptEvent
+
+    var body: some View {
+        if event.isFinal && meeting.page != .review {
+            Button("この発話をWebで調べる", systemImage: "globe") {
+                meeting.research.open(event.text, evidenceIDs: [event.id])
+            }
+        }
     }
 }
