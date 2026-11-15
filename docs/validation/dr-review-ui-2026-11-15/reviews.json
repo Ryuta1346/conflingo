@@ -1,0 +1,39 @@
+{
+  "head": "4ad616e13690f5a7e5e49031a83840bbb0c4fa02",
+  "reviewers": [
+    {
+      "agent": "review_dr5",
+      "range": "53b81cd..4ad616e",
+      "findings": []
+    },
+    {
+      "agent": "review_fixes",
+      "ranges": [
+        "e11ae38..2ad9de3",
+        "0d233fb..53b81cd"
+      ],
+      "findings": []
+    },
+    {
+      "agent": "review_ui",
+      "range": "53b81cd..4ad616e",
+      "findings": [
+        {
+          "file": "ConfLingo/KnowledgeLibrary/KnowledgeLibraryView.swift",
+          "line": 50,
+          "severity": "MEDIUM",
+          "category": "Accessibility",
+          "message": "選択済み資料のアクセシビリティ名が追加のままになり、選択済み状態が公開されない。",
+          "evidence": ".accessibilityLabel(\"\\(entry.title)を追加\")",
+          "suggestion": "選択済みの場合は資料名と選択済み状態をアクセシビリティ名または値で公開し、既存テストで状態情報を検証する。",
+          "confidence": "high"
+        }
+      ]
+    }
+  ],
+  "limitations": [
+    "Independent reviewers performed static review only.",
+    "VoiceOver remains deferred by user instruction.",
+    "Runtime validation is performed separately by the primary agent."
+  ]
+}

@@ -47,7 +47,7 @@ struct KnowledgeLibraryView: View {
                                 if let choose {
                                     Button(attachedIDs.contains(entry.id) ? "選択済み" : "追加") { choose(entry) }
                                         .disabled(entry.failure != nil || attachedIDs.contains(entry.id))
-                                        .accessibilityLabel("\(entry.title)を追加")
+                                        .accessibilityLabel(attachedIDs.contains(entry.id) ? "\(entry.title)、選択済み" : "\(entry.title)を追加")
                                 } else {
                                     Button("削除", systemImage: "trash", role: .destructive) { removing = entry }
                                         .buttonStyle(AppButtonStyle(.destructive)).accessibilityLabel("\(entry.title)を削除")

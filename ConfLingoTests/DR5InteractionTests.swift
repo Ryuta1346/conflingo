@@ -51,28 +51,30 @@ extension AppKitIntegrationTests {
             #expect(try #require(small.value("accessibilityFrame", resume) as? NSValue).rectValue.maxX <= small.window.frame.maxX)
         }
 
-        @Test func libraryOpenAreaAndSelectionKeepIndependentActions() async throws {
+        @Test(arguments: [false, true])
+        func libraryOpenAreaAndSelectionKeepIndependentActions(attached: Bool) async throws {
             let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
             defer { try? FileManager.default.removeItem(at: root) }
             let files = KnowledgeLibraryFiles(directory: root)
             let saved = try await files.save(try await libraryArchive("選択と閲覧の検証資料"), title: "会議の資料")
             let library = KnowledgeLibrary(files: files)
             var selected: [UUID] = []
-            let fixture = DR3Host(KnowledgeLibraryView(library: library, fontSize: 16, attachedIDs: [saved.id],
+            let fixture = DR3Host(KnowledgeLibraryView(library: library, fontSize: 16, attachedIDs: attached ? [saved.id] : [],
                 choose: { selected.append($0.id) }), height: 700, padding: 0)
             defer { fixture.close() }
             await fixture.layout()
-            let add = try #require(fixture.element("会議の資料を追加"))
-            #expect(fixture.value("isAccessibilityEnabled", add) as? Bool == false)
+            let add = try #require(fixture.element(attached ? "会議の資料、選択済み" : "会議の資料を追加"))
+            #expect(fixture.value("isAccessibilityEnabled", add) as? Bool == !attached)
             add.perform(NSSelectorFromString("accessibilityPerformPress"))
-            #expect(selected.isEmpty)
+            #expect(selected == (attached ? [] : [saved.id]))
             let open = try #require(fixture.element("会議の資料を開く"))
             #expect(try #require(fixture.value("accessibilityFrame", open) as? NSValue).rectValue.width > 400)
             open.perform(NSSelectorFromString("accessibilityPerformPress"))
             #expect(try await waitForTestCondition { library.selected?.id == saved.id })
             await fixture.layout()
             try #require(fixture.element("一覧へ戻る")).perform(NSSelectorFromString("accessibilityPerformPress"))
-            #expect(library.selected == nil && selected.isEmpty)
+            #expect(library.selected == nil)
+            #expect(selected == (attached ? [] : [saved.id]))
         }
 
         @Test(arguments: [640.0, 900.0, 1280.0, 1512.0], [false, true])
