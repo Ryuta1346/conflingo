@@ -2,6 +2,7 @@ import Foundation
 
 @MainActor
 final class AppComposition {
+    let commands = AppCommandRouter()
     let defaults: UserDefaults
     let isPreview: Bool
     let isMeetingPreview: Bool
@@ -57,7 +58,7 @@ final class AppComposition {
         conferenceKnowledge = ConferenceKnowledgeWorkspace(store: session, settings: workspace.llmSettings)
         #endif
         meeting = workspace
-        floatingPanel = MeetingFloatingPanel(defaults: settings)
+        floatingPanel = MeetingFloatingPanel(defaults: settings, commands: commands)
         coordinator = TranslationCoordinator()
         availability = ModelAvailabilityService()
         controller = SessionController(activity: activity)
@@ -67,5 +68,9 @@ final class AppComposition {
         navigation = ConferenceNavigation()
         #endif
         profileStore = KeywordProfileStore(defaults: settings)
+        commands.showCompact = { [weak self] in
+            guard let self else { return }
+            floatingPanel.show(meeting: meeting)
+        }
     }
 }

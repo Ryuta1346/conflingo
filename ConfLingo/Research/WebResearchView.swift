@@ -16,6 +16,7 @@ struct WebReferencesView: View {
 }
 
 struct AssistanceAnswerView: View {
+    @Environment(\.readingFontSize) private var fontSize
     let answer: MeetingInsight
     let events: [TranscriptEvent]
     var research: ((String) -> Void)?
@@ -24,11 +25,11 @@ struct AssistanceAnswerView: View {
         Surface {
             VStack(alignment: .leading, spacing: 10) {
                 Text("\(answer.kind.label) · 要確認").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                ResearchAnswerText(answer: answer)
+                ResearchAnswerText(answer: answer).font(.system(size: fontSize))
                 ForEach(answer.evidenceIDs, id: \.self) { id in
                     if let event = events.first(where: { $0.id == id }) {
                         DisclosureGroup("発話 \(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)") {
-                            Text(event.text).textSelection(.enabled)
+                            Text(event.text).font(.system(size: fontSize)).textSelection(.enabled)
                         }.font(DesignTokens.Typography.body)
                     }
                 }
@@ -38,7 +39,7 @@ struct AssistanceAnswerView: View {
                 WebReferencesView(references: answer.webReferences ?? [])
                 if let research { Button("この提案をWebで調べる", systemImage: "globe") { research(answer.text) } }
             }
-        }.sheet(item: $reference) { KnowledgeReferenceView(reference: $0, fontSize: 16) }
+        }.sheet(item: $reference) { KnowledgeReferenceView(reference: $0, fontSize: fontSize) }
     }
 }
 
@@ -64,6 +65,7 @@ struct WebResearchControls: View {
 }
 
 struct WebResearchView: View {
+    @Environment(\.readingFontSize) private var fontSize
     @Bindable var research: WebResearchCoordinator
     let language: AnswerLanguage
     let enabled: Bool
@@ -86,7 +88,7 @@ struct WebResearchView: View {
                         .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
                     DisclosureGroup("回答に使う発話・資料を確認") {
                         ForEach(research.contextEvents.suffix(30)) { event in
-                            Text("\(event.origin.label)：\(event.text)").font(DesignTokens.Typography.supporting).textSelection(.enabled)
+                            Text("\(event.origin.label)：\(event.text)").font(.system(size: fontSize)).textSelection(.enabled)
                         }
                         ForEach(research.knowledge.documents) { document in
                             Text(document.title).font(DesignTokens.Typography.supporting)

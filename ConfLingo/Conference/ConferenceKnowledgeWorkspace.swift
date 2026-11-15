@@ -22,6 +22,25 @@ final class ConferenceKnowledgeWorkspace {
     private(set) var answers: [MeetingInsight] = []
     private(set) var isGenerating = false
     private(set) var preview = ""
+    enum QuestionTarget: String, CaseIterable, Identifiable {
+        case conversation = "発話と資料", documents = "資料のみ"
+        var id: Self { self }
+    }
+    var questionTarget: QuestionTarget = .conversation
+    var documentDraft = ""
+    var questionDraft: String {
+        get { questionTarget == .documents ? documentDraft : assistanceDraft }
+        set { if questionTarget == .documents { documentDraft = newValue } else { assistanceDraft = newValue } }
+    }
+    var canSubmitQuestion: Bool {
+        (questionTarget == .documents ? canAsk : canAskAssistance)
+            && !questionDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && questionDraft.count <= 2_000
+    }
+    func submitQuestion() async {
+        guard canSubmitQuestion else { return }
+        let question = questionDraft
+        if questionTarget == .documents { await ask(question) } else { await askAssistance(question) }
+    }
     var assistanceDraft = ""
     var assistanceVisible: Bool?
     var message = ""
@@ -62,7 +81,6 @@ final class ConferenceKnowledgeWorkspace {
         cancel()
         permissionRevision += 1
         questionPermitted = allowed && canEditKnowledge
-        knowledge.setPermission(questionPermitted)
     }
 
     func setAssistancePermission(_ allowed: Bool) {
@@ -129,7 +147,7 @@ final class ConferenceKnowledgeWorkspace {
     func ask(_ question: String) async {
         guard canAsk else { return }
         await perform {
-            let references = try await self.knowledge.retrieve(question)
+            let references = try await self.knowledge.localReferences(question)
             return try InsightRequest(sessionID: self.store.sessionID, question: question, trigger: .manual,
                 events: [], answerLanguage: self.answerLanguage, knowledge: references, purpose: .documentQuestion)
         } accept: { request, result in
@@ -221,6 +239,8 @@ final class ConferenceKnowledgeWorkspace {
 
     func reset() {
         assistanceDraft = ""
+        documentDraft = ""
+        questionTarget = .conversation
         assistanceVisible = nil
         stop()
         revokePermissions()

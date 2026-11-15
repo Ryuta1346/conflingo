@@ -7,6 +7,7 @@ struct MeetingSupportView<ReviewContent: View>: View {
     var scrollProxy: ScrollViewProxy?
     @ViewBuilder let reviewContent: ReviewContent
     @State private var showsSettings = false
+    @State private var pendingResearch = false
     @State private var showsDocuments = false
     @FocusState private var settingsFocused: Bool
 
@@ -39,14 +40,19 @@ struct MeetingSupportView<ReviewContent: View>: View {
         }
         .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: DesignTokens.radius))
         .overlay(RoundedRectangle(cornerRadius: DesignTokens.radius).stroke(DesignTokens.border))
-        .sheet(isPresented: $showsSettings, onDismiss: { settingsFocused = true }) {
+        .sheet(isPresented: $showsSettings, onDismiss: {
+            if pendingResearch { pendingResearch = false; meeting.research.open("") }
+            else { settingsFocused = true }
+        }) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
                     Text("AI設定・送信範囲").font(DesignTokens.Typography.title)
                     Spacer()
                     Button("閉じる") { showsSettings = false }.keyboardShortcut(.cancelAction)
                 }
-                ScrollView { MeetingAISettings(meeting: meeting).padding(1) }
+                ScrollView {
+                    MeetingAISettings(meeting: meeting, openResearch: { pendingResearch = true; showsSettings = false }).padding(1)
+                }
             }.sheetSurface().frame(minWidth: 480, idealWidth: 600, minHeight: 480, idealHeight: 640)
         }
         .sheet(isPresented: $showsDocuments) {

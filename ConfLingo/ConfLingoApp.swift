@@ -27,11 +27,9 @@ struct ConfLingoApp: App {
         }
         .defaultSize(width: 1180, height: 780)
         .windowLevel(alwaysOnTop ? .floating : .normal)
-        .commands {
-            CommandGroup(after: .windowArrangement) {
-                Button("Meetingの小窓を表示") { composition.floatingPanel.show(meeting: composition.meeting) }
-            }
-        }
+        .commands { AppCommands(router: composition.commands) }
+
+        Settings { AppSettingsView(composition: composition) }
 
         #if DEBUG
         Window("システム音声の確認", id: "system-audio-probe") {

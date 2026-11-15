@@ -6,7 +6,7 @@ struct MeetingAIControls: View {
     var body: some View {
         Surface {
             VStack(alignment: .leading, spacing: 12) {
-                MeetingAISettings(meeting: meeting)
+                MeetingAISettings(meeting: meeting, openResearch: { meeting.research.open("") })
                 if meeting.page != .review { MeetingQuestionComposer(meeting: meeting) }
                 ForEach(meeting.research.answers.reversed()) { answer in
                     AssistanceAnswerView(answer: answer, events: meeting.store.finals,

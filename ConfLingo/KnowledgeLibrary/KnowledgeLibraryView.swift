@@ -43,7 +43,7 @@ struct KnowledgeLibraryView: View {
                         ForEach(library.filtered) { entry in
                             Surface {
                                 VStack(alignment: .leading, spacing: 8) {
-                                    Text(entry.title).font(.system(size: fontSize, weight: .semibold)).lineLimit(3)
+                                    Text(entry.title).font(DesignTokens.Typography.heading).lineLimit(3)
                                     Text("\(entry.kind) · \(entry.count)文書 · \(entry.updatedAt?.formatted() ?? "日時不明")")
                                         .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                                     if let failure = entry.failure { InlineMessage(.failure, "保存内容を読み込めません。元の保存データは保持しています。", details: failure) }

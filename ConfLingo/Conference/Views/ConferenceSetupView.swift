@@ -17,6 +17,10 @@ struct ConferenceSetupView: View {
     let editDictionary: () -> Void
     let retry: () -> Void
     let openTranscript: () -> Void
+    var workspace: ConferenceKnowledgeWorkspace?
+    var library: KnowledgeLibrary?
+    var fontSize: Double = 16
+    var applyTerms: () -> Void = {}
 
     var body: some View {
         ScrollView {
@@ -64,6 +68,17 @@ struct ConferenceSetupView: View {
                         if hasTranscript {
                             Divider()
                             Button("現在の字幕を開く", systemImage: "captions.bubble", action: openTranscript)
+                        }
+                    }
+                }
+                if let workspace, let library {
+                    Surface {
+                        VStack(alignment: .leading, spacing: 16) {
+                            Text("資料・用語・認識方式").font(DesignTokens.Typography.heading)
+                            ConferenceMaterialsContents(workspace: workspace, library: library, fontSize: fontSize,
+                                sourceLanguage: sourceLanguage, targetLanguage: mode == .translation ? targetLanguage : nil,
+                                manualGlossary: KeywordParser.parseGlossary(profiles.selectedProfile.keywords),
+                                showsRecognitionMode: true, applyTerms: applyTerms)
                         }
                     }
                 }

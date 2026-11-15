@@ -5,10 +5,12 @@ import SwiftUI
 final class MeetingFloatingPanel: NSObject, NSWindowDelegate {
     private(set) var panel: NSPanel?
     weak var mainWindow: NSWindow?
+    private let commands: AppCommandRouter?
     private let defaults: UserDefaults
     var expand: (() -> Bool)?
 
-    init(defaults: UserDefaults = .standard) {
+    init(defaults: UserDefaults = .standard, commands: AppCommandRouter? = nil) {
+        self.commands = commands
         self.defaults = defaults
     }
 
@@ -26,7 +28,7 @@ final class MeetingFloatingPanel: NSObject, NSWindowDelegate {
             panel.minSize = NSSize(width: 360, height: 330)
             panel.delegate = self
             panel.contentView = NSHostingView(rootView: MeetingFloatingView(
-                meeting: meeting, defaults: defaults,
+                meeting: meeting, defaults: defaults, commands: commands,
                 expand: { [weak self] in self?.showMain() },
                 hide: { [weak self] in self?.hide() }
             ))
@@ -86,14 +88,19 @@ struct MeetingWindowAttachment: NSViewRepresentable {
 }
 
 private struct MeetingFloatingView: View {
+    let commands: AppCommandRouter?
+    @State private var menuRequestsEnd = false
+    @AppStorage private var alwaysOnTop: Bool
     @Bindable var meeting: MeetingWorkspace
     @AppStorage private var fontSize: Double
     @AppStorage private var appearance: String
     let expand: () -> Void
     let hide: () -> Void
 
-    init(meeting: MeetingWorkspace, defaults: UserDefaults, expand: @escaping () -> Void, hide: @escaping () -> Void) {
+    init(meeting: MeetingWorkspace, defaults: UserDefaults, commands: AppCommandRouter?, expand: @escaping () -> Void, hide: @escaping () -> Void) {
         self.meeting = meeting
+        self.commands = commands
+        _alwaysOnTop = AppStorage(wrappedValue: false, "alwaysOnTop", store: defaults)
         _fontSize = AppStorage(wrappedValue: 16, "fontSize", store: defaults)
         _appearance = AppStorage(wrappedValue: "system", "appearance", store: defaults)
         self.expand = expand
@@ -150,7 +157,7 @@ private struct MeetingFloatingView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    Text("非表示にしても音声収集は続きます。ウィンドウメニューから再表示できます。")
+                    Text("非表示にしても音声収集は続きます。セッションメニューから再表示できます。")
                         .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 }
                 .padding(14)
@@ -163,9 +170,17 @@ private struct MeetingFloatingView: View {
                 }
                 .padding(14)
             } else {
-                MeetingTransport(meeting: meeting)
+                MeetingTransport(meeting: meeting, menuRequestsEnd: $menuRequestsEnd)
             }
         }
+        .background {
+            if let commands {
+                CommandWindowScope(router: commands, actions: .init(
+                    session: .meeting(meeting, requestEnd: { menuRequestsEnd = true }),
+                    fontSize: $fontSize, alwaysOnTop: $alwaysOnTop))
+            }
+        }
+        .environment(\.readingFontSize, fontSize)
         .background(DesignTokens.canvas)
         .foregroundStyle(DesignTokens.text)
         .tint(DesignTokens.accent)

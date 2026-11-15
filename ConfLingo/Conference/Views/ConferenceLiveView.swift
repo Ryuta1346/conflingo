@@ -10,6 +10,7 @@ struct ConferenceLiveView: View {
     let clear: () -> Void
     var corrections: [ConferenceCorrection] = []
     var translationPreparation: TranslationCoordinator.PreparationState = .idle
+    var correct: ((TranslationUnit) -> Void)?
 
     var body: some View {
         GeometryReader { geometry in
@@ -83,7 +84,12 @@ struct ConferenceLiveView: View {
 
     private var sourcePane: some View {
         TranscriptPane(title: "原文 · \(LanguageCatalog.displayName(for: sourceLanguage))",
-                       entries: TranscriptPresentation.source(store, corrections: corrections), fontSize: fontSize)
+                       entries: TranscriptPresentation.source(store, corrections: corrections), fontSize: fontSize,
+                       correct: correct.map { action in { id in
+                           if let unit = store.units.first(where: { $0.segmentIDs.contains(where: { $0.uuidString == id }) }) { action(unit) }
+                       } }, canCorrect: { id in
+                           store.phase != .preparing && store.phase != .stopping && store.units.contains { $0.segmentIDs.contains { $0.uuidString == id } }
+                       })
             .frame(minWidth: 220, minHeight: minimumPaneHeight)
     }
 

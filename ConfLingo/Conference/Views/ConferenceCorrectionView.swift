@@ -5,6 +5,7 @@ struct ConferenceCorrectionView: View {
     let sourceLanguage: String
     let targetLanguage: String?
     let fontSize: Double
+    var initialUnitID: UUID?
     @State private var unitID: UUID?
     @State private var reference: KnowledgeReference?
 
@@ -12,7 +13,6 @@ struct ConferenceCorrectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("資料で原文・訳文を補正").font(DesignTokens.Typography.heading)
             Text("選んだ確定発話、通常訳、関連資料の抜粋、適用用語を\(workspace.settings.selected.name)へ送ります。原文を残し、採用した候補だけを保存・出力します。音声は送りません。")
                 .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             Toggle("字幕と資料を使う補正を許可", isOn: Binding(get: { workspace.correctionPermitted }, set: { workspace.setCorrectionPermission($0) }))
@@ -30,15 +30,21 @@ struct ConferenceCorrectionView: View {
                     await workspace.correct(unitID: unit.id, sourceLanguage: sourceLanguage, targetLanguage: targetLanguage)
                 } }.disabled(!workspace.correctionPermitted || !workspace.canEditKnowledge || workspace.isGenerating)
             }
-            ForEach(workspace.corrections.reversed()) { correction in
+            if workspace.isGenerating {
+                ProgressView("補正候補を生成中…")
+                Text(workspace.preview).font(.system(size: fontSize)).textSelection(.enabled)
+                Button("補正を中断") { workspace.cancel() }
+            }
+            if !workspace.message.isEmpty { InlineMessage(.failure, workspace.message) }
+            ForEach(workspace.corrections.reversed().filter { $0.unitID == unitID }) { correction in
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
                         Text(correction.adopted ? "採用した補正" : "補正候補 · 要確認").font(DesignTokens.Typography.heading)
                         Text("元の原文").font(DesignTokens.Typography.supporting)
-                        Text(correction.original.sourceText).textSelection(.enabled)
+                        Text(correction.original.sourceText).font(.system(size: fontSize)).textSelection(.enabled)
                         Text("補正後の原文").font(DesignTokens.Typography.supporting)
                         Text(correction.sourceText).font(.system(size: fontSize)).textSelection(.enabled)
-                        if let original = correction.original.translation { Text("元の訳文：\(original)").textSelection(.enabled) }
+                        if let original = correction.original.translation { Text("元の訳文：\(original)").font(.system(size: fontSize)).textSelection(.enabled) }
                         if let translation = correction.translation { Text(translation).font(.system(size: fontSize)).textSelection(.enabled) }
                         ForEach(correction.references) { item in
                             Button("\(item.displayTitle) · \(item.provenance)") { reference = item }.buttonStyle(AppButtonStyle(.link))
@@ -49,11 +55,13 @@ struct ConferenceCorrectionView: View {
                     }
                 }
             }
-        }.sheet(item: $reference) { KnowledgeReferenceView(reference: $0, fontSize: fontSize) }
+        }.onAppear { unitID = initialUnitID }
+        .sheet(item: $reference) { KnowledgeReferenceView(reference: $0, fontSize: fontSize) }
     }
 }
 
 private struct CorrectionReferencePreview: View {
+    @Environment(\.readingFontSize) private var fontSize
     let knowledge: KnowledgeStore
     let text: String
     @State private var references: [KnowledgeReference] = []
@@ -66,7 +74,7 @@ private struct CorrectionReferencePreview: View {
             }
             ForEach(references) { reference in
                 Text("\(reference.displayTitle) · \(reference.provenance)").font(DesignTokens.Typography.supporting.bold())
-                Text(reference.snippet).font(DesignTokens.Typography.supporting).textSelection(.enabled)
+                Text(reference.snippet).font(.system(size: fontSize)).textSelection(.enabled)
             }
         }.task(id: text + knowledge.revision.uuidString) {
             do { message = ""; references = try await knowledge.localReferences(text) }

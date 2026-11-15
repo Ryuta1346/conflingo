@@ -1,11 +1,13 @@
 import SwiftUI
 
 struct ConferenceAssistanceView: View {
+    @Environment(\.readingFontSize) private var fontSize
     @Bindable var workspace: ConferenceKnowledgeWorkspace
     var livePanel = false
     var openDocuments: (() -> Void)?
     var close: (() -> Void)?
     @State private var showsSettings = false
+    @State private var pendingResearch = false
     @FocusState private var settingsFocused: Bool
 
     var body: some View {
@@ -29,17 +31,29 @@ struct ConferenceAssistanceView: View {
             composer
         }
         .disabled(workspace.store.phase == .preparing || workspace.store.phase == .stopping)
-        .sheet(isPresented: $showsSettings, onDismiss: { settingsFocused = true }) {
-            ConferenceAssistanceSettings(workspace: workspace)
+        .sheet(isPresented: $showsSettings, onDismiss: {
+            if pendingResearch { pendingResearch = false; workspace.research.open("") }
+            else { settingsFocused = true }
+        }) {
+            ConferenceAssistanceSettings(workspace: workspace, openResearch: { pendingResearch = true; showsSettings = false })
         }
     }
 
     private var answers: some View {
         VStack(alignment: .leading, spacing: 12) {
-            if workspace.assistance.insights.isEmpty && workspace.research.answers.isEmpty {
+            if workspace.assistance.insights.isEmpty && workspace.research.answers.isEmpty && workspace.answers.isEmpty {
                 Text("提案はまだありません").font(DesignTokens.Typography.heading)
                 Text("AIを使う場合は「AI設定」で送信範囲を確認してください。")
                     .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
+            }
+            if workspace.isGenerating, !workspace.preview.isEmpty {
+                Text(workspace.preview).font(.system(size: fontSize)).textSelection(.enabled)
+            }
+            ForEach(workspace.answers.reversed()) { answer in
+                VStack(alignment: .leading, spacing: 8) {
+                    if answer.knowledgeReferences.isEmpty { InlineMessage(.warning, "資料根拠なし・要確認") }
+                    AssistanceAnswerView(answer: answer, events: [])
+                }
             }
             ForEach(workspace.assistance.insights.reversed()) { answer in
                 AssistanceAnswerView(answer: answer, events: workspace.assistanceStore.finals,
@@ -52,7 +66,7 @@ struct ConferenceAssistanceView: View {
             DisclosureGroup("発話からWebで調べる") {
                 ForEach(workspace.assistanceStore.finals.suffix(30)) { event in
                     HStack {
-                        Text(event.text).lineLimit(2)
+                        Text(event.text).font(.system(size: fontSize)).lineLimit(2)
                         Button("Webで調べる") { workspace.research.open(event.text, evidenceIDs: [event.id]) }
                     }
                 }
@@ -62,22 +76,30 @@ struct ConferenceAssistanceView: View {
 
     private var composer: some View {
         VStack(alignment: .leading, spacing: 10) {
+            Picker("質問の対象", selection: $workspace.questionTarget) {
+                ForEach(ConferenceKnowledgeWorkspace.QuestionTarget.allCases) { Text($0.rawValue).tag($0) }
+            }.pickerStyle(.segmented)
             HStack(alignment: .bottom) {
-                TextField("発話や資料について質問する", text: $workspace.assistanceDraft, axis: .vertical)
+                TextField("発話や資料について質問する", text: $workspace.questionDraft, axis: .vertical)
                     .textFieldStyle(.roundedBorder).lineLimit(1...4).accessibilityLabel("AIへの質問")
                 Button("質問する") {
-                    let question = workspace.assistanceDraft
-                    Task { await workspace.askAssistance(question) }
+                    Task { await workspace.submitQuestion() }
                 }
                 .buttonStyle(AppButtonStyle(.primary))
-                .disabled(!workspace.canAskAssistance || workspace.assistanceDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || workspace.assistanceDraft.count > 2_000)
+                .disabled(!workspace.canSubmitQuestion)
             }
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 8) { actions }
                 VStack(alignment: .leading, spacing: 8) { actions }
             }
-            if workspace.assistanceDraft.count > 2_000 { Text("質問は2,000文字以内で入力してください。").font(DesignTokens.Typography.supporting) }
-            InlineMessage(workspace.assistance.statusMessage)
+            if workspace.questionDraft.count > 2_000 { Text("質問は2,000文字以内で入力してください。").font(DesignTokens.Typography.supporting) }
+            if workspace.questionTarget == .documents {
+                Text("資料のみを使います。許可はAI設定で確認できます。").font(DesignTokens.Typography.supporting)
+                if !workspace.message.isEmpty { InlineMessage(.failure, workspace.message) }
+                if workspace.isGenerating { Button("資料のAI処理を中断") { workspace.cancel() } }
+            } else {
+                InlineMessage(workspace.assistance.statusMessage)
+            }
         }
     }
 
@@ -89,48 +111,6 @@ struct ConferenceAssistanceView: View {
             enabled: workspace.canEditKnowledge, showsAnswers: false)
         if workspace.assistance.permitted {
             Button("AI送信を停止") { workspace.setAssistancePermission(false) }
-        }
-    }
-}
-
-struct ConferenceAssistanceSettings: View {
-    @Bindable var workspace: ConferenceKnowledgeWorkspace
-    @Environment(\.dismiss) private var dismiss
-    @State private var showsConnection = false
-
-    var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            HStack {
-                Text("AI設定・送信範囲").font(DesignTokens.Typography.title)
-                Spacer()
-                Button("閉じる") { dismiss() }.keyboardShortcut(.cancelAction)
-            }
-            ScrollView {
-                VStack(alignment: .leading, spacing: 16) {
-                    Text(workspace.settings.selected.destinationLabel).font(DesignTokens.Typography.heading)
-                    Button("LLM設定") { showsConnection = true }
-                    Picker("回答言語", selection: $workspace.answerLanguage) {
-                        ForEach(AnswerLanguage.allCases, id: \.self) { Text($0.label).tag($0) }
-                    }.onChange(of: workspace.answerLanguage) { workspace.cancel() }
-                    Text("確定した発話（最大30件）と質問を\(workspace.settings.selected.name)へ送ります。資料の参照も許可した場合、関連する抜粋を最大5箇所送ります。音声は送りません。")
-                        .font(DesignTokens.Typography.body)
-                    Toggle("発話を使ったAI支援を許可", isOn: Binding(get: { workspace.assistance.permitted },
-                        set: { workspace.setAssistancePermission($0) }))
-                    Toggle("手動質問にも資料を使う", isOn: Binding(get: { workspace.knowledge.permitted },
-                        set: { workspace.knowledge.setPermission($0) })).disabled(!workspace.assistance.permitted)
-                    Toggle("自動提案を使う", isOn: Binding(get: { workspace.assistance.automaticEnabled },
-                        set: { workspace.assistance.setAutomatic($0, after: workspace.assistanceStore.finals.last?.startOffset ?? 0) }))
-                        .disabled(!workspace.assistance.permitted)
-                    Toggle("自動提案にも資料を使う", isOn: Binding(get: { workspace.assistance.automaticKnowledgeEnabled },
-                        set: { workspace.assistance.setAutomaticKnowledge($0) })).disabled(!workspace.assistance.automaticEnabled)
-                    Text("送信先：\(workspace.settings.selected.baseURL)。料金・データ保持・学習への利用は接続先の契約をご確認ください。手動質問・自動提案・Web調査の許可は別々です。")
-                        .font(DesignTokens.Typography.body).textSelection(.enabled)
-                }.padding(1)
-                .disabled(workspace.store.phase == .preparing || workspace.store.phase == .stopping)
-            }
-        }.sheetSurface().frame(minWidth: 480, idealWidth: 600, minHeight: 480, idealHeight: 640)
-        .sheet(isPresented: $showsConnection) {
-                LLMSettingsSheet(settings: workspace.settings) { showsConnection = false }
         }
     }
 }
