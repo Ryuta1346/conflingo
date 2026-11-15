@@ -7,6 +7,30 @@ extension AppKitIntegrationTests {
     @MainActor
     @Suite(.serialized, .timeLimit(.minutes(2)))
     struct DR4CommandWindowTests {
+        @Test func compactWindowCanBeReopenedAfterBothWindowsAreHidden() async throws {
+            let composition = AppComposition(arguments: ["--meeting-preview"])
+            let meeting = composition.meeting
+            meeting.consentConfirmed = true
+            await meeting.start()
+            let main = DR3Host(ContentView(composition: composition), width: 900, padding: 0, nonactivating: true)
+            defer { composition.floatingPanel.hide(); main.close() }
+            await main.layout()
+            composition.floatingPanel.show(meeting: meeting, compactMain: true)
+            let panel = try #require(composition.floatingPanel.panel)
+            panel.makeKeyAndOrderFront(nil)
+            #expect(try await waitForTestCondition { NSApp.keyWindow === panel })
+            composition.floatingPanel.hide()
+            await main.layout()
+            #expect(!main.window.isVisible && !panel.isVisible)
+            #expect(composition.commands.active == nil)
+            let reopen = composition.commands.showCompact
+            #expect(reopen != nil)
+            reopen?()
+            #expect(panel.isVisible)
+            #expect(meeting.phase == .listening)
+            await meeting.end()
+        }
+
         @Test func settingsAndSheetsCannotControlTheCapturingMeeting() async throws {
             let composition = AppComposition(arguments: ["--meeting-preview"])
             let meeting = composition.meeting

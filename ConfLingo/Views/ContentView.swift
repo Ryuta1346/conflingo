@@ -94,8 +94,7 @@ struct ContentView: View {
             }
         }
         .background(CommandWindowScope(router: commands, actions: .init(session: sessionCommands,
-            fontSize: $fontSize, alwaysOnTop: $alwaysOnTop,
-            showCompact: navigation.destination == .meeting ? { floatingPanel.show(meeting: meeting) } : nil)))
+            fontSize: $fontSize, alwaysOnTop: $alwaysOnTop)))
         .environment(\.readingFontSize, fontSize)
         .task { await sessions.reload(); await library.reload() }
         .onAppear {
@@ -139,6 +138,7 @@ struct ContentView: View {
                         targetLanguage: transcriptionOnly ? nil : targetLanguageID, fontSize: fontSize, initialUnitID: unit.id)
                 }
             }.sheetSurface().frame(minWidth: 480, idealWidth: 680, minHeight: 480, idealHeight: 700)
+                .environment(\.readingFontSize, fontSize)
         }
         .alert(closeRequested ? "音声収集を停止してウィンドウを閉じますか？" : "音声収集を停止して移動しますか？", isPresented: $navigation.showsStopConfirmation) {
             Button("キャンセル", role: .cancel) { navigation.cancelNavigation(); closeRequested = false }

@@ -29,7 +29,6 @@ final class AppCommandRouter {
         var session: SessionCommandActions?
         let fontSize: Binding<Double>
         let alwaysOnTop: Binding<Bool>
-        var showCompact: (() -> Void)?
     }
     private final class Target {
         weak var window: NSWindow?
@@ -38,6 +37,7 @@ final class AppCommandRouter {
     }
     private var targets: [ObjectIdentifier: Target] = [:]
     private(set) var revision = 0
+    var showCompact: (() -> Void)?
 
     var active: Actions? {
         _ = revision
@@ -65,8 +65,8 @@ struct AppCommands: Commands {
             Button("会議を終了") { router.active?.session?.end?() }
                 .keyboardShortcut("e", modifiers: [.command, .shift]).disabled(router.active?.session?.end == nil)
             Divider()
-            Button("Meetingの小窓を表示") { router.active?.showCompact?() }
-                .disabled(router.active?.showCompact == nil)
+            Button("Meetingの小窓を表示") { router.showCompact?() }
+                .disabled(router.showCompact == nil)
         }
         CommandGroup(after: .toolbar) {
             Button("読む文字を拡大") { resize(2) }.keyboardShortcut("=", modifiers: .command)

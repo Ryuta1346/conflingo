@@ -157,7 +157,7 @@ private struct MeetingFloatingView: View {
                             .frame(maxWidth: .infinity, alignment: .leading)
                         }
                     }
-                    Text("非表示にしても音声収集は続きます。ウィンドウメニューから再表示できます。")
+                    Text("非表示にしても音声収集は続きます。セッションメニューから再表示できます。")
                         .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 }
                 .padding(14)

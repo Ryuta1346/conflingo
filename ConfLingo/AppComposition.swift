@@ -68,5 +68,9 @@ final class AppComposition {
         navigation = ConferenceNavigation()
         #endif
         profileStore = KeywordProfileStore(defaults: settings)
+        commands.showCompact = { [weak self] in
+            guard let self else { return }
+            floatingPanel.show(meeting: meeting)
+        }
     }
 }

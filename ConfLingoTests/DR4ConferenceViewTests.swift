@@ -7,6 +7,21 @@ extension AppKitIntegrationTests {
     @MainActor
     @Suite(.serialized)
     struct DR4ConferenceViewTests {
+        @Test(arguments: [false, true])
+        func documentAnswersWarnOnlyWhenCitationsAreMissing(citesMaterials: Bool) async throws {
+            let workspace = ConferenceKnowledgeWorkspace(store: SessionStore(), settings: conferenceTestSettings(),
+                client: DR4DocumentAnswerClient(citesMaterials: citesMaterials))
+            await workspace.knowledge.add(data: Data("料金は100円です。".utf8), filename: "price.md")
+            workspace.setQuestionPermission(true)
+            await workspace.ask("料金")
+            let answer = try #require(workspace.answers.first)
+            #expect(answer.knowledgeReferences.isEmpty == !citesMaterials)
+            let fixture = DR3Host(ConferenceAssistanceView(workspace: workspace), height: 900)
+            defer { fixture.close() }
+            await fixture.layout()
+            #expect(fixture.strings.contains("資料根拠なし・要確認") == !citesMaterials)
+        }
+
         @Test func documentSheetContainsOnlyMaterialsAndTerms() async throws {
             let composition = AppComposition(arguments: ["--ui-preview"])
             let fixture = DR3Host(ConferenceKnowledgeView(workspace: composition.conferenceKnowledge,
@@ -30,5 +45,13 @@ extension AppKitIntegrationTests {
             #expect(!meeting.knowledge.permitted)
             #expect(!meeting.ai.automaticEnabled)
         }
+    }
+}
+
+private struct DR4DocumentAnswerClient: InsightClient {
+    let citesMaterials: Bool
+    func generate(_ request: InsightRequest, update: @escaping @MainActor (String) -> Void) async throws -> InsightResult {
+        InsightResult(kind: .answerSuggestion, text: "100円です", evidenceIDs: [],
+            knowledgeIDs: citesMaterials ? request.knowledge.map(\.id) : [])
     }
 }

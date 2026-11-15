@@ -50,7 +50,10 @@ struct ConferenceAssistanceView: View {
                 Text(workspace.preview).font(.system(size: fontSize)).textSelection(.enabled)
             }
             ForEach(workspace.answers.reversed()) { answer in
-                AssistanceAnswerView(answer: answer, events: [])
+                VStack(alignment: .leading, spacing: 8) {
+                    if answer.knowledgeReferences.isEmpty { InlineMessage(.warning, "資料根拠なし・要確認") }
+                    AssistanceAnswerView(answer: answer, events: [])
+                }
             }
             ForEach(workspace.assistance.insights.reversed()) { answer in
                 AssistanceAnswerView(answer: answer, events: workspace.assistanceStore.finals,
