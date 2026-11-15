@@ -1,3 +1,5 @@
+> 2026-11-15 DR1: 会議終了の確認（D03）・候補の状態ラベル（D05）・画面名の「履歴」統一（D14）を実装し、[Draft PR #46](https://github.com/Ryuta1346/conflingo/pull/46)を提出。Linux環境で作業したためローカルのビルド・テストは未実行で、自動検証はPRのCIによる（結果待ち）。追加テストのRedと実機での見え方は未確認。[結果](docs/validation/dr1-small-fixes-2026-11-15.md)・[計画](docs/design/dr1-small-fixes-plan.md)。
+
 > 2026-11-15 UIデザインレビュー: main `8a02bc8`の全画面を静的に確認（ビルド・起動は未実行）。高4・中10・低7件を指摘し、ユーザー指示により[UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR1→DR5としてタスク化。コード変更なし・全項目未着手。[指摘一覧](docs/design/ui-design-review-2026-11-15.md)。
 
 > 2026-11-15 PR #44 CI追補: 初回CIのTab退出4ケース失敗に対し、テストfixtureへ入力可能な巡回先を追加しShift+Tabも検証。関連14ケース・全705テスト成功、Lint275ファイル違反0、Release両CPU成功。修正後の[リモートCI](https://github.com/Ryuta1346/conflingo/actions/runs/43667087489)成功を確認し、[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)でmain `8a02bc8`へマージ済み。[修正記録](docs/validation/ui-keyboard-ci-fix-2026-11-15.md)。
@@ -37,7 +39,7 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-15／main `8a02bc8`**。PR #44までマージ済み（#43・#44とも修正後リモートCI成功をPRで確認）。Sessions・資料ライブラリ・LLM設定の追加UI受入を実施し、U01〜U03を承認後に修正・再受入済み（[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)マージ済み）。UIデザインレビューを実施し、DR1〜5をタスク化（未着手）。VoiceOverは保留（ユーザー指示・オフ確認済み）。独立レビュー・実モデル/実機受入は継続。
+- 更新: **2026-11-15／main `8a02bc8`**。PR #44までマージ済み（#43・#44とも修正後リモートCI成功をPRで確認）。Sessions・資料ライブラリ・LLM設定の追加UI受入を実施し、U01〜U03を承認後に修正・再受入済み（[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)マージ済み）。UIデザインレビューを実施し、DR1〜5をタスク化。DR1は[Draft PR #46](https://github.com/Ryuta1346/conflingo/pull/46)提出・実機確認待ち、DR2〜5は未着手。VoiceOverは保留（ユーザー指示・オフ確認済み）。独立レビュー・実モデル/実機受入は継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** UI修正と追補レビュー後に705定義成功・実API7定義除外、Lint275ファイル違反0、arm64/x86_64 Release成功。U01〜U03は専用Debugプレビューで再受入、追補の長いパス修正はNSHostingViewの14ケースと画像で検証。[UI結果](docs/validation/library-settings-ui-2026-11-15.md)。
@@ -51,7 +53,7 @@
 
 **先行:** PR #44までmain `8a02bc8`へマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の独立レビューは継続。[UIのキー操作3件を修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。[承認済み計画](docs/design/ui-keyboard-acceptance-plan.md)に基づく差分は[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)でマージ済み。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。以下の実音声/実モデル受入も継続。
 
-**次に着手:** [UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR1。実音声を必要としないため、下記1・2の受入待ちと並行してDR1→DR5の順に進める。
+**次に着手:** DR1の実機確認（[手順](docs/validation/dr1-small-fixes-2026-11-15.md#未実施macでの確認手順)）とPR #46のマージ判断。続いて[UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR2（モック更新と承認が先）。実音声を必要としないため、下記1・2の受入待ちと並行してDR5まで順に進める。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -66,7 +68,7 @@
 
 | 順 | 対象 | 内容・完了条件 | 状態 |
 |---|---|---|---|
-| DR1 | 小修正（D03・D05・D14） | 「会議を終了」の誤操作防止（確認または再開）、候補の状態ラベルを状態別の色・記号へ、画面名の統一（Sessions／保存／ライブラリ、`Meeting / General`）。回帰テストと合成UIで確認 | TODO |
+| DR1 | 小修正（D03・D05・D14） | 「会議を終了」に確認ダイアログ、候補の状態ラベルを状態別の色・記号へ、画面名を「履歴」に統一、`Meeting / General`を`Meeting / ライブ`へ。回帰テスト13定義を追加し[Draft PR #46](https://github.com/Ryuta1346/conflingo/pull/46)提出（結果待ち）。実機・合成UIでの確認は未実施。[結果](docs/validation/dr1-small-fixes-2026-11-15.md) | REVIEW |
 | DR2 | 領域配分（D01・D09・D02） | Meeting Liveの右欄を提案優先へ、Conferenceの保存操作を上部へ、字幕2列を支援欄より優先し切替幅を単調化。モック更新・承認後に実装し、640／900／1180／1280／1512pt幅の画像で確認 | TODO |
 | DR3 | デザインシステムの部品化（D04・D06・D07、D15・D16） | 文字様式（補助12pt以上）・ボタン4様式・行内メッセージを定義して置換。送信範囲の説明の可読性、破壊操作と失敗表示の統一を確認 | TODO |
 | DR4 | 中優先の残り（D08・D10〜D13） | Conference資料シートの分割、送信範囲パネルの共通化、メニュー／⌘,／Return、Meeting準備フォーム、文字サイズ設定の適用範囲 | TODO |
