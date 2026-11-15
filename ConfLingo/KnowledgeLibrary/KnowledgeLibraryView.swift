@@ -9,7 +9,7 @@ struct KnowledgeLibraryView: View {
     @State private var importing = false
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
+        VStack(alignment: .leading, spacing: 12) {
             HStack {
                 Text(choose == nil ? "資料ライブラリ" : "ライブラリから追加").font(.title2.bold())
                 Spacer()
@@ -112,7 +112,7 @@ private struct KnowledgeLibraryDetail: View {
         saved.content.documents.first { $0.document.id == documentID } ?? saved.content.documents.first
     }
     var body: some View {
-        VStack(alignment: .leading, spacing: 12) {
+        VStack(alignment: .leading, spacing: 8) {
             Text(saved.title).font(.title3.bold()).textSelection(.enabled)
             Text("保存更新 \(saved.updatedAt.formatted()) · 保存版 \(saved.revision.uuidString.prefix(8)) · 読み取り専用")
                 .font(.caption).foregroundStyle(DesignTokens.secondary)
@@ -122,10 +122,12 @@ private struct KnowledgeLibraryDetail: View {
                         ForEach(saved.content.documents, id: \.document.id) { item in
                             Button(item.document.displayTitle) { documentID = item.document.id }
                                 .font(.callout).buttonStyle(.plain)
+                                .lineLimit(1).truncationMode(.middle)
+                                .help(item.document.displayTitle)
                                 .foregroundStyle(document?.document.id == item.document.id ? DesignTokens.accent : DesignTokens.text)
                         }
                     }.frame(maxWidth: .infinity, alignment: .leading)
-                }.frame(maxHeight: 130)
+                }.frame(minHeight: 36, maxHeight: 130)
             }
             if let document {
                 Text(document.document.displayTitle).font(.headline).textSelection(.enabled)
@@ -135,10 +137,10 @@ private struct KnowledgeLibraryDetail: View {
                     Text("作業ツリー \(source.contentHash.prefix(12)) · snapshot \(source.snapshotID)")
                         .font(.caption).textSelection(.enabled)
                 }
-                ScrollView {
-                    Text(document.body).font(.system(size: fontSize)).textSelection(.enabled)
-                        .frame(maxWidth: .infinity, alignment: .leading)
-                }.frame(maxWidth: .infinity, maxHeight: .infinity)
+                KnowledgeBodyView(text: document.body, fontSize: fontSize)
+                    .frame(minHeight: fontSize * 1.5 + 8)
+                    .layoutPriority(1)
+                    .id(document.document.id)
             }
         }.id(saved.revision)
     }
