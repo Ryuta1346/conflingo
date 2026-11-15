@@ -22,6 +22,7 @@ final class MeetingWorkspace {
         }
     }
     var isSavingSession = false
+    var assistanceDraft = ""
     var name = ""
     var microphoneLocaleID = "ja-JP"
     var systemLocaleID = "en-US"
@@ -336,6 +337,7 @@ final class MeetingWorkspace {
         translations.reset(sessionID: store.sessionID)
         mode = .transcription
         name = ""
+        assistanceDraft = ""
         insights = []
         selectedEvidence = nil
         selectedKnowledge = nil

@@ -115,8 +115,41 @@ struct SessionSaveControls: View {
     let library: SessionsLibrary
     let snapshot: SessionSnapshot?
     let save: () -> Void
+    var compact = false
+    var isActive = false
+    @State private var showsDetails = false
 
     var body: some View {
+        Group {
+            if compact {
+                HStack(spacing: 8) {
+                    saveButton
+                    Button(compactStatus) { showsDetails = true }
+                        .font(.caption).buttonStyle(.plain)
+                        .foregroundStyle(library.error == nil ? DesignTokens.secondary : DesignTokens.danger)
+                        .accessibilityLabel("保存状態：\(compactStatus)。詳細を表示")
+                        .popover(isPresented: $showsDetails) {
+                            VStack(alignment: .leading, spacing: 16) {
+                                details
+                                Button("閉じる") { showsDetails = false }.keyboardShortcut(.cancelAction)
+                            }.padding(20).frame(width: 380)
+                        }
+                }
+            } else {
+                details
+            }
+        }
+    }
+
+    private var compactStatus: String {
+        if library.isBusy { return "処理中…" }
+        if library.error != nil { return "保存エラー" }
+        guard let snapshot else { return isActive ? "停止後に保存" : "保存内容なし" }
+        if library.matches(snapshot) { return "保存済み" }
+        return library.savedSnapshots[snapshot.id] == nil ? "未保存" : "変更あり"
+    }
+
+    private var details: some View {
         VStack(alignment: .leading, spacing: 8) {
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 12) { saveButton; status }

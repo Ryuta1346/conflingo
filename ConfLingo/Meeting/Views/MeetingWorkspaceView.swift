@@ -6,8 +6,8 @@ struct MeetingWorkspaceView: View {
     @Binding var fontSize: Double
     let compact: () -> Void
 
-    @State private var translationLanguages: [Locale.Language] = []
     @State private var workspaceScrollPosition = ScrollPosition(edge: .top)
+    @State private var translationLanguages: [Locale.Language] = []
 
     var sessions: SessionsLibrary?
     var library: KnowledgeLibrary?
@@ -26,22 +26,30 @@ struct MeetingWorkspaceView: View {
                     SessionErrorBanner(message: error).padding([.horizontal, .bottom], 16)
                 }
                 GeometryReader { geometry in
-                    let horizontal = geometry.size.width >= 800
-                    let paneHeight = 80 + max(160, fontSize * 4)
-                    let layout = horizontal
-                        ? AnyLayout(HStackLayout(spacing: 16)) : AnyLayout(VStackLayout(spacing: 12))
-                    ScrollView {
-                        layout {
-                            MeetingTranscriptView(meeting: meeting, fontSize: fontSize)
+                    let horizontal = geometry.size.width >= WorkspaceLayout.meetingColumnsWidth
+                    let paneHeight = meeting.page == .live ? max(400, 160 + fontSize * 4) : 80 + max(160, fontSize * 4)
+                    ScrollViewReader { proxy in
+                        ScrollView {
+                            MeetingPaneLayout(horizontal: horizontal, suggestionsFirst: meeting.page == .live) {
+                                MeetingTranscriptView(meeting: meeting, fontSize: fontSize)
+                                    .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                    .id("meeting-transcript")
+                                MeetingSupportView(meeting: meeting, library: library, fontSize: fontSize, scrollProxy: proxy) {
+                                    insights
+                                }
                                 .frame(maxWidth: .infinity, maxHeight: .infinity)
-                            insights
-                                .frame(maxWidth: .infinity, maxHeight: .infinity)
+                                .accessibilitySortPriority(!horizontal && meeting.page == .live ? 1 : 0)
+                            }
+                            .frame(height: max(geometry.size.height, horizontal ? paneHeight : paneHeight * 2 + 12))
                         }
-                        .frame(height: max(geometry.size.height, horizontal ? paneHeight : paneHeight * 2 + 12))
-                    }
-                    .scrollPosition($workspaceScrollPosition)
-                    .onChange(of: meeting.evidenceRequest) {
-                        workspaceScrollPosition.scrollTo(edge: .top)
+                        .scrollPosition($workspaceScrollPosition)
+                        .onChange(of: meeting.evidenceRequest) {
+                            if meeting.page == .live {
+                                proxy.scrollTo("meeting-transcript", anchor: .top)
+                            } else {
+                                workspaceScrollPosition.scrollTo(edge: .top)
+                            }
+                        }
                     }
                 }
                 .padding(.horizontal, 16)
@@ -137,53 +145,50 @@ struct MeetingWorkspaceView: View {
     }
 
     private var insights: some View {
-        ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
-                    .font(.headline).accessibilityAddTraits(.isHeader)
-                if meeting.page == .live { MeetingAIControls(meeting: meeting) }
-                if meeting.page == .review {
-                    MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions)
-                    ForEach(meeting.research.answers.reversed()) { answer in
-                        AssistanceAnswerView(answer: answer, events: meeting.store.finals)
-                    }
-                }
-                MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
-                if !meeting.candidates.items.isEmpty {
-                    Text("決定・アクション候補").font(.headline)
-                    Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
-                        .font(.caption).foregroundStyle(DesignTokens.secondary)
-                    ForEach(meeting.candidates.items) { candidate in
-                        MeetingInsightCard(meeting: meeting, insight: candidate.insight, fontSize: fontSize)
-                    }
-                }
-                if meeting.insights.isEmpty && meeting.research.answers.isEmpty {
-                    Surface {
-                        VStack(alignment: .leading, spacing: 14) {
-                            Image(systemName: "sparkles").font(.title2).foregroundStyle(DesignTokens.accent)
-                            Text("会話の流れを確認できます")
-                                .font(.title3.weight(.semibold))
-                            Text("送信を許可するとAsk AIで質問できます。認識した発話は「会話の流れ」で確認できます。")
-                                .foregroundStyle(DesignTokens.secondary)
-                            if meeting.page == .review {
-                                Text("確定した発話 \(meeting.store.finals.count)件。必要な文章は選択してコピーできます。")
-                            }
-                        }
-                        .font(.callout)
-                    }
-                }
-                ForEach(meeting.insights.reversed().filter { card in !meeting.candidates.items.contains { $0.id == card.id } }) { insight in
-                    MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
-                }
-                Label(meeting.aiStatus, systemImage: "cloud")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
-                if meeting.page == .review {
-                    Text("「このMacに保存」で再起動後も振り返れます。Markdownの書き出しとは別の保存です。")
-                        .font(.callout).foregroundStyle(DesignTokens.secondary)
+        VStack(alignment: .leading, spacing: 16) {
+            Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
+                .font(.headline).accessibilityAddTraits(.isHeader)
+            if meeting.page == .review {
+                MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions)
+                ForEach(meeting.research.answers.reversed()) { answer in
+                    AssistanceAnswerView(answer: answer, events: meeting.store.finals)
                 }
             }
-            .padding(1)
+            MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
+            if !meeting.candidates.items.isEmpty {
+                Text("決定・アクション候補").font(.headline)
+                Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
+                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                ForEach(meeting.candidates.items) { candidate in
+                    MeetingInsightCard(meeting: meeting, insight: candidate.insight, fontSize: fontSize)
+                }
+            }
+            if meeting.insights.isEmpty && meeting.research.answers.isEmpty {
+                Surface {
+                    VStack(alignment: .leading, spacing: 14) {
+                        Image(systemName: "sparkles").font(.title2).foregroundStyle(DesignTokens.accent)
+                        Text("会話の流れを確認できます")
+                            .font(.title3.weight(.semibold))
+                        Text("送信を許可するとAsk AIで質問できます。認識した発話は「会話の流れ」で確認できます。")
+                            .foregroundStyle(DesignTokens.secondary)
+                        if meeting.page == .review {
+                            Text("確定した発話 \(meeting.store.finals.count)件。必要な文章は選択してコピーできます。")
+                        }
+                    }
+                    .font(.callout)
+                }
+            }
+            ForEach(meeting.insights.reversed().filter { card in !meeting.candidates.items.contains { $0.id == card.id } }) { insight in
+                MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
+            }
+            Label(meeting.aiStatus, systemImage: "cloud")
+                .font(.caption).foregroundStyle(DesignTokens.secondary)
+            if meeting.page == .review {
+                Text("「このMacに保存」で再起動後も振り返れます。Markdownの書き出しとは別の保存です。")
+                    .font(.callout).foregroundStyle(DesignTokens.secondary)
+            }
         }
+        .padding(1)
     }
 
     private func translationPicker(_ title: String, selection: Binding<String>) -> some View {

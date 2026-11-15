@@ -8,6 +8,7 @@ struct ContentView: View {
     private let meeting: MeetingWorkspace
     private let conferenceKnowledge: ConferenceKnowledgeWorkspace
     @State private var showConferenceKnowledge = false
+    @FocusState private var assistanceToggleFocused: Bool
     @State private var conferenceInput: AudioInputSelection = .microphone
     private let floatingPanel: MeetingFloatingPanel
     @Environment(\.openWindow) private var openWindow
@@ -58,30 +59,32 @@ struct ContentView: View {
 
     var body: some View {
         AppShellView(destination: navigation.destination, phase: activePhase, navigate: navigate) {
-            VStack(spacing: 0) {
-                topBar
-                Divider()
-                if let error = controller.lastError {
-                    SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
-                }
-                if !transcriptionOnly && (navigation.destination == .live || navigation.destination == .setup) {
-                    TranslationPreparationNotice(state: coordinator.preparationState, retry: retryTranslation)
-                }
-                ZStack {
-                    page
-                    MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
-                                         compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions, library: library)
-                        .opacity(navigation.destination == .meeting ? 1 : 0)
-                        .allowsHitTesting(navigation.destination == .meeting)
-                        .disabled(navigation.destination != .meeting)
-                        .accessibilityHidden(navigation.destination != .meeting)
-                }
-                if navigation.destination == .setup || navigation.destination == .live {
+            GeometryReader { shell in
+                VStack(spacing: 0) {
+                    topBar(contentWidth: shell.size.width)
                     Divider()
-                    ControlBar(phase: store.phase, isStopping: controller.isStopping,
-                               canStart: modelState == .ready && !conferenceKnowledge.knowledge.isBusy && !library.isBusy, hasTranscript: !store.segments.isEmpty,
-                               start: startSession, stop: { Task { await stopSession() } }, inputLabel: conferenceInput.label)
-                        .disabled(sessions.isBusy)
+                    if let error = controller.lastError {
+                        SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
+                    }
+                    if !transcriptionOnly && (navigation.destination == .live || navigation.destination == .setup) {
+                        TranslationPreparationNotice(state: coordinator.preparationState, retry: retryTranslation)
+                    }
+                    ZStack {
+                        page
+                        MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
+                                             compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions, library: library)
+                            .opacity(navigation.destination == .meeting ? 1 : 0)
+                            .allowsHitTesting(navigation.destination == .meeting)
+                            .disabled(navigation.destination != .meeting)
+                            .accessibilityHidden(navigation.destination != .meeting)
+                    }
+                    if navigation.destination == .setup || navigation.destination == .live {
+                        Divider()
+                        ControlBar(phase: store.phase, isStopping: controller.isStopping,
+                                   canStart: modelState == .ready && !conferenceKnowledge.knowledge.isBusy && !library.isBusy, hasTranscript: !store.segments.isEmpty,
+                                   start: startSession, stop: { Task { await stopSession() } }, inputLabel: conferenceInput.label)
+                            .disabled(sessions.isBusy)
+                    }
                 }
             }
         }
@@ -234,33 +237,35 @@ struct ContentView: View {
                 openTranscript: { navigate(.live) }
             )
         case .live:
-            VStack(spacing: 0) {
-                SessionSaveControls(library: sessions, snapshot: conferenceSnapshot) {
-                    guard let snapshot = conferenceSnapshot else { return }
-                    Task { await sessions.save(snapshot) }
-                }.padding([.horizontal, .top], 20)
-                GeometryReader { geometry in
-                    HStack(spacing: 0) {
-                        ConferenceLiveView(
-                            store: store, sourceLanguage: sourceLocaleID,
-                            targetLanguage: transcriptionOnly ? nil : targetLanguageID,
-                            profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
-                            editSettings: { navigate(.setup) },
-                            clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections,
-                            translationPreparation: coordinator.preparationState
-                        )
-                        if geometry.size.width >= 1_000 && !showConferenceKnowledge {
-                            Divider()
-                            ScrollView {
-                                VStack(alignment: .leading, spacing: 12) {
-                                    Button("資料・LLM設定を開く") { showConferenceKnowledge = true }
-                                    ConferenceAssistanceView(workspace: conferenceKnowledge)
-                                }.padding(16)
-                            }.frame(width: 340)
-                        }
+            GeometryReader { geometry in
+                let docked = WorkspaceLayout.docksAssistance(contentWidth: geometry.size.width)
+                let visible = conferenceKnowledge.assistanceVisible ?? docked
+                ZStack(alignment: .trailing) {
+                    ConferenceLiveView(
+                        store: store, sourceLanguage: sourceLocaleID,
+                        targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                        profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
+                        editSettings: { navigate(.setup) },
+                        clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections,
+                        translationPreparation: coordinator.preparationState
+                    )
+                    .padding(.trailing, docked && visible ? WorkspaceLayout.assistanceWidth + 1 : 0)
+                    if visible && !showConferenceKnowledge {
+                        ConferenceAssistanceView(workspace: conferenceKnowledge, livePanel: true,
+                            openDocuments: { showConferenceKnowledge = true }, close: {
+                                conferenceKnowledge.assistanceVisible = false
+                                assistanceToggleFocused = true
+                            })
+                            .padding(12)
+                            .frame(width: docked ? WorkspaceLayout.assistanceWidth : min(420, geometry.size.width - 32))
+                            .frame(maxHeight: .infinity)
+                            .background(DesignTokens.surface)
+                            .overlay(Rectangle().stroke(DesignTokens.border))
+                            .shadow(color: .black.opacity(docked ? 0 : 0.15), radius: docked ? 0 : 12)
+                            .padding(docked ? 0 : 16)
                     }
-                }.disabled(sessions.isBusy)
-            }
+                }
+            }.disabled(sessions.isBusy)
         case .library:
             KnowledgeLibraryView(library: library, fontSize: fontSize)
         case .sessions:
@@ -275,35 +280,72 @@ struct ContentView: View {
         }
     }
 
-    private var topBar: some View {
-        HStack(spacing: 10) {
-            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "履歴" : navigation.destination == .meeting ? "Meeting" : "Conference")
-                .font(.callout.weight(.medium))
-                .foregroundStyle(DesignTokens.secondary)
-            Spacer(minLength: 8)
-            if navigation.destination == .setup || navigation.destination == .live {
-                Button("資料・AI支援（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
-                    .disabled(store.phase == .preparing || store.phase == .stopping)
+    private func topBar(contentWidth: CGFloat) -> some View {
+        ViewThatFits(in: .horizontal) {
+            HStack(spacing: 10) {
+                toolbarTitle
+                Spacer(minLength: 8)
+                conferenceTools(contentWidth: contentWidth)
+                displayTools
+                saveAndExport
             }
-            if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions || navigation.destination == .library {
-                Button("A−") { fontSize = max(10, fontSize - 2) }
-                    .keyboardShortcut("-", modifiers: .command)
-                    .accessibilityLabel("字幕を小さく")
-                Button("A＋") { fontSize = min(48, fontSize + 2) }
-                    .keyboardShortcut("+", modifiers: .command)
-                    .accessibilityLabel("字幕を大きく")
-                Toggle(isOn: $alwaysOnTop) { Label("最前面", systemImage: "pin") }
-                    .toggleStyle(.button)
-                if navigation.destination == .live {
-                    ConferenceExportButton(store: store, sourceLanguage: sourceLocaleID,
-                        targetLanguage: transcriptionOnly ? nil : targetLanguageID, support: conferenceKnowledge.snapshot)
+            VStack(alignment: .leading, spacing: 10) {
+                HStack {
+                    toolbarTitle
+                    Spacer(minLength: 8)
+                    displayTools
+                }
+                HStack(spacing: 8) {
+                    conferenceTools(contentWidth: contentWidth)
+                    Spacer(minLength: 8)
+                    saveAndExport
                 }
             }
         }
         .controlSize(.regular)
-        .padding(.horizontal, 22)
-        .padding(.vertical, 14)
+        .padding(.horizontal, 16)
+        .padding(.vertical, 12)
         .background(DesignTokens.surface)
+    }
+
+    private var toolbarTitle: some View {
+        Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "履歴" : navigation.destination == .meeting ? "Meeting" : "Conference")
+            .font(.callout.weight(.medium)).foregroundStyle(DesignTokens.secondary).fixedSize()
+    }
+
+    @ViewBuilder private func conferenceTools(contentWidth: CGFloat) -> some View {
+        if navigation.destination == .setup || navigation.destination == .live {
+            Button("資料・設定（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
+                .disabled(store.phase == .preparing || store.phase == .stopping)
+        }
+        if navigation.destination == .live {
+            let visible = conferenceKnowledge.assistanceVisible ?? WorkspaceLayout.docksAssistance(contentWidth: contentWidth)
+            Button(visible ? "AI支援を閉じる" : "AI支援を開く") {
+                conferenceKnowledge.assistanceVisible = !visible
+            }.focused($assistanceToggleFocused)
+        }
+    }
+
+    @ViewBuilder private var displayTools: some View {
+        if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions || navigation.destination == .library {
+            Button("A−") { fontSize = max(10, fontSize - 2) }
+                .keyboardShortcut("-", modifiers: .command).accessibilityLabel("字幕を小さく")
+            Button("A＋") { fontSize = min(48, fontSize + 2) }
+                .keyboardShortcut("+", modifiers: .command).accessibilityLabel("字幕を大きく")
+            Toggle(isOn: $alwaysOnTop) { Label("最前面", systemImage: "pin") }.toggleStyle(.button)
+        }
+    }
+
+    @ViewBuilder private var saveAndExport: some View {
+        if navigation.destination == .live {
+            SessionSaveControls(library: sessions, snapshot: conferenceSnapshot, save: {
+                guard let snapshot = conferenceSnapshot else { return }
+                Task { await sessions.save(snapshot) }
+            }, compact: true, isActive: store.phase != .idle)
+            ConferenceExportButton(store: store, sourceLanguage: sourceLocaleID,
+                targetLanguage: transcriptionOnly ? nil : targetLanguageID, support: conferenceKnowledge.snapshot)
+                .disabled(sessions.isBusy)
+        }
     }
 
     private var conferenceSnapshot: SessionSnapshot? {
