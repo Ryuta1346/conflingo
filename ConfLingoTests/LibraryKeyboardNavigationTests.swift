@@ -45,7 +45,12 @@ struct LibraryKeyboardNavigationTests {
         let files = KnowledgeLibraryFiles(directory: root)
         let saved = try await files.save(try await libraryArchive(String(repeating: "本文の長い行を読み進めます。\n", count: 100)), title: "Keyboard document")
         let library = KnowledgeLibrary(files: files)
-        let host = NSHostingView(rootView: KnowledgeLibraryView(library: library, fontSize: fontSize))
+        let host = NSHostingView(rootView: VStack(spacing: 0) {
+            KnowledgeLibraryView(library: library, fontSize: fontSize)
+            // Text inputs stay in the key loop even when macOS skips buttons during Tab navigation.
+            TextField("Keyboard test destination", text: .constant(""))
+                .accessibilityLabel("Keyboard test destination")
+        })
         let window = makeWindow(host, width: width)
         defer { window.close() }
         await layout(host)
@@ -72,9 +77,17 @@ struct LibraryKeyboardNavigationTests {
         #expect(scroll.documentVisibleRect.minY < 4)
         let textView = try #require(scroll.documentView as? NSTextView)
         #expect(window.firstResponder === textView)
+        let destination = try #require(descendants(host, of: NSTextField.self).first { $0.isEditable },
+            "The fixture must provide a Tab destination independently of button navigation settings")
+        #expect(destination.canBecomeKeyView)
+        print("Keyboard paging fixture: fullKeyboardAccess=\(NSApp.isFullKeyboardAccessEnabled)")
         try key(.tab, code: 48, window: window)
         await layout(host)
         #expect(window.firstResponder !== textView, "Tab must leave the read-only body")
+        try focus(body)
+        try key(.tab, code: 48, window: window, modifiers: .shift)
+        await layout(host)
+        #expect(window.firstResponder !== textView, "Shift+Tab must leave the read-only body")
     }
 
     @Test(arguments: [640.0, 1180.0])
@@ -161,8 +174,8 @@ struct LibraryKeyboardNavigationTests {
         element.setValue(true, forKey: "accessibilityFocused")
     }
 
-    private func key(_ key: KeyEquivalent, code: UInt16, window: NSWindow) throws {
-        let event = try #require(NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: [], timestamp: 0,
+    private func key(_ key: KeyEquivalent, code: UInt16, window: NSWindow, modifiers: NSEvent.ModifierFlags = []) throws {
+        let event = try #require(NSEvent.keyEvent(with: .keyDown, location: .zero, modifierFlags: modifiers, timestamp: 0,
             windowNumber: window.windowNumber, context: nil, characters: String(key.character),
             charactersIgnoringModifiers: String(key.character), isARepeat: false, keyCode: code))
         window.sendEvent(event)

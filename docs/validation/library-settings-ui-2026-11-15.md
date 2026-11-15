@@ -13,6 +13,8 @@
 
 ## 結果
 
+2026-11-15 マージ前確認: PR #44の[初回リモートCI](https://github.com/Ryuta1346/conflingo/actions/runs/43664037692)は、`LibraryKeyboardNavigationTests.swift:77`のTab退出検証4ケースで失敗。ユーザー「修正進めて」によりCI修正・コミット・pushと、成功後のマージ・main移動・作業ブランチ削除を承認。テスト専用の巡回先追加とShift+Tab検証を実施し、関連14ケース成功。[CI修正記録](ui-keyboard-ci-fix-2026-11-15.md)に最新の検証状態を記録する。下記の成功実績は過去のローカル検証であり、初回リモートCI成功を意味しない。
+
 **U01〜U03をローカル修正し、キーボード・狭幅の再受入を確認。全705テスト（127スイート）、Lint275ファイル違反0、Release両CPU成功。VoiceOverはユーザー指示で停止・保留を継続し、再有効化していない。S12・L12・LLM設定UI・Gate U全体は未合格。修正 `20d959c` を[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)へ提出済み・未マージ。**
 
 初回の観測と[修正・再受入](#修正と再受入)を分けて記録する。[承認済み計画](../design/ui-keyboard-acceptance-plan.md)。

@@ -1,3 +1,5 @@
+> 2026-11-15 PR #44 CI追補: 初回CIのTab退出4ケース失敗に対し、テストfixtureへ入力可能な巡回先を追加しShift+Tabも検証。関連14ケース・全705テスト成功、Lint275ファイル違反0、Release両CPU成功。リモートCI成功後にマージする。[修正記録](docs/validation/ui-keyboard-ci-fix-2026-11-15.md)。
+
 > 2026-11-15 UI受入: Sessions・資料ライブラリ・LLM設定の狭幅/48pt・主要キー操作と、合成モデル一覧からの選択保存を確認。キー操作U01〜U03をローカル修正・再受入済み。追補レビューで長い資料パスのボタン切れも修正し、関連14ケース・全705テスト成功、Lint275ファイル違反0、Release両CPU成功。VoiceOver受入は保留（ユーザー指示・オフ確認済み）。Gate Uは未合格。[結果](docs/validation/library-settings-ui-2026-11-15.md)。
 
 > LLM分岐/SSE集約・CIは[PR #43](https://github.com/Ryuta1346/conflingo/pull/43)でmain `e21c355`へマージ済み。CI失敗修正後はローカル701定義成功・実API7定義除外、Lint272ファイル違反0、Release両CPU成功。GitHubの[修正後CI](https://github.com/Ryuta1346/conflingo/actions/runs/43610628462)もPRに成功記録あり。[修正記録](docs/validation/ci-failure-fix-2026-11-15.md)。独立レビュー・実機受入は継続。
