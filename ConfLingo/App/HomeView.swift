@@ -15,22 +15,12 @@ struct HomeView: View {
             VStack(alignment: .leading, spacing: 28) {
                 PageHeading(
                     title: "会話に、集中できる場所。",
-                    subtitle: "聞きながら、原文と翻訳を読む。",
+                    subtitle: "会話を文字で追い、必要に応じて翻訳やAI支援を。",
                     eyebrow: "ConfLingo"
                 )
-                Surface {
-                    VStack(alignment: .leading, spacing: 18) {
-                        Image(systemName: "captions.bubble")
-                            .font(.system(size: 28))
-                            .foregroundStyle(DesignTokens.accent)
-                        Text("Conference").font(DesignTokens.Typography.heading)
-                        Text("講演の字幕・翻訳を読みながら、資料と発話を使った提案やWeb調査を利用できます。")
-                            .foregroundStyle(DesignTokens.secondary)
-                            .lineSpacing(5)
-                        Button("字幕を準備する", systemImage: "arrow.right", action: prepare)
-                            .buttonStyle(AppButtonStyle(.primary))
-                            .controlSize(.large)
-                    }
+                LazyVGrid(columns: [GridItem(.adaptive(minimum: 340), spacing: 24)], alignment: .leading, spacing: 24) {
+                    conferenceCard
+                    meetingCard
                 }
                 if hasTranscript {
                     Surface {
@@ -45,15 +35,6 @@ struct HomeView: View {
                         }
                     }
                 }
-                Surface {
-                    VStack(alignment: .leading, spacing: 14) {
-                        Label("Meeting", systemImage: "person.2").font(DesignTokens.Typography.heading)
-                        Text("選んだ音声を文字起こし。資料・発話から提案やWeb調査を利用できます。")
-                            .foregroundStyle(DesignTokens.secondary)
-                        Button("会議を開く", systemImage: "arrow.right", action: openMeeting)
-                            .buttonStyle(AppButtonStyle()).controlSize(.large)
-                    }
-                }
                 if let sessions {
                     RecentSessionsView(library: sessions, showAll: showSessions, open: openSession)
                 }
@@ -63,6 +44,39 @@ struct HomeView: View {
             .padding(32)
             .frame(maxWidth: 900)
             .frame(maxWidth: .infinity)
+        }
+    }
+    private var conferenceCard: some View {
+        HomeModeCard(title: "Conference", symbol: "captions.bubble",
+                     description: "講演を文字で追い、必要に応じて翻訳。資料と発話から提案やWeb調査を利用できます。",
+                     actionTitle: "字幕を準備する", action: prepare)
+    }
+
+    private var meetingCard: some View {
+        HomeModeCard(title: "Meeting", symbol: "person.2",
+                     description: "選んだ音声を文字起こし。資料と発話から提案やWeb調査を利用できます。",
+                     actionTitle: "会議を開く", action: openMeeting)
+    }
+}
+
+private struct HomeModeCard: View {
+    let title: String
+    let symbol: String
+    let description: String
+    let actionTitle: String
+    let action: () -> Void
+
+    var body: some View {
+        Surface {
+            VStack(alignment: .leading, spacing: 16) {
+                Label(title, systemImage: symbol)
+                    .font(DesignTokens.Typography.heading).foregroundStyle(DesignTokens.text)
+                Text(description).font(DesignTokens.Typography.body)
+                    .foregroundStyle(DesignTokens.secondary).lineSpacing(5)
+                    .frame(minHeight: 80, alignment: .topLeading)
+                Button(actionTitle, systemImage: "arrow.right", action: action)
+                    .buttonStyle(AppButtonStyle()).controlSize(.large)
+            }
         }
     }
 }

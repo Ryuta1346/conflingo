@@ -42,14 +42,44 @@ struct MeetingTransport: View {
     }
 
     private var inputStatus: some View {
-        HStack(spacing: 12) {
-            ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
-                Label("\(origin.label) \(state(origin))", systemImage: origin == .microphone ? "mic" : "speaker.wave.2")
-                    .foregroundStyle(meeting.controller.inputState(origin) == .running ? DesignTokens.positive : DesignTokens.secondary)
+        VStack(alignment: .leading, spacing: 8) {
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { sessionStatus; elapsedTime }
+                VStack(alignment: .leading, spacing: 8) { sessionStatus; elapsedTime }
+            }
+            ViewThatFits(in: .horizontal) {
+                HStack(spacing: 8) { inputChips }
+                VStack(alignment: .leading, spacing: 4) { inputChips }
             }
         }
-        .font(DesignTokens.Typography.supporting)
-        .accessibilityElement(children: .combine)
+    }
+
+    private var sessionStatus: some View {
+        let status = meeting.transportStatus
+        return StatusLabel(text: status.text, symbol: status.symbol, color: status.color)
+    }
+
+    @ViewBuilder private var elapsedTime: some View {
+        if meeting.startedAt != nil && meeting.page != .review {
+            TimelineView(.periodic(from: .now, by: 1)) { _ in elapsedLabel }
+        } else {
+            elapsedLabel
+        }
+    }
+
+    private var elapsedLabel: some View {
+        Text("開始から \(MarkdownExporter.timestamp(meeting.elapsedTime))")
+            .font(DesignTokens.Typography.supporting).monospacedDigit()
+            .foregroundStyle(DesignTokens.secondary)
+            .help("一時停止中の時間を含みます。")
+    }
+
+    private var inputChips: some View {
+        ForEach(meeting.displayedInputOrigins, id: \.self) { origin in
+            StatusLabel(text: "\(origin.label) \(state(origin))",
+                        symbol: origin == .microphone ? "mic" : "speaker.wave.2",
+                        color: meeting.controller.inputState(origin) == .running ? DesignTokens.positive : DesignTokens.secondary)
+        }
     }
 
     @ViewBuilder private var controls: some View {

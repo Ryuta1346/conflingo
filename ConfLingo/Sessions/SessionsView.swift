@@ -56,31 +56,13 @@ struct SavedSessionRow: View {
     var delete: (() -> Void)?
 
     var body: some View {
-        Surface {
-            VStack(alignment: .leading, spacing: 10) {
-                HStack(alignment: .top, spacing: 12) {
-                    Image(systemName: entry.kind == "Meeting" ? "person.2" : "captions.bubble")
-                        .foregroundStyle(DesignTokens.accent).font(.title2)
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text(entry.title).font(DesignTokens.Typography.heading).textSelection(.enabled)
-                        Text("\(entry.kind) · 開始 \(entry.startedAt.map { MarkdownExporter.dateFormatter.string(from: $0) } ?? "未取得")")
-                            .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                        if let date = entry.updatedAt {
-                            Text("保存更新 \(date.formatted(date: .abbreviated, time: .shortened))")
-                                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                        }
-                    }
-                    Spacer(minLength: 0)
-                }
-                if let failure = entry.failure { InlineMessage(.failure, "保存内容を読み込めません。元の保存データは保持しています。", details: failure) }
-                HStack {
-                    Button("開く", systemImage: "arrow.right", action: open)
-                        .disabled(entry.failure != nil).accessibilityLabel("\(entry.title)を開く")
-                    Spacer()
-                    if let delete {
-                        Button("削除", systemImage: "trash", role: .destructive, action: delete).accessibilityLabel("\(entry.title)を削除")
-                    }
-                }
+        LibraryEntryRow(title: entry.title, symbol: entry.kind == "Meeting" ? "person.2" : "captions.bubble",
+                        subtitle: "\(entry.kind) · 開始 \(entry.startedAt.map { MarkdownExporter.dateFormatter.string(from: $0) } ?? "未取得")",
+                        detail: entry.updatedAt.map { "保存更新 \($0.formatted(date: .abbreviated, time: .shortened))" },
+                        failure: entry.failure, open: open) {
+            if let delete {
+                Button("削除", systemImage: "trash", role: .destructive, action: delete)
+                    .buttonStyle(AppButtonStyle(.destructive)).accessibilityLabel("\(entry.title)を削除")
             }
         }
     }

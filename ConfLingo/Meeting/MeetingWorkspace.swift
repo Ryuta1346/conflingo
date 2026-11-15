@@ -41,6 +41,9 @@ final class MeetingWorkspace {
     let summary: MeetingSummaryCoordinator
     let export = MeetingExportState()
     var startedAt: Date? { controller.startedAt }
+    private var endedElapsedTime: TimeInterval?
+    var elapsedTime: TimeInterval { endedElapsedTime ?? (startedAt == nil ? 0 : controller.elapsedOffset) }
+    private let statusAnnouncements: MeetingStatusAnnouncements
     private var pendingSummaryID: UUID?
     private var preparingSummaryID: UUID?
     var candidates: MeetingCandidateStore { ai.candidates }
@@ -78,7 +81,9 @@ final class MeetingWorkspace {
     init(controller: DualTranscriptionController, insightClient: (any InsightClient)? = nil,
          credentials: APIKeyCredentials? = nil, defaults: UserDefaults = .standard, llmSettings: LLMSettings? = nil,
          translationClientFactory: @escaping (String, String) -> any MeetingTranslating = { _, _ in AppleMeetingTranslator() }, prepareTranslationModels: Bool = true,
-         researchClient: (any LLMWebResearching)? = nil) {
+         researchClient: (any LLMWebResearching)? = nil,
+         announceStatus: @escaping @MainActor (String) -> Void = MeetingStatusAnnouncements.post) {
+        statusAnnouncements = MeetingStatusAnnouncements(post: announceStatus)
         self.defaults = defaults
         microphoneTranslationLanguage = defaults.string(forKey: "meetingMicrophoneTranslation") ?? "en"
         systemTranslationLanguage = defaults.string(forKey: "meetingSystemTranslation") ?? "ja"
@@ -113,6 +118,7 @@ final class MeetingWorkspace {
         captureSubscription = controller.captureActivityChanges.observe { [weak support] active in
             if active { support?.resume() } else { support?.suspend() }
         }
+        statusAnnouncements.observe(self)
     }
 
     func summaryPlan() throws -> MeetingSummaryPlan {
@@ -330,7 +336,9 @@ final class MeetingWorkspace {
         guard phase == .idle else { return }
         switch completion {
         case .pause: page = .live
-        case .end: page = .review
+        case .end:
+            endedElapsedTime = elapsedTime
+            page = .review
         case .cancelPreparation: page = .setup
         }
         pendingCompletion = nil
@@ -342,6 +350,7 @@ final class MeetingWorkspace {
         export.reset()
         support.reset()
         controller.clear()
+        endedElapsedTime = nil
         translations.reset(sessionID: store.sessionID)
         mode = .transcription
         name = ""
