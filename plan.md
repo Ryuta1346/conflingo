@@ -68,7 +68,7 @@
 |---|---|---|---|
 | DR1 | 小修正（D03・D05・D14） | 「会議を終了」に確認ダイアログ、候補の状態ラベルを状態別の色・記号へ、画面名を「履歴」に統一、`Meeting / General`を`Meeting / ライブ`へ。回帰テスト13定義を追加し[PR #46](https://github.com/Ryuta1346/conflingo/pull/46)マージ済み、修正後14定義・CI全719テスト成功。実機・合成UIでの確認は未実施。[結果](docs/validation/dr1-small-fixes-2026-11-15.md) | REVIEW |
 | DR2 | 領域配分（D01・D09・D02） | 提案優先・上部保存・字幕2列優先を承認後にローカル実装。731テスト・Lint281ファイル違反0・Release両CPU成功。5幅×2モード×2配色の画像、下書き保持・保存・フォーカス操作を確認。[結果](docs/validation/dr2-layout-2026-11-15.md)・[計画](docs/design/dr2-layout-plan.md) | REVIEW |
-| DR3 | デザインシステムの部品化（D04・D06・D07、D15・D16） | 文字様式（補助12pt以上）・ボタン4様式・行内メッセージを共通化し、送信範囲・破壊操作・失敗表示・シートを統一。743テスト・Lint287ファイル違反0・Release両CPU成功。代表描画28枚・キー操作を確認、独立レビュー／網羅受入は継続。[結果](docs/validation/dr3-design-system-2026-11-15.md)・[計画](docs/design/dr3-design-system-plan.md) | REVIEW |
+| DR3 | デザインシステムの部品化（D04・D06・D07、D15・D16） | 文字様式（補助12pt以上）・ボタン4様式・行内メッセージを共通化し、送信範囲・破壊操作・失敗表示・シートを統一。743テスト・Lint287ファイル違反0・Release両CPU成功。代表描画28枚・キー操作を確認。[PR #48](https://github.com/Ryuta1346/conflingo/pull/48)（Draft）、独立レビュー／網羅受入は継続。[結果](docs/validation/dr3-design-system-2026-11-15.md)・[計画](docs/design/dr3-design-system-plan.md) | REVIEW |
 | DR4 | 中優先の残り（D08・D10〜D13） | Conference資料シートの分割、送信範囲パネルの共通化、メニュー／⌘,／Return、Meeting準備フォーム、文字サイズ設定の適用範囲 | TODO |
 | DR5 | 低優先（D17〜D21） | 会話の流れ・Home・状態表示・一覧画面の仕上げ。ダーク配色の強調ボタンのコントラスト（D21）は実機で先に確認 | TODO |
 
