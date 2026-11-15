@@ -209,6 +209,8 @@ struct WorkspaceRegionLayoutTests {
     }
 
     @Test func meetingSettingsCloseRestoresFocusWithoutSending() async throws {
+        try #require(NSApp.isFullKeyboardAccessEnabled,
+            "Button focus restoration requires System Settings > Keyboard > Keyboard navigation")
         let release = TestAccessibility.shared.enable()
         defer { release() }
         let meeting = MeetingPreview.make(activity: AudioInputUse())
@@ -230,7 +232,10 @@ struct WorkspaceRegionLayoutTests {
         close.perform(NSSelectorFromString("accessibilityPerformPress"))
         #expect(try await waitForTestCondition { window.attachedSheet == nil })
         await layout(host)
-        #expect(value("isAccessibilityFocused", try #require(button(in: host, title: "AI設定 · オフ"))) as? Bool == true)
+        #expect(try await waitForTestCondition {
+            guard let target = button(in: host, title: "AI設定 · オフ") else { return false }
+            return value("isAccessibilityFocused", target) as? Bool == true
+        })
         #expect(!meeting.ai.permitted)
         #expect(meeting.insights.isEmpty)
         #expect(meeting.phase == .listening)
@@ -271,6 +276,8 @@ struct WorkspaceRegionLayoutTests {
     }
 
     @Test func conferenceOverlayClosesWithEscapeAndRestoresToolbarFocus() async throws {
+        try #require(NSApp.isFullKeyboardAccessEnabled,
+            "Button focus restoration requires System Settings > Keyboard > Keyboard navigation")
         let release = TestAccessibility.shared.enable()
         defer { release() }
         let composition = AppComposition(arguments: ["--ui-preview"])
@@ -288,7 +295,10 @@ struct WorkspaceRegionLayoutTests {
         window.sendEvent(escape)
         await layout(host)
         #expect(button(in: host, title: "AI支援を閉じる") == nil)
-        #expect(value("isAccessibilityFocused", try #require(button(in: host, title: "AI支援を開く"))) as? Bool == true)
+        #expect(try await waitForTestCondition {
+            guard let target = button(in: host, title: "AI支援を開く") else { return false }
+            return value("isAccessibilityFocused", target) as? Bool == true
+        })
     }
 
     @Test(arguments: ["empty", "generating", "long"])
