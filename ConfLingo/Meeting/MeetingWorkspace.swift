@@ -277,6 +277,8 @@ final class MeetingWorkspace {
         showsEndConfirmation = true
     }
 
+    func cancelEnd() { showsEndConfirmation = false }
+
     @discardableResult
     func confirmEnd() -> Task<Void, Never>? {
         guard showsEndConfirmation else { return nil }

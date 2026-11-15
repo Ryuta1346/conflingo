@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MeetingTransport: View {
     @Bindable var meeting: MeetingWorkspace
+    @State private var asksToEnd = false
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -16,6 +17,18 @@ struct MeetingTransport: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DesignTokens.surface)
+        .alert("会議を終了しますか？", isPresented: endConfirmation) {
+            Button("キャンセル", role: .cancel, action: meeting.cancelEnd)
+            Button("会議を終了", role: .destructive) { meeting.confirmEnd() }
+        } message: {
+            Text("終了すると、この会議の文字起こしは再開できません。ここまでの発話とAIの回答は振り返りに残り、保存とMarkdownの書き出しができます。")
+        }
+    }
+
+    /// 確認は終了ボタンを押した窓（メイン画面または小窓）に出す。メイン画面を隠した小窓からも終了できるようにするため。
+    /// 表示の解除では確認状態を変えない。確定・取消の処理が、ダイアログを閉じる順序に左右されないようにする。
+    private var endConfirmation: Binding<Bool> {
+        Binding(get: { asksToEnd && meeting.showsEndConfirmation }, set: { if !$0 { asksToEnd = false } })
     }
 
     private var inputStatus: some View {
@@ -69,8 +82,11 @@ struct MeetingTransport: View {
     private static let endSpacing: CGFloat = 24
 
     private var endButton: some View {
-        Button("会議を終了", systemImage: "stop", action: meeting.requestEnd)
-            .tint(DesignTokens.danger)
+        Button("会議を終了", systemImage: "stop") {
+            meeting.requestEnd()
+            asksToEnd = meeting.showsEndConfirmation
+        }
+        .tint(DesignTokens.danger)
     }
 
     private func state(_ origin: AudioOrigin) -> String {

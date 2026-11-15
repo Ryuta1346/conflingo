@@ -23,7 +23,8 @@ struct MeetingEndConfirmationTests {
         #expect(meeting.page == .live, "Asking must not end the meeting")
         #expect(meeting.phase == phase)
 
-        meeting.showsEndConfirmation = false
+        meeting.cancelEnd()
+        #expect(!meeting.showsEndConfirmation)
         #expect(meeting.confirmEnd() == nil, "A cancelled confirmation must not end the meeting later")
         #expect(meeting.page == .live)
         #expect(meeting.phase == phase)
@@ -165,7 +166,38 @@ struct DesignReviewSmallFixViewTests {
         #expect(meeting.page == .live, "Pressing the button alone must not end the meeting")
         #expect(meeting.phase == (paused ? .idle : .listening))
 
-        meeting.showsEndConfirmation = false
+        meeting.cancelEnd()
+        await meeting.end()
+    }
+
+    /// 小窓（メイン画面は隠れていることがある）から押しても、押した窓に確認が出る。もう一方の窓には出ない。
+    @Test func endConfirmationAppearsInTheWindowThatAsked() async throws {
+        let release = TestAccessibility.shared.enable()
+        defer { release() }
+        let fixture = DualFixture()
+        let meeting = MeetingWorkspace(controller: fixture.controller())
+        meeting.consentConfirmed = true
+        await meeting.start()
+        let main = NSHostingView(rootView: MeetingTransport(meeting: meeting))
+        let mainWindow = makeWindow(main, width: 900, height: 160)
+        defer { mainWindow.close() }
+        let floating = NSHostingView(rootView: MeetingTransport(meeting: meeting))
+        let floatingWindow = makeWindow(floating, width: 420, height: 160)
+        defer { floatingWindow.close() }
+        await layout(main)
+        await layout(floating)
+
+        let end = try #require(button("会議を終了", in: floating))
+        _ = end.perform(NSSelectorFromString("accessibilityPerformPress"))
+        await layout(floating)
+        #expect(meeting.showsEndConfirmation)
+        #expect(floatingWindow.attachedSheet != nil, "The window whose button was pressed must ask")
+        #expect(mainWindow.attachedSheet == nil, "Other windows must not ask")
+
+        meeting.cancelEnd()
+        await layout(floating)
+        #expect(floatingWindow.attachedSheet == nil)
+        #expect(meeting.page == .live)
         await meeting.end()
     }
 

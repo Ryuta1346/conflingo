@@ -63,12 +63,6 @@ struct MeetingWorkspaceView: View {
         } message: {
             Text("現在の会議の未保存の変更と資料全体を破棄します。履歴に保存した記録、資料ライブラリと書き出したMarkdownは残ります。")
         }
-        .alert("会議を終了しますか？", isPresented: $meeting.showsEndConfirmation) {
-            Button("キャンセル", role: .cancel) {}
-            Button("会議を終了", role: .destructive) { meeting.confirmEnd() }
-        } message: {
-            Text("終了すると、この会議の文字起こしは再開できません。ここまでの発話とAIの回答は振り返りに残り、保存とMarkdownの書き出しができます。")
-        }
     }
 
     private var preparation: some View {
