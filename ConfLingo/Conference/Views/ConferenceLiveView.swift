@@ -13,7 +13,7 @@ struct ConferenceLiveView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let stacked = targetLanguage != nil && geometry.size.width < 820
+            let stacked = targetLanguage != nil && geometry.size.width < WorkspaceLayout.subtitleColumnsWidth
             let minimumHeight = minimumPaneHeight * (stacked ? 2 : 1) + 160
             ScrollView {
                 VStack(alignment: .leading, spacing: 12) {
@@ -34,7 +34,7 @@ struct ConferenceLiveView: View {
                         if targetLanguage == nil {
                             sourcePane
                         } else {
-                            let horizontal = geometry.size.width >= 820
+                            let horizontal = geometry.size.width >= WorkspaceLayout.subtitleColumnsWidth
                             let layout = horizontal
                                 ? AnyLayout(HStackLayout(spacing: 0))
                                 : AnyLayout(VStackLayout(spacing: 0))
@@ -56,8 +56,8 @@ struct ConferenceLiveView: View {
                             .disabled(store.phase != .idle || store.segments.isEmpty)
                     }
                 }
-                .frame(height: max(minimumHeight, geometry.size.height - (geometry.size.width < 820 ? 32 : 48)))
-                .padding(geometry.size.width < 820 ? 16 : 24)
+                .frame(height: max(minimumHeight, geometry.size.height - (geometry.size.width < WorkspaceLayout.subtitleColumnsWidth ? 32 : 48)))
+                .padding(geometry.size.width < WorkspaceLayout.subtitleColumnsWidth ? 16 : 24)
             }
         }
     }

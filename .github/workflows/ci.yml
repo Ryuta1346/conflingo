@@ -30,6 +30,8 @@ jobs:
           bash scripts/install-swiftlint.sh "$RUNNER_TEMP/conflingo-tools"
       - name: Lint
         run: bash scripts/ci.sh lint
+      - name: Enable keyboard navigation for focus restoration tests
+        run: defaults write -g AppleKeyboardUIMode -int 2
       - name: Test without live APIs
         run: bash scripts/ci.sh test
       - name: Build universal Release

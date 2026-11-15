@@ -22,6 +22,8 @@ final class ConferenceKnowledgeWorkspace {
     private(set) var answers: [MeetingInsight] = []
     private(set) var isGenerating = false
     private(set) var preview = ""
+    var assistanceDraft = ""
+    var assistanceVisible: Bool?
     var message = ""
     private var permissionRevision = 0
     private var requestID: UUID?
@@ -218,6 +220,8 @@ final class ConferenceKnowledgeWorkspace {
     func stop() { cancel(); support.suspend(); knowledge.cancelPendingImports() }
 
     func reset() {
+        assistanceDraft = ""
+        assistanceVisible = nil
         stop()
         revokePermissions()
         answers = []

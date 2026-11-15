@@ -46,10 +46,13 @@ struct WebResearchControls: View {
     @Bindable var research: WebResearchCoordinator
     let language: AnswerLanguage
     var enabled = true
+    var showsAnswers = true
+    var scrollProxy: ScrollViewProxy?
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             Button("Webで調べる", systemImage: "globe") { research.open("") }.disabled(!enabled)
-            ForEach(research.answers.reversed()) { answer in
+                .modifier(RevealOnFocus(proxy: scrollProxy))
+            ForEach(showsAnswers ? Array(research.answers.reversed()) : []) { answer in
                 AssistanceAnswerView(answer: answer, events: research.store.finals,
                     research: enabled ? { research.open($0, evidenceIDs: answer.evidenceIDs) } : nil)
             }

@@ -8,7 +8,7 @@ struct AppShellView<Content: View>: View {
 
     var body: some View {
         GeometryReader { geometry in
-            let wide = geometry.size.width >= 900
+            let wide = geometry.size.width >= WorkspaceLayout.sidebarThreshold
             let layout = wide
                 ? AnyLayout(HStackLayout(spacing: 0))
                 : AnyLayout(VStackLayout(spacing: 0))
@@ -16,7 +16,7 @@ struct AppShellView<Content: View>: View {
                 Group {
                     if wide { sidebar } else { compactNavigation }
                 }
-                .frame(width: wide ? 184 : nil)
+                .frame(width: wide ? WorkspaceLayout.sidebarWidth : nil)
                 Rectangle().fill(DesignTokens.border)
                     .frame(width: wide ? 1 : nil, height: wide ? nil : 1)
                 content.frame(maxWidth: .infinity, maxHeight: .infinity)
