@@ -72,7 +72,7 @@
 | DR2 | 領域配分（D01・D09・D02） | 提案優先・上部保存・字幕2列優先を承認後にローカル実装。731テスト・Lint281ファイル違反0・Release両CPU成功。5幅×2モード×2配色の画像、下書き保持・保存・フォーカス操作を確認。[結果](docs/validation/dr2-layout-2026-11-15.md)・[計画](docs/design/dr2-layout-plan.md) | REVIEW |
 | DR3 | デザインシステムの部品化（D04・D06・D07、D15・D16） | 文字様式（補助12pt以上）・ボタン4様式・行内メッセージを共通化し、送信範囲・破壊操作・失敗表示・シートを統一。独立レビュー2件を修正し748テスト・Lint290ファイル違反0（[修正結果](docs/validation/dr3-review-fixes-2026-11-15.md)）。両CPU Release・代表描画28枚は初期実装時。[PR #48](https://github.com/Ryuta1346/conflingo/pull/48)（main `2ad9de3`へマージ済み）、修正後の追加レビュー／網羅受入は継続。[結果](docs/validation/dr3-design-system-2026-11-15.md)・[計画](docs/design/dr3-design-system-plan.md) | REVIEW |
 | DR4 | 中優先の残り（D08・D10〜D13） | Conference資料シートの分割、送信範囲パネルの共通化、メニュー／⌘,／Return、Meeting準備フォーム、文字サイズ設定の適用範囲。[具体計画](docs/design/dr4-workflow-plan.md)・[確認シート](docs/design/dr4-approval.md)を承認後にローカル実装。独立レビュー3件を修正し、全770テスト・Lint305ファイル違反0・Release両CPU成功。修正後の追加レビューと残る受入待ち。[修正結果](docs/validation/dr4-review-fixes-2026-11-15.md)。[結果](docs/validation/dr4-workflow-2026-11-15.md) | REVIEW |
-| DR5 | 低優先（D17〜D21） | 発話メニュー、Homeの入口統一、時間・選択入力の状態表示、履歴／資料一覧の行操作と技術情報の折り畳みを実装。D21は現行配色を再確認。全783テスト・Lint310ファイル違反0・Release両CPU成功、代表描画26枚とネイティブ操作を確認。独立レビュー・残る受入待ち。[結果](docs/validation/dr5-polish-2026-11-15.md)・[計画](docs/design/dr5-polish-plan.md) | REVIEW |
+| DR5 | 低優先（D17〜D21） | 発話メニュー、Homeの入口統一、時間・選択入力の状態表示、履歴／資料一覧の行操作と技術情報の折り畳みを実装。D21は現行配色を再確認。全783テスト・Lint310ファイル違反0・Release両CPU成功、代表描画26枚とネイティブ操作を確認。[Draft PR #50](https://github.com/Ryuta1346/conflingo/pull/50)を作成済み。独立レビュー・残る受入待ち。[結果](docs/validation/dr5-polish-2026-11-15.md)・[計画](docs/design/dr5-polish-plan.md) | REVIEW |
 
 ## レビュー対応（2026-11-13承認）
 
