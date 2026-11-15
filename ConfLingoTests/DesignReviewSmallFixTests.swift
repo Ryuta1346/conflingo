@@ -130,195 +130,197 @@ struct InsightReviewBadgeTests {
     }
 }
 
-@MainActor
-@Suite(.serialized, .timeLimit(.minutes(1)))
-struct DesignReviewSmallFixViewTests {
-    @Test(arguments: [false, true])
-    func endButtonAsksBeforeEndingAndSitsApart(paused: Bool) async throws {
-        let release = TestAccessibility.shared.enable()
-        defer { release() }
-        let fixture = DualFixture()
-        let meeting = MeetingWorkspace(controller: fixture.controller())
-        meeting.consentConfirmed = true
-        await meeting.start()
-        if paused { await meeting.pause() }
-        let host = NSHostingView(rootView: MeetingTransport(meeting: meeting))
-        let window = makeWindow(host, width: 900, height: 160)
-        defer { window.close() }
-        await layout(host)
+extension AppKitIntegrationTests {
+    @MainActor
+    @Suite(.serialized, .timeLimit(.minutes(1)))
+    struct DesignReviewSmallFixViewTests {
+        @Test(arguments: [false, true])
+        func endButtonAsksBeforeEndingAndSitsApart(paused: Bool) async throws {
+            let release = TestAccessibility.shared.enable()
+            defer { release() }
+            let fixture = DualFixture()
+            let meeting = MeetingWorkspace(controller: fixture.controller())
+            meeting.consentConfirmed = true
+            await meeting.start()
+            if paused { await meeting.pause() }
+            let host = NSHostingView(rootView: MeetingTransport(meeting: meeting))
+            let window = makeWindow(host, width: 900, height: 160)
+            defer { window.close() }
+            await layout(host)
 
-        let end = try #require(button("会議を終了", in: host))
-        let neighbour = try #require(button(paused ? "再開" : "一時停止", in: host))
-        let endFrame = try #require(frame(end))
-        let neighbourFrame = try #require(frame(neighbour))
-        let gap = endFrame.minX - neighbourFrame.maxX
-        #expect(gap >= 12, "Ending must sit apart from the neighbouring control, gap \(gap)")
-        if paused {
-            let back = try #require(button("準備へ戻る", in: host))
-            let backFrame = try #require(frame(back))
-            let ordinary = neighbourFrame.minX - backFrame.maxX
-            #expect(gap > ordinary + 8, "Ending needs more room than ordinary controls: \(gap) vs \(ordinary)")
+            let end = try #require(button("会議を終了", in: host))
+            let neighbour = try #require(button(paused ? "再開" : "一時停止", in: host))
+            let endFrame = try #require(frame(end))
+            let neighbourFrame = try #require(frame(neighbour))
+            let gap = endFrame.minX - neighbourFrame.maxX
+            #expect(gap >= 12, "Ending must sit apart from the neighbouring control, gap \(gap)")
+            if paused {
+                let back = try #require(button("準備へ戻る", in: host))
+                let backFrame = try #require(frame(back))
+                let ordinary = neighbourFrame.minX - backFrame.maxX
+                #expect(gap > ordinary + 8, "Ending needs more room than ordinary controls: \(gap) vs \(ordinary)")
+            }
+
+            _ = end.perform(NSSelectorFromString("accessibilityPerformPress"))
+            await layout(host)
+            #expect(meeting.showsEndConfirmation)
+            #expect(meeting.page == .live, "Pressing the button alone must not end the meeting")
+            #expect(meeting.phase == (paused ? .idle : .listening))
+
+            meeting.cancelEnd()
+            await meeting.end()
         }
 
-        _ = end.perform(NSSelectorFromString("accessibilityPerformPress"))
-        await layout(host)
-        #expect(meeting.showsEndConfirmation)
-        #expect(meeting.page == .live, "Pressing the button alone must not end the meeting")
-        #expect(meeting.phase == (paused ? .idle : .listening))
+        /// 小窓（メイン画面は隠れていることがある）から押しても、押した窓に確認が出る。もう一方の窓には出ない。
+        @Test func endConfirmationAppearsInTheWindowThatAsked() async throws {
+            let release = TestAccessibility.shared.enable()
+            defer { release() }
+            let fixture = DualFixture()
+            let meeting = MeetingWorkspace(controller: fixture.controller())
+            meeting.consentConfirmed = true
+            await meeting.start()
+            let main = NSHostingView(rootView: MeetingTransport(meeting: meeting))
+            let mainWindow = makeWindow(main, width: 900, height: 160)
+            defer { mainWindow.close() }
+            let floating = NSHostingView(rootView: MeetingTransport(meeting: meeting))
+            let floatingWindow = makeWindow(floating, width: 420, height: 160)
+            defer { floatingWindow.close() }
+            await layout(main)
+            await layout(floating)
 
-        meeting.cancelEnd()
-        await meeting.end()
-    }
+            let end = try #require(button("会議を終了", in: floating))
+            _ = end.perform(NSSelectorFromString("accessibilityPerformPress"))
+            await layout(floating)
+            #expect(meeting.showsEndConfirmation)
+            #expect(floatingWindow.attachedSheet != nil, "The window whose button was pressed must ask")
+            #expect(mainWindow.attachedSheet == nil, "Other windows must not ask")
 
-    /// 小窓（メイン画面は隠れていることがある）から押しても、押した窓に確認が出る。もう一方の窓には出ない。
-    @Test func endConfirmationAppearsInTheWindowThatAsked() async throws {
-        let release = TestAccessibility.shared.enable()
-        defer { release() }
-        let fixture = DualFixture()
-        let meeting = MeetingWorkspace(controller: fixture.controller())
-        meeting.consentConfirmed = true
-        await meeting.start()
-        let main = NSHostingView(rootView: MeetingTransport(meeting: meeting))
-        let mainWindow = makeWindow(main, width: 900, height: 160)
-        defer { mainWindow.close() }
-        let floating = NSHostingView(rootView: MeetingTransport(meeting: meeting))
-        let floatingWindow = makeWindow(floating, width: 420, height: 160)
-        defer { floatingWindow.close() }
-        await layout(main)
-        await layout(floating)
-
-        let end = try #require(button("会議を終了", in: floating))
-        _ = end.perform(NSSelectorFromString("accessibilityPerformPress"))
-        await layout(floating)
-        #expect(meeting.showsEndConfirmation)
-        #expect(floatingWindow.attachedSheet != nil, "The window whose button was pressed must ask")
-        #expect(mainWindow.attachedSheet == nil, "Other windows must not ask")
-
-        meeting.cancelEnd()
-        await layout(floating)
-        #expect(floatingWindow.attachedSheet == nil)
-        #expect(meeting.page == .live)
-        await meeting.end()
-    }
-
-    @Test(arguments: [1180.0, 640.0])
-    func navigationCallsSavedSessionsHistory(width: Double) async {
-        let release = TestAccessibility.shared.enable()
-        defer { release() }
-        let host = NSHostingView(rootView: AppShellView(destination: .sessions, phase: .idle, navigate: { _ in }) {
-            Color.clear
-        })
-        let window = makeWindow(host, width: width, height: 520)
-        defer { window.close() }
-        await layout(host)
-        let shown = strings(host)
-        #expect(shown.contains("履歴"))
-        #expect(!shown.contains { $0.contains("保存") }, "The destination must not read as a save action or use the old name")
-        #expect(!shown.contains("Sessions"))
-    }
-
-    @Test func savedSessionListAndDetailUseTheSameName() async throws {
-        let release = TestAccessibility.shared.enable()
-        defer { release() }
-        let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
-        defer { try? FileManager.default.removeItem(at: root) }
-        let list = NSHostingView(rootView: SessionsView(library: SessionsLibrary(files: SessionFiles(directory: root)), fontSize: 16))
-        let listWindow = makeWindow(list, width: 900, height: 520)
-        defer { listWindow.close() }
-        await layout(list)
-        let listed = strings(list)
-        #expect(listed.contains("履歴"))
-        #expect(!listed.contains("保存したセッション"))
-        #expect(!listed.contains("ライブラリ"), "The saved sessions list must not be confused with the knowledge library")
-
-        let saved = SavedSession(version: 1, createdAt: Date(), updatedAt: Date(), snapshot: sessionFixture(title: "Design"))
-        let detail = NSHostingView(rootView: SavedSessionView(saved: saved, fontSize: 16, back: {}, delete: {}))
-        let detailWindow = makeWindow(detail, width: 900, height: 520)
-        defer { detailWindow.close() }
-        await layout(detail)
-        let detailed = strings(detail)
-        #expect(detailed.contains("履歴"))
-        #expect(!detailed.contains("Sessions"))
-    }
-
-    @Test func topBarCallsSavedSessionsHistory() async throws {
-        let release = TestAccessibility.shared.enable()
-        defer { release() }
-        let suite = "DesignReviewSmallFix-\(UUID())"
-        let defaults = try #require(UserDefaults(suiteName: suite))
-        defer { defaults.removePersistentDomain(forName: suite) }
-        let composition = AppComposition(arguments: ["--ui-preview"], defaults: defaults)
-        composition.navigation.request(.sessions, phase: .idle)
-        try #require(composition.navigation.destination == .sessions)
-        let host = NSHostingView(rootView: ContentView(composition: composition))
-        let window = makeWindow(host, width: 1180, height: 780)
-        defer { window.close() }
-        await layout(host)
-        let shown = strings(host)
-        #expect(shown.contains("履歴"))
-        #expect(!shown.contains("Sessions"))
-        #expect(!shown.contains("保存したセッション"))
-    }
-
-    @Test func liveMeetingHeaderDoesNotNameAnUnavailablePreset() async throws {
-        let release = TestAccessibility.shared.enable()
-        defer { release() }
-        let suite = "DesignReviewSmallFix-\(UUID())"
-        let defaults = try #require(UserDefaults(suiteName: suite))
-        defer { defaults.removePersistentDomain(forName: suite) }
-        let meeting = MeetingPreview.make(activity: AudioInputUse(), defaults: defaults)
-        meeting.consentConfirmed = true
-        await meeting.start()
-        let host = NSHostingView(rootView: MeetingWorkspaceView(meeting: meeting, fontSize: .constant(16), compact: {}))
-        let window = makeWindow(host, width: 1180, height: 780)
-        defer { window.close() }
-        await layout(host)
-        let shown = strings(host).joined(separator: "\n")
-        #expect(shown.contains("Meeting / ライブ"))
-        #expect(!shown.contains("General"))
-        await meeting.end()
-    }
-
-    private func makeWindow(_ host: NSView, width: Double, height: Double) -> NSWindow {
-        let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: height),
-            styleMask: [.titled, .resizable], backing: .buffered, defer: false)
-        window.isReleasedWhenClosed = false
-        window.contentView = host
-        window.orderFront(nil)
-        return window
-    }
-
-    private func layout(_ host: NSView) async {
-        host.layoutSubtreeIfNeeded()
-        try? await Task.sleep(for: .milliseconds(200))
-        host.layoutSubtreeIfNeeded()
-    }
-
-    private func value(_ name: String, of element: NSObject) -> Any? {
-        guard element.responds(to: NSSelectorFromString(name)) else { return nil }
-        return element.value(forKey: name)
-    }
-
-    private func elements(_ root: NSObject) -> [NSObject] {
-        [root] + (value("accessibilityChildren", of: root) as? [NSObject] ?? []).flatMap { elements($0) }
-    }
-
-    /// 画面上の各要素が読み上げ・表示に使う文字列。
-    private func strings(_ root: NSObject) -> [String] {
-        elements(root).flatMap { element in
-            ["accessibilityLabel", "accessibilityValue", "accessibilityTitle"].compactMap { value($0, of: element) as? String }
+            meeting.cancelEnd()
+            await layout(floating)
+            #expect(floatingWindow.attachedSheet == nil)
+            #expect(meeting.page == .live)
+            await meeting.end()
         }
-    }
 
-    private func button(_ title: String, in root: NSObject) -> NSObject? {
-        let press = NSSelectorFromString("accessibilityPerformPress")
-        return elements(root).first { element in
-            element.responds(to: press) && (value("accessibilityLabel", of: element) as? String == title
-                || value("accessibilityTitle", of: element) as? String == title)
+        @Test(arguments: [1180.0, 640.0])
+        func navigationCallsSavedSessionsHistory(width: Double) async {
+            let release = TestAccessibility.shared.enable()
+            defer { release() }
+            let host = NSHostingView(rootView: AppShellView(destination: .sessions, phase: .idle, navigate: { _ in }) {
+                Color.clear
+            })
+            let window = makeWindow(host, width: width, height: 520)
+            defer { window.close() }
+            await layout(host)
+            let shown = strings(host)
+            #expect(shown.contains("履歴"))
+            #expect(!shown.contains { $0.contains("保存") }, "The destination must not read as a save action or use the old name")
+            #expect(!shown.contains("Sessions"))
         }
-    }
 
-    private func frame(_ element: NSObject) -> NSRect? {
-        (value("accessibilityFrame", of: element) as? NSValue)?.rectValue
+        @Test func savedSessionListAndDetailUseTheSameName() async throws {
+            let release = TestAccessibility.shared.enable()
+            defer { release() }
+            let root = FileManager.default.temporaryDirectory.appendingPathComponent(UUID().uuidString)
+            defer { try? FileManager.default.removeItem(at: root) }
+            let list = NSHostingView(rootView: SessionsView(library: SessionsLibrary(files: SessionFiles(directory: root)), fontSize: 16))
+            let listWindow = makeWindow(list, width: 900, height: 520)
+            defer { listWindow.close() }
+            await layout(list)
+            let listed = strings(list)
+            #expect(listed.contains("履歴"))
+            #expect(!listed.contains("保存したセッション"))
+            #expect(!listed.contains("ライブラリ"), "The saved sessions list must not be confused with the knowledge library")
+
+            let saved = SavedSession(version: 1, createdAt: Date(), updatedAt: Date(), snapshot: sessionFixture(title: "Design"))
+            let detail = NSHostingView(rootView: SavedSessionView(saved: saved, fontSize: 16, back: {}, delete: {}))
+            let detailWindow = makeWindow(detail, width: 900, height: 520)
+            defer { detailWindow.close() }
+            await layout(detail)
+            let detailed = strings(detail)
+            #expect(detailed.contains("履歴"))
+            #expect(!detailed.contains("Sessions"))
+        }
+
+        @Test func topBarCallsSavedSessionsHistory() async throws {
+            let release = TestAccessibility.shared.enable()
+            defer { release() }
+            let suite = "DesignReviewSmallFix-\(UUID())"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let composition = AppComposition(arguments: ["--ui-preview"], defaults: defaults)
+            composition.navigation.request(.sessions, phase: .idle)
+            try #require(composition.navigation.destination == .sessions)
+            let host = NSHostingView(rootView: ContentView(composition: composition))
+            let window = makeWindow(host, width: 1180, height: 780)
+            defer { window.close() }
+            await layout(host)
+            let shown = strings(host)
+            #expect(shown.contains("履歴"))
+            #expect(!shown.contains("Sessions"))
+            #expect(!shown.contains("保存したセッション"))
+        }
+
+        @Test func liveMeetingHeaderDoesNotNameAnUnavailablePreset() async throws {
+            let release = TestAccessibility.shared.enable()
+            defer { release() }
+            let suite = "DesignReviewSmallFix-\(UUID())"
+            let defaults = try #require(UserDefaults(suiteName: suite))
+            defer { defaults.removePersistentDomain(forName: suite) }
+            let meeting = MeetingPreview.make(activity: AudioInputUse(), defaults: defaults)
+            meeting.consentConfirmed = true
+            await meeting.start()
+            let host = NSHostingView(rootView: MeetingWorkspaceView(meeting: meeting, fontSize: .constant(16), compact: {}))
+            let window = makeWindow(host, width: 1180, height: 780)
+            defer { window.close() }
+            await layout(host)
+            let shown = strings(host).joined(separator: "\n")
+            #expect(shown.contains("Meeting / ライブ"))
+            #expect(!shown.contains("General"))
+            await meeting.end()
+        }
+
+        private func makeWindow(_ host: NSView, width: Double, height: Double) -> NSWindow {
+            let window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: height),
+                styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+            window.isReleasedWhenClosed = false
+            window.contentView = host
+            window.orderFront(nil)
+            return window
+        }
+
+        private func layout(_ host: NSView) async {
+            host.layoutSubtreeIfNeeded()
+            try? await Task.sleep(for: .milliseconds(200))
+            host.layoutSubtreeIfNeeded()
+        }
+
+        private func value(_ name: String, of element: NSObject) -> Any? {
+            guard element.responds(to: NSSelectorFromString(name)) else { return nil }
+            return element.value(forKey: name)
+        }
+
+        private func elements(_ root: NSObject) -> [NSObject] {
+            [root] + (value("accessibilityChildren", of: root) as? [NSObject] ?? []).flatMap { elements($0) }
+        }
+
+        /// 画面上の各要素が読み上げ・表示に使う文字列。
+        private func strings(_ root: NSObject) -> [String] {
+            elements(root).flatMap { element in
+                ["accessibilityLabel", "accessibilityValue", "accessibilityTitle"].compactMap { value($0, of: element) as? String }
+            }
+        }
+
+        private func button(_ title: String, in root: NSObject) -> NSObject? {
+            let press = NSSelectorFromString("accessibilityPerformPress")
+            return elements(root).first { element in
+                element.responds(to: press) && (value("accessibilityLabel", of: element) as? String == title
+                    || value("accessibilityTitle", of: element) as? String == title)
+            }
+        }
+
+        private func frame(_ element: NSObject) -> NSRect? {
+            (value("accessibilityFrame", of: element) as? NSValue)?.rectValue
+        }
     }
 }
