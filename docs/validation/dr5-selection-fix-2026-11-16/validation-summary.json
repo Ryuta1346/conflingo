@@ -1,0 +1,26 @@
+{
+  "result": "Passed",
+  "totalTestCount": 783,
+  "passedTests": 783,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "testFailures": [],
+  "baseHead": "4ad616e",
+  "workingTreeChange": "DR5 selection accessibility label and parameterized regression test",
+  "swiftTestingSuites": 146,
+  "swiftTestingDurationSeconds": 164.413,
+  "lint": {
+    "files": 310,
+    "violations": 0
+  },
+  "releaseArchitectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "exitCode": 0,
+  "liveAPIEnabled": false,
+  "independentReviewFindings": [],
+  "nativeSelectionState": "Passed",
+  "nativeSyntheticMeetingEnd": "Passed",
+  "compactReturnKeyboardFocus": "Unresolved"
+}

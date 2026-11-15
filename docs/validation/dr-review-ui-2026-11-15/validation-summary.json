@@ -1,0 +1,22 @@
+{
+  "result": "Passed",
+  "totalTestCount": 783,
+  "passedTests": 783,
+  "failedTests": 0,
+  "skippedTests": 0,
+  "testFailures": [],
+  "head": "4ad616e13690f5a7e5e49031a83840bbb0c4fa02",
+  "swiftTestingSuites": 146,
+  "swiftTestingDurationSeconds": 169.581,
+  "lint": {
+    "files": 310,
+    "violations": 0
+  },
+  "releaseArchitectures": [
+    "arm64",
+    "x86_64"
+  ],
+  "exitCode": 0,
+  "liveAPIEnabled": false,
+  "logDirectory": "/private/tmp/conflingo-dr-review-20261115/validated"
+}
