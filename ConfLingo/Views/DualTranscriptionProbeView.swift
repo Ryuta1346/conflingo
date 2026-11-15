@@ -48,8 +48,8 @@ struct DualTranscriptionProbeView: View {
             if controller.phase == .idle, controller.activity.owner != nil {
                 Text(controller.activity.busyMessage).font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             }
-            if let error = controller.lastError {
-                InlineMessage(.failure, "音声入力に問題が発生しました。アクセス権を確認し、停止できない場合は停止を再試行してください。", details: error)
+            if let failure = controller.failure {
+                InlineMessage(failure)
             }
             #if DEBUG
             if controller.phase == .idle, let snapshot = controller.diagnostics?.snapshot {

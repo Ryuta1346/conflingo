@@ -63,8 +63,8 @@ struct ContentView: View {
                 VStack(spacing: 0) {
                     topBar(contentWidth: shell.size.width)
                     Divider()
-                    if let error = controller.lastError {
-                        InlineMessage(.failure, "音声入力に問題が発生しました。入力設定・権限を確認してください。停止できない場合は停止を再試行できます。確定済みの発話は保持しています。", details: error).padding([.horizontal, .top], 16)
+                    if let failure = controller.failure {
+                        InlineMessage(failure).padding([.horizontal, .top], 16)
                     }
                     if !transcriptionOnly && (navigation.destination == .live || navigation.destination == .setup) {
                         TranslationPreparationNotice(state: coordinator.preparationState, retry: retryTranslation)

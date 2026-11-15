@@ -22,8 +22,8 @@ struct MeetingWorkspaceView: View {
                     Text("翻訳待ち \(meeting.translations.pendingCount)件 · 保存には完成した訳文を含めます")
                         .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary).padding(.horizontal, 16)
                 }
-                if let error = meeting.controller.lastError {
-                    InlineMessage(.failure, "音声入力に問題が発生しました。入力設定・権限を確認してください。停止できない場合は停止を再試行できます。確定済みの発話は保持しています。", details: error).padding([.horizontal, .bottom], 16)
+                if let failure = meeting.controller.failure {
+                    InlineMessage(failure).padding([.horizontal, .bottom], 16)
                 }
                 GeometryReader { geometry in
                     let horizontal = geometry.size.width >= WorkspaceLayout.meetingColumnsWidth
@@ -121,7 +121,7 @@ struct MeetingWorkspaceView: View {
                     Surface { MeetingSaveControls(meeting: meeting, sessions: sessions) }
                 }
                 MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
-                if let error = meeting.controller.lastError { InlineMessage(.failure, "音声入力に問題が発生しました。入力設定・権限を確認してください。停止できない場合は停止を再試行できます。確定済みの発話は保持しています。", details: error) }
+                if let failure = meeting.controller.failure { InlineMessage(failure) }
             }
             .padding(24)
             .frame(maxWidth: 800)

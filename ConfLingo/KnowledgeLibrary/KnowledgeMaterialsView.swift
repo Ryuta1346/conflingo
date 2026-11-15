@@ -18,7 +18,6 @@ struct KnowledgeMaterialsView: View {
     @State private var query = ""
     @State private var selectedReference: KnowledgeReference?
     @State private var notice: UserMessage?
-    @State private var importResults: [UserMessage] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -27,7 +26,7 @@ struct KnowledgeMaterialsView: View {
                 VStack(alignment: .leading) { addButtons }
             }
             RepositoryKnowledgeControls(knowledge: knowledge, canEdit: canEdit) { scan, paths in
-                importResults = []; notice = nil
+                notice = nil
                 if let importRepository { await importRepository(scan, paths) }
                 else { await knowledge.importRepository(scan, selected: paths) }
             }
@@ -57,9 +56,9 @@ struct KnowledgeMaterialsView: View {
                 }
             }.frame(maxHeight: knowledge.documents.isEmpty ? 0 : 180)
             if knowledge.isBusy { ProgressView("資料を処理しています…") }
-            if importResults.isEmpty, let notice = knowledge.notice { InlineMessage(notice) }
+            if knowledge.fileImportResults.isEmpty, let notice = knowledge.notice { InlineMessage(notice) }
             if let notice { InlineMessage(notice) }
-            ForEach(Array(importResults.enumerated()), id: \.offset) { _, result in InlineMessage(result) }
+            ForEach(Array(knowledge.fileImportResults.enumerated()), id: \.offset) { _, result in InlineMessage(result) }
             HStack {
                 TextField("資料をこのMacで検索", text: $query).textFieldStyle(.roundedBorder)
                     .onSubmit { search() }.accessibilityLabel("資料検索")
@@ -81,17 +80,9 @@ struct KnowledgeMaterialsView: View {
             case .success(let urls):
                 let generation = knowledge.importGeneration
                 Task {
-                    var results: [UserMessage] = []
+                    guard generation == knowledge.importGeneration else { return }
                     notice = nil
-                    importResults = []
-                    for url in urls {
-                        guard generation == knowledge.importGeneration, canEdit() else { break }
-                        if let importFile { await importFile(url) } else { await knowledge.add(url: url); knowledge.setPermission(false) }
-                        if let result = knowledge.notice {
-                            results.append(UserMessage(result.kind, "\(url.lastPathComponent)：\(result.text)", details: result.details))
-                        }
-                    }
-                    if generation == knowledge.importGeneration { importResults = results }
+                    await knowledge.importFiles(urls, canEdit: canEdit, importFile: importFile)
                 }
             case .failure(let error): notice = UserMessage(.failure, "資料を選択できませんでした。", details: error.localizedDescription)
             }
@@ -121,7 +112,7 @@ struct KnowledgeMaterialsView: View {
             Button("キャンセル", role: .cancel) { removing = nil }
             Button("取り外す", role: .destructive) {
                 if let removing, canEdit() {
-                    importResults = []; notice = nil
+                    notice = nil
                     Task {
                     if removing.source == nil { await knowledge.remove(removing.id) } else { await knowledge.removeRepository() }
                     }
@@ -129,7 +120,7 @@ struct KnowledgeMaterialsView: View {
                 removing = nil
             }
         } message: { Text("以降の検索から除外します。既存の引用、保存資料、元ファイルは残ります。リポジトリは一括で取り外します。") }
-        .onChange(of: knowledge.importGeneration) { selecting = false; importing = false; saving = nil; importResults = []; notice = nil }
+        .onChange(of: knowledge.importGeneration) { selecting = false; importing = false; saving = nil; notice = nil }
     }
 
     private var addButtons: some View {
@@ -140,7 +131,7 @@ struct KnowledgeMaterialsView: View {
             }
         }
     }
-    private func search() { notice = nil; importResults = []; Task { await knowledge.search(query) } }
+    private func search() { notice = nil; Task { await knowledge.search(query) } }
     private func read(_ document: KnowledgeDocument) async {
         notice = nil
         do { reading = try await knowledge.contents().first { $0.document.id == document.id } }

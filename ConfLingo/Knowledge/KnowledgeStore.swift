@@ -10,6 +10,7 @@ final class KnowledgeStore {
     private(set) var searchState: SearchState = .idle
     private(set) var isBusy = false
     private(set) var notice: UserMessage?
+    private(set) var fileImportResults: [UserMessage] = []
     var message: String { notice?.text ?? "" }
     private(set) var permitted = false
     private var index = KnowledgeIndex()
@@ -72,6 +73,7 @@ final class KnowledgeStore {
 
     func cancelPendingImports() {
         importGeneration = UUID()
+        fileImportResults = []
         repositoryTask?.cancel()
     }
 
@@ -191,6 +193,21 @@ final class KnowledgeStore {
         await importDocument { try await $0.add(url: url) }
     }
 
+    func importFiles(_ urls: [URL], canEdit: () -> Bool, importFile: ((URL) async -> Void)? = nil) async {
+        let generation = importGeneration
+        fileImportResults = []
+        var results: [UserMessage] = []
+        for url in urls {
+            guard generation == importGeneration, !Task.isCancelled, canEdit() else { break }
+            if let importFile { await importFile(url) }
+            else { await add(url: url); setPermission(false) }
+            if let notice {
+                results.append(UserMessage(notice.kind, "\(url.lastPathComponent)：\(notice.text)", details: notice.details))
+            }
+        }
+        if generation == importGeneration, !Task.isCancelled { fileImportResults = results }
+    }
+
     func add(data: Data, filename: String) async {
         await importDocument { try await $0.add(data: data, filename: filename) }
     }
@@ -246,6 +263,7 @@ final class KnowledgeStore {
     }
 
     func search(_ text: String) async {
+        fileImportResults = []
         let id = UUID()
         searchID = id
         let version = revision
@@ -290,6 +308,7 @@ final class KnowledgeStore {
     }
 
     private func invalidate() {
+        fileImportResults = []
         revision = UUID()
         invalidations.emit(())
         searchID = UUID()

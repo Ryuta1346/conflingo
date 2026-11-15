@@ -11,7 +11,8 @@ final class DualTranscriptionController {
     }
 
     private(set) var phase: SessionPhase = .idle { didSet { phaseChanges.emit(phase) } }
-    private(set) var lastError: String?
+    private(set) var failure: UserMessage?
+    var lastError: String? { failure?.text }
     private(set) var preparation = ""
     private(set) var permissions: [AudioOrigin: AudioPermissionStatus] = [:]
     private(set) var startedInputs: Set<AudioOrigin> = []
@@ -43,7 +44,7 @@ final class DualTranscriptionController {
     private var stopTask: Task<Void, Never>?
     private var contextTask: Task<Bool, Never>?
     private var contextUpdateID: UUID?
-    private var stopFailureMessage: String?
+    private var stopFailureMessage: UserMessage?
 
     init(
         microphone: (any AudioSource)? = nil,
@@ -88,7 +89,7 @@ final class DualTranscriptionController {
     ) async {
         guard phase == .idle, !Task.isCancelled else { return }
         guard let token = activity.acquire(owner) else {
-            lastError = activity.busyMessage
+            failure = UserMessage(.failure, activity.busyMessage)
             return
         }
         usageToken = token
@@ -98,7 +99,7 @@ final class DualTranscriptionController {
         let run = UUID()
         runID = run
         failed = false
-        lastError = nil
+        failure = nil
         stopFailureMessage = nil
         phase = .preparing
         let task = Task {
@@ -133,7 +134,7 @@ final class DualTranscriptionController {
         pendingStart?.cancel()
         let task = Task {
             await pendingStart?.value
-            if let stopFailureMessage, lastError == stopFailureMessage { lastError = nil }
+            if let stopFailureMessage, failure == stopFailureMessage { failure = nil }
             stopFailureMessage = nil
             await finishInputs()
             // Stop capture first, then drain context writes before allowing another run.
@@ -167,7 +168,7 @@ final class DualTranscriptionController {
         timeline.reset()
         startedAt = nil
         store.reset(sessionID: timeline.sessionID)
-        lastError = nil
+        failure = nil
     }
 
     func updateContext(_ keywords: [AudioOrigin: [String]]) async -> Bool {
@@ -284,9 +285,10 @@ final class DualTranscriptionController {
                     diagnostics?.record(.inputStopped, origin: input.origin)
                     return true
                 } catch {
-                    let message = "\(input.origin.label)：停止を完了できませんでした。停止を再試行してください: \(error.localizedDescription)"
+                    let message = AudioFailureMessage.diagnostic(error,
+                        summary: "\(input.origin.label)：停止を完了できませんでした。停止を再試行してください。")
                     stopFailureMessage = message
-                    lastError = message
+                    failure = message
                     await input.speech.cancelRecognition()
                     diagnostics?.record(.recognitionCancelled, origin: input.origin)
                     return false
@@ -303,7 +305,10 @@ final class DualTranscriptionController {
                     try await input.speech.finishRecognition()
                     diagnostics?.record(.recognitionFinished, origin: input.origin)
                 } catch {
-                    if lastError == nil { lastError = "\(input.origin.label)：認識の終了に失敗しました: \(error.localizedDescription)" }
+                    if failure == nil {
+                        failure = AudioFailureMessage.diagnostic(error,
+                            summary: "\(input.origin.label)：認識の終了に失敗しました。最後の発話を確認してください。確定済みの発話は保持しています。")
+                    }
                     await input.speech.cancelRecognition()
                     diagnostics?.record(.recognitionCancelled, origin: input.origin)
                 }
@@ -317,14 +322,7 @@ final class DualTranscriptionController {
         guard runID == run, !failed else { return }
         failed = true
         captureActivityChanges.emit(false)
-        let prefix = origin.map { "\($0.label)：" } ?? ""
-        if origin == .microphone, error as? AudioSourceError == .permissionDenied {
-            lastError = "マイクへのアクセスが許可されていません。システム設定 > プライバシーとセキュリティ > マイク で ConfLingo を許可してください。"
-        } else {
-            lastError = error as? TranscriptEventHub.Failure == .overflow
-                ? "\(prefix)字幕の処理が追いつかないため入力を停止します。最後の発話が欠けている可能性があります。"
-                : "\(prefix)文字起こしを継続できません: \(error.localizedDescription)"
-        }
+        failure = AudioFailureMessage.transcription(error, origin: origin)
         // A result callback must return before stop waits for the recognition task.
         Task { [weak self] in
             guard let self, self.runID == run, self.phase != .stopping else { return }

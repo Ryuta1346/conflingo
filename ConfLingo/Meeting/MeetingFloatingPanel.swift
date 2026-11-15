@@ -122,7 +122,7 @@ private struct MeetingFloatingView: View {
                     if meeting.canStopAI {
                         Button("AI送信を停止") { meeting.setAIAllowed(false) }
                     }
-                    if let error = meeting.controller.lastError { InlineMessage(.failure, "音声入力に問題が発生しました。入力設定・権限を確認してください。停止できない場合は停止を再試行できます。確定済みの発話は保持しています。", details: error) }
+                    if let failure = meeting.controller.failure { InlineMessage(failure) }
                     if let insight = MeetingInsight.featured(in: meeting.insights) {
                         MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize, revealKnowledge: { reference in
                             expand()
