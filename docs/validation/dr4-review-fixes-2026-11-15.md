@@ -35,3 +35,7 @@
 ログ: `/private/tmp/conflingo-dr4-fixes-red.log`、`conflingo-dr4-fixes-green.log`、`conflingo-dr4-fixes-validation/`。
 
 実音声・実API・VoiceOver・実配列キー操作の残る受入は維持する。今回の修正差分は単独で確認しており、修正後の独立レビュー・コミット・PR更新・マージは未実施。
+
+## マージ前のリモートCI対応
+
+修正は`c711a83`でコミット・push済み。[run 43714784442](https://github.com/Ryuta1346/conflingo/actions/runs/43714784442)では資料抜粋のAX取得に失敗したため、テストをシート内のスクロール・展開状態を確認する操作へ修正した。ローカル関連2テスト・Lintは成功。最新HEADのリモートCI成功後にユーザー依頼のマージを行う。[調査と計画](../design/dr4-ci-fix-plan.md)。

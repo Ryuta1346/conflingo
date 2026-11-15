@@ -19,7 +19,7 @@ extension AppKitIntegrationTests {
                 await composition.conferenceKnowledge.knowledge.add(data: Data(material.utf8), filename: "reading.md")
                 let references = try await composition.conferenceKnowledge.knowledge.localReferences(unit.english)
                 let snippet = try #require(references.first).snippet
-                let fixture = DR3Host(ContentView(composition: composition), width: 1280, height: 900, padding: 0)
+                let fixture = DR3Host(ContentView(composition: composition), width: 640, height: 520, padding: 0)
                 defer { fixture.close() }
                 await fixture.layout()
                 try #require(fixture.element("この発話を資料で補正")).perform(NSSelectorFromString("accessibilityPerformPress"))
@@ -27,14 +27,33 @@ extension AppKitIntegrationTests {
                 let sheet = try #require(fixture.window.attachedSheet)
                 let content = try #require(sheet.contentView)
                 await fixture.layout()
-                let disclosure = try #require(fixture.elements(content).first {
-                    fixture.value("accessibilityLabel", $0) as? String == "参照する資料を確認"
-                        && $0.responds(to: NSSelectorFromString("accessibilityPerformPress"))
-                })
+                func descendants(_ view: NSView) -> [NSView] { [view] + view.subviews.flatMap(descendants) }
+                let scroll = try #require(descendants(content).compactMap { $0 as? NSScrollView }.first)
+                func revealMaterials() {
+                    content.layoutSubtreeIfNeeded()
+                    guard let document = scroll.documentView else { return }
+                    scroll.contentView.scroll(to: NSPoint(x: 0, y: max(0, document.bounds.height - scroll.contentView.bounds.height)))
+                    scroll.reflectScrolledClipView(scroll.contentView)
+                }
+                func disclosureControl() -> NSObject? {
+                    fixture.elements(content).first {
+                        fixture.value("accessibilityLabel", $0) as? String == "参照する資料を確認"
+                            && fixture.value("accessibilityRole", $0) as? String == "AXDisclosureTriangle"
+                    }
+                }
+                try #require(try await waitForTestCondition { revealMaterials(); return disclosureControl() != nil })
+                let disclosure = try #require(disclosureControl())
                 disclosure.perform(NSSelectorFromString("accessibilityPerformPress"))
-                #expect(try await waitForTestCondition {
-                    fixture.elements(content).contains { fixture.value("accessibilityValue", $0) as? String == snippet }
-                })
+                try #require(try await waitForTestCondition {
+                    guard let control = disclosureControl() else { return false }
+                    return (fixture.value("accessibilityValue", control) as? NSNumber)?.boolValue == true
+                }, "Material disclosure must expand at \(size)pt")
+                let found = try await waitForTestCondition {
+                    revealMaterials()
+                    return fixture.elements(content).contains { fixture.value("accessibilityValue", $0) as? String == snippet }
+                }
+                let visibleText = fixture.elements(content).compactMap { fixture.value("accessibilityValue", $0) as? String }
+                try #require(found, "Reading size: \(size), sheet: \(sheet.frame), contents: \(visibleText)")
                 content.layoutSubtreeIfNeeded()
                 let text = try #require(fixture.elements(content).first { fixture.value("accessibilityValue", $0) as? String == snippet })
                 return try #require(fixture.value("accessibilityFrame", text) as? NSValue).rectValue.height
