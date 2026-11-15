@@ -1,0 +1,45 @@
+{
+  "devicesAndConfigurations": [
+    {
+      "device": {
+        "architecture": "arm64",
+        "modelName": "MacBook Pro",
+        "osBuildNumber": "25F84",
+        "osVersion": "26.5.2",
+        "platform": "macOS"
+      },
+      "expectedFailures": 0,
+      "failedTests": 0,
+      "passedTests": 1118,
+      "skippedTests": 0,
+      "testPlanConfiguration": {
+        "configurationId": "1",
+        "configurationName": "Test Scheme Action"
+      }
+    }
+  ],
+  "environmentDescription": "ConfLingo · Built with macOS 26.5.2",
+  "expectedFailures": 0,
+  "failedTests": 0,
+  "finishTime": 1794726749.694,
+  "passedTests": 705,
+  "result": "Passed",
+  "skippedTests": 0,
+  "startTime": 1794726688.13,
+  "statistics": [
+    {
+      "subtitle": "549 test runs",
+      "title": "136 tests ran with dynamic parameters"
+    }
+  ],
+  "testFailures": [],
+  "title": "Test - ConfLingo",
+  "topInsights": [
+    {
+      "category": "Longest Test Runs",
+      "impact": "0% of duration",
+      "text": "1 longest test run with outlier durations exceeding 9.15s (three standard deviations)"
+    }
+  ],
+  "totalTestCount": 705
+}

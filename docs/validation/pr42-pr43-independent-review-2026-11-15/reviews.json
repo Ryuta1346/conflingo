@@ -1,0 +1,77 @@
+{
+  "head": "8a02bc89d2faec70701541c3785d740bbfde923f",
+  "diff_sha256": {
+    "pr42": "1ed0bacf41e6a547718c6f07fd71734944c95818e6a4f7d39df347b19519c547",
+    "pr43": "3689976cd6b7b0de890094521d42349afb76036460162f7754d4de743b692170"
+  },
+  "reviews": [
+    {
+      "agent": "review_assistance",
+      "findings": [],
+      "scope": {
+        "revision": "ed0a08b..50f59d4",
+        "reviewed": [
+          "EventSignal/EventSubscription",
+          "SessionAssistance",
+          "ConferenceKnowledgeWorkspace",
+          "MeetingWorkspace",
+          "KnowledgeStore",
+          "InsightCoordinator",
+          "LLMSettings",
+          "WebResearchCoordinator",
+          "SessionStore/MeetingSessionStore",
+          "DualTranscriptionController/SessionController",
+          "EventSignalTests/AssistanceLifecycleTests",
+          "docs/design/shared-assistance-notifications-plan.md"
+        ],
+        "checks": [
+          "購読の所有・解放、登録順、配信中の解除と追加、同期再入時のスナップショット",
+          "設定変更によるAI・Web・資料許可、Conference補正・Meeting要約の取消",
+          "停止前の送信取消、再開時の購読、破棄時の資料・用語リセット、古い応答の棄却"
+        ]
+      },
+      "gaps": [
+        "静的レビューのみ。テスト・Lint・ビルドは主担当が実行。実API・音声・UI操作なし。"
+      ]
+    },
+    {
+      "agent": "staff-backend-llm-pr43",
+      "findings": [],
+      "positive_feedback": [
+        "LLMInsightRequest / LLMResearchRequest preserve provider bodies, schema settings, OpenAI store=false, authentication headers, request size limits and timeout values while sharing HTTP construction.",
+        "SSEFramer preserves UTF-8 line reconstruction, CRLF handling, joined data-line accounting, EOF flush and finite line/event/wire budgets; extracted provider parsers retain terminal, refusal and usage semantics.",
+        "Transport byte scanning uses @concurrent while delivery is sequentially awaited on MainActor, with cancellation checked before delivery and after EOF; redirect refusal and ephemeral-session privacy settings are retained."
+      ]
+    },
+    {
+      "agent": "review_ci",
+      "findings": [],
+      "positive_feedback": [
+        "CI uses read-only repository permissions, disables persisted checkout credentials, pins both GitHub actions by commit, and verifies the downloaded SwiftLint archive by SHA-256 before execution.",
+        "The new transport regression test checks cancellation from both an EOF-sized payload and an intermediate chunk, asserts MainActor callback isolation, and verifies that only one callback is delivered; existing tests retain exact 2 MiB and overflow coverage.",
+        "Observation-based waits preserve the existing one-minute suite limits and cancellation checks; the meeting test injects a fixed timeline instead of weakening production consent boundaries."
+      ],
+      "scope": {
+        "revision": "e21c355^1..e21c355 (PR43), workspace HEAD 8a02bc89d2faec70701541c3785d740bbfde923f",
+        "reviewed": [
+          ".github/workflows/ci.yml",
+          "scripts/ci.sh",
+          "scripts/install-swiftlint.sh",
+          "All PR43 ConfLingoTests changes and surrounding relevant transport/provider tests",
+          "InsightHTTPTransport @concurrent helper and callback/cancellation behavior",
+          "LLMWebResearchClient transport @concurrent helper and existing wire-budget tests",
+          "docs/design/llm-sse-ci-plan.md",
+          "docs/design/ci-failure-fix-plan.md",
+          "docs/validation/ci.md and checked-in CI failure validation evidence"
+        ],
+        "conclusion": "No confirmed newly introduced correctness, coverage, CI reproducibility, or security issue found within this scope."
+      },
+      "gaps": [
+        "Static independent review only; no tests, lint, builds, network calls, live API/audio, or UI actions executed by this reviewer. Runtime validation is owned by the parent agent.",
+        "The hosted runner image and tool download availability were not independently rechecked online; this review verifies the pinned versions, fail-closed environment checks, hash verification, and checked-in evidence.",
+        "Existing research transport coverage validates size limits and decoding but does not deterministically cancel while bytes are actively arriving. This is a coverage limitation, not a confirmed regression in the added helper."
+      ]
+    }
+  ],
+  "findings": []
+}

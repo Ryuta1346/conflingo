@@ -15,7 +15,7 @@
 - 起動引数の`AppleKeyboardUIMode`ではAppKitの実設定は変わらず、専用プロセスでの完全なCI環境再現はできなかった。OS全体の設定変更はしていない。
 - Green: 関連4定義・14ケース成功。`/tmp/conflingo-keyboard-ci-green.log`。ローカルは`fullKeyboardAccess=true`。
 - 全体: `scripts/ci.sh all`成功。705テスト・127スイート成功（34.216秒）、実API7定義除外、SwiftLint275ファイル違反0、Release arm64/x86_64成功。ログ・xcresultは`/tmp/conflingo-keyboard-followup-validation/`。
-- リモートCI: 本書の記録時点はpush前。最新HEADに対する成功を確認してからマージする。最終結果は[PR #44のChecks](https://github.com/Ryuta1346/conflingo/pull/44/checks)とPR本文に記録する。
+- リモートCI: 修正HEAD `d63e176`の[run 43667087489](https://github.com/Ryuta1346/conflingo/actions/runs/43667087489)は成功。2026-11-15にGitHub APIで`completed / success`を確認。PR本文には705テスト・Lint・両CPU Release成功と、ローカル`fullKeyboardAccess=true`／CI`false`の両環境成功の記録あり。[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)はmain `8a02bc8`へマージ済み。
 
 ## 受入の範囲
 

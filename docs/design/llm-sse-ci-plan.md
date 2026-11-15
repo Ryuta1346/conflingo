@@ -32,6 +32,6 @@ GitHub公式[macOS 26 arm64イメージ](https://github.com/actions/runner-image
 
 ## 完了記録
 
-ローカル実装・自動検証完了。全700定義成功（実API7定義除外）、Lint272ファイル違反0、Release arm64/x86_64成功、actionlint/ShellCheck/bash構文検証成功。先行テストで再現したGemini取消後プレビューも修正。[Draft PR #43](https://github.com/Ryuta1346/conflingo/pull/43)提出済み・未マージ。独立レビュー・初回リモートCI・実機/実モデル受入は継続。[検証記録](../validation/llm-sse-ci-2026-11-14.md)。
+ローカル実装・自動検証完了。全700定義成功（実API7定義除外）、Lint272ファイル違反0、Release arm64/x86_64成功、actionlint/ShellCheck/bash構文検証成功。先行テストで再現したGemini取消後プレビューも修正。[PR #43](https://github.com/Ryuta1346/conflingo/pull/43)はmain `e21c355`へマージ済み。初回CI失敗の修正後は701定義成功、修正後リモートCI成功。[2026-11-15独立レビュー](../validation/pr42-pr43-independent-review-2026-11-15.md)で修正指摘0件。実機/実モデル受入は継続。[検証記録](../validation/llm-sse-ci-2026-11-14.md)。
 
 提出時: `bed5023`（LLM/SSE整理）、`6ec128b`（CI・検証記録）をコミット・push。Draft PR #43をmain向けに作成。独立レビュー・実機受入は継続。

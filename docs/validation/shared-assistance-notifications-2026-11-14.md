@@ -1,5 +1,7 @@
 # 共通支援・通知統一の検証
 
+> 2026-11-15追補: PR #42・#43はマージ済み。3担当による[独立レビュー](pr42-pr43-independent-review-2026-11-15.md)は修正指摘0件。PR #43修正後のリモートCI成功をGitHub APIで確認。現行main `8a02bc8`で705テスト・Lint・Release両CPU成功。以下は実装・提出当時の記録で、当時の未確認事項と検証値を保持する。
+
 2026-11-14。基点: main `ed0a08b`（PR #41マージ済み）。[計画](../design/shared-assistance-notifications-plan.md)。実装コミット`3e4e27b`。ローカル実装・自動検証完了、[PR #42](https://github.com/Ryuta1346/conflingo/pull/42)はmain `50f59d4`へマージ済み。
 
 ## 変更
