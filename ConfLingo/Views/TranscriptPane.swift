@@ -7,7 +7,7 @@ struct TranscriptPane: View {
     @State private var followsLatest = true
     @State private var userScrolling = false
     @State private var atBottom = true
-    @State private var scrollPosition = ScrollPosition(edge: .bottom)
+    @State private var scrollPosition = ScrollPosition(idType: String.self, edge: .bottom)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
@@ -55,6 +55,7 @@ struct TranscriptPane: View {
                         }
                         Color.clear.frame(height: 1).id("latest")
                     }
+                    .scrollTargetLayout()
                     .padding(16)
                 }
                 .clipped()
@@ -74,11 +75,7 @@ struct TranscriptPane: View {
                     if userScrolling { followsLatest = atBottom }
                 }
                 .onChange(of: entries.update) {
-                    if followsLatest {
-                        proxy.scrollTo("latest", anchor: .bottom)
-                    } else {
-                        scrollPosition = ScrollPosition()
-                    }
+                    if followsLatest { proxy.scrollTo("latest", anchor: .bottom) }
                 }
                 .overlay(alignment: .bottomTrailing) {
                     if !followsLatest {

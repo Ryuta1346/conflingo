@@ -106,6 +106,10 @@ extension AppKitIntegrationTests {
             let anchor = try #require(try historyTitles.first { title in
                 try visible.contains(frame(of: title, in: host))
             })
+            print("HISTORY baseline before update", fontSize, anchor)
+            await layout(host)
+            try await expectVisible(anchor, in: host, scroll: scroll)
+            print("HISTORY baseline remained visible", fontSize, anchor)
             for partial in ["First partial", String(repeating: "A growing partial. ", count: 20), "New conference partial"] {
                 store.updateVolatile(partial)
                 await layout(host)
