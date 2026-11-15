@@ -1,6 +1,6 @@
 > 2026-11-15 UIデザインレビュー: main `8a02bc8`の全画面を静的に確認（ビルド・起動は未実行）。高4・中10・低7件を指摘し、ユーザー指示により[UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR1→DR5としてタスク化。コード変更なし・全項目未着手。[指摘一覧](docs/design/ui-design-review-2026-11-15.md)。
 
-> 2026-11-15 PR #44 CI追補: 初回CIのTab退出4ケース失敗に対し、テストfixtureへ入力可能な巡回先を追加しShift+Tabも検証。関連14ケース・全705テスト成功、Lint275ファイル違反0、Release両CPU成功。リモートCI成功後にマージする。[修正記録](docs/validation/ui-keyboard-ci-fix-2026-11-15.md)。
+> 2026-11-15 PR #44 CI追補: 初回CIのTab退出4ケース失敗に対し、テストfixtureへ入力可能な巡回先を追加しShift+Tabも検証。関連14ケース・全705テスト成功、Lint275ファイル違反0、Release両CPU成功。修正後の[リモートCI](https://github.com/Ryuta1346/conflingo/actions/runs/43667087489)成功を確認し、[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)でmain `8a02bc8`へマージ済み。[修正記録](docs/validation/ui-keyboard-ci-fix-2026-11-15.md)。
 
 > 2026-11-15 UI受入: Sessions・資料ライブラリ・LLM設定の狭幅/48pt・主要キー操作と、合成モデル一覧からの選択保存を確認。キー操作U01〜U03をローカル修正・再受入済み。追補レビューで長い資料パスのボタン切れも修正し、関連14ケース・全705テスト成功、Lint275ファイル違反0、Release両CPU成功。VoiceOver受入は保留（ユーザー指示・オフ確認済み）。Gate Uは未合格。[結果](docs/validation/library-settings-ui-2026-11-15.md)。
 
@@ -18,7 +18,7 @@
 
 > 2026-11-13 R1-3レビュー追補: 検索ツール前後の段落を保持するよう修正。全583件中577成功・実API評価6skip、Lint228ファイル違反0。[追補](docs/design/r1-3-claude-research-text-plan.md)。
 
-> 2026-11-13 R1-3: Claudeの複数textブロック間に余分な段落が入る問題を修正。全580件中574成功・実API評価6skip、Lint228ファイル違反0、Release成功。[結果](docs/design/r1-3-claude-research-text-plan.md)。R1-2もローカル検証済みで、両修正を[Draft PR #32](https://github.com/Ryuta1346/conflingo/pull/32)へ提出済み。R1-2の実モデル再試行は未受入。[R1-2の結果](docs/design/r1-2-translation-preparation-plan.md)。R1-1はmain `ab2c4ae`で[PR #31](https://github.com/Ryuta1346/conflingo/pull/31)のマージを確認。実機の機器切替・Gate Bは未受入。[R1-1の結果](docs/design/r1-1-microphone-configuration-plan.md)。
+> 2026-11-13 R1-3: Claudeの複数textブロック間に余分な段落が入る問題を修正。全580件中574成功・実API評価6skip、Lint228ファイル違反0、Release成功。[結果](docs/design/r1-3-claude-research-text-plan.md)。R1-2もローカル検証済みで、両修正は[PR #32](https://github.com/Ryuta1346/conflingo/pull/32)でマージ済み。R1-2の実モデル再試行は未受入。[R1-2の結果](docs/design/r1-2-translation-preparation-plan.md)。R1-1はmain `ab2c4ae`で[PR #31](https://github.com/Ryuta1346/conflingo/pull/31)のマージを確認。実機の機器切替・Gate Bは未受入。[R1-1の結果](docs/design/r1-1-microphone-configuration-plan.md)。
 
 > 2026-11-13 アーキテクチャ／コードレビュー: main `f43ee38`の全体を静的に確認（レビュー時のビルド・テストは未実行）。高3・中5・低5件と構造課題7件を指摘し、ユーザー承認により[レビュー対応](#レビュー対応2026-11-13承認)のR1→R4の順で進める。R1-1〜3はマージ済み（残る実機受入は継続）、R2・R3もマージ済み、R4もマージ済み（実機受入・独立レビュー確認は継続）。
 
@@ -37,7 +37,7 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-15／main `e21c355`**。PR #43マージ済み、修正後リモートCI成功をPRで確認。Sessions・資料ライブラリ・LLM設定の追加UI受入を実施し、U01〜U03を承認後に修正・再受入済み（[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)提出済み・未マージ）。VoiceOverは保留（ユーザー指示・オフ確認済み）。独立レビュー・実モデル/実機受入は継続。
+- 更新: **2026-11-15／main `8a02bc8`**。PR #44までマージ済み（#43・#44とも修正後リモートCI成功をPRで確認）。Sessions・資料ライブラリ・LLM設定の追加UI受入を実施し、U01〜U03を承認後に修正・再受入済み（[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)マージ済み）。UIデザインレビューを実施し、DR1〜5をタスク化（未着手）。VoiceOverは保留（ユーザー指示・オフ確認済み）。独立レビュー・実モデル/実機受入は継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** UI修正と追補レビュー後に705定義成功・実API7定義除外、Lint275ファイル違反0、arm64/x86_64 Release成功。U01〜U03は専用Debugプレビューで再受入、追補の長いパス修正はNSHostingViewの14ケースと画像で検証。[UI結果](docs/validation/library-settings-ui-2026-11-15.md)。
@@ -49,7 +49,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** PR #43までmainへマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の独立レビューは継続。[UIのキー操作3件を修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。[承認済み計画](docs/design/ui-keyboard-acceptance-plan.md)に基づく差分を[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)へ提出済み。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。以下の実音声/実モデル受入も継続。
+**先行:** PR #44までmain `8a02bc8`へマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の独立レビューは継続。[UIのキー操作3件を修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。[承認済み計画](docs/design/ui-keyboard-acceptance-plan.md)に基づく差分は[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)でマージ済み。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。以下の実音声/実モデル受入も継続。
 
 **次に着手:** [UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR1。実音声を必要としないため、下記1・2の受入待ちと並行してDR1→DR5の順に進める。
 
@@ -125,9 +125,9 @@
 | [x] | PR8／レビュー・修正マージ | 独立レビュー・MEDIUM 2件の修正検証・実API評価を完了。PR #19はmain `7efbd3f`でマージ確認済み。PR8全体の受入は継続 | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
 | [x] | PR4（短時間ローカル） | 新しい文による再開と通常Meetingの開始・一時停止・再開・終了を確認。会議アプリ別・Gate B全体は次行で継続 | [実入力受入](docs/validation/meeting-real-input-2026-11-11.md)・[診断結果](docs/validation/microphone-diagnostics.md) |
 | [ ] | 資料追加導線／新規受入 | 用語ライブ更新競合・資料取り外し後の許可解除漏れをローカル修正し、自動検証・独立レビュー完了、PR #41マージ済み。日英精度・2入力・実モデル質問/補正・UI全経路は継続 | [検証記録](docs/validation/knowledge-entry-points.md)・[修正結果](docs/validation/remaining-implementation-2026-11-14.md) |
-| [ ] | Sessions／UI受入 | 狭幅・48pt・検索/詳細・保存パネル/削除取消のキー操作を確認。U01は上部操作の固定によりローカル修正・再受入済み。VoiceOverは対象操作を確認できず、ユーザー指示で保留（オフ確認済み） | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[Sessions検証](docs/validation/sessions.md) |
-| [ ] | 資料ライブラリ／UI・レビュー | 狭幅・48pt・登録/検索/詳細/文書切替/削除取消を確認。U02は本文のネイティブ化でローカル修正・再受入済み。未実施経路、VoiceOver受入の保留（ユーザー指示・オフ確認済み）が残る。独立レビュー実施済み、指摘修正はPR #41マージ済み。最大容量の測定も未実施 | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[資料ライブラリ検証](docs/validation/knowledge-library.md) |
-| [ ] | LLM選択／実モデル・UI | 合成ローカルのモデル一覧選択→保存→再編集、狭幅の主要キー操作を確認。U03はフォーカス追従でローカル修正・再受入済み。VoiceOver受入の保留（ユーザー指示・オフ確認済み）、各社/Qwenの実生成・構造化応答・品質・速度が残る | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[LLM選択検証](docs/validation/llm-selection.md) |
+| [ ] | Sessions／UI受入 | 狭幅・48pt・検索/詳細・保存パネル/削除取消のキー操作を確認。U01は上部操作の固定により修正・再受入済み（PR #44マージ済み）。VoiceOverは対象操作を確認できず、ユーザー指示で保留（オフ確認済み） | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[Sessions検証](docs/validation/sessions.md) |
+| [ ] | 資料ライブラリ／UI・レビュー | 狭幅・48pt・登録/検索/詳細/文書切替/削除取消を確認。U02は本文のネイティブ化で修正・再受入済み（PR #44マージ済み）。未実施経路、VoiceOver受入の保留（ユーザー指示・オフ確認済み）が残る。独立レビュー実施済み、指摘修正はPR #41マージ済み。最大容量の測定も未実施 | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[資料ライブラリ検証](docs/validation/knowledge-library.md) |
+| [ ] | LLM選択／実モデル・UI | 合成ローカルのモデル一覧選択→保存→再編集、狭幅の主要キー操作を確認。U03はフォーカス追従で修正・再受入済み（PR #44マージ済み）。VoiceOver受入の保留（ユーザー指示・オフ確認済み）、各社/Qwenの実生成・構造化応答・品質・速度が残る | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[LLM選択検証](docs/validation/llm-selection.md) |
 | [ ] | PR0・5-B／Gate A | Conferenceの実翻訳・文字起こし専用・字幕・停止/再開・辞書・言語切替・Clear・Markdown保存・権限拒否/復旧など、回帰表の未実施項目を実機確認 | [Conference回帰表](docs/validation/conference-baseline.md#conference回帰表) |
 | [ ] | PR3・4／Gate B | Zoom/Meet/Teamsそれぞれで内部音声とマイクを識別。入力切替・機器/権限変更・切断/復旧・検証画面閉鎖時の停止、2系統STTの精度・時刻誤差・遅延・CPU/メモリを確認 | [2入力検証](docs/validation/dual-transcription.md)・[詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR5-C・6・7・8／Gate C | 通常Meetingの開始・一時停止/再開・終了は実音声で確認済み。候補確認/却下・要約・Markdown保存との結合受入が残る。根拠表示・誤確定防止・提案連発防止、通信断時の音声継続とAIのみの縮退、資料検索との結合を確認 | [PR5-C](docs/validation/pr5-c-meeting.md)・[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-meeting-state.md)・[PR8](docs/validation/pr8-local-rag.md) |
@@ -156,11 +156,11 @@
 
 ## 更新履歴（直近のみ）
 
-- **2026-11-12（資料追加導線）:** 承認済みの事前登録・会議中追加・Conference支援をローカル実装。自動検証・主要fake UIを確認。実音声・実モデル品質・UI網羅は継続。レビュー提出版・未マージ。[結果](docs/validation/knowledge-entry-points.md)。
+- **2026-11-12（資料追加導線）:** 承認済みの事前登録・会議中追加・Conference支援をローカル実装。自動検証・主要fake UIを確認。実音声・実モデル品質・UI網羅は継続。[PR #24](https://github.com/Ryuta1346/conflingo/pull/24)でマージ済み。[結果](docs/validation/knowledge-entry-points.md)。
 - **2026-11-12（現状整理）:** ローカルmain `56d7a81`でPR #21〜23のマージを確認。最新テスト件数を467へ修正し、資料ライブラリ・LLM選択の未検証項目と作業優先順を明記。文書整理のみ。受入完了数2/12と各Gateの未完了を維持。
-- **2026-11-11（Sessions）:** 計画承認後にローカル実装、423テスト・lint・Debug/Release成功。主要無通信UIを確認し、残るS12を明記。ユーザー依頼でコミット・pushし、[Draft PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成。[結果](docs/validation/sessions.md)。
+- **2026-11-11（Sessions）:** 計画承認後にローカル実装、423テスト・lint・Debug/Release成功。主要無通信UIを確認し、残るS12を明記。ユーザー依頼でコミット・pushし、[PR #21](https://github.com/Ryuta1346/conflingo/pull/21)を作成（マージ済み）。[結果](docs/validation/sessions.md)。
 - **2026-11-11（PR #20マージ後の整理）:** main `294bd0c`と検証記録151ファイルのハッシュ一致を確認。追加機能を実装済みへ更新し、実モデル品質・独立レビュー・大規模性能・README整合を残件に明記。受入完了数2/12と各Gate状態は維持。文書整理のみで追加API・音声取得は0。
 - **2026-11-11（実音声）:** 診断2試行で日本語4文・英語9文を確認。欠落の旧判定を撤回。新しい文での再開と通常Meetingの開始→一時停止→再開→終了も確認。追加API0。[診断](docs/validation/microphone-diagnostics.md)・[Meeting受入](docs/validation/meeting-real-input-2026-11-11.md)。
 - **2026-11-11（品質）:** PR8合成引用16/16合格。PR7要約期限を60秒へ変更し、複数回評価を通じ固定16会議・22区間の品質条件を確認。過去timeoutと使用量予約は保持。[PR8結果](docs/validation/pr8-quality-acceptance.md)・[PR7結果](docs/validation/pr7-summary-deadline.md)。
 
-> 2026-11-15 UI修正結果: U01〜U03のテスト・修正・再受入を完了。VoiceOverは停止・保留を維持し、全経路受入ではないためGate完了数2/12を維持する。修正は `20d959c`、[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)提出済み・未マージ。
+> 2026-11-15 UI修正結果: U01〜U03のテスト・修正・再受入を完了。VoiceOverは停止・保留を維持し、全経路受入ではないためGate完了数2/12を維持する。修正は `20d959c`、[PR #44](https://github.com/Ryuta1346/conflingo/pull/44)でmain `8a02bc8`へマージ済み。
