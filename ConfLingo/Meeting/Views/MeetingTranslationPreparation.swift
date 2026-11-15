@@ -58,7 +58,7 @@ struct MeetingTranslationText: View {
         if let target = entry?.request.targetLanguage ?? targetLanguage {
             VStack(alignment: .leading, spacing: 6) {
                 Text("訳文 · \(LanguageCatalog.displayName(for: target))")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 ReservedTranslation(sourceText: entry?.request.event.text ?? sourceText, fontSize: fontSize) {
                     if let translation = entry?.translation {
                         Text(translation.text).font(.system(size: fontSize)).lineSpacing(6).textSelection(.enabled)
@@ -68,13 +68,13 @@ struct MeetingTranslationText: View {
                             case .pending: Text("翻訳待ち（初回はモデルを準備）")
                             case .translating: Text("翻訳中…")
                             case .failed(let reason):
-                                Text(reason).foregroundStyle(DesignTokens.warning)
+                                InlineMessage(.failure, "翻訳失敗・原文は保持しています。", details: reason)
                                 Button("翻訳を再試行") { translations.retry(eventID) }
                             case .done: Text("翻訳完了")
                             case nil: Text("発話の確定待ち")
                             }
                         }
-                        .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                     }
                 }
             }

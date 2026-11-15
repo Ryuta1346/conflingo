@@ -7,15 +7,15 @@ struct TranscriptPane: View {
     @State private var followsLatest = true
     @State private var userScrolling = false
     @State private var atBottom = true
-    @State private var scrollPosition = ScrollPosition(edge: .bottom)
+    @State private var scrollPosition = ScrollPosition(idType: String.self, edge: .bottom)
 
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             HStack {
-                Text(title).font(.callout.weight(.semibold))
+                Text(title).font(DesignTokens.Typography.body.weight(.semibold))
                 Spacer()
                 if !followsLatest {
-                    Text("履歴を表示中").font(.caption).foregroundStyle(DesignTokens.secondary)
+                    Text("履歴を表示中").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 }
             }
             .padding(12)
@@ -26,8 +26,8 @@ struct TranscriptPane: View {
                         if entries.isEmpty {
                             VStack(alignment: .leading, spacing: 10) {
                                 Image(systemName: "waveform").font(.title2)
-                                Text("字幕を待っています").font(.headline)
-                                Text("音声が認識されると、ここに表示されます。").font(.callout)
+                                Text("字幕を待っています").font(DesignTokens.Typography.heading)
+                                Text("音声が認識されると、ここに表示されます。").font(DesignTokens.Typography.body)
                             }
                             .foregroundStyle(DesignTokens.secondary)
                             .padding(.vertical, 24)
@@ -44,7 +44,7 @@ struct TranscriptPane: View {
                                         Text(" ").accessibilityHidden(true)
                                     }
                                 }
-                                .font(.caption)
+                                .font(DesignTokens.Typography.supporting)
                                 .foregroundStyle(entry.status == .failed ? DesignTokens.danger : DesignTokens.secondary)
                                 if let source = entry.reservationText {
                                     ReservedTranslation(sourceText: source, fontSize: fontSize) { entryText(entry) }
@@ -55,6 +55,7 @@ struct TranscriptPane: View {
                         }
                         Color.clear.frame(height: 1).id("latest")
                     }
+                    .scrollTargetLayout()
                     .padding(16)
                 }
                 .clipped()
@@ -82,7 +83,7 @@ struct TranscriptPane: View {
                             followsLatest = true
                             proxy.scrollTo("latest", anchor: .bottom)
                         }
-                        .buttonStyle(.borderedProminent)
+                        .buttonStyle(AppButtonStyle(.primary))
                         .padding(14)
                     }
                 }

@@ -16,10 +16,10 @@ struct SetupView: View {
                     Text("利用できる言語とモデルを確認しています…")
                 }
                 Text("準備が完了してから、字幕を開始できます。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
         }
-        .font(.callout)
+        .font(DesignTokens.Typography.body)
         .padding(16)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: 8))

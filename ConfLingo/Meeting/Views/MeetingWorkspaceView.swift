@@ -20,14 +20,14 @@ struct MeetingWorkspaceView: View {
                 header
                 if meeting.translations.pendingCount > 0 {
                     Text("翻訳待ち \(meeting.translations.pendingCount)件 · 保存には完成した訳文を含めます")
-                        .font(.caption).foregroundStyle(DesignTokens.secondary).padding(.horizontal, 16)
+                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary).padding(.horizontal, 16)
                 }
-                if let error = meeting.controller.lastError {
-                    SessionErrorBanner(message: error).padding([.horizontal, .bottom], 16)
+                if let failure = meeting.controller.failure {
+                    InlineMessage(failure).padding([.horizontal, .bottom], 16)
                 }
                 GeometryReader { geometry in
                     let horizontal = geometry.size.width >= WorkspaceLayout.meetingColumnsWidth
-                    let paneHeight = meeting.page == .live ? max(400, 160 + fontSize * 4) : 80 + max(160, fontSize * 4)
+                    let paneHeight = meeting.page == .live ? max(400, 160 + fontSize * 4) : 96 + max(160, fontSize * 4)
                     ScrollViewReader { proxy in
                         ScrollView {
                             MeetingPaneLayout(horizontal: horizontal, suggestionsFirst: meeting.page == .live) {
@@ -91,25 +91,25 @@ struct MeetingWorkspaceView: View {
                         if meeting.mode == .translation {
                             translationPicker("内部音声の翻訳先", selection: $meeting.systemTranslationLanguage)
                             Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
-                                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                         }
                         Text("内部音声にはMacで再生する他の音も含まれます。ヘッドフォンの利用を推奨します。")
-                            .font(.callout).foregroundStyle(DesignTokens.secondary)
+                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                         Divider()
                         Toggle("参加者に文字起こしを通知し、同意を確認しました", isOn: $meeting.consentConfirmed)
                         Text("このチェックで参加者への通知が送信されることはありません。")
-                            .font(.caption).foregroundStyle(DesignTokens.secondary)
+                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
                     }
                     .disabled(meeting.phase != .idle || meeting.isBusy)
                 }
                 Surface {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("音声認識と翻訳は、このMacで", systemImage: "checkmark.shield")
-                            .font(.headline)
+                            .font(DesignTokens.Typography.heading)
                         Text("音声は保存・外部送信しません。翻訳モデルは初回にダウンロードが必要な場合があります。AIの回答言語と翻訳先は別設定です。自動保存はしません。準備中の完成したAI回答、または会議終了後の記録を「このMacに保存」で残せます。AI送信は下で明示的に許可した場合だけ行います。")
-                            .font(.callout).foregroundStyle(DesignTokens.secondary)
+                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
                         ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
-                            Text("\(origin.label)：\(permission(origin))").font(.caption)
+                            Text("\(origin.label)：\(permission(origin))").font(DesignTokens.Typography.supporting)
                         }
                     }
                 }
@@ -121,7 +121,7 @@ struct MeetingWorkspaceView: View {
                     Surface { MeetingSaveControls(meeting: meeting, sessions: sessions) }
                 }
                 MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
-                if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
+                if let failure = meeting.controller.failure { InlineMessage(failure) }
             }
             .padding(24)
             .frame(maxWidth: 800)
@@ -133,10 +133,10 @@ struct MeetingWorkspaceView: View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 5) {
                 Text(meeting.page == .review ? "Meeting / 振り返り" : "Meeting / ライブ")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
-                Text(meeting.title).font(.title2.weight(.semibold)).lineLimit(2)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
+                Text(meeting.title).font(DesignTokens.Typography.heading).lineLimit(2)
                 Text(sessions?.status(for: meeting.sessionSnapshot) ?? "自動保存オフ · 終了後に保存またはMarkdown書き出し")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
             Spacer(minLength: 8)
             Button("小さく表示", systemImage: "pip", action: compact)
@@ -147,7 +147,7 @@ struct MeetingWorkspaceView: View {
     private var insights: some View {
         VStack(alignment: .leading, spacing: 16) {
             Text(meeting.page == .review ? "会議の振り返り" : "いま、役立つ提案")
-                .font(.headline).accessibilityAddTraits(.isHeader)
+                .font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
             if meeting.page == .review {
                 MeetingReviewControls(meeting: meeting, fontSize: fontSize, sessions: sessions)
                 ForEach(meeting.research.answers.reversed()) { answer in
@@ -156,9 +156,9 @@ struct MeetingWorkspaceView: View {
             }
             MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize)
             if !meeting.candidates.items.isEmpty {
-                Text("決定・アクション候補").font(.headline)
+                Text("決定・アクション候補").font(DesignTokens.Typography.heading)
                 Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 ForEach(meeting.candidates.items) { candidate in
                     MeetingInsightCard(meeting: meeting, insight: candidate.insight, fontSize: fontSize)
                 }
@@ -168,24 +168,24 @@ struct MeetingWorkspaceView: View {
                     VStack(alignment: .leading, spacing: 14) {
                         Image(systemName: "sparkles").font(.title2).foregroundStyle(DesignTokens.accent)
                         Text("会話の流れを確認できます")
-                            .font(.title3.weight(.semibold))
+                            .font(DesignTokens.Typography.heading)
                         Text("送信を許可するとAsk AIで質問できます。認識した発話は「会話の流れ」で確認できます。")
-                            .foregroundStyle(DesignTokens.secondary)
+                            .foregroundStyle(DesignTokens.text)
                         if meeting.page == .review {
                             Text("確定した発話 \(meeting.store.finals.count)件。必要な文章は選択してコピーできます。")
                         }
                     }
-                    .font(.callout)
+                    .font(DesignTokens.Typography.body)
                 }
             }
             ForEach(meeting.insights.reversed().filter { card in !meeting.candidates.items.contains { $0.id == card.id } }) { insight in
                 MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize)
             }
             Label(meeting.aiStatus, systemImage: "cloud")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             if meeting.page == .review {
                 Text("「このMacに保存」で再起動後も振り返れます。Markdownの書き出しとは別の保存です。")
-                    .font(.callout).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             }
         }
         .padding(1)
@@ -232,30 +232,30 @@ struct MeetingInsightCard: View {
                     Spacer()
                     StatusLabel(text: badge.text, symbol: badge.symbol, color: badge.color)
                 }
-                .font(.caption)
+                .font(DesignTokens.Typography.supporting)
                 Text(insight.text).font(.system(size: fontSize, weight: .medium)).textSelection(.enabled)
                 ForEach(insight.evidenceIDs, id: \.self) { id in
                     if let event = meeting.evidence(for: id) {
-                        Text(event.text).font(.callout).foregroundStyle(DesignTokens.secondary).textSelection(.enabled)
+                        Text(event.text).font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary).textSelection(.enabled)
                         Button("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)の発話を見る") {
                             meeting.revealEvidence(id)
                         }
-                        .font(.caption)
+                        .buttonStyle(AppButtonStyle(.link))
                     } else {
-                        Text("根拠の発話を参照できません").font(.caption).foregroundStyle(DesignTokens.warning)
+                        Text("根拠の発話を参照できません").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.warning)
                     }
                 }
                 ForEach(insight.knowledgeReferences) { reference in
                     Button("資料：\(reference.displayTitle) · \(reference.location)") {
                         if let revealKnowledge { revealKnowledge(reference) } else { meeting.selectedKnowledge = reference }
-                    }.font(.caption)
+                    }.font(DesignTokens.Typography.supporting).buttonStyle(AppButtonStyle(.link))
                 }
                 WebReferencesView(references: insight.webReferences ?? [])
                 if meeting.page != .review {
                     Button("この提案をWebで調べる") { meeting.research.open(insight.text, evidenceIDs: insight.evidenceIDs) }
                 }
                 if insight.hasInvalidEvidence {
-                    Text("応答に確認できない根拠が含まれます・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
+                    Text("応答に確認できない根拠が含まれます・要確認").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.warning)
                 }
                 if let candidate = meeting.candidates.items.first(where: { $0.id == insight.id }) {
                     ViewThatFits(in: .horizontal) {
@@ -264,11 +264,11 @@ struct MeetingInsightCard: View {
                     }
                     if !meeting.candidates.canConfirm(candidate.id) {
                         Text("有効な根拠が揃っていないため、確認済みにできません。")
-                            .font(.caption).foregroundStyle(DesignTokens.warning)
+                            .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.warning)
                     }
                 }
                 if insight.evidenceIDs.isEmpty && insight.knowledgeReferences.isEmpty {
-                    Text("根拠なし・要確認").font(.caption).foregroundStyle(DesignTokens.warning)
+                    Text("根拠なし・要確認").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.warning)
                 }
             }
         }

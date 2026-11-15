@@ -8,8 +8,9 @@ final class SessionController {
     private let dual: DualTranscriptionController
     var activity: AudioInputUse { dual.activity }
     var isStopping: Bool { dual.isStopping }
-    var lastError: String? { dual.lastError ?? sessionError }
-    private var sessionError: String?
+    var failure: UserMessage? { dual.failure ?? sessionError }
+    var lastError: String? { failure?.text }
+    private var sessionError: UserMessage?
     private var adapter: LegacyTranslationAdapter?
     private var consumer: Task<Void, Never>?
     @ObservationIgnored private var phaseSubscription: EventSubscription<SessionPhase>?
@@ -56,7 +57,7 @@ final class SessionController {
                 do {
                     while let event = try await subscription.next() { adapter.receive(event) }
                 } catch {
-                    self?.sessionError = "字幕の処理が追いつかないため入力を停止します。最後の発話が欠けている可能性があります。"
+                    self?.sessionError = AudioFailureMessage.transcription(error, origin: nil)
                     // この購読の終了を待つstopは、別タスクで開始する。
                     Task { [weak self] in await self?.dual.stop() }
                 }

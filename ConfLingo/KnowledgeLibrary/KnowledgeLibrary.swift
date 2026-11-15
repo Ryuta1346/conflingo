@@ -9,7 +9,8 @@ final class KnowledgeLibrary {
     private(set) var entries: [KnowledgeLibraryEntry] = []
     private(set) var selected: SavedKnowledge?
     private(set) var isBusy = false
-    private(set) var error: String?
+    private(set) var failure: UserMessage?
+    var error: String? { failure?.text }
     var query = ""
 
     init(files: KnowledgeLibraryFiles, load: (@MainActor (UUID) async throws -> SavedKnowledge)? = nil) {
@@ -35,18 +36,20 @@ final class KnowledgeLibrary {
     func reload() async {
         guard !isBusy else { return }
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
-        do { entries = try await files.list() } catch { self.error = "一覧を読み込めません。\(error.localizedDescription)" }
+        do { entries = try await files.list() } catch { self.failure = UserMessage(.failure, "一覧を読み込めません。" + ((error as? LibraryFailure)?.localizedDescription ?? ""),
+            details: error is LibraryFailure ? nil : error.localizedDescription) }
     }
 
     func open(_ id: UUID) async {
         guard !isBusy else { return }
         isBusy = true
-        error = nil
+        failure = nil
         selected = nil
         defer { isBusy = false }
-        do { selected = try await load(id) } catch { self.error = "資料を開けません。\(error.localizedDescription)" }
+        do { selected = try await load(id) } catch { self.failure = UserMessage(.failure, "資料を開けません。" + ((error as? LibraryFailure)?.localizedDescription ?? ""),
+            details: error is LibraryFailure ? nil : error.localizedDescription) }
     }
 
     func close() { if !isBusy { selected = nil } }
@@ -54,7 +57,7 @@ final class KnowledgeLibrary {
     func delete(_ entry: KnowledgeLibraryEntry) async {
         guard !isBusy else { return }
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
         do {
             // A confirmation for an old revision must not delete its replacement.
@@ -62,14 +65,15 @@ final class KnowledgeLibrary {
             try await files.delete(entry.id)
             entries.removeAll { $0.id == entry.id }
             if selected?.id == entry.id { selected = nil }
-        } catch { self.error = "削除できませんでした。\(error.localizedDescription)" }
+        } catch { self.failure = UserMessage(.failure, "削除できませんでした。" + ((error as? LibraryFailure)?.localizedDescription ?? ""),
+            details: error is LibraryFailure ? nil : error.localizedDescription) }
     }
 
     func canUse(_ meeting: MeetingWorkspace) -> Bool { !isBusy && meeting.canEditKnowledge }
 
     func save(from meeting: MeetingWorkspace, documentID: UUID?, title: String,
               replacing replacement: KnowledgeLibraryEntry? = nil) async -> Bool {
-        guard canUse(meeting) else { error = LibraryFailure.unavailable.localizedDescription; return false }
+        guard canUse(meeting) else { failure = UserMessage(.failure, LibraryFailure.unavailable.localizedDescription); return false }
         meeting.isUsingLibrary = true
         defer { meeting.isUsingLibrary = false }
         return await save(from: meeting.knowledge, documentID: documentID, title: title, replacing: replacement)
@@ -79,7 +83,7 @@ final class KnowledgeLibrary {
               replacing replacement: KnowledgeLibraryEntry? = nil) async -> Bool {
         guard !isBusy, !knowledge.isBusy else { return false }
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
         let revision = knowledge.revision
         let generation = knowledge.importGeneration
@@ -93,11 +97,17 @@ final class KnowledgeLibrary {
             if selected?.id == saved.id { selected = saved }
             if revision == knowledge.revision, generation == knowledge.importGeneration { knowledge.markSaved(saved) }
             return true
-        } catch { self.error = "保存できませんでした。前回の保存版を保持します。\(error.localizedDescription)"; return false }
+        } catch {
+            self.failure = error is CancellationError
+            ? UserMessage(.information, "保存を中止しました。前回の保存版を保持します。")
+            : UserMessage(.failure, "保存できませんでした。前回の保存版を保持します。" + ((error as? LibraryFailure)?.localizedDescription ?? ""),
+            details: error is LibraryFailure ? nil : error.localizedDescription)
+            return false
+        }
     }
 
     func attach(_ id: UUID, to meeting: MeetingWorkspace) async -> Bool {
-        guard canUse(meeting) else { error = LibraryFailure.unavailable.localizedDescription; return false }
+        guard canUse(meeting) else { failure = UserMessage(.failure, LibraryFailure.unavailable.localizedDescription); return false }
         meeting.isUsingLibrary = true
         defer { meeting.isUsingLibrary = false }
         let result = await attach(id, to: meeting.knowledge)
@@ -108,7 +118,7 @@ final class KnowledgeLibrary {
     func attach(_ id: UUID, to knowledge: KnowledgeStore) async -> Bool {
         guard !isBusy, !knowledge.isBusy else { return false }
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
         let revision = knowledge.revision
         let generation = knowledge.importGeneration
@@ -119,7 +129,13 @@ final class KnowledgeLibrary {
             upsert(saved.entry)
             knowledge.setPermission(false)
             return true
-        } catch { self.error = "追加できませんでした。\(error.localizedDescription)"; return false }
+        } catch {
+            self.failure = error is CancellationError
+            ? UserMessage(.information, "資料の追加を中止しました。")
+            : UserMessage(.failure, "追加できませんでした。資料を選び直してください。" + ((error as? LibraryFailure)?.localizedDescription ?? ""),
+            details: error is LibraryFailure ? nil : error.localizedDescription)
+            return false
+        }
     }
 
     private func upsert(_ entry: KnowledgeLibraryEntry) {

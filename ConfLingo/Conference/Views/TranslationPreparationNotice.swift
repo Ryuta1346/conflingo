@@ -8,7 +8,7 @@ struct TranslationPreparationNotice: View {
         switch state {
         case .failed(let reason):
             VStack(alignment: .leading, spacing: 8) {
-                SessionErrorBanner(message: "翻訳モデルを準備できませんでした。文字起こしは引き続き利用できます。\n\(reason)")
+                InlineMessage(.failure, "翻訳モデルを準備できませんでした。文字起こしは引き続き利用できます。翻訳を再試行してください。", details: reason)
                 Button("翻訳を再試行", systemImage: "arrow.clockwise", action: retry)
                     .accessibilityHint("文字起こしを止めずに翻訳モデルの準備をやり直します")
             }
@@ -16,7 +16,7 @@ struct TranslationPreparationNotice: View {
         case .preparing:
             HStack(spacing: 10) {
                 ProgressView().controlSize(.small)
-                Text("翻訳モデルを準備しています…").font(.callout)
+                Text("翻訳モデルを準備しています…").font(DesignTokens.Typography.body)
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding([.horizontal, .top], 16)

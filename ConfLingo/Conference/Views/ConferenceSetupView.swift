@@ -44,9 +44,9 @@ struct ConferenceSetupView: View {
                         Divider()
                         HStack {
                             VStack(alignment: .leading, spacing: 5) {
-                                Text("専門用語辞書").font(.headline)
+                                Text("専門用語辞書").font(DesignTokens.Typography.heading)
                                 Text("固有名詞や訳語を、いつもの表記で。")
-                                    .font(.callout).foregroundStyle(DesignTokens.secondary)
+                                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                             }
                             Spacer()
                             Button("辞書を管理", systemImage: "book", action: editDictionary)
@@ -59,7 +59,7 @@ struct ConferenceSetupView: View {
                         }
                         .disabled(!canEdit)
                         Text(profiles.selectedProfile.keywords.isEmpty ? "登録された用語はありません" : profiles.selectedProfile.keywords)
-                            .font(.callout).foregroundStyle(DesignTokens.secondary)
+                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                             .lineLimit(3)
                         if hasTranscript {
                             Divider()
@@ -68,7 +68,7 @@ struct ConferenceSetupView: View {
                     }
                 }
                 Label("音声認識と翻訳はこのMacで行います。字幕は自動保存されません。", systemImage: "checkmark.shield")
-                    .font(.callout).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             }
             .padding(28)
             .frame(maxWidth: 920)
@@ -100,7 +100,7 @@ struct ConferenceSetupView: View {
 
     private func labeledField<Content: View>(_ title: String, @ViewBuilder content: () -> Content) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(title).font(.callout.weight(.medium))
+            Text(title).font(DesignTokens.Typography.body.weight(.medium))
             content().frame(maxWidth: .infinity, alignment: .leading)
         }
         .frame(minWidth: 200, maxWidth: .infinity, alignment: .leading)
@@ -115,7 +115,7 @@ struct ConferenceSetupView: View {
             SetupView(state: modelState, progress: downloadProgress, sourceLanguage: sourceLanguage)
         case .unavailable(let reason):
             VStack(alignment: .leading, spacing: 10) {
-                SessionErrorBanner(message: reason)
+                InlineMessage(.failure, "音声認識を準備できませんでした。入力設定を確認して再試行してください。", details: reason)
                 Button("もう一度確認", systemImage: "arrow.clockwise", action: retry).disabled(!canEdit)
             }
         }

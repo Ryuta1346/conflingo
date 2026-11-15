@@ -32,7 +32,8 @@ struct KeychainAPIKeyStore: APIKeyStore {
 @Observable
 final class APIKeyCredentials {
     private(set) var configured = false
-    private(set) var message = ""
+    private(set) var notice: UserMessage?
+    var message: String { notice?.text ?? "" }
     private var checking = false
     private var readFailed = false
     private var refreshVersion = 0
@@ -51,7 +52,7 @@ final class APIKeyCredentials {
         refreshVersion += 1
         let version = refreshVersion
         checking = true
-        message = ""
+        notice = nil
         defer { if refreshVersion == version { checking = false } }
         do {
             let exists = try await store.read() != nil
@@ -62,7 +63,7 @@ final class APIKeyCredentials {
             guard refreshVersion == version, !Task.isCancelled else { return }
             configured = false
             readFailed = true
-            message = InsightFailure.keyStorage.localizedDescription
+            notice = UserMessage(.failure, InsightFailure.keyStorage.localizedDescription)
         }
     }
 
@@ -74,7 +75,7 @@ final class APIKeyCredentials {
     func save(_ value: String) -> Bool {
         let key = value.trimmingCharacters(in: .whitespacesAndNewlines)
         guard Self.isValid(key) else {
-            message = "有効なAPIキーを入力してください。"
+            notice = UserMessage(.warning, "有効なAPIキーを入力してください。")
             return false
         }
         onChange?()
@@ -84,9 +85,9 @@ final class APIKeyCredentials {
             checking = false
             configured = true
             readFailed = false
-            message = "APIキーをKeychainへ保存しました。"
+            notice = UserMessage(.success, "APIキーをKeychainへ保存しました。")
             return true
-        } catch { message = InsightFailure.keyStorage.localizedDescription; return false }
+        } catch { notice = UserMessage(.failure, InsightFailure.keyStorage.localizedDescription); return false }
     }
 
     func delete() {
@@ -97,7 +98,7 @@ final class APIKeyCredentials {
             checking = false
             configured = false
             readFailed = false
-            message = "APIキーを削除しました。"
-        } catch { message = InsightFailure.keyStorage.localizedDescription }
+            notice = UserMessage(.success, "APIキーを削除しました。")
+        } catch { notice = UserMessage(.failure, InsightFailure.keyStorage.localizedDescription) }
     }
 }

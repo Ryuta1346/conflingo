@@ -10,7 +10,7 @@ struct KeywordProfileEditor: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 20) {
             HStack {
-                Text("専門用語辞書").font(.title2.weight(.semibold))
+                Text("専門用語辞書").font(DesignTokens.Typography.heading)
                 Spacer()
                 Button("閉じる") { dismiss() }.keyboardShortcut(.cancelAction)
             }
@@ -30,21 +30,21 @@ struct KeywordProfileEditor: View {
                 Button("削除", systemImage: "trash", role: .destructive) { deleting = true }
                     .disabled(profiles.profiles.count <= 1)
             }
-            Text("専門用語・固定訳語").font(.headline)
+            Text("専門用語・固定訳語").font(DesignTokens.Typography.heading)
             TextEditor(text: Binding(
                 get: { profiles.selectedProfile.keywords },
                 set: { profiles.updateSelectedKeywords($0) }
             ))
-            .font(.body)
+            .font(DesignTokens.Typography.body)
             .padding(8)
             .frame(minHeight: 150, maxHeight: 240)
-            .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: 8))
-            .overlay(RoundedRectangle(cornerRadius: 8).stroke(DesignTokens.border))
+            .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: DesignTokens.controlRadius))
+            .overlay(RoundedRectangle(cornerRadius: DesignTokens.controlRadius).stroke(DesignTokens.border))
             .accessibilityLabel("専門用語・固定訳語")
             Text("カンマ・読点・改行で区切ります。例：evals=評価。訳語を省略すると原文表記を保持します。変更は自動保存され、次回の開始から適用されます。")
-                .font(.callout).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
         }
-        .padding(28)
+        .sheetSurface()
         .frame(width: 580)
         .background(DesignTokens.canvas)
         .alert("辞書の名前を変更", isPresented: $renaming) {

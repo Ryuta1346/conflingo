@@ -26,7 +26,7 @@ SWIFTLINT_BIN=/tmp/conflingo-tools/swiftlint bash scripts/ci.sh
 ## 検証範囲
 
 - SwiftLint strict/no-cache。
-- 既定の並列設定で全ローカルテスト。8つの実API評価フラグを0にし、実APIを使う4suite（7テスト定義）を明示除外する。合成HTTP応答やローカルfixtureを使用し、利用者のキー・実音声は使用しない。
+- 全ローカルテストを実行する。AppKitのウィンドウ・フォーカス・AX状態を共有する画面テストは、`AppKitIntegrationTests`親suiteの`.serialized`でsuite間も直列化し、その他は既定の並列実行を維持する。8つの実API評価フラグを0にし、実APIを使う4suite（7テスト定義）を明示除外する。合成HTTP応答やローカルfixtureを使用し、利用者のキー・実音声は使用しない。
 - 署名なしReleaseをarm64/x86_64でビルドし、lipoで両アーキテクチャを検査する。
 - `set -euo pipefail`でLint/テスト/ビルド失敗を伝播。エラー後の自動再実行で成功化しない。
 - workflowはcontents:readのみ、checkoutの認証情報を残さず、同一refの古いrunを取り消す。30分上限。ログとxcresultを成功/失敗時に7日間保持し、アプリ本体はアップロードしない。

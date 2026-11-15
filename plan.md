@@ -37,10 +37,10 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-15／main `0948f48`を基点とするDR2実装**。PR #46までマージ済み。PR #42・#43の独立レビューは修正指摘0件、PR #43・#44の修正後CI成功をGitHub APIで確認。U01〜U03は修正・再受入済み。UIデザインレビューのDR1はPR #46でマージ済み・実機確認待ち、DR2はモック・計画承認後にローカル実装・731テスト／Lint／両CPU Release成功（[結果](docs/validation/dr2-layout-2026-11-15.md)）。DR3〜5は未着手。VoiceOverは保留（ユーザー指示・オフ確認済み）。PR #44の独立レビュー・実モデル/実機受入は継続。
+- 更新: **2026-11-15／main `a34283c`を基点とするDR3実装**。PR #46までマージ済み。PR #42・#43の独立レビューは修正指摘0件、PR #43・#44の修正後CI成功をGitHub APIで確認。U01〜U03は修正・再受入済み。UIデザインレビューのDR1はPR #46でマージ済み・実機確認待ち、DR2はモック・計画承認後にローカル実装・731テスト／Lint／両CPU Release成功（[結果](docs/validation/dr2-layout-2026-11-15.md)）。DR2はPR #47でmain `a34283c`へマージ済み。DR3は初期実装後の独立レビュー2件をローカル修正し、748テスト／Lint成功（[修正結果](docs/validation/dr3-review-fixes-2026-11-15.md)）。修正後の追加レビュー・実機受入は継続。DR4〜5は未着手。VoiceOverは保留（ユーザー指示・オフ確認済み）。PR #44の独立レビュー・実モデル/実機受入は継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
-- **検証記録:** DR2ローカル最終版は731テスト・131suite成功（34.577秒）・Lint281ファイル違反0・Release両CPU成功（[画像・結果・途中の失敗](docs/validation/dr2-layout-2026-11-15.md)）。DR1のCI719テスト成功は[記録](docs/validation/dr1-small-fixes-2026-11-15.md)、PR #42・#43の独立レビューは[記録](docs/validation/pr42-pr43-independent-review-2026-11-15.md)を参照。
+- **検証記録:** DR3レビュー修正後は748テスト・135suite成功（37.963秒）・Lint290ファイル違反0（[修正結果](docs/validation/dr3-review-fixes-2026-11-15.md)）。両CPU Releaseと代表画像は[初期実装の記録](docs/validation/dr3-design-system-2026-11-15.md)。DR1のCI719テスト成功は[記録](docs/validation/dr1-small-fixes-2026-11-15.md)、PR #42・#43の独立レビューは[記録](docs/validation/pr42-pr43-independent-review-2026-11-15.md)を参照。
 - **品質確認済み:** PR6の合成回答52/52、PR7の固定16会議・22区間（複数回評価の合算）、PR8の合成引用16/16が合格。[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-summary-deadline.md)・[PR8](docs/validation/pr8-quality-acceptance.md)。実会議の結合受入とは区別する。
 - **実機確認済み:** 短時間の2入力、新しい文での再開、通常Meetingの開始→一時停止→再開→終了、AIの実受信後停止/取消、主要キーボード経路・VoiceOver基本操作。マイク発話欠落の旧判定は一覧末尾の確認漏れであり撤回済み。[実入力](docs/validation/meeting-real-input-2026-11-11.md)・[UI](docs/validation/pr6-focus-stability.md)。
 - **最新の追加機能:** Gemini・OpenAI・Claude・Kimi・DeepSeek・その他互換クラウド・PC内のQwen等の選択。APIキー分離、モデル一覧／手入力、ローカル接続を実装。ChatGPTログインは除外。
@@ -51,7 +51,7 @@
 
 **先行完了:** PR #44までmainへマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の[独立レビューは修正指摘0件](docs/validation/pr42-pr43-independent-review-2026-11-15.md)。[UIのキー操作3件も修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。実音声待ちの間はPR #44の独立レビューと残るUI受入を進める。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。
 
-**次に着手:** DR2の[ローカル実装差分・結果](docs/validation/dr2-layout-2026-11-15.md)のレビューと、DR1を含む残る実機受入。DR2はPRレビュー対象。続いて[UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR3（着手時に計画・承認）。実音声待ちの間にDR5まで順に進める。
+**次の作業:** DR3は文字・ボタン・行内メッセージ・シートの統一をローカル実装／自動検証済み（[結果](docs/validation/dr3-design-system-2026-11-15.md)）。独立レビューの2件は修正・自動検証済み（[結果](docs/validation/dr3-review-fixes-2026-11-15.md)）。修正後の追加レビューと実機受入を進める。DR2はPR #47でmainへマージ済み。DR1・DR2の残る受入を継続し、DR4は着手時に具体案を作成・承認後に進める。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -68,7 +68,7 @@
 |---|---|---|---|
 | DR1 | 小修正（D03・D05・D14） | 「会議を終了」に確認ダイアログ、候補の状態ラベルを状態別の色・記号へ、画面名を「履歴」に統一、`Meeting / General`を`Meeting / ライブ`へ。回帰テスト13定義を追加し[PR #46](https://github.com/Ryuta1346/conflingo/pull/46)マージ済み、修正後14定義・CI全719テスト成功。実機・合成UIでの確認は未実施。[結果](docs/validation/dr1-small-fixes-2026-11-15.md) | REVIEW |
 | DR2 | 領域配分（D01・D09・D02） | 提案優先・上部保存・字幕2列優先を承認後にローカル実装。731テスト・Lint281ファイル違反0・Release両CPU成功。5幅×2モード×2配色の画像、下書き保持・保存・フォーカス操作を確認。[結果](docs/validation/dr2-layout-2026-11-15.md)・[計画](docs/design/dr2-layout-plan.md) | REVIEW |
-| DR3 | デザインシステムの部品化（D04・D06・D07、D15・D16） | 文字様式（補助12pt以上）・ボタン4様式・行内メッセージを定義して置換。送信範囲の説明の可読性、破壊操作と失敗表示の統一を確認 | TODO |
+| DR3 | デザインシステムの部品化（D04・D06・D07、D15・D16） | 文字様式（補助12pt以上）・ボタン4様式・行内メッセージを共通化し、送信範囲・破壊操作・失敗表示・シートを統一。独立レビュー2件を修正し748テスト・Lint290ファイル違反0（[修正結果](docs/validation/dr3-review-fixes-2026-11-15.md)）。両CPU Release・代表描画28枚は初期実装時。[PR #48](https://github.com/Ryuta1346/conflingo/pull/48)（Draft）、修正後の追加レビュー／網羅受入は継続。[結果](docs/validation/dr3-design-system-2026-11-15.md)・[計画](docs/design/dr3-design-system-plan.md) | REVIEW |
 | DR4 | 中優先の残り（D08・D10〜D13） | Conference資料シートの分割、送信範囲パネルの共通化、メニュー／⌘,／Return、Meeting準備フォーム、文字サイズ設定の適用範囲 | TODO |
 | DR5 | 低優先（D17〜D21） | 会話の流れ・Home・状態表示・一覧画面の仕上げ。ダーク配色の強調ボタンのコントラスト（D21）は実機で先に確認 | TODO |
 

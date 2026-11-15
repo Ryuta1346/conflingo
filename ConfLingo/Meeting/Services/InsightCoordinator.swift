@@ -62,6 +62,11 @@ final class InsightCoordinator {
     deinit { task?.cancel(); deadline?.cancel(); consumer?.cancel() }
 
     var canAsk: Bool { active && permitted && lookupID == nil && !knowledge.isBusy && request?.trigger != .manual }
+    var statusMessage: UserMessage {
+        if case .failed = state { return UserMessage(.failure, statusText) }
+        return UserMessage(.information, statusText)
+    }
+
     var statusText: String {
         let status = switch state {
         case .off: "AIオフ・外部送信なし"

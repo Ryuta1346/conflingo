@@ -63,8 +63,8 @@ struct ContentView: View {
                 VStack(spacing: 0) {
                     topBar(contentWidth: shell.size.width)
                     Divider()
-                    if let error = controller.lastError {
-                        SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
+                    if let failure = controller.failure {
+                        InlineMessage(failure).padding([.horizontal, .top], 16)
                     }
                     if !transcriptionOnly && (navigation.destination == .live || navigation.destination == .setup) {
                         TranslationPreparationNotice(state: coordinator.preparationState, retry: retryTranslation)
@@ -310,7 +310,7 @@ struct ContentView: View {
 
     private var toolbarTitle: some View {
         Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "履歴" : navigation.destination == .meeting ? "Meeting" : "Conference")
-            .font(.callout.weight(.medium)).foregroundStyle(DesignTokens.secondary).fixedSize()
+            .font(DesignTokens.Typography.body.weight(.medium)).foregroundStyle(DesignTokens.secondary).fixedSize()
     }
 
     @ViewBuilder private func conferenceTools(contentWidth: CGFloat) -> some View {

@@ -15,49 +15,54 @@ struct ConferenceLiveView: View {
         GeometryReader { geometry in
             let stacked = targetLanguage != nil && geometry.size.width < WorkspaceLayout.subtitleColumnsWidth
             let minimumHeight = minimumPaneHeight * (stacked ? 2 : 1) + 160
-            ScrollView {
-                VStack(alignment: .leading, spacing: 12) {
-                    ViewThatFits(in: .horizontal) {
-                        HStack(alignment: .center) {
-                            heading
-                            Spacer()
-                            Button("字幕の設定", systemImage: "gearshape", action: editSettings)
-                                .disabled(store.phase == .preparing || store.phase == .stopping)
-                        }
-                        VStack(alignment: .leading, spacing: 12) {
-                            heading
-                            Button("字幕の設定", systemImage: "gearshape", action: editSettings)
-                                .disabled(store.phase == .preparing || store.phase == .stopping)
-                        }
-                    }
-                    Group {
-                        if targetLanguage == nil {
-                            sourcePane
-                        } else {
-                            let horizontal = geometry.size.width >= WorkspaceLayout.subtitleColumnsWidth
-                            let layout = horizontal
-                                ? AnyLayout(HStackLayout(spacing: 0))
-                                : AnyLayout(VStackLayout(spacing: 0))
-                            layout {
-                                sourcePane
-                                Rectangle().fill(DesignTokens.border)
-                                    .frame(width: horizontal ? 1 : nil, height: horizontal ? nil : 1)
-                                translationPane
+            ScrollViewReader { proxy in
+                ScrollView {
+                    VStack(alignment: .leading, spacing: 12) {
+                        ViewThatFits(in: .horizontal) {
+                            HStack(alignment: .center) {
+                                heading
+                                Spacer()
+                                Button("字幕の設定", systemImage: "gearshape", action: editSettings)
+                                    .disabled(store.phase == .preparing || store.phase == .stopping)
+                                    .modifier(RevealOnFocus(proxy: proxy))
+                            }
+                            VStack(alignment: .leading, spacing: 12) {
+                                heading
+                                Button("字幕の設定", systemImage: "gearshape", action: editSettings)
+                                    .disabled(store.phase == .preparing || store.phase == .stopping)
+                                    .modifier(RevealOnFocus(proxy: proxy))
                             }
                         }
+                        Group {
+                            if targetLanguage == nil {
+                                sourcePane
+                            } else {
+                                let horizontal = geometry.size.width >= WorkspaceLayout.subtitleColumnsWidth
+                                let layout = horizontal
+                                    ? AnyLayout(HStackLayout(spacing: 0))
+                                    : AnyLayout(VStackLayout(spacing: 0))
+                                layout {
+                                    sourcePane
+                                    Rectangle().fill(DesignTokens.border)
+                                        .frame(width: horizontal ? 1 : nil, height: horizontal ? nil : 1)
+                                    translationPane
+                                }
+                            }
+                        }
+                        .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radius))
+                        .overlay(RoundedRectangle(cornerRadius: DesignTokens.radius).stroke(DesignTokens.border))
+                        HStack {
+                            Text("字幕を選択してコピーできます。")
+                                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
+                            Spacer()
+                            Button("字幕を消去", systemImage: "trash", role: .destructive, action: clear)
+                                .disabled(store.phase != .idle || store.segments.isEmpty)
+                                .modifier(RevealOnFocus(proxy: proxy))
+                        }
                     }
-                    .clipShape(RoundedRectangle(cornerRadius: DesignTokens.radius))
-                    .overlay(RoundedRectangle(cornerRadius: DesignTokens.radius).stroke(DesignTokens.border))
-                    HStack {
-                        Text("字幕を選択してコピーできます。")
-                            .font(.caption).foregroundStyle(DesignTokens.secondary)
-                        Spacer()
-                        Button("字幕を消去", systemImage: "trash", action: clear)
-                            .disabled(store.phase != .idle || store.segments.isEmpty)
-                    }
+                    .frame(height: max(minimumHeight, geometry.size.height - (geometry.size.width < WorkspaceLayout.subtitleColumnsWidth ? 32 : 48)))
+                    .padding(geometry.size.width < WorkspaceLayout.subtitleColumnsWidth ? 16 : 24)
                 }
-                .frame(height: max(minimumHeight, geometry.size.height - (geometry.size.width < WorkspaceLayout.subtitleColumnsWidth ? 32 : 48)))
-                .padding(geometry.size.width < WorkspaceLayout.subtitleColumnsWidth ? 16 : 24)
             }
         }
     }
@@ -67,11 +72,11 @@ struct ConferenceLiveView: View {
     private var heading: some View {
         VStack(alignment: .leading, spacing: 8) {
             Text(store.sessionName.isEmpty ? "Conference" : store.sessionName)
-                .font(.system(size: 24, weight: .semibold))
+                .font(DesignTokens.Typography.title)
                 .lineLimit(2)
                 .accessibilityAddTraits(.isHeader)
             Text("\(LanguageCatalog.displayName(for: sourceLanguage))\(targetLanguage.map { " → " + LanguageCatalog.displayName(for: $0) } ?? " · 文字起こしのみ") · 辞書：\(profileName)")
-                .font(.callout).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                 .lineLimit(2)
         }
     }
