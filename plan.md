@@ -38,6 +38,8 @@
 
 ## 現在地
 
+- **CI運用（2026-11-15、ユーザー指示）:** コスト上の理由からGitHub ActionsのCIは実行しない。`macOS validation`ワークフローはGitHub側で無効化済み。実行・再実行・再有効化は行わず、`bash scripts/ci.sh all`によるローカルのLint・全テスト・両CPU Releaseで検証する。
+
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
 - 更新: **2026-11-15／main `53b81cd`を基点とするDR5実装**。PR #46までマージ済み。PR #42・#43の独立レビューは修正指摘0件、PR #43・#44の修正後CI成功をGitHub APIで確認。U01〜U03は修正・再受入済み。UIデザインレビューのDR1はPR #46でマージ済み・実機確認待ち、DR2はモック・計画承認後にローカル実装・731テスト／Lint／両CPU Release成功（[結果](docs/validation/dr2-layout-2026-11-15.md)）。DR2はPR #47でmain `a34283c`へマージ済み。DR3は初期実装後の独立レビュー2件をローカル修正し、748テスト／Lint成功（[修正結果](docs/validation/dr3-review-fixes-2026-11-15.md)）。修正後の追加レビュー・実機受入は継続。DR3はPR #48でmain `2ad9de3`へマージ済み。DR4は独立レビュー3件を修正し、770テスト／Lint／両CPU Release成功、修正後の追加レビュー・残る受入待ち。DR4はPR #49でmain `53b81cd`へマージ済み。DR5はローカル実装・783テスト／Lint／両CPU Release成功、代表UI確認済み（[結果](docs/validation/dr5-polish-2026-11-15.md)）。独立レビュー・残る受入待ち。VoiceOverは保留（ユーザー指示・オフ確認済み）。PR #44の独立レビュー・実モデル/実機受入は継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
