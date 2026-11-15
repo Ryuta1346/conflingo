@@ -2,6 +2,7 @@ import SwiftUI
 
 struct MeetingTransport: View {
     @Bindable var meeting: MeetingWorkspace
+    var menuRequestsEnd: Binding<Bool> = .constant(false)
     @State private var asksToEnd = false
 
     var body: some View {
@@ -10,6 +11,9 @@ struct MeetingTransport: View {
                 HStack(spacing: 12) { inputStatus; Spacer(); controls }
                 VStack(alignment: .leading, spacing: 10) { inputStatus; controls }
             }
+            if meeting.phase == .idle, meeting.page != .review, let reason = meeting.startUnavailableReason {
+                Text(reason).font(DesignTokens.Typography.supporting)
+            }
             if meeting.phase == .preparing {
                 Text(meeting.controller.preparation).font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
@@ -17,6 +21,12 @@ struct MeetingTransport: View {
         .padding(14)
         .frame(maxWidth: .infinity, alignment: .leading)
         .background(DesignTokens.surface)
+        .onChange(of: menuRequestsEnd.wrappedValue) { _, requested in
+            guard requested else { return }
+            meeting.requestEnd()
+            asksToEnd = meeting.showsEndConfirmation
+            menuRequestsEnd.wrappedValue = false
+        }
         .alert("会議を終了しますか？", isPresented: endConfirmation) {
             Button("キャンセル", role: .cancel, action: meeting.cancelEnd)
             Button("会議を終了", role: .destructive) { meeting.confirmEnd() }

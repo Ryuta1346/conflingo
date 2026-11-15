@@ -3,11 +3,15 @@ import SwiftUI
 import Translation
 
 struct ContentView: View {
+    private let commands: AppCommandRouter
+    @State private var menuRequestsEnd = false
+    @Environment(\.openSettings) private var openSettings
     private let sessions: SessionsLibrary
     private let library: KnowledgeLibrary
     private let meeting: MeetingWorkspace
     private let conferenceKnowledge: ConferenceKnowledgeWorkspace
     @State private var showConferenceKnowledge = false
+    @State private var correctionUnit: TranslationUnit?
     @FocusState private var assistanceToggleFocused: Bool
     @State private var conferenceInput: AudioInputSelection = .microphone
     private let floatingPanel: MeetingFloatingPanel
@@ -36,6 +40,7 @@ struct ContentView: View {
     private let isPreview: Bool
 
     init(composition: AppComposition) {
+        commands = composition.commands
         isPreview = composition.isPreview
         sessions = composition.sessions
         library = composition.library
@@ -72,7 +77,7 @@ struct ContentView: View {
                     ZStack {
                         page
                         MeetingWorkspaceView(meeting: meeting, fontSize: $fontSize,
-                                             compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions, library: library)
+                                             compact: { meeting.cancelSummary(); floatingPanel.show(meeting: meeting, compactMain: true) }, sessions: sessions, library: library, menuRequestsEnd: $menuRequestsEnd)
                             .opacity(navigation.destination == .meeting ? 1 : 0)
                             .allowsHitTesting(navigation.destination == .meeting)
                             .disabled(navigation.destination != .meeting)
@@ -88,6 +93,10 @@ struct ContentView: View {
                 }
             }
         }
+        .background(CommandWindowScope(router: commands, actions: .init(session: sessionCommands,
+            fontSize: $fontSize, alwaysOnTop: $alwaysOnTop,
+            showCompact: navigation.destination == .meeting ? { floatingPanel.show(meeting: meeting) } : nil)))
+        .environment(\.readingFontSize, fontSize)
         .task { await sessions.reload(); await library.reload() }
         .onAppear {
             floatingPanel.expand = {
@@ -113,14 +122,23 @@ struct ContentView: View {
         }
         .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
         .sheet(isPresented: $showDictionary) {
-            KeywordProfileEditor(profiles: profileStore).disabled(store.phase != .idle)
+            KeywordProfileEditor(profiles: profileStore, canEdit: store.phase == .idle && meeting.phase == .idle)
         }
         .sheet(isPresented: $showConferenceKnowledge) {
-            ConferenceKnowledgeView(workspace: conferenceKnowledge, library: library, sessions: sessions, fontSize: fontSize,
-                stopAudio: { Task { await stopSession() } }, sourceLanguage: sourceLocaleID,
+            ConferenceKnowledgeView(workspace: conferenceKnowledge, library: library, fontSize: fontSize,
+                sourceLanguage: sourceLocaleID,
                 targetLanguage: transcriptionOnly ? nil : targetLanguageID,
                 manualGlossary: KeywordParser.parseGlossary(profileStore.selectedProfile.keywords),
                 applyTerms: { Task { await applyConferenceTerms() } })
+        }
+        .sheet(item: $correctionUnit, onDismiss: { conferenceKnowledge.cancel() }) { unit in
+            VStack(alignment: .leading, spacing: 16) {
+                SheetHeader(title: "資料で原文・訳文を補正") { conferenceKnowledge.cancel(); correctionUnit = nil }
+                ScrollView {
+                    ConferenceCorrectionView(workspace: conferenceKnowledge, sourceLanguage: sourceLocaleID,
+                        targetLanguage: transcriptionOnly ? nil : targetLanguageID, fontSize: fontSize, initialUnitID: unit.id)
+                }
+            }.sheetSurface().frame(minWidth: 480, idealWidth: 680, minHeight: 480, idealHeight: 700)
         }
         .alert(closeRequested ? "音声収集を停止してウィンドウを閉じますか？" : "音声収集を停止して移動しますか？", isPresented: $navigation.showsStopConfirmation) {
             Button("キャンセル", role: .cancel) { navigation.cancelNavigation(); closeRequested = false }
@@ -225,47 +243,8 @@ struct ContentView: View {
                      prepare: { navigate(.setup) }, openTranscript: { navigate(.live) },
                      openMeeting: { navigate(.meeting) }, sessions: sessions,
                      showSessions: { sessions.closeDetail(); navigate(.sessions) }, openSession: openSavedSession)
-        case .setup:
-            ConferenceSetupView(
-                sessionName: $store.sessionName, inputSelection: $conferenceInput, sourceLanguage: $sourceLocaleID,
-                targetLanguage: $targetLanguageID, mode: $store.mode,
-                fastFinalization: $fastFinalization, profiles: profileStore,
-                sourceLocales: sourceLocales, targetLanguages: targetLanguages,
-                modelState: modelState, downloadProgress: availability.downloadProgress,
-                canEdit: store.phase == .idle, hasTranscript: !store.segments.isEmpty,
-                editDictionary: { showDictionary = true }, retry: { preparationRetry += 1 },
-                openTranscript: { navigate(.live) }
-            )
-        case .live:
-            GeometryReader { geometry in
-                let docked = WorkspaceLayout.docksAssistance(contentWidth: geometry.size.width)
-                let visible = conferenceKnowledge.assistanceVisible ?? docked
-                ZStack(alignment: .trailing) {
-                    ConferenceLiveView(
-                        store: store, sourceLanguage: sourceLocaleID,
-                        targetLanguage: transcriptionOnly ? nil : targetLanguageID,
-                        profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
-                        editSettings: { navigate(.setup) },
-                        clear: { if !sessions.isBusy { showClearConfirmation = true } }, corrections: conferenceKnowledge.snapshot.corrections,
-                        translationPreparation: coordinator.preparationState
-                    )
-                    .padding(.trailing, docked && visible ? WorkspaceLayout.assistanceWidth + 1 : 0)
-                    if visible && !showConferenceKnowledge {
-                        ConferenceAssistanceView(workspace: conferenceKnowledge, livePanel: true,
-                            openDocuments: { showConferenceKnowledge = true }, close: {
-                                conferenceKnowledge.assistanceVisible = false
-                                assistanceToggleFocused = true
-                            })
-                            .padding(12)
-                            .frame(width: docked ? WorkspaceLayout.assistanceWidth : min(420, geometry.size.width - 32))
-                            .frame(maxHeight: .infinity)
-                            .background(DesignTokens.surface)
-                            .overlay(Rectangle().stroke(DesignTokens.border))
-                            .shadow(color: .black.opacity(docked ? 0 : 0.15), radius: docked ? 0 : 12)
-                            .padding(docked ? 0 : 16)
-                    }
-                }
-            }.disabled(sessions.isBusy)
+        case .setup, .live:
+            conferencePage(isSetup: navigation.destination == .setup)
         case .library:
             KnowledgeLibraryView(library: library, fontSize: fontSize)
         case .sessions:
@@ -278,6 +257,62 @@ struct ContentView: View {
                          llmSettings: meeting.llmSettings,
                          editDictionary: { showDictionary = true }, prepare: { navigate(.setup) })
         }
+    }
+
+    private var conferenceSetup: some View {
+        ConferenceSetupView(
+            sessionName: $store.sessionName, inputSelection: $conferenceInput, sourceLanguage: $sourceLocaleID,
+            targetLanguage: $targetLanguageID, mode: $store.mode,
+            fastFinalization: $fastFinalization, profiles: profileStore,
+            sourceLocales: sourceLocales, targetLanguages: targetLanguages,
+            modelState: modelState, downloadProgress: availability.downloadProgress,
+            canEdit: store.phase == .idle, hasTranscript: !store.segments.isEmpty,
+            editDictionary: { showDictionary = true }, retry: { preparationRetry += 1 },
+            openTranscript: { navigate(.live) }, workspace: conferenceKnowledge, library: library,
+            fontSize: fontSize, applyTerms: { Task { await applyConferenceTerms() } }
+        )
+    }
+
+    private func conferencePage(isSetup: Bool) -> some View {
+        GeometryReader { geometry in
+            let docked = WorkspaceLayout.docksAssistance(contentWidth: geometry.size.width)
+            let visible = conferenceKnowledge.assistanceVisible ?? (!isSetup && docked)
+            ZStack(alignment: .trailing) {
+                Group {
+                    if isSetup {
+                        conferenceSetup
+                    } else {
+                        ConferenceLiveView(
+                            store: store, sourceLanguage: sourceLocaleID,
+                            targetLanguage: transcriptionOnly ? nil : targetLanguageID,
+                            profileName: profileStore.selectedProfile.name, fontSize: $fontSize,
+                            editSettings: { navigate(.setup) },
+                            clear: { if !sessions.isBusy { showClearConfirmation = true } },
+                            corrections: conferenceKnowledge.snapshot.corrections,
+                            translationPreparation: coordinator.preparationState, correct: { unit in
+                                conferenceKnowledge.cancel()
+                                correctionUnit = unit
+                            }
+                        )
+                    }
+                }
+                .padding(.trailing, docked && visible ? WorkspaceLayout.assistanceWidth + 1 : 0)
+                if visible && !showConferenceKnowledge {
+                    ConferenceAssistanceView(workspace: conferenceKnowledge, livePanel: true,
+                        openDocuments: { showConferenceKnowledge = true }, close: {
+                            conferenceKnowledge.assistanceVisible = false
+                            assistanceToggleFocused = true
+                        })
+                        .padding(12)
+                        .frame(width: docked ? WorkspaceLayout.assistanceWidth : min(420, geometry.size.width - 32))
+                        .frame(maxHeight: .infinity)
+                        .background(DesignTokens.surface)
+                        .overlay(Rectangle().stroke(DesignTokens.border))
+                        .shadow(color: .black.opacity(docked ? 0 : 0.15), radius: docked ? 0 : 12)
+                        .padding(docked ? 0 : 16)
+                }
+            }
+        }.disabled(sessions.isBusy)
     }
 
     private func topBar(contentWidth: CGFloat) -> some View {
@@ -315,11 +350,11 @@ struct ContentView: View {
 
     @ViewBuilder private func conferenceTools(contentWidth: CGFloat) -> some View {
         if navigation.destination == .setup || navigation.destination == .live {
-            Button("資料・設定（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
+            Button("資料（\(conferenceKnowledge.knowledge.documents.count)）", systemImage: "books.vertical") { showConferenceKnowledge = true }
                 .disabled(store.phase == .preparing || store.phase == .stopping)
         }
-        if navigation.destination == .live {
-            let visible = conferenceKnowledge.assistanceVisible ?? WorkspaceLayout.docksAssistance(contentWidth: contentWidth)
+        if navigation.destination == .live || navigation.destination == .setup {
+            let visible = conferenceKnowledge.assistanceVisible ?? (navigation.destination == .live && WorkspaceLayout.docksAssistance(contentWidth: contentWidth))
             Button(visible ? "AI支援を閉じる" : "AI支援を開く") {
                 conferenceKnowledge.assistanceVisible = !visible
             }.focused($assistanceToggleFocused)
@@ -329,15 +364,15 @@ struct ContentView: View {
     @ViewBuilder private var displayTools: some View {
         if navigation.destination == .live || navigation.destination == .meeting || navigation.destination == .sessions || navigation.destination == .library {
             Button("A−") { fontSize = max(10, fontSize - 2) }
-                .keyboardShortcut("-", modifiers: .command).accessibilityLabel("字幕を小さく")
+                .accessibilityLabel("読む文字を小さく")
             Button("A＋") { fontSize = min(48, fontSize + 2) }
-                .keyboardShortcut("+", modifiers: .command).accessibilityLabel("字幕を大きく")
+                .accessibilityLabel("読む文字を大きく")
             Toggle(isOn: $alwaysOnTop) { Label("最前面", systemImage: "pin") }.toggleStyle(.button)
         }
     }
 
     @ViewBuilder private var saveAndExport: some View {
-        if navigation.destination == .live {
+        if navigation.destination == .live || (navigation.destination == .setup && conferenceSnapshot != nil) {
             SessionSaveControls(library: sessions, snapshot: conferenceSnapshot, save: {
                 guard let snapshot = conferenceSnapshot else { return }
                 Task { await sessions.save(snapshot) }
@@ -403,7 +438,23 @@ struct ContentView: View {
         return false
     }
 
+    private var sessionCommands: SessionCommandActions? {
+        if navigation.destination == .meeting {
+            return .meeting(meeting, requestEnd: { menuRequestsEnd = true })
+        }
+        guard navigation.destination == .live || navigation.destination == .setup else { return nil }
+        let available = !sessions.isBusy && !library.isBusy
+        return SessionCommandActions(title: store.phase == .listening ? "字幕を停止" : "字幕を開始／再開",
+            canToggle: available && (store.phase == .listening || (store.phase == .idle && modelState == .ready && !conferenceKnowledge.knowledge.isBusy)),
+            toggle: {
+                guard !sessions.isBusy, !library.isBusy else { return }
+                if store.phase == .listening { Task { await stopSession() } }
+                else if store.phase == .idle { startSession() }
+            })
+    }
+
     private func navigate(_ destination: ConferenceNavigation.Destination) {
+        if destination == .settings { openSettings(); return }
         guard !sessions.isBusy, !library.isBusy else { return }
         if destination != .meeting { meeting.cancelSummary() }
         navigation.request(destination, phase: activePhase)

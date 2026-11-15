@@ -25,12 +25,7 @@ struct MeetingKnowledgeControls: View {
                         sourceLanguages: [meeting.microphoneLocaleID, meeting.systemLocaleID], targetLanguage: nil,
                         applied: { Task { await meeting.applyDocumentTerms() } })
                     Text(meeting.recognitionStatus).font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                    Toggle("この会議の資料の抜粋を\(meeting.llmSettings.selected.name)へ送信する", isOn: Binding(
-                        get: { meeting.knowledge.permitted }, set: { meeting.setKnowledgeAllowed($0) }
-                    ))
-                    .disabled(!meeting.ai.permitted || meeting.page == .review || meeting.phase == .stopping || meeting.knowledge.isBusy)
-                    Text("手動質問に最大5箇所・6,000文字と資料名・位置を送ります。自動提案と終了後要約は別に許可します。資料追加後は許可を確認してください。")
-                        .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
+
                 }.padding(.top, 10)
             } label: {
                 Label("資料（\(meeting.knowledge.documents.count)）", systemImage: "doc.text.magnifyingglass").font(DesignTokens.Typography.heading)

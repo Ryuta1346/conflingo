@@ -143,11 +143,14 @@ final class DR3Host {
     let host: NSView
     let window: NSWindow
     private let release: () -> Void
-    init<V: View>(_ view: V, width: Double = 640, height: Double = 520, padding: CGFloat = 24) {
+    init<V: View>(_ view: V, width: Double = 640, height: Double = 520, padding: CGFloat = 24, nonactivating: Bool = false) {
         release = TestAccessibility.shared.enable()
         host = NSHostingView(rootView: view.padding(padding))
-        window = NSWindow(contentRect: NSRect(x: 0, y: 0, width: width, height: height),
-                          styleMask: [.titled, .resizable], backing: .buffered, defer: false)
+        let windowType: NSWindow.Type = nonactivating ? NSPanel.self : NSWindow.self
+        var style: NSWindow.StyleMask = [.titled, .resizable]
+        if nonactivating { style.insert(.nonactivatingPanel) }
+        window = windowType.init(contentRect: NSRect(x: 0, y: 0, width: width, height: height),
+                                 styleMask: style, backing: .buffered, defer: false)
         window.isReleasedWhenClosed = false
         window.contentView = host
         window.makeKeyAndOrderFront(nil)

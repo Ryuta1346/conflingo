@@ -70,7 +70,7 @@ struct KnowledgeMaterialsView: View {
                 Button { selectedReference = reference } label: {
                     VStack(alignment: .leading, spacing: 4) {
                         Text("\(reference.displayTitle) · \(reference.provenance)").font(DesignTokens.Typography.supporting.bold())
-                        Text(reference.snippet).font(DesignTokens.Typography.supporting).lineLimit(3)
+                        Text(reference.snippet).font(.system(size: fontSize)).lineLimit(3)
                     }.frame(maxWidth: .infinity, alignment: .leading)
                 }.buttonStyle(AppButtonStyle(.link))
             }
@@ -180,7 +180,7 @@ private struct MaterialSaveView: View {
                 Button("保存") { Task {
                     if await library.save(from: knowledge, documentID: document.source == nil ? document.id : nil,
                                           title: title, replacing: targets.first { $0.id == replacementID }) { dismiss() }
-                } }.disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.count > 200)
+                } }.keyboardShortcut(.defaultAction).disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.count > 200)
                     .buttonStyle(AppButtonStyle(.primary))
             }
         }.sheetSurface().frame(minWidth: 440).disabled(library.isBusy || knowledge.isBusy)

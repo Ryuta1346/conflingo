@@ -36,12 +36,15 @@ struct SettingsView: View {
                             }
                             .frame(maxWidth: 360).modifier(RevealOnFocus(proxy: proxy))
                             Divider()
-                            Stepper("字幕の文字サイズ：\(Int(fontSize)) pt", value: $fontSize, in: 10...48, step: 2)
+                            Stepper("読む文字のサイズ：\(Int(fontSize)) pt", value: $fontSize, in: 10...48, step: 2)
                                 .modifier(RevealOnFocus(proxy: proxy))
+                            Text("字幕・AI回答・引用・資料本文・要約・履歴の本文に適用します。")
+                                .font(DesignTokens.Typography.supporting)
                             Toggle("ウィンドウを最前面に表示", isOn: $alwaysOnTop).modifier(RevealOnFocus(proxy: proxy))
                             Divider()
-                            LabeledContent("Conferenceの開始 / 停止", value: "⌘ R")
-                            LabeledContent("文字を拡大 / 縮小", value: "⌘ ＋ / −")
+                            LabeledContent("開始 / 停止・一時停止 / 再開", value: "⌘ R")
+                            LabeledContent("会議の終了確認", value: "⌘ ⇧ E")
+                            LabeledContent("文字を拡大 / 縮小", value: "⌘ ＝・＋ / −")
                         }
                     }
                     Surface {

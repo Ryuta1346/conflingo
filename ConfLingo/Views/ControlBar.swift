@@ -20,7 +20,6 @@ struct ControlBar: View {
             case .idle:
                 Button(hasTranscript ? "字幕を再開" : "字幕を開始", systemImage: "play.fill", action: start)
                     .buttonStyle(AppButtonStyle(.primary))
-                    .keyboardShortcut("r", modifiers: .command)
                     .disabled(!canStart)
             case .preparing:
                 ProgressView().controlSize(.small)
@@ -28,7 +27,6 @@ struct ControlBar: View {
             case .listening:
                 Button("停止する", systemImage: "stop.fill", action: stop)
                     .buttonStyle(AppButtonStyle())
-                    .keyboardShortcut("r", modifiers: .command)
             case .stopping:
                 Button(isStopping ? "停止処理中…" : "停止を再試行", action: stop)
                     .disabled(isStopping)

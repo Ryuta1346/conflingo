@@ -143,6 +143,7 @@ struct RepositorySelectionView: View {
                 Spacer()
                 Button("キャンセル", action: cancel).keyboardShortcut(.cancelAction)
                 Button("選択したファイルを取り込む", action: importSelection)
+                    .keyboardShortcut(.defaultAction)
                     .buttonStyle(AppButtonStyle(.primary)).disabled(selected.isEmpty || exceedsLimit)
             }
         }.sheetSurface().frame(minWidth: 440, idealWidth: 640, minHeight: 450, idealHeight: 600)

@@ -165,7 +165,7 @@ private struct LLMConnectionEditor: View {
             HStack {
                 Spacer()
                 Button("キャンセル") { dismiss() }.keyboardShortcut(.cancelAction)
-                Button("保存して選択") { save() }.buttonStyle(AppButtonStyle(.primary)).disabled(loading)
+                Button("保存して選択") { save() }.keyboardShortcut(.defaultAction).buttonStyle(AppButtonStyle(.primary)).disabled(loading)
             }
         }
         .sheetSurface().frame(width: 620)

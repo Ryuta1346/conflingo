@@ -7,10 +7,10 @@ struct MeetingWorkspaceView: View {
     let compact: () -> Void
 
     @State private var workspaceScrollPosition = ScrollPosition(edge: .top)
-    @State private var translationLanguages: [Locale.Language] = []
 
     var sessions: SessionsLibrary?
     var library: KnowledgeLibrary?
+    var menuRequestsEnd: Binding<Bool> = .constant(false)
 
     var body: some View {
         VStack(spacing: 0) {
@@ -56,11 +56,9 @@ struct MeetingWorkspaceView: View {
                 .padding(.bottom, 16)
             }
             Divider()
-            MeetingTransport(meeting: meeting)
+            MeetingTransport(meeting: meeting, menuRequestsEnd: menuRequestsEnd)
         }
-        .task(id: meeting.mode) {
-            if meeting.mode == .translation { translationLanguages = await SystemModelPreparation().targetLanguages() }
-        }
+        .environment(\.readingFontSize, fontSize)
         .disabled(meeting.isSavingSession || meeting.isUsingLibrary)
         .sheet(item: $meeting.selectedKnowledge) { reference in
             KnowledgeReferenceView(reference: reference, fontSize: fontSize)
@@ -77,40 +75,14 @@ struct MeetingWorkspaceView: View {
         ScrollView {
             VStack(alignment: .leading, spacing: 24) {
                 PageHeading(title: "会議を、はじめる。", subtitle: "選んだ音声入力を、このMacで文字にします。", eyebrow: "Meeting / 準備")
-                Surface {
-                    VStack(alignment: .leading, spacing: 18) {
-                        TextField("会議名", text: $meeting.name)
-                            .textFieldStyle(.roundedBorder).accessibilityLabel("会議名")
-                        AudioInputPicker(selection: $meeting.inputSelection)
-                        SessionModePicker(selection: $meeting.mode)
-                        languagePicker("マイク・外部入力", selection: $meeting.microphoneLocaleID)
-                        if meeting.mode == .translation {
-                            translationPicker("マイク・外部入力の翻訳先", selection: $meeting.microphoneTranslationLanguage)
-                        }
-                        languagePicker("Macの内部音声", selection: $meeting.systemLocaleID)
-                        if meeting.mode == .translation {
-                            translationPicker("内部音声の翻訳先", selection: $meeting.systemTranslationLanguage)
-                            Text("確定した原文の下に訳文を表示します。同じ言語は翻訳せず、原文を表示します。翻訳先の変更は次の開始以降に適用します。")
-                                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-                        }
-                        Text("内部音声にはMacで再生する他の音も含まれます。ヘッドフォンの利用を推奨します。")
-                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
-                        Divider()
-                        Toggle("参加者に文字起こしを通知し、同意を確認しました", isOn: $meeting.consentConfirmed)
-                        Text("このチェックで参加者への通知が送信されることはありません。")
-                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
-                    }
-                    .disabled(meeting.phase != .idle || meeting.isBusy)
-                }
+                MeetingPreparationForm(meeting: meeting)
                 Surface {
                     VStack(alignment: .leading, spacing: 12) {
                         Label("音声認識と翻訳は、このMacで", systemImage: "checkmark.shield")
                             .font(DesignTokens.Typography.heading)
                         Text("音声は保存・外部送信しません。翻訳モデルは初回にダウンロードが必要な場合があります。AIの回答言語と翻訳先は別設定です。自動保存はしません。準備中の完成したAI回答、または会議終了後の記録を「このMacに保存」で残せます。AI送信は下で明示的に許可した場合だけ行います。")
                             .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
-                        ForEach([AudioOrigin.microphone, .systemAudio], id: \.self) { origin in
-                            Text("\(origin.label)：\(permission(origin))").font(DesignTokens.Typography.supporting)
-                        }
+
                     }
                 }
                 MeetingAIControls(meeting: meeting)
@@ -191,31 +163,6 @@ struct MeetingWorkspaceView: View {
         .padding(1)
     }
 
-    private func translationPicker(_ title: String, selection: Binding<String>) -> some View {
-        let identifiers = Set(translationLanguages.map(\.minimalIdentifier) + ["ja", "en", selection.wrappedValue])
-            .filter { !$0.isEmpty }.sorted { LanguageCatalog.displayName(for: $0) < LanguageCatalog.displayName(for: $1) }
-        return Picker(title, selection: selection) {
-            Text("翻訳なし").tag("")
-            ForEach(identifiers, id: \.self) { identifier in
-                Text(LanguageCatalog.displayName(for: identifier)).tag(identifier)
-            }
-        }
-    }
-
-    private func languagePicker(_ title: String, selection: Binding<String>) -> some View {
-        Picker(title, selection: selection) {
-            Text("日本語").tag("ja-JP")
-            Text("English").tag("en-US")
-        }
-    }
-
-    private func permission(_ origin: AudioOrigin) -> String {
-        switch meeting.controller.permissions[origin] {
-        case .granted: "許可済み"
-        case .denied: "未許可。システム設定のプライバシーとセキュリティをご確認ください"
-        case .undetermined, .unknown, nil: "開始時にアクセスを確認します"
-        }
-    }
 }
 
 struct MeetingInsightCard: View {
@@ -236,7 +183,7 @@ struct MeetingInsightCard: View {
                 Text(insight.text).font(.system(size: fontSize, weight: .medium)).textSelection(.enabled)
                 ForEach(insight.evidenceIDs, id: \.self) { id in
                     if let event = meeting.evidence(for: id) {
-                        Text(event.text).font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary).textSelection(.enabled)
+                        Text(event.text).font(.system(size: fontSize)).foregroundStyle(DesignTokens.secondary).textSelection(.enabled)
                         Button("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)の発話を見る") {
                             meeting.revealEvidence(id)
                         }

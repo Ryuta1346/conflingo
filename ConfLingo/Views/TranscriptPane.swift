@@ -4,6 +4,8 @@ struct TranscriptPane: View {
     let title: String
     let entries: TranscriptEntries
     let fontSize: Double
+    var correct: ((String) -> Void)?
+    var canCorrect: (String) -> Bool = { _ in false }
     @State private var followsLatest = true
     @State private var userScrolling = false
     @State private var atBottom = true
@@ -50,6 +52,11 @@ struct TranscriptPane: View {
                                     ReservedTranslation(sourceText: source, fontSize: fontSize) { entryText(entry) }
                                 } else {
                                     entryText(entry)
+                                }
+                                if let correct, entry.status == .final, canCorrect(entry.id) {
+                                    Button("資料で補正") { correct(entry.id) }
+                                        .buttonStyle(AppButtonStyle(.link))
+                                        .accessibilityLabel("この発話を資料で補正")
                                 }
                             }
                         }

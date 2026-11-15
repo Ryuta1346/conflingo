@@ -224,7 +224,15 @@ final class MeetingWorkspace {
         page != .review && (phase == .idle || phase == .listening)
             && !isBusy && !isUsingLibrary && !isSavingSession && !knowledge.isBusy
     }
-    var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && page != .review }
+    var startUnavailableReason: String? {
+        if page == .review { return "新しい会議を作成してください。" }
+        if phase != .idle || isBusy { return "音声の処理が完了するまでお待ちください。" }
+        if isSavingSession { return "保存が完了するまでお待ちください。" }
+        if knowledge.isBusy || isUsingLibrary { return "資料の処理が完了するまでお待ちください。" }
+        if !consentConfirmed { return "参加者への通知と同意を確認してください。" }
+        return nil
+    }
+    var canStart: Bool { startUnavailableReason == nil }
     var canEnd: Bool { page == .live && (phase == .listening || phase == .idle) && !isBusy }
     var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && !isSavingSession }
     var title: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "名前のない会議" : name }

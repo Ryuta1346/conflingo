@@ -2,8 +2,7 @@ import SwiftUI
 
 struct MeetingAISettings: View {
     @Bindable var meeting: MeetingWorkspace
-    @State private var showsKeySettings = false
-    @State private var showsDataDetails = true
+    var openResearch: (() -> Void)?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -13,49 +12,28 @@ struct MeetingAISettings: View {
                     .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.warning)
             }
             #endif
-            HStack {
-                Label(meeting.llmSettings.selected.destinationLabel, systemImage: "sparkles").font(DesignTokens.Typography.heading)
-                Spacer()
-                Button("LLM設定") { showsKeySettings = true }
-            }
-            Picker("AIの回答言語", selection: $meeting.answerLanguage) {
-                ForEach(AnswerLanguage.allCases, id: \.self) { language in
-                    Text(language.label).tag(language)
+            AISendingScopePanel(settings: meeting.llmSettings, answerLanguage: $meeting.answerLanguage,
+                permitted: Binding(get: { meeting.ai.permitted }, set: { meeting.setAIAllowed($0) }),
+                manualKnowledge: Binding(get: { meeting.knowledge.permitted }, set: { meeting.setKnowledgeAllowed($0) }),
+                automatic: Binding(get: { meeting.ai.automaticEnabled }, set: { meeting.setAutomaticAI($0) }),
+                automaticKnowledge: Binding(get: { meeting.ai.automaticKnowledgeEnabled }, set: { meeting.setAutomaticKnowledgeAllowed($0) }),
+                canEdit: meeting.page != .review && meeting.phase != .stopping,
+                canUseKnowledge: !meeting.knowledge.isBusy, canUseAutomatic: !meeting.ai.subscriptionFailed,
+                contextDescription: meeting.ai.contextDescription) {
+                Text("Web調査：発話・資料の独立した許可と送信内容を、実行前に確認します。")
+                    .font(DesignTokens.Typography.body)
+                Text(meeting.research.permitted ? "Web調査：許可済み" : "Web調査：オフ").font(DesignTokens.Typography.supporting)
+                if let openResearch {
+                    Button("Web調査の送信範囲を確認", action: openResearch)
+                        .disabled(meeting.page == .review || !meeting.canEditKnowledge)
                 }
+                Text("終了後要約：振り返りで会議全体の送信計画を確認し、資料を含めるか選択します。手動質問・自動提案の許可は流用しません。")
+                    .font(DesignTokens.Typography.body)
             }
-            Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
-                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
-            Toggle("確定発話と質問文を\(meeting.llmSettings.selected.name)へ送信することを許可", isOn: Binding(
-                get: { meeting.ai.permitted }, set: { meeting.setAIAllowed($0) }
-            ))
-            .disabled(meeting.page == .review || meeting.phase == .stopping)
-            DisclosureGroup("送信する内容・データの扱い", isExpanded: $showsDataDetails) {
-                Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は手動質問・自動提案それぞれの許可、または終了後要約の確認画面で選択した場合に参照します。")
-                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
-                Text("送信先：\(meeting.llmSettings.selected.baseURL)。料金・データ保持・学習への利用は、接続先サービスとご自身の契約・実行環境の条件をご確認ください。")
-                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
-            }
-            Toggle("自動提案を使う（追加のAI処理が発生）", isOn: Binding(
-                get: { meeting.ai.automaticEnabled }, set: { meeting.setAutomaticAI($0) }
-            ))
-            .disabled(!meeting.ai.permitted || meeting.ai.subscriptionFailed || meeting.page == .review || meeting.phase == .stopping)
-            Toggle("自動提案にも資料を使う", isOn: Binding(
-                get: { meeting.ai.automaticKnowledgeEnabled }, set: { meeting.setAutomaticKnowledgeAllowed($0) }
-            ))
-            .disabled(!meeting.ai.permitted || !meeting.ai.automaticEnabled || meeting.page == .review || meeting.phase == .stopping || meeting.knowledge.isBusy)
-            Text("発話に関連する資料を検索し、最大5箇所・6,000文字と資料名・位置を送ります。提案の回数上限は同じですが、入力トークンが増える場合があります。手動質問・終了後要約の資料許可とは別の設定です。")
-                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
-            Text(meeting.ai.contextDescription).font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             if let usage = meeting.ai.lastUsage {
                 Text("直近の使用量：入力 \(usage.inputTokens)・出力 \(usage.outputTokens + usage.thinkingTokens) トークン（思考を含む）")
                     .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
-        }
-        .onChange(of: meeting.ai.permitted) { _, allowed in
-            if allowed { showsDataDetails = false }
-        }
-        .sheet(isPresented: $showsKeySettings) {
-            LLMSettingsSheet(settings: meeting.llmSettings) { showsKeySettings = false }
         }
     }
 }
