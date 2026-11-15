@@ -74,7 +74,11 @@ struct TranscriptPane: View {
                     if userScrolling { followsLatest = atBottom }
                 }
                 .onChange(of: entries.update) {
-                    if followsLatest { proxy.scrollTo("latest", anchor: .bottom) }
+                    if followsLatest {
+                        proxy.scrollTo("latest", anchor: .bottom)
+                    } else {
+                        scrollPosition = ScrollPosition()
+                    }
                 }
                 .overlay(alignment: .bottomTrailing) {
                     if !followsLatest {
