@@ -14,12 +14,6 @@ struct SavedSessionView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    HStack {
-                        Button("一覧へ", systemImage: "chevron.left", action: back)
-                        Spacer()
-                        Button("Markdownを書き出す", systemImage: "square.and.arrow.up", action: exportMarkdown)
-                        Button("削除", systemImage: "trash", action: delete)
-                    }
                     PageHeading(title: saved.snapshot.title, subtitle: "\(saved.snapshot.kind) · 保存した記録 / 読み取り専用", eyebrow: "Sessions")
                     Text("保存更新 \(saved.updatedAt.formatted(date: .abbreviated, time: .shortened)) · 開始 \(saved.snapshot.startedAt.map { MarkdownExporter.dateFormatter.string(from: $0) } ?? "未取得")")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
@@ -35,6 +29,17 @@ struct SavedSessionView: View {
                 }
                 .padding(24).frame(maxWidth: 1000).frame(maxWidth: .infinity)
             }
+        }
+        .safeAreaInset(edge: .top, spacing: 0) {
+            HStack {
+                Button("一覧へ", systemImage: "chevron.left", action: back)
+                Spacer()
+                Button("Markdownを書き出す", systemImage: "square.and.arrow.up", action: exportMarkdown)
+                Button("削除", systemImage: "trash", action: delete)
+            }
+            .padding(.horizontal, 24).padding(.vertical, 12)
+            .frame(maxWidth: 1000).frame(maxWidth: .infinity)
+            .background(DesignTokens.canvas)
         }
         .sheet(item: $selectedReference) { reference in
             KnowledgeReferenceView(reference: reference, fontSize: fontSize)

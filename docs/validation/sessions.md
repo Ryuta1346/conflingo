@@ -1,5 +1,7 @@
 # Sessions 永続保存 — 検証記録
 
+> 2026-11-15追加UI受入: U01（根拠ジャンプ後の上部操作）をローカル修正・再受入済み。全705テスト・Lint・Release両CPU成功。VoiceOverはユーザー指示で停止・保留を継続。全経路受入は未完了。[今回の結果](library-settings-ui-2026-11-15.md#修正と再受入)。以下は各実施時点の履歴。
+
 > 2026-11-12追補: 事前資料登録・Meeting/Conference実行中の追加とConference資料支援をローカル実装。今回の検証と未受入項目は[追加導線の記録](knowledge-entry-points.md)を参照。以下は各実施時点の結果。
 
 2026-11-11 / main `294bd0c`をベースに検証。実装コミット `e95f8ae`、ブランチ `feature/session-persistence`、[PR #21](https://github.com/Ryuta1346/conflingo/pull/21)（マージ済み。2026-11-12、ローカルmainの`adfc2c5`で確認）。

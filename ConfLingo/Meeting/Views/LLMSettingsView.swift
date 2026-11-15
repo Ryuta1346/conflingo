@@ -2,6 +2,7 @@ import SwiftUI
 
 struct LLMSettingsView: View {
     @Bindable var settings: LLMSettings
+    var scrollProxy: ScrollViewProxy?
     @State private var editing: LLMConnection?
     @State private var confirmsDeletion = false
     @State private var confirmsKeyDeletion = false
@@ -18,6 +19,7 @@ struct LLMSettingsView: View {
                     Text(connection.destinationLabel).tag(connection.id)
                 }
             }
+            .modifier(RevealOnFocus(proxy: scrollProxy))
             Text(settings.selected.baseURL).font(.caption).textSelection(.enabled)
             Text(settings.credentials.statusText + (settings.selected.provider == .local ? "（ローカルではキーは任意）" : ""))
                 .font(.caption)
@@ -27,15 +29,16 @@ struct LLMSettingsView: View {
                         Button(provider.label) { editing = .preset(provider) }
                     }
                 }
-                Button("編集・APIキー設定") { editing = settings.selected }
+                .modifier(RevealOnFocus(proxy: scrollProxy))
+                Button("編集・APIキー設定") { editing = settings.selected }.modifier(RevealOnFocus(proxy: scrollProxy))
                 Button("接続を削除", role: .destructive) { confirmsDeletion = true }
-                    .disabled(settings.connections.count <= 1)
+                    .disabled(settings.connections.count <= 1).modifier(RevealOnFocus(proxy: scrollProxy))
             }
             HStack {
-                Button(checking ? "接続を確認中…" : "接続を確認") { checkConnection() }.disabled(checking)
-                if checking { Button("中止") { cancelCheck() } }
+                Button(checking ? "接続を確認中…" : "接続を確認") { checkConnection() }.disabled(checking).modifier(RevealOnFocus(proxy: scrollProxy))
+                if checking { Button("中止") { cancelCheck() }.modifier(RevealOnFocus(proxy: scrollProxy)) }
                 Button("APIキーを削除", role: .destructive) { confirmsKeyDeletion = true }
-                    .disabled(!settings.credentials.configured)
+                    .disabled(!settings.credentials.configured).modifier(RevealOnFocus(proxy: scrollProxy))
             }
             Text("接続確認は架空の短文を1回送信します。クラウドではAPI料金が発生する場合があります。")
                 .font(.caption).foregroundStyle(DesignTokens.secondary)
