@@ -135,7 +135,7 @@ struct ContentView: View {
             Button("キャンセル", role: .cancel) {}
             Button("消去", role: .destructive) { if !sessions.isBusy { conferenceKnowledge.reset(); controller.reset(store: store) } }
         } message: {
-            Text("現在の字幕と、このConferenceの一時資料・AI回答を破棄します。資料ライブラリ、保存済みセッション、Markdownは削除しません。")
+            Text("現在の字幕と、このConferenceの一時資料・AI回答を破棄します。資料ライブラリ、履歴に保存した記録、Markdownは削除しません。")
         }
         .task(id: "\(sourceLocaleID)->\(targetLanguageID)|only=\(transcriptionOnly)|retry=\(preparationRetry)|mode=\(conferenceKnowledge.recognitionMode.rawValue)") {
             guard !isPreview else { return }
@@ -277,7 +277,7 @@ struct ContentView: View {
 
     private var topBar: some View {
         HStack(spacing: 10) {
-            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "Sessions" : navigation.destination == .meeting ? "Meeting" : "Conference")
+            Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "履歴" : navigation.destination == .meeting ? "Meeting" : "Conference")
                 .font(.callout.weight(.medium))
                 .foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)

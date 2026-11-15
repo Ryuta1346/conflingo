@@ -7,7 +7,7 @@ struct SessionsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 0) {
             if let error = library.error { SessionErrorBanner(message: error).padding(16) }
-            if library.isBusy { ProgressView().padding(12).accessibilityLabel("保存したセッションを処理中") }
+            if library.isBusy { ProgressView().padding(12).accessibilityLabel("履歴を処理中") }
             if let selected = library.selected {
                 SavedSessionView(saved: selected, fontSize: fontSize, back: library.closeDetail) {
                     if let entry = library.entries.first(where: { $0.id == selected.id }) { library.requestDelete(entry) }
@@ -15,7 +15,7 @@ struct SessionsView: View {
             } else {
                 ScrollView {
                     VStack(alignment: .leading, spacing: 24) {
-                        PageHeading(title: "保存したセッション", subtitle: "このMacに保存した会議と字幕。", eyebrow: "ライブラリ")
+                        PageHeading(title: "履歴", subtitle: "このMacに保存した会議と字幕。", eyebrow: "ConfLingo")
                         HStack {
                             TextField("セッション名で検索", text: $library.query)
                                 .textFieldStyle(.roundedBorder).accessibilityLabel("セッション名で検索")
@@ -24,7 +24,7 @@ struct SessionsView: View {
                         Text("自動保存はオフです。削除しても、書き出したMarkdownと元資料は残ります。")
                             .font(.caption).foregroundStyle(DesignTokens.secondary)
                         if library.filtered.isEmpty {
-                            ContentUnavailableView(library.query.isEmpty ? "保存したセッションはありません" : "一致するセッションはありません",
+                            ContentUnavailableView(library.query.isEmpty ? "履歴はありません" : "一致するセッションはありません",
                                 systemImage: "folder", description: Text(library.query.isEmpty ? "会議の終了後、または字幕の停止後に「このMacに保存」を選んでください。" : "別の名前で検索してください。"))
                         }
                         LazyVStack(spacing: 12) {
@@ -39,7 +39,7 @@ struct SessionsView: View {
             }
         }
         .disabled(library.isBusy)
-        .alert("保存したセッションを削除しますか？", isPresented: Binding(
+        .alert("履歴から削除しますか？", isPresented: Binding(
             get: { library.pendingDelete != nil }, set: { if !$0 { library.cancelDelete() } }
         ), presenting: library.pendingDelete) { entry in
             Button("キャンセル", role: .cancel, action: library.cancelDelete)
@@ -94,7 +94,7 @@ struct RecentSessionsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
             HStack {
-                Text("最近保存したセッション").font(.title3.weight(.semibold))
+                Text("最近の履歴").font(.title3.weight(.semibold))
                 Spacer()
                 Button("すべて見る", action: showAll)
             }

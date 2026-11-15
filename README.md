@@ -12,7 +12,7 @@ A personal macOS app for conference subtitles and meeting assistance. Conference
 
 ## Saved sessions
 
-After stopping Conference or ending a Meeting, choose **Save on this Mac** (「このMacに保存」). The saved sessions page supports name search, read-only viewing after restarting the app, Markdown export, and deletion. Home shows the five most recently saved sessions.
+After stopping Conference or ending a Meeting, choose **Save on this Mac** (「このMacに保存」). The **History** page (「履歴」) lists the sessions you saved and supports name search, read-only viewing after restarting the app, Markdown export, and deletion. Home shows the five most recently saved sessions.
 
 Saved records include final transcripts, available translations, completed AI cards, candidate review states, completed summaries, and cited document excerpts. Changes require an explicit re-save. Audio, complete source documents, API keys, and AI permissions are not included. There is no autosave or cloud sync. Deleting a saved session leaves exported Markdown and source files intact.
 
