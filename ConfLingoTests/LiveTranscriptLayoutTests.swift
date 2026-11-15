@@ -79,11 +79,12 @@ extension AppKitIntegrationTests {
             #expect(scroll.contentView.bounds.maxY >= document.bounds.maxY - 24)
         }
 
-        @Test func conferenceManualHistoryScrollIsNotTakenOverByPartialUpdates() async throws {
+        @Test(arguments: [16.0, 48.0])
+        func conferenceManualHistoryScrollIsNotTakenOverByPartialUpdates(fontSize: Double) async throws {
             let store = SessionStore()
             for index in 0..<100 { store.appendFinal("Conference history \(index).") }
             let host = NSHostingView(rootView: ConferenceLiveView(store: store, sourceLanguage: "en", targetLanguage: nil,
-                profileName: "Synthetic", fontSize: .constant(16), editSettings: {}, clear: {}))
+                profileName: "Synthetic", fontSize: .constant(fontSize), editSettings: {}, clear: {}))
             let window = makeWindow(host, width: 620)
             let releaseAccessibility = TestAccessibility.shared.enable()
             defer { window.close(); releaseAccessibility() }
@@ -105,10 +106,12 @@ extension AppKitIntegrationTests {
             let anchor = try #require(try historyTitles.first { title in
                 try visible.contains(frame(of: title, in: host))
             })
-            store.updateVolatile("New conference partial")
-            await layout(host)
-            #expect(try viewport(of: scroll).intersects(frame(of: anchor, in: host)))
-            #expect(text(host).contains("履歴を表示中"))
+            for partial in ["First partial", String(repeating: "A growing partial. ", count: 20), "New conference partial"] {
+                store.updateVolatile(partial)
+                await layout(host)
+                try await expectVisible(anchor, in: host, scroll: scroll)
+                #expect(text(host).contains("履歴を表示中"))
+            }
             try press("最新へ", in: host)
             await layout(host)
             try await expectText("New conference partial", in: host)
@@ -169,16 +172,31 @@ extension AppKitIntegrationTests {
         }
 
         private func frame(of title: String, in root: NSObject) throws -> CGRect {
-            let element = try #require(elements(root).first {
+            try #require(subtitleFrame(of: title, in: root), "Missing subtitle: \(title). Available text: \(text(root))")
+        }
+
+        private func subtitleFrame(of title: String, in root: NSObject) -> CGRect? {
+            guard let element = elements(root).first(where: {
                 value("accessibilityValue", of: $0) as? String == title
                     || value("accessibilityLabel", of: $0) as? String == title
-            })
+            }) else { return nil }
             let selector = NSSelectorFromString("accessibilityFrame")
-            try #require(element.responds(to: selector))
+            guard element.responds(to: selector) else { return nil }
             // SwiftUI's AX element exposes the selector without publicly conforming to NSAccessibility.
             typealias FrameGetter = @convention(c) (AnyObject, Selector) -> CGRect
             let getter = unsafeBitCast(element.method(for: selector), to: FrameGetter.self)
             return getter(element, selector)
+        }
+
+        private func expectVisible(_ title: String, in host: NSView, scroll: NSScrollView) async throws {
+            let window = try #require(scroll.window)
+            let visible = try await waitForTestCondition {
+                host.layoutSubtreeIfNeeded()
+                guard let frame = subtitleFrame(of: title, in: host) else { return false }
+                let viewport = window.convertToScreen(scroll.contentView.convert(scroll.contentView.bounds, to: nil))
+                return viewport.intersects(frame)
+            }
+            try #require(visible, "History row must remain visible: \(title). Available text: \(text(host))")
         }
 
         private func viewport(of scroll: NSScrollView) throws -> CGRect {
