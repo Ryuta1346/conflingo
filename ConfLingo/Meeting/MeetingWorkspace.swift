@@ -27,6 +27,7 @@ final class MeetingWorkspace {
     var systemLocaleID = "en-US"
     var consentConfirmed = false
     var showsDiscardConfirmation = false
+    var showsEndConfirmation = false
     var knowledge: KnowledgeStore { support.knowledge }
     var selectedKnowledge: KnowledgeReference?
     var isUsingLibrary = false
@@ -223,6 +224,7 @@ final class MeetingWorkspace {
             && !isBusy && !isUsingLibrary && !isSavingSession && !knowledge.isBusy
     }
     var canStart: Bool { consentConfirmed && phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && page != .review }
+    var canEnd: Bool { page == .live && (phase == .listening || phase == .idle) && !isBusy }
     var canDiscard: Bool { phase == .idle && !isBusy && !knowledge.isBusy && !isUsingLibrary && !isSavingSession }
     var title: String { name.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty ? "名前のない会議" : name }
 
@@ -269,6 +271,20 @@ final class MeetingWorkspace {
         recognitionStatus = updated ? "認識エンジンへ用語を反映しました。認識精度への効果は未評価です。" : "認識用語は未反映です。次回の開始時に適用します。"
     }
     func end() async { await complete(.end) }
+
+    func requestEnd() {
+        guard canEnd else { return }
+        showsEndConfirmation = true
+    }
+
+    @discardableResult
+    func confirmEnd() -> Task<Void, Never>? {
+        guard showsEndConfirmation else { return nil }
+        showsEndConfirmation = false
+        guard canEnd else { return nil }
+        return Task { await end() }
+    }
+
     func cancelPreparation() async { await complete(.cancelPreparation) }
     func retryStop() async { await complete(pendingCompletion ?? .pause) }
 
@@ -323,6 +339,7 @@ final class MeetingWorkspace {
         selectedKnowledge = nil
         consentConfirmed = false
         showsDiscardConfirmation = false
+        showsEndConfirmation = false
         page = .setup
         pendingCompletion = nil
     }

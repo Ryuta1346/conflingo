@@ -45,25 +45,32 @@ struct MeetingTransport: View {
             Button("準備を取り消す") { Task { await meeting.cancelPreparation() } }
                 .disabled(meeting.isTransitioning)
         } else if meeting.phase == .listening {
-            HStack {
+            HStack(spacing: Self.endSpacing) {
                 Button("一時停止", systemImage: "pause") { Task { await meeting.pause() } }
-                Button("会議を終了", systemImage: "stop") { Task { await meeting.end() } }
-                    .tint(DesignTokens.danger)
+                endButton
             }
             .disabled(meeting.isBusy)
         } else {
-            HStack {
-                if meeting.page == .live {
-                    Button("準備へ戻る", action: meeting.editPreparation)
-                    Button("会議を終了") { Task { await meeting.end() } }
+            HStack(spacing: Self.endSpacing) {
+                HStack {
+                    if meeting.page == .live { Button("準備へ戻る", action: meeting.editPreparation) }
+                    Button(meeting.page == .setup ? "会議を開始" : "再開", systemImage: "play") {
+                        Task { await meeting.start() }
+                    }
+                    .buttonStyle(.borderedProminent)
+                    .disabled(!meeting.canStart)
                 }
-                Button(meeting.page == .setup ? "会議を開始" : "再開", systemImage: "play") {
-                    Task { await meeting.start() }
-                }
-                .buttonStyle(.borderedProminent)
-                .disabled(!meeting.canStart)
+                if meeting.page == .live { endButton.disabled(!meeting.canEnd) }
             }
         }
+    }
+
+    /// 終了は取り消せないため、隣の操作から離して右端に置く。
+    private static let endSpacing: CGFloat = 24
+
+    private var endButton: some View {
+        Button("会議を終了", systemImage: "stop", action: meeting.requestEnd)
+            .tint(DesignTokens.danger)
     }
 
     private func state(_ origin: AudioOrigin) -> String {

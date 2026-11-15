@@ -38,13 +38,13 @@ Provider-returned sources appear as clickable inline numbers and a URL list. Ret
 2. Enter a name and choose Japanese or English independently for the microphone and system audio. Keep **文字起こし** for transcription, or select **リアルタイム翻訳** to reveal per-input translation targets (initially English for the microphone and Japanese for system audio). Either input can use **翻訳なし**. Confirm that participants have been notified and have consented. The checkbox does not send notifications.
 3. Select **会議を開始** (Start meeting). The app prepares recognition models and checks input permissions. System audio may include other playback on your Mac; headphones are recommended.
 4. **一時停止** (Pause) stops the selected inputs; **再開** (Resume) preserves the same meeting and transcript. Preparation can be cancelled. If stopping fails, select **停止を再試行** (Retry stop).
-5. **会議を終了** (End meeting) waits for inputs to stop and final results to arrive before opening Review.
+5. **会議を終了** (End meeting) asks for confirmation, because an ended meeting cannot be resumed. Once confirmed, it waits for inputs to stop and final results to arrive before opening Review.
 
 The timeline identifies input sources, not individual participants. Reading older speech suspends automatic scrolling; **最新へ** returns to the latest speech. Text size and appearance are shared with Conference.
 
 **小さく表示** hides the main window and opens the floating panel. **展開** restores the main window. Hiding or closing the panel does not stop capture. Restore it through **Window → Meetingの小窓を表示**. Use Pause or End to stop capture. The panel is not guaranteed to be excluded from screen sharing.
 
-Transcripts and audio are not saved automatically. After ending the meeting, explicitly save on this Mac or export Markdown. Completed translations, AI answers and citations are retained and can be reopened from Sessions. Candidate confirmation/rejection is available. AI requests require session permission. Starting a new meeting asks before discarding existing speech.
+Transcripts and audio are not saved automatically. After ending the meeting, explicitly save on this Mac or export Markdown. Completed translations, AI answers and citations are retained and can be reopened from History (「履歴」). Candidate confirmation/rejection is available. AI requests require session permission. Starting a new meeting asks before discarding existing speech.
 
 ### Meeting AI assistance and LLM selection
 
@@ -148,7 +148,7 @@ Cancelling the save dialog or encountering a write failure preserves subtitles. 
 | Poor recognition | Check the input microphone, background noise, distance, and technical-term dictionary |
 | Stop remains unconfirmed | Select **停止を再試行**; the app preserves captions and input state while retrying |
 
-Both modes offer microphone/external devices, system audio, or both, plus document and transcript assistance and manual Web research. Meeting also offers summaries and candidate review. Saved sessions and the knowledge library are available from the shared navigation.
+Both modes offer microphone/external devices, system audio, or both, plus document and transcript assistance and manual Web research. Meeting also offers summaries and candidate review. Saved sessions (「履歴」, History) and the knowledge library are available from the shared navigation.
 
 See [README](../README.md#distribution) for distribution builds and [PR5-B validation](validation/pr5-b-conference.md) for the verification scope.
 
@@ -188,7 +188,7 @@ Open **資料** in Meeting, or the **資料（count）** button above Conference
 
 For document-only questions, open **資料だけに質問** in the materials panel and enable **資料への質問を許可**, choose the answer language and ask a question. Only the question and relevant excerpts are sent to the selected LLM; captions and audio are excluded. Citations open the imported source. Changing materials or the LLM connection cancels pending generation and requires fresh permission.
 
-Completed document answers can be saved before recording. Use **このMacに保存** or **書き出す** at the top of the materials panel, then reopen saved answers and citations from Sessions. Session saving requires audio to be stopped. Empty sessions, terminology alone, and unfinished answers are not saved.
+Completed document answers can be saved before recording. Use **このMacに保存** or **書き出す** at the top of the materials panel, then reopen saved answers and citations from History (「履歴」). Session saving requires audio to be stopped. Empty sessions, terminology alone, and unfinished answers are not saved.
 
 ## Document terminology and corrections
 

@@ -14,7 +14,7 @@ struct SavedSessionView: View {
         ScrollViewReader { proxy in
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 20) {
-                    PageHeading(title: saved.snapshot.title, subtitle: "\(saved.snapshot.kind) · 保存した記録 / 読み取り専用", eyebrow: "Sessions")
+                    PageHeading(title: saved.snapshot.title, subtitle: "\(saved.snapshot.kind) · 保存した記録 / 読み取り専用", eyebrow: "履歴")
                     Text("保存更新 \(saved.updatedAt.formatted(date: .abbreviated, time: .shortened)) · 開始 \(saved.snapshot.startedAt.map { MarkdownExporter.dateFormatter.string(from: $0) } ?? "未取得")")
                         .font(.caption).foregroundStyle(DesignTokens.secondary)
                     Text("保存時の内容です。音声取得・翻訳・AI送信は開始しません。")
@@ -186,6 +186,6 @@ struct SavedSessionView: View {
         do {
             try saved.snapshot.markdown.write(to: url, atomically: true, encoding: .utf8)
             exportMessage = "Markdownを書き出しました。アプリ内の保存とは別に管理されます。"
-        } catch { exportMessage = "書き出しに失敗しました。保存したセッションは保持されています。" }
+        } catch { exportMessage = "書き出しに失敗しました。履歴に保存した記録は保持されています。" }
     }
 }

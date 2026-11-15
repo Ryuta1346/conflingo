@@ -61,7 +61,13 @@ struct MeetingWorkspaceView: View {
             Button("キャンセル", role: .cancel) {}
             Button("破棄して新しい会議へ", role: .destructive) { meeting.confirmDiscard() }
         } message: {
-            Text("現在の会議の未保存の変更と資料全体を破棄します。保存済みセッション、資料ライブラリと書き出したMarkdownは残ります。")
+            Text("現在の会議の未保存の変更と資料全体を破棄します。履歴に保存した記録、資料ライブラリと書き出したMarkdownは残ります。")
+        }
+        .alert("会議を終了しますか？", isPresented: $meeting.showsEndConfirmation) {
+            Button("キャンセル", role: .cancel) {}
+            Button("会議を終了", role: .destructive) { meeting.confirmEnd() }
+        } message: {
+            Text("終了すると、この会議の文字起こしは再開できません。ここまでの発話とAIの回答は振り返りに残り、保存とMarkdownの書き出しができます。")
         }
     }
 
@@ -124,7 +130,7 @@ struct MeetingWorkspaceView: View {
     private var header: some View {
         HStack(alignment: .top) {
             VStack(alignment: .leading, spacing: 5) {
-                Text(meeting.page == .review ? "Meeting / 振り返り" : "Meeting / General")
+                Text(meeting.page == .review ? "Meeting / 振り返り" : "Meeting / ライブ")
                     .font(.caption).foregroundStyle(DesignTokens.secondary)
                 Text(meeting.title).font(.title2.weight(.semibold)).lineLimit(2)
                 Text(sessions?.status(for: meeting.sessionSnapshot) ?? "自動保存オフ · 終了後に保存またはMarkdown書き出し")
@@ -225,7 +231,7 @@ struct MeetingInsightCard: View {
                 HStack {
                     Label(insight.kind.label, systemImage: "sparkles").foregroundStyle(DesignTokens.accent)
                     Spacer()
-                    StatusLabel(text: reviewLabel, symbol: "questionmark.circle", color: DesignTokens.warning)
+                    StatusLabel(text: badge.text, symbol: badge.symbol, color: badge.color)
                 }
                 .font(.caption)
                 Text(insight.text).font(.system(size: fontSize, weight: .medium)).textSelection(.enabled)
@@ -268,9 +274,8 @@ struct MeetingInsightCard: View {
             }
         }
     }
-    private var reviewLabel: String {
-        if let candidate = meeting.candidates.items.first(where: { $0.id == insight.id }) { return candidate.review.label }
-        return insight.status == .generating ? "生成中・未検証" : insight.status == .interrupted ? "中断" : "要確認"
+    private var badge: InsightReviewBadge {
+        InsightReviewBadge(review: meeting.candidates.items.first { $0.id == insight.id }?.review, status: insight.status)
     }
 
     @ViewBuilder private func reviewButtons(_ candidate: MeetingCandidate) -> some View {
