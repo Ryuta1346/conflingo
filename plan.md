@@ -33,7 +33,7 @@
 ## 現在地
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-15／main `e21c355`**。PR #43マージ済み、修正後リモートCI成功をPRで確認。Sessions・資料ライブラリ・LLM設定の追加UI受入を実施し、U01〜U03を承認後にローカル修正・再受入済み（未コミット）。VoiceOverは保留（ユーザー指示・オフ確認済み）。独立レビュー・実モデル/実機受入は継続。
+- 更新: **2026-11-15／main `e21c355`**。PR #43マージ済み、修正後リモートCI成功をPRで確認。Sessions・資料ライブラリ・LLM設定の追加UI受入を実施し、U01〜U03を承認後に修正・再受入済み（[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)提出済み・未マージ）。VoiceOverは保留（ユーザー指示・オフ確認済み）。独立レビュー・実モデル/実機受入は継続。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **直近の検証記録:** UI修正と追補レビュー後に705定義成功・実API7定義除外、Lint275ファイル違反0、arm64/x86_64 Release成功。U01〜U03は専用Debugプレビューで再受入、追補の長いパス修正はNSHostingViewの14ケースと画像で検証。[UI結果](docs/validation/library-settings-ui-2026-11-15.md)。
@@ -45,7 +45,7 @@
 
 ## 次の作業の優先順（提案）
 
-**先行:** PR #43までmainへマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の独立レビューは継続。[UIのキー操作3件を修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。[承認済み計画](docs/design/ui-keyboard-acceptance-plan.md)に基づく未コミット差分。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。以下の実音声/実モデル受入も継続。
+**先行:** PR #43までmainへマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の独立レビューは継続。[UIのキー操作3件を修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。[承認済み計画](docs/design/ui-keyboard-acceptance-plan.md)に基づく差分を[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)へ提出済み。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。以下の実音声/実モデル受入も継続。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -145,4 +145,4 @@
 - **2026-11-11（実音声）:** 診断2試行で日本語4文・英語9文を確認。欠落の旧判定を撤回。新しい文での再開と通常Meetingの開始→一時停止→再開→終了も確認。追加API0。[診断](docs/validation/microphone-diagnostics.md)・[Meeting受入](docs/validation/meeting-real-input-2026-11-11.md)。
 - **2026-11-11（品質）:** PR8合成引用16/16合格。PR7要約期限を60秒へ変更し、複数回評価を通じ固定16会議・22区間の品質条件を確認。過去timeoutと使用量予約は保持。[PR8結果](docs/validation/pr8-quality-acceptance.md)・[PR7結果](docs/validation/pr7-summary-deadline.md)。
 
-> 2026-11-15 UI修正結果: U01〜U03のテスト・修正・再受入を完了。VoiceOverは停止・保留を維持し、全経路受入ではないためGate完了数2/12を維持する。コミット・PR作成なし。
+> 2026-11-15 UI修正結果: U01〜U03のテスト・修正・再受入を完了。VoiceOverは停止・保留を維持し、全経路受入ではないためGate完了数2/12を維持する。修正は `20d959c`、[Draft PR #44](https://github.com/Ryuta1346/conflingo/pull/44)提出済み・未マージ。
