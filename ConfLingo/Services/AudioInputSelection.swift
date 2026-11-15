@@ -28,10 +28,10 @@ struct AudioInputPicker: View {
                 ForEach(AudioInputSelection.allCases) { Text($0.label).tag($0) }
             }
             Text("マイク・外部入力はMacのシステム設定で選択した入力機器を使います。内部音声はこのアプリを除くMac全体の再生音です。")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             if selection == .both {
                 Text("スピーカーの音がマイクにも入る場合は、ヘッドフォンを使うと重複を抑えられます。")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
         }
     }

@@ -23,12 +23,12 @@ struct HomeView: View {
                         Image(systemName: "captions.bubble")
                             .font(.system(size: 28))
                             .foregroundStyle(DesignTokens.accent)
-                        Text("Conference").font(.title2.weight(.semibold))
+                        Text("Conference").font(DesignTokens.Typography.heading)
                         Text("講演の字幕・翻訳を読みながら、資料と発話を使った提案やWeb調査を利用できます。")
                             .foregroundStyle(DesignTokens.secondary)
                             .lineSpacing(5)
                         Button("字幕を準備する", systemImage: "arrow.right", action: prepare)
-                            .buttonStyle(.borderedProminent)
+                            .buttonStyle(AppButtonStyle(.primary))
                             .controlSize(.large)
                     }
                 }
@@ -36,9 +36,9 @@ struct HomeView: View {
                     Surface {
                         HStack {
                             VStack(alignment: .leading, spacing: 5) {
-                                Text("現在の字幕").font(.headline)
+                                Text("現在の字幕").font(DesignTokens.Typography.heading)
                                 Text("停止後にこのMacへ保存するか、Markdownを書き出せます。")
-                                    .font(.callout).foregroundStyle(DesignTokens.secondary)
+                                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                             }
                             Spacer()
                             Button("字幕を開く", action: openTranscript)
@@ -47,18 +47,18 @@ struct HomeView: View {
                 }
                 Surface {
                     VStack(alignment: .leading, spacing: 14) {
-                        Label("Meeting", systemImage: "person.2").font(.title2.weight(.semibold))
+                        Label("Meeting", systemImage: "person.2").font(DesignTokens.Typography.heading)
                         Text("選んだ音声を文字起こし。資料・発話から提案やWeb調査を利用できます。")
                             .foregroundStyle(DesignTokens.secondary)
                         Button("会議を開く", systemImage: "arrow.right", action: openMeeting)
-                            .buttonStyle(.bordered).controlSize(.large)
+                            .buttonStyle(AppButtonStyle()).controlSize(.large)
                     }
                 }
                 if let sessions {
                     RecentSessionsView(library: sessions, showAll: showSessions, open: openSession)
                 }
                 Label("音声は保存せず、認識と翻訳はMacで処理します。", systemImage: "checkmark.shield")
-                    .font(.callout).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             }
             .padding(32)
             .frame(maxWidth: 900)

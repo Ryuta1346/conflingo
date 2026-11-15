@@ -25,6 +25,8 @@ struct AppShellView<Content: View>: View {
         .background(DesignTokens.canvas)
         .foregroundStyle(DesignTokens.text)
         .tint(DesignTokens.accent)
+        .buttonStyle(AppButtonStyle())
+        .font(DesignTokens.Typography.body)
     }
 
     private var compactNavigation: some View {
@@ -51,12 +53,12 @@ struct AppShellView<Content: View>: View {
                 Image(systemName: "captions.bubble.fill")
                     .font(.title2)
                     .foregroundStyle(DesignTokens.accent)
-                Text("ConfLingo").font(.system(size: 17, weight: .semibold))
+                Text("ConfLingo").font(DesignTokens.Typography.heading)
             }
             .padding(.vertical, 24)
             .padding(.horizontal, 8)
             Text("ワークスペース")
-                .font(.caption2)
+                .font(DesignTokens.Typography.note)
                 .foregroundStyle(DesignTokens.secondary)
                 .padding(8)
             navigationButton("ホーム", symbol: "house", target: .home)
@@ -68,7 +70,7 @@ struct AppShellView<Content: View>: View {
             navigationButton("設定", symbol: "gearshape", target: .settings)
             Divider().padding(.vertical, 12)
             Label("音声認識は、このMacで。", systemImage: "checkmark.shield")
-                .font(.caption2)
+                .font(DesignTokens.Typography.note)
                 .foregroundStyle(DesignTokens.secondary)
                 .padding(.horizontal, 8)
                 .padding(.bottom, 12)
@@ -86,7 +88,7 @@ struct AppShellView<Content: View>: View {
             navigate(target)
         } label: {
             Label(title, systemImage: symbol)
-                .font(.system(size: 13, weight: selected ? .semibold : .regular))
+                .font(DesignTokens.Typography.body.weight(selected ? .semibold : .regular))
                 .frame(maxWidth: .infinity, alignment: .leading)
                 .padding(10)
                 .foregroundStyle(selected ? DesignTokens.accent : DesignTokens.text)

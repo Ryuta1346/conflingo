@@ -17,7 +17,8 @@ struct KnowledgeMaterialsView: View {
     @State private var reading: KnowledgeArchive.Document?
     @State private var query = ""
     @State private var selectedReference: KnowledgeReference?
-    @State private var message = ""
+    @State private var notice: UserMessage?
+    @State private var importResults: [UserMessage] = []
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
@@ -26,17 +27,18 @@ struct KnowledgeMaterialsView: View {
                 VStack(alignment: .leading) { addButtons }
             }
             RepositoryKnowledgeControls(knowledge: knowledge, canEdit: canEdit) { scan, paths in
+                importResults = []; notice = nil
                 if let importRepository { await importRepository(scan, paths) }
                 else { await knowledge.importRepository(scan, selected: paths) }
             }
             Text("UTF-8の.md / .txt、またはリポジトリ。直接追加した資料はこのセッション内に保持します。「ライブラリに保存」で次回も使えます。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             if knowledge.documents.isEmpty { Text("資料なし。実行中も追加できます。").foregroundStyle(DesignTokens.secondary) }
             ScrollView {
                 LazyVStack(alignment: .leading, spacing: 10) {
                     ForEach(knowledge.documents) { document in
                         VStack(alignment: .leading, spacing: 4) {
-                            Text(document.displayTitle).font(.callout.weight(.medium)).lineLimit(2)
+                            Text(document.displayTitle).font(DesignTokens.Typography.body.weight(.medium)).lineLimit(2)
                             HStack {
                                 Button("本文") { Task { await read(document) } }.disabled(knowledge.isBusy)
                                 if document.source == nil || document.id == knowledge.documents.first(where: { $0.source != nil })?.id {
@@ -46,31 +48,32 @@ struct KnowledgeMaterialsView: View {
                                 Button("取り外す", role: .destructive) { removing = document }
                                     .disabled(!canEdit())
                                     .accessibilityLabel("\(document.displayTitle)を取り外す")
-                            }.font(.caption)
+                            }.font(DesignTokens.Typography.supporting)
                             if let entry = knowledge.librarySources[document.id] {
-                                Text("保存版：\(entry.title)").font(.caption).foregroundStyle(DesignTokens.secondary)
+                                Text("保存版：\(entry.title)").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                             }
                         }
                     }
                 }
             }.frame(maxHeight: knowledge.documents.isEmpty ? 0 : 180)
             if knowledge.isBusy { ProgressView("資料を処理しています…") }
-            if !knowledge.message.isEmpty { Text(knowledge.message).font(.caption).textSelection(.enabled) }
-            if !message.isEmpty { Text(message).font(.caption).foregroundStyle(DesignTokens.warning) }
+            if importResults.isEmpty, let notice = knowledge.notice { InlineMessage(notice) }
+            if let notice { InlineMessage(notice) }
+            ForEach(Array(importResults.enumerated()), id: \.offset) { _, result in InlineMessage(result) }
             HStack {
                 TextField("資料をこのMacで検索", text: $query).textFieldStyle(.roundedBorder)
                     .onSubmit { search() }.accessibilityLabel("資料検索")
                 Button("検索", action: search).disabled(knowledge.isBusy || knowledge.documents.isEmpty)
             }
-            if knowledge.searchState == .empty { Text("一致する資料はありません。").font(.caption) }
-            if knowledge.searchState == .failed { Text("検索できませんでした。再試行してください。").font(.caption) }
+            if knowledge.searchState == .empty { InlineMessage(.information, "一致する資料はありません。") }
+            if knowledge.searchState == .failed { InlineMessage(.failure, "検索できませんでした。再試行してください。") }
             ForEach(knowledge.results) { reference in
                 Button { selectedReference = reference } label: {
                     VStack(alignment: .leading, spacing: 4) {
-                        Text("\(reference.displayTitle) · \(reference.provenance)").font(.caption.bold())
-                        Text(reference.snippet).font(.caption).lineLimit(3)
+                        Text("\(reference.displayTitle) · \(reference.provenance)").font(DesignTokens.Typography.supporting.bold())
+                        Text(reference.snippet).font(DesignTokens.Typography.supporting).lineLimit(3)
                     }.frame(maxWidth: .infinity, alignment: .leading)
-                }.buttonStyle(.plain)
+                }.buttonStyle(AppButtonStyle(.link))
             }
         }
         .fileImporter(isPresented: $importing, allowedContentTypes: [.plainText, UTType(filenameExtension: "md") ?? .text], allowsMultipleSelection: true) { result in
@@ -78,19 +81,24 @@ struct KnowledgeMaterialsView: View {
             case .success(let urls):
                 let generation = knowledge.importGeneration
                 Task {
-                    var results: [String] = []
+                    var results: [UserMessage] = []
+                    notice = nil
+                    importResults = []
                     for url in urls {
                         guard generation == knowledge.importGeneration, canEdit() else { break }
                         if let importFile { await importFile(url) } else { await knowledge.add(url: url); knowledge.setPermission(false) }
-                        results.append("\(url.lastPathComponent)：\(knowledge.message)")
+                        if let result = knowledge.notice {
+                            results.append(UserMessage(result.kind, "\(url.lastPathComponent)：\(result.text)", details: result.details))
+                        }
                     }
-                    message = results.joined(separator: "\n")
+                    if generation == knowledge.importGeneration { importResults = results }
                 }
-            case .failure: message = "資料を選択できませんでした。"
+            case .failure(let error): notice = UserMessage(.failure, "資料を選択できませんでした。", details: error.localizedDescription)
             }
         }
         .sheet(isPresented: $selecting) {
             VStack {
+                SheetHeader(title: "保存資料を選択") { selecting = false }
                 KnowledgeLibraryView(library: library, fontSize: fontSize, attachedIDs: Set(knowledge.librarySources.values.map(\.id))) { entry in
                     Task {
                         guard canEdit() else { return }
@@ -100,8 +108,7 @@ struct KnowledgeMaterialsView: View {
                         if success { selecting = false; library.close() }
                     }
                 }
-                Button("閉じる") { selecting = false }.keyboardShortcut(.cancelAction).padding()
-            }.frame(minWidth: 480, idealWidth: 640, minHeight: 400)
+            }.sheetSurface().frame(minWidth: 480, idealWidth: 640, minHeight: 400)
         }
         .sheet(item: $saving) { document in
             MaterialSaveView(knowledge: knowledge, library: library, document: document)
@@ -113,13 +120,16 @@ struct KnowledgeMaterialsView: View {
         .alert("資料を取り外しますか？", isPresented: Binding(get: { removing != nil }, set: { if !$0 { removing = nil } })) {
             Button("キャンセル", role: .cancel) { removing = nil }
             Button("取り外す", role: .destructive) {
-                if let removing, canEdit() { Task {
+                if let removing, canEdit() {
+                    importResults = []; notice = nil
+                    Task {
                     if removing.source == nil { await knowledge.remove(removing.id) } else { await knowledge.removeRepository() }
-                } }
+                    }
+                }
                 removing = nil
             }
         } message: { Text("以降の検索から除外します。既存の引用、保存資料、元ファイルは残ります。リポジトリは一括で取り外します。") }
-        .onChange(of: knowledge.importGeneration) { selecting = false; importing = false; saving = nil }
+        .onChange(of: knowledge.importGeneration) { selecting = false; importing = false; saving = nil; importResults = []; notice = nil }
     }
 
     private var addButtons: some View {
@@ -130,10 +140,11 @@ struct KnowledgeMaterialsView: View {
             }
         }
     }
-    private func search() { Task { await knowledge.search(query) } }
+    private func search() { notice = nil; importResults = []; Task { await knowledge.search(query) } }
     private func read(_ document: KnowledgeDocument) async {
+        notice = nil
         do { reading = try await knowledge.contents().first { $0.document.id == document.id } }
-        catch { message = "本文を開けませんでした。" }
+        catch { notice = UserMessage(.failure, "本文を開けませんでした。再試行してください。", details: error.localizedDescription) }
     }
 }
 
@@ -145,10 +156,9 @@ private struct MaterialBodyView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text(item.document.displayTitle).font(.title2).textSelection(.enabled)
+            SheetHeader(title: item.document.displayTitle) { dismiss() }
             ScrollView { Text(item.body).font(.system(size: fontSize)).textSelection(.enabled).frame(maxWidth: .infinity, alignment: .leading) }
-            Button("閉じる") { dismiss() }.keyboardShortcut(.cancelAction)
-        }.padding(24).frame(minWidth: 420, idealWidth: 620, minHeight: 360)
+        }.sheetSurface().frame(minWidth: 420, idealWidth: 620, minHeight: 360)
     }
 }
 
@@ -164,25 +174,25 @@ private struct MaterialSaveView: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("資料をライブラリに保存").font(.title2.bold())
+            Text("資料をライブラリに保存").font(DesignTokens.Typography.title)
             Text("本文をこのMacに保持します。セッションを破棄しても残ります。")
             TextField("保存名", text: $title).textFieldStyle(.roundedBorder)
             Picker("更新先", selection: $replacementID) {
                 Text("この資料の保存先（初回は新規）").tag(nil as UUID?)
                 ForEach(targets) { Text($0.title).tag(Optional($0.id)) }
             }
-            if replacementID != nil { Text("選んだ保存資料を置き換えます。使用中のコピーは変更しません。").font(.caption) }
-            if let error = library.error { Text(error).foregroundStyle(DesignTokens.warning).font(.caption) }
+            if replacementID != nil { Text("選んだ保存資料を置き換えます。使用中のコピーは変更しません。").font(DesignTokens.Typography.supporting) }
+            if let failure = library.failure { InlineMessage(failure) }
             HStack {
-                Button("キャンセル") { dismiss() }.keyboardShortcut(.cancelAction)
                 Spacer()
+                Button("キャンセル") { dismiss() }.keyboardShortcut(.cancelAction)
                 Button("保存") { Task {
                     if await library.save(from: knowledge, documentID: document.source == nil ? document.id : nil,
                                           title: title, replacing: targets.first { $0.id == replacementID }) { dismiss() }
                 } }.disabled(title.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || title.count > 200)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(AppButtonStyle(.primary))
             }
-        }.padding(24).frame(minWidth: 440).disabled(library.isBusy || knowledge.isBusy)
+        }.sheetSurface().frame(minWidth: 440).disabled(library.isBusy || knowledge.isBusy)
             .interactiveDismissDisabled(library.isBusy)
             .task { title = knowledge.librarySources[document.id]?.title ?? document.source?.name ?? document.title; await library.reload() }
     }

@@ -14,11 +14,11 @@ struct DualTranscriptionProbeView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("2入力文字起こしの確認").font(.title2.bold())
+            Text("2入力文字起こしの確認").font(DesignTokens.Typography.title)
             Text("マイクとMacの内部音声を別々に文字起こしします。内部音声には会議以外のアプリの音も含まれます。入力元は人物名を示しません。回り込みを減らすにはヘッドフォンを使ってください。")
-                .font(.callout).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             Text("音声ファイルの保存・外部AI送信は行いません。開始時に認識モデルのダウンロードとアクセス許可が必要な場合があります。")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             HStack(spacing: 24) {
                 inputSettings(.microphone, selection: $microphoneLocale)
                 inputSettings(.systemAudio, selection: $systemLocale)
@@ -26,7 +26,7 @@ struct DualTranscriptionProbeView: View {
             Toggle("高速確定（精度低め）", isOn: $fastResults)
                 .disabled(controller.phase != .idle)
             HStack {
-                Text(phaseLabel).font(.callout)
+                Text(phaseLabel).font(DesignTokens.Typography.body)
                 Spacer()
                 Button("Clear") { controller.clear() }.disabled(controller.phase != .idle)
                 if controller.phase == .idle {
@@ -38,7 +38,7 @@ struct DualTranscriptionProbeView: View {
                             )
                         }
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(AppButtonStyle(.primary))
                 } else {
                     Button(controller.phase == .preparing ? "キャンセル" : "停止／停止を再試行") {
                         Task { await controller.stop() }
@@ -46,14 +46,14 @@ struct DualTranscriptionProbeView: View {
                 }
             }
             if controller.phase == .idle, controller.activity.owner != nil {
-                Text(controller.activity.busyMessage).font(.callout).foregroundStyle(.secondary)
+                Text(controller.activity.busyMessage).font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             }
             if let error = controller.lastError {
-                Text(error).foregroundStyle(.red).font(.callout).textSelection(.enabled)
+                InlineMessage(.failure, "音声入力に問題が発生しました。アクセス権を確認し、停止できない場合は停止を再試行してください。", details: error)
             }
             #if DEBUG
             if controller.phase == .idle, let snapshot = controller.diagnostics?.snapshot {
-                Text("診断ID: \(snapshot.id.uuidString)").font(.caption).textSelection(.enabled)
+                Text("診断ID: \(snapshot.id.uuidString)").font(DesignTokens.Typography.supporting).textSelection(.enabled)
                 if controller.diagnosticSaveFailed { Text("診断メタデータを保存できませんでした。").foregroundStyle(.red) }
             }
             #endif
@@ -62,7 +62,7 @@ struct DualTranscriptionProbeView: View {
                 LazyVStack(alignment: .leading, spacing: 12) {
                     if controller.store.finals.isEmpty && controller.store.partials.isEmpty {
                         Text("認識した発話を、入力元と会議の経過時刻付きで表示します。")
-                            .foregroundStyle(.secondary)
+                            .foregroundStyle(DesignTokens.secondary)
                     }
                     ForEach(controller.store.finals + controller.store.partials) { event in
                         transcript(event)
@@ -71,7 +71,7 @@ struct DualTranscriptionProbeView: View {
                 .frame(maxWidth: .infinity, alignment: .leading)
             }
             Text("時刻は各入力の開始通知を基準にしています。実音声での同期精度・認識精度は検証が必要です。")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
         }
         .padding(24)
         .frame(minWidth: 680, minHeight: 480)
@@ -92,14 +92,14 @@ struct DualTranscriptionProbeView: View {
             }
             .disabled(controller.phase != .idle)
             Text("アクセス：\(permissionLabel(origin))")
-                .font(.caption).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             Text(inputStateLabel(origin))
-                .font(.caption).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             if controller.permissions[origin] != .granted {
                 Text(origin == .microphone
                      ? "許可の変更：システム設定 → プライバシーとセキュリティ → マイク"
                      : "許可の変更：システム設定 → プライバシーとセキュリティ → 画面収録とシステムオーディオ録音。変更後は再起動が必要な場合があります。")
-                    .font(.caption).foregroundStyle(.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
         }
         .frame(maxWidth: .infinity, alignment: .leading)
@@ -108,7 +108,7 @@ struct DualTranscriptionProbeView: View {
     private func transcript(_ event: TranscriptEvent) -> some View {
         VStack(alignment: .leading, spacing: 4) {
             Text("\(event.origin.label) · \(event.startOffset, specifier: "%.1f")秒 · \(event.isFinal ? "確定" : "認識中")")
-                .font(.caption.monospacedDigit()).foregroundStyle(.secondary)
+                .font(DesignTokens.Typography.supporting.monospacedDigit()).foregroundStyle(DesignTokens.secondary)
             Text(event.text).textSelection(.enabled)
                 .foregroundStyle(event.isFinal ? .primary : .secondary)
         }

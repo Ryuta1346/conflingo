@@ -8,7 +8,7 @@ struct DocumentTermsView: View {
     var manual: [KeywordParser.GlossaryEntry] = []
     var applied: () -> Void = {}
     @State private var sourceLanguage = ""
-    @State private var message = ""
+    @State private var notice: UserMessage?
     @State private var extracting = false
     @State private var newTerm = ""
     @State private var newTarget = ""
@@ -19,26 +19,27 @@ struct DocumentTermsView: View {
                 Text(targetLanguage == nil
                     ? "見出し・強調語・コード表記・用語表から候補を抽出します。使う語を確認してください。合計100語まで。"
                     : "見出し・強調語・コード表記・原語/訳語の表から候補を抽出します。使う語と訳語を確認してください。既存辞書と合わせて100語まで。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 Button("資料から用語を抽出") {
+                    notice = nil
                     extracting = true
                     Task {
                         defer { extracting = false }
                         do {
                             terms.extract(try await knowledge.contents())
                             terms.selectCandidates(sourceLanguage: sourceLanguage)
-                            message = "候補を選択・編集して適用してください。"
+                            notice = UserMessage(.success, "候補を選択・編集して適用してください。")
                         }
-                        catch { message = "資料を読み込めませんでした。" }
+                        catch { notice = UserMessage(.failure, "資料を読み込めませんでした。再試行してください。", details: error.localizedDescription) }
                     }
                 }.disabled(extracting || knowledge.isBusy || knowledge.documents.isEmpty)
                 Picker("原語の言語", selection: $sourceLanguage) {
                     ForEach(Array(Set(sourceLanguages)).sorted(), id: \.self) { Text(LanguageCatalog.displayName(for: $0)).tag($0) }
                 }
                 Text(targetLanguage.map { "訳語の言語：\(LanguageCatalog.displayName(for: $0))" } ?? "認識ヒントと、翻訳時の原文表記保持に使います。固定訳語の指定はできません。")
-                    .font(.caption)
+                    .font(DesignTokens.Typography.supporting)
                 Text("適用・解除は選択中の原語言語だけを変更します。別の言語に適用した用語は保持します。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 ScrollView {
                     LazyVStack(alignment: .leading) {
                         ForEach($terms.candidates) { $candidate in
@@ -49,7 +50,7 @@ struct DocumentTermsView: View {
                                     if targetLanguage != nil { TextField("訳語（任意）", text: $candidate.target).textFieldStyle(.roundedBorder) }
                                 }
                                 Text("\(candidate.documentTitle)\(candidate.line > 0 ? " · \(candidate.line)行" : "") · \(candidate.snippet)")
-                                    .font(.caption2).foregroundStyle(DesignTokens.secondary).textSelection(.enabled).lineLimit(3)
+                                    .font(DesignTokens.Typography.note).foregroundStyle(DesignTokens.secondary).textSelection(.enabled).lineLimit(3)
                             }
                         }
                     }
@@ -64,15 +65,15 @@ struct DocumentTermsView: View {
                     Button("選択した用語を適用") {
                         do {
                             try terms.apply(sourceLanguage: sourceLanguage, targetLanguage: targetLanguage, manual: manual)
-                            message = targetLanguage == nil
+                            notice = UserMessage(.success, targetLanguage == nil
                                 ? "用語を適用しました。以降の翻訳で原文表記を保護します。"
-                                : "用語を適用しました。翻訳は以降の処理に反映します。"
+                                : "用語を適用しました。翻訳は以降の処理に反映します。")
                             applied()
-                        } catch { message = error.localizedDescription }
+                        } catch { notice = UserMessage(.failure, (error as? DocumentTermFailure)?.localizedDescription ?? "用語を適用できませんでした。選択内容を確認してください。") }
                     }.disabled(extracting || knowledge.isBusy || sourceLanguage.isEmpty)
-                    Button("この言語の適用を解除") { terms.clear(sourceLanguage: sourceLanguage); applied() }
+                    Button("この言語の適用を解除") { terms.clear(sourceLanguage: sourceLanguage); notice = UserMessage(.success, "この言語の用語適用を解除しました。"); applied() }
                 }
-                if !message.isEmpty { Text(message).font(.caption).textSelection(.enabled) }
+                if let notice { InlineMessage(notice) }
             }.padding(.top, 10)
         }
         .onAppear {

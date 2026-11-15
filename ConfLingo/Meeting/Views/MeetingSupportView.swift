@@ -14,7 +14,7 @@ struct MeetingSupportView<ReviewContent: View>: View {
         VStack(alignment: .leading, spacing: 0) {
             if meeting.page == .live {
                 HStack {
-                    Text("いま、役立つ提案").font(.headline).accessibilityAddTraits(.isHeader)
+                    Text("いま、役立つ提案").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
                     Spacer(minLength: 8)
                     Button(meeting.ai.permitted ? "AI設定 · 許可済み" : "AI設定 · オフ") { showsSettings = true }
                         .focused($settingsFocused)
@@ -42,22 +42,22 @@ struct MeetingSupportView<ReviewContent: View>: View {
         .sheet(isPresented: $showsSettings, onDismiss: { settingsFocused = true }) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("AI設定・送信範囲").font(.title2.bold())
+                    Text("AI設定・送信範囲").font(DesignTokens.Typography.title)
                     Spacer()
                     Button("閉じる") { showsSettings = false }.keyboardShortcut(.cancelAction)
                 }
                 ScrollView { MeetingAISettings(meeting: meeting).padding(1) }
-            }.padding(24).frame(minWidth: 480, idealWidth: 600, minHeight: 480, idealHeight: 640)
+            }.sheetSurface().frame(minWidth: 480, idealWidth: 600, minHeight: 480, idealHeight: 640)
         }
         .sheet(isPresented: $showsDocuments) {
             VStack(alignment: .leading, spacing: 16) {
                 HStack {
-                    Text("会議の資料").font(.title2.bold())
+                    Text("会議の資料").font(DesignTokens.Typography.title)
                     Spacer()
                     Button("閉じる") { showsDocuments = false }.keyboardShortcut(.cancelAction)
                 }
                 ScrollView { MeetingKnowledgeControls(meeting: meeting, library: library, fontSize: fontSize) }
-            }.padding(24).frame(minWidth: 480, idealWidth: 640, minHeight: 480, idealHeight: 640)
+            }.sheetSurface().frame(minWidth: 480, idealWidth: 640, minHeight: 480, idealHeight: 640)
         }
     }
 
@@ -65,9 +65,9 @@ struct MeetingSupportView<ReviewContent: View>: View {
         VStack(alignment: .leading, spacing: 16) {
             if meeting.insights.isEmpty && meeting.research.answers.isEmpty {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("提案はまだありません").font(.headline)
+                    Text("提案はまだありません").font(DesignTokens.Typography.heading)
                     Text("会話は「会話の流れ」で確認できます。AIを使う場合は「AI設定」で送信範囲を確認してください。")
-                        .font(.callout).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
                 }.padding(8)
             }
             ForEach(meeting.insights.reversed().filter { card in !meeting.candidates.items.contains { $0.id == card.id } }) { insight in
@@ -78,9 +78,9 @@ struct MeetingSupportView<ReviewContent: View>: View {
                     research: { meeting.research.open($0, evidenceIDs: answer.evidenceIDs) })
             }
             if !meeting.candidates.items.isEmpty {
-                Text("決定・アクション候補").font(.headline)
+                Text("決定・アクション候補").font(DesignTokens.Typography.heading)
                 Text("確認済みは利用者による確認を示します。参加者全員の合意や内容の正しさを保証するものではありません。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 ForEach(meeting.candidates.items) { candidate in
                     MeetingInsightCard(meeting: meeting, insight: candidate.insight, fontSize: fontSize)
                 }

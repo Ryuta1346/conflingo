@@ -43,6 +43,15 @@ final class WebResearchCoordinator {
     static func validQuestion(_ value: String) -> Bool {
         !value.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty && value.count <= 2_000
     }
+    var statusMessage: UserMessage {
+        if !supported { return UserMessage(.warning, status) }
+        switch state {
+        case .failed: return UserMessage(.failure, status)
+        case .complete: return UserMessage(.success, status)
+        case .idle, .researching: return UserMessage(.information, status)
+        }
+    }
+
     var status: String {
         if !supported { return ResearchFailure.unsupported.localizedDescription }
         switch state {

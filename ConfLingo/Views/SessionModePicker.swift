@@ -10,7 +10,7 @@ struct SessionModePicker: View {
             }
             .pickerStyle(.segmented)
             Text(selection == .transcription ? "音声を文字にします。翻訳は行いません。" : "原文をすぐに表示し、訳文は準備した欄に順次表示します。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
         }
     }
 }

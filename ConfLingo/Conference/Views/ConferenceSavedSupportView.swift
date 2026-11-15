@@ -7,7 +7,7 @@ struct ConferenceSavedSupportView: View {
     @State private var reference: KnowledgeReference?
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if !support.answers.isEmpty { Text("AIの回答・提案・Web調査 · 要確認").font(.title3.bold()) }
+            if !support.answers.isEmpty { Text("AIの回答・提案・Web調査 · 要確認").font(DesignTokens.Typography.heading) }
             ForEach(support.answers) { answer in
                 ResearchAnswerText(answer: answer).font(.system(size: fontSize))
                 citations(answer.knowledgeReferences)
@@ -17,15 +17,15 @@ struct ConferenceSavedSupportView: View {
                     }
                 }
                 WebReferencesView(references: answer.webReferences ?? [])
-                if answer.webReferences?.isEmpty == false { Text("Webの生抜粋は保存していません。").font(.caption) }
+                if answer.webReferences?.isEmpty == false { Text("Webの生抜粋は保存していません。").font(DesignTokens.Typography.supporting) }
             }
-            if !support.corrections.isEmpty { Text("採用した資料参照補正").font(.title3.bold()) }
+            if !support.corrections.isEmpty { Text("採用した資料参照補正").font(DesignTokens.Typography.heading) }
             ForEach(support.corrections) { correction in
                 Surface {
                     VStack(alignment: .leading, spacing: 8) {
-                        Text("元の原文").font(.caption)
+                        Text("元の原文").font(DesignTokens.Typography.supporting)
                         Text(correction.original.sourceText).textSelection(.enabled)
-                        Text("採用した原文").font(.caption)
+                        Text("採用した原文").font(DesignTokens.Typography.supporting)
                         Text(correction.sourceText).font(.system(size: fontSize)).textSelection(.enabled)
                         if let original = correction.original.translation { Text("元の訳文：\(original)").textSelection(.enabled) }
                         if let translated = correction.translation { Text(translated).font(.system(size: fontSize)).textSelection(.enabled) }
@@ -36,7 +36,7 @@ struct ConferenceSavedSupportView: View {
             if !support.terms.isEmpty {
                 DisclosureGroup("適用用語（\(support.terms.count)語）") {
                     ForEach(Array(support.terms.enumerated()), id: \.offset) { _, term in
-                        Text("\(term.term)\(term.target.map { " = " + $0 } ?? "") · \(term.documentTitle) · \(term.line)行").font(.caption)
+                        Text("\(term.term)\(term.target.map { " = " + $0 } ?? "") · \(term.documentTitle) · \(term.line)行").font(DesignTokens.Typography.supporting)
                     }
                 }
             }
@@ -44,7 +44,7 @@ struct ConferenceSavedSupportView: View {
     }
     private func citations(_ references: [KnowledgeReference]) -> some View {
         ForEach(references) { item in
-            Button("\(item.displayTitle) · \(item.provenance)") { reference = item }.font(.caption)
+            Button("\(item.displayTitle) · \(item.provenance)") { reference = item }.font(DesignTokens.Typography.supporting).buttonStyle(AppButtonStyle(.link))
         }
     }
 }

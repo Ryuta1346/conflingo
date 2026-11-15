@@ -14,12 +14,12 @@ struct ControlBar: View {
             StatusLabel(text: status, symbol: phase == .listening ? "mic.fill" : "mic",
                         color: phase == .listening ? DesignTokens.positive : DesignTokens.secondary)
             Text("オンデバイス処理")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             Spacer(minLength: 8)
             switch phase {
             case .idle:
                 Button(hasTranscript ? "字幕を再開" : "字幕を開始", systemImage: "play.fill", action: start)
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(AppButtonStyle(.primary))
                     .keyboardShortcut("r", modifiers: .command)
                     .disabled(!canStart)
             case .preparing:
@@ -27,13 +27,12 @@ struct ControlBar: View {
                 Button("開始準備中…") {}.disabled(true)
             case .listening:
                 Button("停止する", systemImage: "stop.fill", action: stop)
-                    .tint(DesignTokens.danger)
-                    .buttonStyle(.bordered)
+                    .buttonStyle(AppButtonStyle())
                     .keyboardShortcut("r", modifiers: .command)
             case .stopping:
                 Button(isStopping ? "停止処理中…" : "停止を再試行", action: stop)
                     .disabled(isStopping)
-                    .tint(DesignTokens.danger)
+                    .buttonStyle(AppButtonStyle())
             }
         }
         .controlSize(.large)

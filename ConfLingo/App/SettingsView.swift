@@ -16,7 +16,7 @@ struct SettingsView: View {
                     PageHeading(title: "設定", subtitle: "入力と表示を、使いやすく。", eyebrow: "ConfLingo")
                     Surface {
                         VStack(alignment: .leading, spacing: 18) {
-                            Text("音声と言語").font(.headline)
+                            Text("音声と言語").font(DesignTokens.Typography.heading)
                             LabeledContent("認識言語・翻訳先") {
                                 Button("字幕の準備へ", action: prepare).modifier(RevealOnFocus(proxy: proxy))
                             }
@@ -28,7 +28,7 @@ struct SettingsView: View {
                     }
                     Surface {
                         VStack(alignment: .leading, spacing: 18) {
-                            Text("表示と操作").font(.headline)
+                            Text("表示と操作").font(DesignTokens.Typography.heading)
                             Picker("配色", selection: $appearance) {
                                 Text("システムに合わせる").tag("system")
                                 Text("ライト").tag("light")
@@ -46,7 +46,7 @@ struct SettingsView: View {
                     }
                     Surface {
                         VStack(alignment: .leading, spacing: 18) {
-                            Text("AI会話支援").font(.headline)
+                            Text("AI会話支援").font(DesignTokens.Typography.heading)
                             Picker("AIの回答言語", selection: $answerLanguage) {
                                 ForEach(AnswerLanguage.allCases, id: \.self) { language in
                                     Text(language.label).tag(language)
@@ -54,14 +54,14 @@ struct SettingsView: View {
                             }
                             .modifier(RevealOnFocus(proxy: proxy))
                             Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
-                                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                             Divider()
                             LLMSettingsView(settings: llmSettings, scrollProxy: proxy)
                         }
                     }
                     Surface {
                         VStack(alignment: .leading, spacing: 10) {
-                            Text("データの扱い").font(.headline)
+                            Text("データの扱い").font(DesignTokens.Typography.heading)
                             Text("Conferenceは停止後、Meetingは終了後に「このMacに保存」を選べます。保存した内容は「履歴」で再起動後も閲覧・削除でき、引用した資料の抜粋も残ります。Markdownは別に書き出せます。自動保存と音声ファイルの保存は行いません。")
                                 .foregroundStyle(DesignTokens.secondary)
                         }

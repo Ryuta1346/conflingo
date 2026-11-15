@@ -33,15 +33,15 @@ struct MeetingQuestionComposer: View {
                     let question = meeting.assistanceDraft
                     Task { await meeting.askAssistance(question) }
                 }
+                .buttonStyle(AppButtonStyle(.primary))
                 .disabled(!meeting.canAskAssistance || meeting.assistanceDraft.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty || meeting.assistanceDraft.count > 2_000)
                 .modifier(RevealOnFocus(proxy: scrollProxy))            }
             ViewThatFits(in: .horizontal) {
                 HStack(spacing: 10) { actions }
                 VStack(alignment: .leading, spacing: 10) { actions }
             }
-            if meeting.assistanceDraft.count > 2_000 { Text("質問は2,000文字以内で入力してください。").font(.caption) }
-            Label(meeting.ai.statusText, systemImage: meeting.ai.state == .sending ? "arrow.up.circle" : "cloud")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+            if meeting.assistanceDraft.count > 2_000 { Text("質問は2,000文字以内で入力してください。").font(DesignTokens.Typography.supporting) }
+            InlineMessage(meeting.ai.statusMessage)
                 .accessibilityLabel("AI状態：\(meeting.ai.statusText)")
         }
     }

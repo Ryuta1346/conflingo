@@ -10,11 +10,11 @@ struct MeetingAISettings: View {
             #if DEBUG
             if meeting.previewUsesLiveAI {
                 Text("実API検証：合成発話・音声取得なし・選択したAIへ実通信（API利用料金が発生）")
-                    .font(.caption).foregroundStyle(DesignTokens.warning)
+                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.warning)
             }
             #endif
             HStack {
-                Label(meeting.llmSettings.selected.destinationLabel, systemImage: "sparkles").font(.headline)
+                Label(meeting.llmSettings.selected.destinationLabel, systemImage: "sparkles").font(DesignTokens.Typography.heading)
                 Spacer()
                 Button("LLM設定") { showsKeySettings = true }
             }
@@ -24,16 +24,16 @@ struct MeetingAISettings: View {
                 }
             }
             Text("質問や発話の言語に関係なく適用します。変更は次の回答から反映されます。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             Toggle("確定発話と質問文を\(meeting.llmSettings.selected.name)へ送信することを許可", isOn: Binding(
                 get: { meeting.ai.permitted }, set: { meeting.setAIAllowed($0) }
             ))
             .disabled(meeting.page == .review || meeting.phase == .stopping)
             DisclosureGroup("送信する内容・データの扱い", isExpanded: $showsDataDetails) {
                 Text("音声は送りません。手動質問では許可前を含む直近の確定発話を最大30件送ります。資料は手動質問・自動提案それぞれの許可、または終了後要約の確認画面で選択した場合に参照します。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
                 Text("送信先：\(meeting.llmSettings.selected.baseURL)。料金・データ保持・学習への利用は、接続先サービスとご自身の契約・実行環境の条件をご確認ください。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             }
             Toggle("自動提案を使う（追加のAI処理が発生）", isOn: Binding(
                 get: { meeting.ai.automaticEnabled }, set: { meeting.setAutomaticAI($0) }
@@ -44,22 +44,18 @@ struct MeetingAISettings: View {
             ))
             .disabled(!meeting.ai.permitted || !meeting.ai.automaticEnabled || meeting.page == .review || meeting.phase == .stopping || meeting.knowledge.isBusy)
             Text("発話に関連する資料を検索し、最大5箇所・6,000文字と資料名・位置を送ります。提案の回数上限は同じですが、入力トークンが増える場合があります。手動質問・終了後要約の資料許可とは別の設定です。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
-            Text(meeting.ai.contextDescription).font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
+            Text(meeting.ai.contextDescription).font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             if let usage = meeting.ai.lastUsage {
                 Text("直近の使用量：入力 \(usage.inputTokens)・出力 \(usage.outputTokens + usage.thinkingTokens) トークン（思考を含む）")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
         }
         .onChange(of: meeting.ai.permitted) { _, allowed in
             if allowed { showsDataDetails = false }
         }
         .sheet(isPresented: $showsKeySettings) {
-            VStack(alignment: .trailing, spacing: 16) {
-                LLMSettingsView(settings: meeting.llmSettings)
-                Button("閉じる") { showsKeySettings = false }.keyboardShortcut(.cancelAction)
-            }
-            .padding(24).frame(width: 680)
+            LLMSettingsSheet(settings: meeting.llmSettings) { showsKeySettings = false }
         }
     }
 }

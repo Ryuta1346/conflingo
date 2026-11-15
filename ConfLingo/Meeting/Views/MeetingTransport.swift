@@ -11,7 +11,7 @@ struct MeetingTransport: View {
                 VStack(alignment: .leading, spacing: 10) { inputStatus; controls }
             }
             if meeting.phase == .preparing {
-                Text(meeting.controller.preparation).font(.caption).foregroundStyle(DesignTokens.secondary)
+                Text(meeting.controller.preparation).font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
         }
         .padding(14)
@@ -38,7 +38,7 @@ struct MeetingTransport: View {
                     .foregroundStyle(meeting.controller.inputState(origin) == .running ? DesignTokens.positive : DesignTokens.secondary)
             }
         }
-        .font(.caption)
+        .font(DesignTokens.Typography.supporting)
         .accessibilityElement(children: .combine)
     }
 
@@ -48,10 +48,10 @@ struct MeetingTransport: View {
         } else if meeting.phase == .stopping {
             if meeting.isBusy {
                 ProgressView().controlSize(.small)
-                Text("停止中…").font(.callout)
+                Text("停止中…").font(DesignTokens.Typography.body)
             } else {
                 Button("停止を再試行") { Task { await meeting.retryStop() } }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(AppButtonStyle())
             }
         } else if meeting.phase == .preparing || meeting.isStarting {
             ProgressView().controlSize(.small)
@@ -70,7 +70,7 @@ struct MeetingTransport: View {
                     Button(meeting.page == .setup ? "会議を開始" : "再開", systemImage: "play") {
                         Task { await meeting.start() }
                     }
-                    .buttonStyle(.borderedProminent)
+                    .buttonStyle(AppButtonStyle(.primary))
                     .disabled(!meeting.canStart)
                 }
                 if meeting.page == .live { endButton.disabled(!meeting.canEnd) }
@@ -82,11 +82,11 @@ struct MeetingTransport: View {
     private static let endSpacing: CGFloat = 24
 
     private var endButton: some View {
-        Button("会議を終了", systemImage: "stop") {
+        Button("会議を終了", systemImage: "stop", role: .destructive) {
             meeting.requestEnd()
             asksToEnd = meeting.showsEndConfirmation
         }
-        .tint(DesignTokens.danger)
+        .buttonStyle(AppButtonStyle(.destructive))
     }
 
     private func state(_ origin: AudioOrigin) -> String {

@@ -11,33 +11,33 @@ struct MeetingReviewControls: View {
         VStack(alignment: .leading, spacing: 14) {
             Surface {
                 VStack(alignment: .leading, spacing: 12) {
-                    Text("会話を振り返る").font(.headline)
+                    Text("会話を振り返る").font(DesignTokens.Typography.heading)
                     MeetingSaveControls(meeting: meeting, sessions: sessions)
                     Text("要約は任意です。AIを使わず、候補と発話だけを書き出すこともできます。")
-                        .font(.callout).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                     Text("要約は最大\(MeetingSummaryPlan.maximumSections)区間です。1区間は30発話・12,000文字まで。上限を超えても、発話の全文をMarkdownに書き出せます。")
-                        .font(.callout).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                     summaryButton
-                    if let preparationError { Text(preparationError).font(.callout).foregroundStyle(DesignTokens.warning) }
+                    if let preparationError { InlineMessage(.failure, preparationError) }
                     if meeting.summary.state == .sending {
                         ProgressView(value: Double(meeting.summary.draft.count), total: Double(max(1, meeting.summary.totalSections)))
                         Text("要約中：\(meeting.summary.draft.count) / \(meeting.summary.totalSections)区間完了 · \(meeting.llmSettings.selected.name)へ送信中")
-                            .font(.caption)
+                            .font(DesignTokens.Typography.body)
                         Button("要約の送信を停止", action: meeting.cancelSummary)
                         if !meeting.summary.partialText.isEmpty {
-                            Text("生成中・未確認").font(.caption)
+                            Text("生成中・未確認").font(DesignTokens.Typography.supporting)
                             Text(meeting.summary.partialText).font(.system(size: fontSize)).textSelection(.enabled)
                         }
                     }
                     if case .failed(let error) = meeting.summary.state {
-                        Text(error.localizedDescription).font(.callout).foregroundStyle(DesignTokens.warning)
+                        InlineMessage(.failure, error.localizedDescription)
                     }
                     if meeting.summary.state == .interrupted {
-                        Text("要約を中断しました。後続の区間は送信しません。").font(.callout)
+                        InlineMessage(.information, "要約を中断しました。後続の区間は送信しません。")
                     }
                     if meeting.summary.state != .complete, !meeting.summary.draft.isEmpty {
                         Text("今回の未完成要約：\(meeting.summary.draft.count)区間。Markdownには含めません。")
-                            .font(.caption).foregroundStyle(DesignTokens.warning)
+                            .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.warning)
                     }
                     if meeting.summary.state != .complete {
                         ForEach(meeting.summary.draft) { section in
@@ -47,17 +47,17 @@ struct MeetingReviewControls: View {
                 }
             }
             if let summary = meeting.summary.completed {
-                Text("AIによる区間別要約 · 未確認").font(.headline)
+                Text("AIによる区間別要約 · 未確認").font(DesignTokens.Typography.heading)
                 Text("各区間の内容は会議全体の最終合意ではありません。後の訂正と根拠を確認してください。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 if meeting.summary.state != .complete {
-                    Text("前回の完成版を表示しています。").font(.caption)
+                    Text("前回の完成版を表示しています。").font(DesignTokens.Typography.supporting)
                 }
                 ForEach(summary.sections) { section in
                     Surface {
                         VStack(alignment: .leading, spacing: 10) {
                             Text("\(MarkdownExporter.timestamp(section.startOffset))–\(MarkdownExporter.timestamp(section.endOffset))")
-                                .font(.caption)
+                                .font(DesignTokens.Typography.supporting)
                             SummarySectionContent(meeting: meeting, section: section, fontSize: fontSize)
                         }
                     }
@@ -90,7 +90,7 @@ struct MeetingEvidenceLinks: View {
                 Button("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)の発話を見る") {
                     meeting.revealEvidence(id)
                 }
-                .font(.caption)
+                .buttonStyle(AppButtonStyle(.link))
             }
         }
     }

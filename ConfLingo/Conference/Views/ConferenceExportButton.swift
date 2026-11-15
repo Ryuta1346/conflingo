@@ -7,11 +7,28 @@ struct ConferenceExportButton: View {
     let sourceLanguage: String
     let targetLanguage: String?
     var support: ConferenceSupportSnapshot?
+    @State private var notice: UserMessage?
+    @State private var showsResult = false
 
     var body: some View {
-        Button("書き出す", systemImage: "square.and.arrow.up") { saveMarkdown() }
-            .disabled(store.segments.isEmpty && support?.hasCompletedAnswers != true)
-            .help("現在の字幕と完成した資料回答をMarkdownで書き出す")
+        HStack(spacing: DesignTokens.Space.small) {
+            Button("書き出す", systemImage: "square.and.arrow.up") { saveMarkdown() }
+                .disabled(store.segments.isEmpty && support?.hasCompletedAnswers != true)
+                .help("現在の字幕と完成した資料回答をMarkdownで書き出す")
+            if let notice {
+                Button { showsResult = true } label: {
+                    Image(systemName: notice.kind.symbol).foregroundStyle(notice.kind.color)
+                }
+                .buttonStyle(AppButtonStyle(.link))
+                .accessibilityLabel("書き出し結果：\(notice.text)")
+                .popover(isPresented: $showsResult) {
+                    VStack(alignment: .leading, spacing: DesignTokens.Space.large) {
+                        SheetHeader(title: "書き出し結果") { showsResult = false }
+                        InlineMessage(notice)
+                    }.sheetSurface().frame(width: 420)
+                }
+            }
+        }
     }
 
     private func saveMarkdown() {
@@ -35,11 +52,10 @@ struct ConferenceExportButton: View {
         ) + (support?.renderMarkdown(segments: store.segments) ?? "")
         do {
             try markdown.write(to: url, atomically: true, encoding: .utf8)
+            notice = UserMessage(.success, "Markdownを書き出しました。アプリ内への保存とは別に管理されます。")
         } catch {
-            let alert = NSAlert()
-            alert.messageText = "保存に失敗しました"
-            alert.informativeText = error.localizedDescription
-            alert.runModal()
+            notice = UserMessage(.failure, "書き出しに失敗しました。保存先を確認してください。現在の字幕は保持しています。", details: error.localizedDescription)
+            showsResult = true
         }
     }
 }

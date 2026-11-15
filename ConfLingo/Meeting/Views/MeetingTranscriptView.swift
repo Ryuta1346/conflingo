@@ -12,10 +12,10 @@ struct MeetingTranscriptView: View {
         let events = meeting.transcriptEvents
         VStack(spacing: 0) {
             HStack {
-                Text("会話の流れ").font(.headline)
+                Text("会話の流れ").font(DesignTokens.Typography.heading)
                 Spacer()
                 Text(followsLatest ? "入力元ごとに表示" : "履歴を表示中")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
             .padding(14)
             Divider()
@@ -24,7 +24,7 @@ struct MeetingTranscriptView: View {
                     LazyVStack(alignment: .leading, spacing: 18) {
                         if events.isEmpty {
                             Text("発話が認識されると、ここに表示されます。")
-                                .font(.callout).foregroundStyle(DesignTokens.secondary).padding(.vertical, 24)
+                                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary).padding(.vertical, 24)
                         }
                         ForEach(events) { event in
                             VStack(alignment: .leading, spacing: 8) {
@@ -34,10 +34,10 @@ struct MeetingTranscriptView: View {
                                     Spacer()
                                     Text(MarkdownExporter.timestamp(event.startOffset)).monospacedDigit()
                                 }
-                                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).lineSpacing(5).textSelection(.enabled)
                                 if event.isFinal && meeting.page != .review {
-                                    Button("この発話をWebで調べる") { meeting.research.open(event.text, evidenceIDs: [event.id]) }.font(.caption)
+                                    Button("この発話をWebで調べる") { meeting.research.open(event.text, evidenceIDs: [event.id]) }.font(DesignTokens.Typography.supporting)
                                 }
                                 MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,
                                                        sourceText: event.text, targetLanguage: meeting.translationTarget(for: event))
@@ -86,13 +86,13 @@ struct MeetingTranscriptView: View {
                             meeting.selectedEvidence = nil
                             scrollPosition.scrollTo(edge: .bottom)
                         }
-                        .buttonStyle(.borderedProminent).padding(12)
+                        .buttonStyle(AppButtonStyle(.primary)).padding(12)
                     }
                 }
             }
             Divider()
             Text("入力元を表示しています。人物名の自動識別は行いません。")
-                .font(.caption2).foregroundStyle(DesignTokens.secondary).padding(10)
+                .font(DesignTokens.Typography.note).foregroundStyle(DesignTokens.secondary).padding(10)
         }
         .background(DesignTokens.surface, in: RoundedRectangle(cornerRadius: DesignTokens.radius))
         .overlay(RoundedRectangle(cornerRadius: DesignTokens.radius).stroke(DesignTokens.border))

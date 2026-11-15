@@ -11,16 +11,14 @@ struct KnowledgeLibraryView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
             HStack {
-                Text(choose == nil ? "資料ライブラリ" : "ライブラリから追加").font(.title2.bold())
+                Text(choose == nil ? "資料ライブラリ" : "ライブラリから追加").font(DesignTokens.Typography.title)
                 Spacer()
                 if choose == nil { Button("資料を追加", systemImage: "doc.badge.plus") { importing = true } }
                 if library.isBusy { ProgressView().controlSize(.small) }
             }
             Text("このMacに保存した資料です。会議で選んだ保存版を使います。閲覧・追加だけでは外部送信しません。")
-                .font(.callout).foregroundStyle(DesignTokens.secondary)
-            if let error = library.error {
-                Text(error).font(.callout).foregroundStyle(DesignTokens.warning).textSelection(.enabled)
-            }
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
+            if let failure = library.failure { InlineMessage(failure) }
             if let selected = library.selected {
                 HStack {
                     Button("一覧へ戻る") { library.close() }
@@ -47,8 +45,8 @@ struct KnowledgeLibraryView: View {
                                 VStack(alignment: .leading, spacing: 8) {
                                     Text(entry.title).font(.system(size: fontSize, weight: .semibold)).lineLimit(3)
                                     Text("\(entry.kind) · \(entry.count)文書 · \(entry.updatedAt?.formatted() ?? "日時不明")")
-                                        .font(.caption).foregroundStyle(DesignTokens.secondary)
-                                    if let failure = entry.failure { Text(failure).font(.caption).foregroundStyle(DesignTokens.warning) }
+                                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
+                                    if let failure = entry.failure { InlineMessage(.failure, "保存内容を読み込めません。元の保存データは保持しています。", details: failure) }
                                     HStack {
                                         Button("内容を見る") { Task { await library.open(entry.id) } }.disabled(entry.failure != nil)
                                         if let choose {
@@ -90,15 +88,14 @@ private struct LibraryImportView: View {
     @Environment(\.dismiss) private var dismiss
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            Text("資料を事前に登録").font(.title2.bold())
+            SheetHeader(title: "資料を事前に登録") { draft.cancelPendingImports(); dismiss() }.disabled(library.isBusy)
             Text("ファイルを取り込み、各資料の「ライブラリに保存」を選んでください。閉じると未保存の取り込み内容は破棄されます。")
-                .font(.callout).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
             ScrollView {
                 KnowledgeMaterialsView(knowledge: draft, library: library, fontSize: fontSize,
                     canEdit: { !draft.isBusy && !library.isBusy }, allowsSelection: false)
             }
-            Button("完了") { draft.cancelPendingImports(); dismiss() }.keyboardShortcut(.cancelAction).disabled(library.isBusy)
-        }.padding(24).frame(minWidth: 480, idealWidth: 660, minHeight: 480, idealHeight: 650)
+        }.sheetSurface().frame(minWidth: 480, idealWidth: 660, minHeight: 480, idealHeight: 650)
             .interactiveDismissDisabled(library.isBusy)
             .onDisappear { draft.cancelPendingImports() }
     }
@@ -113,15 +110,15 @@ private struct KnowledgeLibraryDetail: View {
     }
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            Text(saved.title).font(.title3.bold()).textSelection(.enabled)
+            Text(saved.title).font(DesignTokens.Typography.heading).textSelection(.enabled)
             Text("保存更新 \(saved.updatedAt.formatted()) · 保存版 \(saved.revision.uuidString.prefix(8)) · 読み取り専用")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             if saved.content.isRepository {
                 ScrollView {
                     LazyVStack(alignment: .leading) {
                         ForEach(saved.content.documents, id: \.document.id) { item in
                             Button(item.document.displayTitle) { documentID = item.document.id }
-                                .font(.callout).buttonStyle(.plain)
+                                .font(DesignTokens.Typography.body).buttonStyle(.plain)
                                 .lineLimit(1).truncationMode(.middle)
                                 .help(item.document.displayTitle)
                                 .foregroundStyle(document?.document.id == item.document.id ? DesignTokens.accent : DesignTokens.text)
@@ -130,12 +127,12 @@ private struct KnowledgeLibraryDetail: View {
                 }.frame(minHeight: 36, maxHeight: 130)
             }
             if let document {
-                Text(document.document.displayTitle).font(.headline).textSelection(.enabled)
+                Text(document.document.displayTitle).font(DesignTokens.Typography.heading).textSelection(.enabled)
                 Text("元の取り込み \(document.document.importedAt.formatted()) · \(document.document.characterCount)文字")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 if let source = document.document.source {
                     Text("作業ツリー \(source.contentHash.prefix(12)) · snapshot \(source.snapshotID)")
-                        .font(.caption).textSelection(.enabled)
+                        .font(DesignTokens.Typography.supporting).textSelection(.enabled)
                 }
                 KnowledgeBodyView(text: document.body, fontSize: fontSize)
                     .frame(minHeight: fontSize * 1.5 + 8)

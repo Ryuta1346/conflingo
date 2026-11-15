@@ -8,7 +8,7 @@ struct SavedSessionView: View {
     let back: () -> Void
     let delete: () -> Void
     @State private var selectedReference: KnowledgeReference?
-    @State private var exportMessage = ""
+    @State private var exportNotice: UserMessage?
 
     var body: some View {
         ScrollViewReader { proxy in
@@ -16,10 +16,10 @@ struct SavedSessionView: View {
                 LazyVStack(alignment: .leading, spacing: 20) {
                     PageHeading(title: saved.snapshot.title, subtitle: "\(saved.snapshot.kind) · 保存した記録 / 読み取り専用", eyebrow: "履歴")
                     Text("保存更新 \(saved.updatedAt.formatted(date: .abbreviated, time: .shortened)) · 開始 \(saved.snapshot.startedAt.map { MarkdownExporter.dateFormatter.string(from: $0) } ?? "未取得")")
-                        .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                     Text("保存時の内容です。音声取得・翻訳・AI送信は開始しません。")
-                        .font(.callout).foregroundStyle(DesignTokens.secondary)
-                    if !exportMessage.isEmpty { Text(exportMessage).font(.callout) }
+                        .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
+                    if let exportNotice { InlineMessage(exportNotice) }
                     switch saved.snapshot {
                     case .meeting(let snapshot, let cards):
                         meetingContent(snapshot, cards: cards, proxy: proxy)
@@ -35,7 +35,7 @@ struct SavedSessionView: View {
                 Button("一覧へ", systemImage: "chevron.left", action: back)
                 Spacer()
                 Button("Markdownを書き出す", systemImage: "square.and.arrow.up", action: exportMarkdown)
-                Button("削除", systemImage: "trash", action: delete)
+                Button("削除", systemImage: "trash", role: .destructive, action: delete)
             }
             .padding(.horizontal, 24).padding(.vertical, 12)
             .frame(maxWidth: 1000).frame(maxWidth: .infinity)
@@ -51,17 +51,17 @@ struct SavedSessionView: View {
     private func meetingContent(_ snapshot: MeetingExportSnapshot, cards: [MeetingInsight], proxy: ScrollViewProxy) -> some View {
         let translations = Dictionary((snapshot.translations ?? []).map { ($0.id, $0) }, uniquingKeysWith: { first, _ in first })
         if let summary = snapshot.summary {
-            Text("AIによる区間別要約 · 未確認").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+            Text("AIによる区間別要約 · 未確認").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
             Text("各区間の記述は会議全体の最終合意ではありません。回答言語：\(summary.answerLanguage.label)")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             ForEach(summary.sections) { section in
                 Surface {
                     VStack(alignment: .leading, spacing: 12) {
-                        Text("\(MarkdownExporter.timestamp(section.startOffset))–\(MarkdownExporter.timestamp(section.endOffset))").font(.caption)
+                        Text("\(MarkdownExporter.timestamp(section.startOffset))–\(MarkdownExporter.timestamp(section.endOffset))").font(DesignTokens.Typography.supporting)
                         bodyText(section.text)
                         evidence(section.evidenceIDs, events: snapshot.events, proxy: proxy)
                         if !section.supplement.isEmpty {
-                            Text("資料・実装からの補足").font(.headline)
+                            Text("資料・実装からの補足").font(DesignTokens.Typography.heading)
                             bodyText(section.supplement)
                         }
                         references(section.knowledgeReferences)
@@ -70,28 +70,28 @@ struct SavedSessionView: View {
             }
         }
         if !snapshot.candidates.isEmpty {
-            Text("決定・アクション候補").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+            Text("決定・アクション候補").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
             Text("確認済みは利用者による確認です。参加者全員の合意や正しさを保証しません。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             ForEach(snapshot.candidates) { candidate in
                 card(candidate.insight, review: candidate.review.label, events: snapshot.events, proxy: proxy)
             }
         }
         let otherCards = cards.filter { item in !snapshot.candidates.contains { $0.id == item.id } }
         if !otherCards.isEmpty {
-            Text("AIの回答・提案 · 未確認").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+            Text("AIの回答・提案 · 未確認").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
             ForEach(otherCards) { item in card(item, review: nil, events: snapshot.events, proxy: proxy) }
         }
-        Text("確定発話").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+        Text("確定発話").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
         ForEach(snapshot.events) { event in
             Surface {
                 VStack(alignment: .leading, spacing: 10) {
                     Text("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label) · \(event.languageCode)")
-                        .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                     bodyText(event.text)
                     if let translation = translations[event.id] {
                         Text("訳文 · \(LanguageCatalog.displayName(for: translation.targetLanguage))")
-                            .font(.caption).foregroundStyle(DesignTokens.secondary)
+                            .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                         bodyText(translation.text)
                     }
                 }
@@ -103,16 +103,16 @@ struct SavedSessionView: View {
     private func card(_ item: MeetingInsight, review: String?, events: [TranscriptEvent], proxy: ScrollViewProxy) -> some View {
         Surface {
             VStack(alignment: .leading, spacing: 12) {
-                Text(item.kind.label + (review.map { " · " + $0 } ?? "")).font(.headline)
+                Text(item.kind.label + (review.map { " · " + $0 } ?? "")).font(DesignTokens.Typography.heading)
                 ResearchAnswerText(answer: item).font(.system(size: fontSize))
                 if item.hasInvalidEvidence { Text("無効な根拠を含むため要確認").foregroundStyle(DesignTokens.warning) }
                 if item.evidenceIDs.isEmpty && item.knowledgeReferences.isEmpty && item.webReferences?.isEmpty != false {
-                    Text("根拠なし・要確認").font(.caption)
+                    Text("根拠なし・要確認").font(DesignTokens.Typography.supporting)
                 }
                 evidence(item.evidenceIDs, events: events, proxy: proxy)
                 references(item.knowledgeReferences)
                 WebReferencesView(references: item.webReferences ?? [])
-                if item.webReferences?.isEmpty == false { Text("Webの生抜粋は保存していません。").font(.caption) }
+                if item.webReferences?.isEmpty == false { Text("Webの生抜粋は保存していません。").font(DesignTokens.Typography.supporting) }
             }
         }
     }
@@ -121,8 +121,8 @@ struct SavedSessionView: View {
     private func evidence(_ ids: [UUID], events: [TranscriptEvent], proxy: ScrollViewProxy) -> some View {
         ForEach(Array(Set(ids)).sorted { $0.uuidString < $1.uuidString }, id: \.self) { id in
             if let event = events.first(where: { $0.id == id }) {
-                Button("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)の発話を見る") { proxy.scrollTo(id, anchor: .top) }
-                    .font(.caption)
+                Button("\(MarkdownExporter.timestamp(event.startOffset)) · \(event.origin.label)の発話を見る") { proxy.scrollTo(id, anchor: .top) }.buttonStyle(AppButtonStyle(.link))
+                    .font(DesignTokens.Typography.supporting)
             }
         }
     }
@@ -132,7 +132,7 @@ struct SavedSessionView: View {
         ForEach(Array(values.enumerated()), id: \.offset) { _, reference in
             Button { selectedReference = reference } label: {
                 Label("\(reference.displayTitle) · \(reference.startLine)–\(reference.endLine)行", systemImage: "doc.text")
-                    .font(.caption).multilineTextAlignment(.leading)
+                    .font(DesignTokens.Typography.supporting).multilineTextAlignment(.leading)
             }
         }
     }
@@ -142,25 +142,25 @@ struct SavedSessionView: View {
         if let support = snapshot.support {
             ConferenceSavedSupportView(support: support, fontSize: fontSize, segments: snapshot.segments)
         }
-        Text("原文 · \(snapshot.sourceLanguage)").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+        Text("原文 · \(snapshot.sourceLanguage)").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
         ForEach(snapshot.segments) { segment in
             Surface {
                 VStack(alignment: .leading, spacing: 10) {
-                    Text(segment.startTime.map(MarkdownExporter.timestamp) ?? "時刻不明").font(.caption)
+                    Text(segment.startTime.map(MarkdownExporter.timestamp) ?? "時刻不明").font(DesignTokens.Typography.supporting)
                     bodyText(segment.english)
                 }
             }
         }
         if let language = snapshot.targetLanguage {
-            Text("翻訳 · \(language)").font(.title3.weight(.semibold)).accessibilityAddTraits(.isHeader)
+            Text("翻訳 · \(language)").font(DesignTokens.Typography.heading).accessibilityAddTraits(.isHeader)
             ForEach(snapshot.units) { unit in
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(unit.startTime.map(MarkdownExporter.timestamp) ?? "時刻不明").font(.caption)
+                        Text(unit.startTime.map(MarkdownExporter.timestamp) ?? "時刻不明").font(DesignTokens.Typography.supporting)
                         bodyText(unit.english)
                         if let translation = unit.japanese { bodyText(translation) }
                         else {
-                            Text(translationStatus(unit.translationState)).foregroundStyle(DesignTokens.secondary).font(.callout)
+                            Text(translationStatus(unit.translationState)).foregroundStyle(DesignTokens.secondary).font(DesignTokens.Typography.body)
                         }
                     }
                 }
@@ -185,7 +185,7 @@ struct SavedSessionView: View {
         guard panel.runModal() == .OK, let url = panel.url else { return }
         do {
             try saved.snapshot.markdown.write(to: url, atomically: true, encoding: .utf8)
-            exportMessage = "Markdownを書き出しました。アプリ内の保存とは別に管理されます。"
-        } catch { exportMessage = "書き出しに失敗しました。履歴に保存した記録は保持されています。" }
+            exportNotice = UserMessage(.success, "Markdownを書き出しました。アプリ内の保存とは別に管理されます。")
+        } catch { exportNotice = UserMessage(.failure, "書き出しに失敗しました。保存先を確認してください。履歴に保存した記録は保持されています。", details: error.localizedDescription) }
     }
 }

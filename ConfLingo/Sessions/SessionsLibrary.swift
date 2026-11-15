@@ -9,7 +9,8 @@ final class SessionsLibrary {
     private(set) var selected: SavedSession?
     private(set) var pendingDelete: SessionListEntry?
     private(set) var isBusy = false
-    private(set) var error: String?
+    private(set) var failure: UserMessage?
+    var error: String? { failure?.text }
     private(set) var savedSnapshots: [UUID: SessionSnapshot] = [:]
     var query = ""
 
@@ -45,15 +46,15 @@ final class SessionsLibrary {
     func reload() async {
         guard !isBusy else { return }
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
-        do { entries = try await files.list() } catch { self.error = "一覧を読み込めません。\(error.localizedDescription)" }
+        do { entries = try await files.list() } catch { self.failure = UserMessage(.failure, "一覧を読み込めません。", details: error.localizedDescription) }
     }
 
     func save(_ snapshot: SessionSnapshot) async {
         guard !isBusy else { return }
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
         do {
             let saved = try await files.save(snapshot)
@@ -63,16 +64,16 @@ final class SessionsLibrary {
             entries.removeAll { $0.id == saved.id }
             entries.insert(entry, at: 0)
             if selected?.id == saved.id { selected = saved }
-        } catch { self.error = "保存に失敗しました。前回の保存版と現在の内容は保持しています。\(error.localizedDescription)" }
+        } catch { self.failure = UserMessage(.failure, "保存に失敗しました。前回の保存版と現在の内容は保持しています。", details: error.localizedDescription) }
     }
 
     func open(_ id: UUID) async {
         guard !isBusy else { return }
         isBusy = true
-        error = nil
+        failure = nil
         selected = nil
         defer { isBusy = false }
-        do { selected = try await files.load(id) } catch { self.error = "開けませんでした。\(error.localizedDescription)" }
+        do { selected = try await files.load(id) } catch { self.failure = UserMessage(.failure, "開けませんでした。", details: error.localizedDescription) }
     }
 
     func closeDetail() { if !isBusy { selected = nil } }
@@ -83,13 +84,13 @@ final class SessionsLibrary {
         guard !isBusy, let entry = confirmed ?? pendingDelete else { return }
         pendingDelete = nil
         isBusy = true
-        error = nil
+        failure = nil
         defer { isBusy = false }
         do {
             try await files.delete(entry.id)
             entries.removeAll { $0.id == entry.id }
             savedSnapshots[entry.id] = nil
             if selected?.id == entry.id { selected = nil }
-        } catch { self.error = "削除できませんでした。保存した内容は保持しています。\(error.localizedDescription)" }
+        } catch { self.failure = UserMessage(.failure, "削除できませんでした。保存した内容は保持しています。", details: error.localizedDescription) }
     }
 }

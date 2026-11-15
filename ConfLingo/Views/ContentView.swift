@@ -64,7 +64,7 @@ struct ContentView: View {
                     topBar(contentWidth: shell.size.width)
                     Divider()
                     if let error = controller.lastError {
-                        SessionErrorBanner(message: error).padding([.horizontal, .top], 16)
+                        InlineMessage(.failure, "音声入力に問題が発生しました。入力設定・権限を確認してください。停止できない場合は停止を再試行できます。確定済みの発話は保持しています。", details: error).padding([.horizontal, .top], 16)
                     }
                     if !transcriptionOnly && (navigation.destination == .live || navigation.destination == .setup) {
                         TranslationPreparationNotice(state: coordinator.preparationState, retry: retryTranslation)
@@ -310,7 +310,7 @@ struct ContentView: View {
 
     private var toolbarTitle: some View {
         Text(navigation.destination == .home ? "ConfLingo" : navigation.destination == .settings ? "設定" : navigation.destination == .library ? "資料ライブラリ" : navigation.destination == .sessions ? "履歴" : navigation.destination == .meeting ? "Meeting" : "Conference")
-            .font(.callout.weight(.medium)).foregroundStyle(DesignTokens.secondary).fixedSize()
+            .font(DesignTokens.Typography.body.weight(.medium)).foregroundStyle(DesignTokens.secondary).fixedSize()
     }
 
     @ViewBuilder private func conferenceTools(contentWidth: CGFloat) -> some View {

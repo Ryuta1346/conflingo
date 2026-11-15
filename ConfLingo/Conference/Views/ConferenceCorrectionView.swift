@@ -12,9 +12,9 @@ struct ConferenceCorrectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("資料で原文・訳文を補正").font(.headline)
+            Text("資料で原文・訳文を補正").font(DesignTokens.Typography.heading)
             Text("選んだ確定発話、通常訳、関連資料の抜粋、適用用語を\(workspace.settings.selected.name)へ送ります。原文を残し、採用した候補だけを保存・出力します。音声は送りません。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.text)
             Toggle("字幕と資料を使う補正を許可", isOn: Binding(get: { workspace.correctionPermitted }, set: { workspace.setCorrectionPermission($0) }))
             Picker("補正する発話", selection: $unitID) {
                 Text("発話を選択").tag(nil as UUID?)
@@ -33,15 +33,15 @@ struct ConferenceCorrectionView: View {
             ForEach(workspace.corrections.reversed()) { correction in
                 Surface {
                     VStack(alignment: .leading, spacing: 10) {
-                        Text(correction.adopted ? "採用した補正" : "補正候補 · 要確認").font(.headline)
-                        Text("元の原文").font(.caption)
+                        Text(correction.adopted ? "採用した補正" : "補正候補 · 要確認").font(DesignTokens.Typography.heading)
+                        Text("元の原文").font(DesignTokens.Typography.supporting)
                         Text(correction.original.sourceText).textSelection(.enabled)
-                        Text("補正後の原文").font(.caption)
+                        Text("補正後の原文").font(DesignTokens.Typography.supporting)
                         Text(correction.sourceText).font(.system(size: fontSize)).textSelection(.enabled)
                         if let original = correction.original.translation { Text("元の訳文：\(original)").textSelection(.enabled) }
                         if let translation = correction.translation { Text(translation).font(.system(size: fontSize)).textSelection(.enabled) }
                         ForEach(correction.references) { item in
-                            Button("\(item.displayTitle) · \(item.provenance)") { reference = item }.font(.caption)
+                            Button("\(item.displayTitle) · \(item.provenance)") { reference = item }.buttonStyle(AppButtonStyle(.link))
                         }
                         Button(correction.adopted ? "採用を解除して元に戻す" : "この補正を採用") {
                             workspace.adoptCorrection(correction.id, adopted: !correction.adopted)
@@ -60,13 +60,16 @@ private struct CorrectionReferencePreview: View {
     @State private var message = ""
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
-            if references.isEmpty { Text(message.isEmpty ? "関連資料なし" : message).font(.caption) }
+            if references.isEmpty {
+                if message.isEmpty { InlineMessage(.information, "関連資料なし") }
+                else { InlineMessage(.failure, message) }
+            }
             ForEach(references) { reference in
-                Text("\(reference.displayTitle) · \(reference.provenance)").font(.caption.bold())
-                Text(reference.snippet).font(.caption).textSelection(.enabled)
+                Text("\(reference.displayTitle) · \(reference.provenance)").font(DesignTokens.Typography.supporting.bold())
+                Text(reference.snippet).font(DesignTokens.Typography.supporting).textSelection(.enabled)
             }
         }.task(id: text + knowledge.revision.uuidString) {
-            do { references = try await knowledge.localReferences(text) }
+            do { message = ""; references = try await knowledge.localReferences(text) }
             catch { references = []; message = "資料を検索できませんでした。" }
         }
     }

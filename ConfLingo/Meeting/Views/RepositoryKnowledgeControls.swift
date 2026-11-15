@@ -21,7 +21,7 @@ struct RepositoryKnowledgeControls: View {
     @State private var scan: RepositoryScan?
     @State private var selected: Set<String> = []
     @State private var scanning = false
-    @State private var error = ""
+    @State private var failure: UserMessage?
     @State private var scanTask: Task<Void, Never>?
     @State private var showsRemoval = false
 
@@ -31,7 +31,7 @@ struct RepositoryKnowledgeControls: View {
                 Button("リポジトリを追加", systemImage: "folder.badge.plus") { chooseFolder() }
                     .disabled(scanning || !canEdit() || knowledge.isBusy || knowledge.hasRepository)
                 Text("ローカルのコード・テスト・文書を選びます。1リポジトリ・1,000ファイル・500万文字・20 MiBまで。")
-                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             }
             if scanning {
                 HStack {
@@ -47,7 +47,7 @@ struct RepositoryKnowledgeControls: View {
             if knowledge.isBusy {
                 Button("リポジトリ取り込みを中止") { knowledge.cancelRepositoryImport() }
             }
-            if !error.isEmpty { Text(error).font(.caption).foregroundStyle(DesignTokens.warning) }
+            if let failure { InlineMessage(failure) }
         }
         .sheet(item: $scan) { preview in
             RepositorySelectionView(scan: preview, selected: $selected) {
@@ -82,7 +82,7 @@ struct RepositoryKnowledgeControls: View {
     private func scanFolder(_ url: URL) {
         scanTask?.cancel()
         scanning = true
-        error = ""
+        failure = nil
         let generation = knowledge.importGeneration
         scanTask = Task {
             defer { scanning = false }
@@ -92,7 +92,8 @@ struct RepositoryKnowledgeControls: View {
                 selected = Set(result.eligible.map(\.path))
                 scan = result
             } catch is CancellationError { } catch {
-                self.error = error.localizedDescription
+                failure = UserMessage(.failure, (error as? RepositoryFailure)?.localizedDescription ?? "リポジトリを読み込めませんでした。選択したフォルダを確認してください。",
+                    details: error is RepositoryFailure ? nil : error.localizedDescription)
             }
         }
     }
@@ -108,11 +109,11 @@ struct RepositorySelectionView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("取り込むファイルを確認").font(.title2.bold())
-            Text(scan.root.lastPathComponent).font(.headline)
+            Text("取り込むファイルを確認").font(DesignTokens.Typography.title)
+            Text(scan.root.lastPathComponent).font(DesignTokens.Typography.heading)
             Text("取り込み時点の作業ツリーを参照します。Gitコミットの版とは限りません。選んだ本文はこの会議内で保持します。")
             Text("隠しファイル・依存パッケージ・生成物・既知の認証情報を除外します。.gitignoreの全規則は適用しません。ソース内の秘密情報は対象から外してください。")
-                .font(.caption).foregroundStyle(DesignTokens.secondary)
+                .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
             HStack {
                 Button("すべて選択") { selected = Set(scan.eligible.map(\.path)) }
                 Button("すべて解除") { selected = [] }
@@ -131,20 +132,20 @@ struct RepositorySelectionView: View {
                             let paths = Set(scan.eligible.filter { $0.path.hasPrefix(entry.path) }.map(\.path))
                             Toggle(entry.path, isOn: selection(paths)).fontWeight(.semibold).disabled(paths.isEmpty)
                         } else {
-                            Text("\(entry.path) — \(entry.reason ?? "除外")").font(.caption).foregroundStyle(DesignTokens.secondary)
+                            Text("\(entry.path) — \(entry.reason ?? "除外")").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                         }
                     }
                 }.frame(maxWidth: .infinity, alignment: .leading)
             }
             Text("追加時には外部送信しません。AIで使う際はリポジトリ名・相対パス・位置・抜粋を送信します。文字数上限は読み込み時にも検証します。")
-                .font(.caption)
+                .font(DesignTokens.Typography.body)
             HStack {
-                Button("キャンセル", action: cancel).keyboardShortcut(.cancelAction)
                 Spacer()
+                Button("キャンセル", action: cancel).keyboardShortcut(.cancelAction)
                 Button("選択したファイルを取り込む", action: importSelection)
-                    .buttonStyle(.borderedProminent).disabled(selected.isEmpty || exceedsLimit)
+                    .buttonStyle(AppButtonStyle(.primary)).disabled(selected.isEmpty || exceedsLimit)
             }
-        }.padding(24).frame(minWidth: 440, idealWidth: 640, minHeight: 450, idealHeight: 600)
+        }.sheetSurface().frame(minWidth: 440, idealWidth: 640, minHeight: 450, idealHeight: 600)
     }
 
     private func selection(_ paths: Set<String>) -> Binding<Bool> {

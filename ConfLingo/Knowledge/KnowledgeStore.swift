@@ -9,7 +9,8 @@ final class KnowledgeStore {
     private(set) var results: [KnowledgeReference] = []
     private(set) var searchState: SearchState = .idle
     private(set) var isBusy = false
-    private(set) var message = ""
+    private(set) var notice: UserMessage?
+    var message: String { notice?.text ?? "" }
     private(set) var permitted = false
     private var index = KnowledgeIndex()
     private(set) var librarySources: [UUID: KnowledgeLibraryEntry] = [:]
@@ -36,7 +37,7 @@ final class KnowledgeStore {
         let mutation = UUID()
         mutationID = mutation
         isBusy = true
-        message = "リポジトリを取り込んでいます…"
+        notice = UserMessage(.information, "リポジトリを取り込んでいます…")
         let index = index
         let generation = importGeneration
         let task = Task {
@@ -54,10 +55,13 @@ final class KnowledgeStore {
             guard mutationID == mutation else { return }
             documents += imported
             contentChanges.emit(())
-            message = "リポジトリを取り込みました。取り込み時点の作業ツリーをこの会議で参照します。"
+            notice = UserMessage(.success, "リポジトリを取り込みました。取り込み時点の作業ツリーをこの会議で参照します。")
         } catch {
             guard mutationID == mutation else { return }
-            message = error is CancellationError ? "取り込みを中止しました。" : error.localizedDescription
+            notice = error is CancellationError
+                ? UserMessage(.information, "取り込みを中止しました。")
+                : UserMessage(.failure, (error as? RepositoryFailure)?.localizedDescription ?? "リポジトリを取り込めませんでした。選択内容を確認して再試行してください。",
+                              details: error is RepositoryFailure ? nil : error.localizedDescription)
         }
         repositoryTask = nil
         mutationID = nil
@@ -91,10 +95,10 @@ final class KnowledgeStore {
             let remaining = Set(documents.map(\.id))
             librarySources = librarySources.filter { remaining.contains($0.key) }
             contentChanges.emit(())
-            message = "リポジトリを取り外しました。生成済みの引用は会議破棄まで残ります。"
+            notice = UserMessage(.success, "リポジトリを取り外しました。生成済みの引用は会議破棄まで残ります。")
         } catch {
             guard mutationID == mutation else { return }
-            message = KnowledgeFailure.search.localizedDescription
+            notice = UserMessage(.failure, KnowledgeFailure.search.localizedDescription)
         }
         mutationID = nil
         isBusy = false
@@ -173,7 +177,7 @@ final class KnowledgeStore {
         documents += restored
         markSaved(saved)
         contentChanges.emit(())
-        message = "保存資料を追加しました。資料の送信許可を確認してください。"
+        notice = UserMessage(.success, "保存資料を追加しました。資料の送信許可を確認してください。")
     }
 
     func setPermission(_ value: Bool) {
@@ -197,7 +201,7 @@ final class KnowledgeStore {
         let mutation = UUID()
         mutationID = mutation
         isBusy = true
-        message = "資料を取り込んでいます…"
+        notice = UserMessage(.information, "資料を取り込んでいます…")
         let index = index
         let generation = importGeneration
         do {
@@ -209,10 +213,12 @@ final class KnowledgeStore {
             guard mutationID == mutation else { return }
             documents.append(document)
             contentChanges.emit(())
-            message = "資料を取り込みました。この会議の終了後も、破棄するまで参照できます。"
+            notice = UserMessage(.success, "資料を取り込みました。この会議の終了後も、破棄するまで参照できます。")
         } catch {
             guard mutationID == mutation else { return }
-            message = error is CancellationError ? "取り込みを中止しました。" : (error as? KnowledgeFailure ?? .unreadable).localizedDescription
+            notice = error is CancellationError
+                ? UserMessage(.information, "取り込みを中止しました。")
+                : UserMessage(.failure, (error as? KnowledgeFailure ?? .unreadable).localizedDescription)
         }
         mutationID = nil
         isBusy = false
@@ -230,10 +236,10 @@ final class KnowledgeStore {
             documents.removeAll { $0.id == id }
             librarySources[id] = nil
             contentChanges.emit(())
-            message = "資料を取り外しました。既存の回答にある引用は会議破棄まで残ります。"
+            notice = UserMessage(.success, "資料を取り外しました。既存の回答にある引用は会議破棄まで残ります。")
         } catch {
             guard mutationID == mutation else { return }
-            message = KnowledgeFailure.search.localizedDescription
+            notice = UserMessage(.failure, KnowledgeFailure.search.localizedDescription)
         }
         mutationID = nil
         isBusy = false
@@ -279,7 +285,7 @@ final class KnowledgeStore {
         librarySources = [:]
         permitted = false
         isBusy = false
-        message = ""
+        notice = nil
         contentChanges.emit(())
     }
 

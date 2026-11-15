@@ -104,7 +104,8 @@ struct MeetingExportSnapshot: Equatable, Codable, Sendable {
 @MainActor
 @Observable
 final class MeetingExportState {
-    private(set) var message = ""
+    private(set) var notice: UserMessage?
+    var message: String { notice?.text ?? "" }
     private var lastSnapshot: MeetingExportSnapshot?
 
     func matches(_ snapshot: MeetingExportSnapshot) -> Bool { lastSnapshot == snapshot }
@@ -116,11 +117,11 @@ final class MeetingExportState {
         do {
             try write(markdown, url)
             lastSnapshot = snapshot
-            message = "Markdownを書き出しました。アプリ内への永続保存ではありません。"
+            notice = UserMessage(.success, "Markdownを書き出しました。アプリ内への永続保存ではありません。")
         } catch {
-            message = "書き出しに失敗しました。保存先のアクセス権と空き容量を確認してください。会議内容は保持されています。"
+            notice = UserMessage(.failure, "書き出しに失敗しました。保存先のアクセス権と空き容量を確認してください。会議内容は保持されています。", details: error.localizedDescription)
         }
     }
 
-    func reset() { lastSnapshot = nil; message = "" }
+    func reset() { lastSnapshot = nil; notice = nil }
 }

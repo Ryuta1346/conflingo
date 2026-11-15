@@ -103,7 +103,7 @@ private struct MeetingFloatingView: View {
     var body: some View {
         VStack(spacing: 0) {
             HStack {
-                Text(meeting.title).font(.headline).lineLimit(1)
+                Text(meeting.title).font(DesignTokens.Typography.heading).lineLimit(1)
                 Spacer()
                 Button("展開", systemImage: "arrow.up.left.and.arrow.down.right", action: expand)
                 Button("非表示", systemImage: "eye.slash", action: hide)
@@ -115,14 +115,14 @@ private struct MeetingFloatingView: View {
                     #if DEBUG
                     if meeting.previewUsesLiveAI {
                         Text("実API検証：合成発話・音声取得なし・選択したAIへ実通信")
-                            .font(.caption).foregroundStyle(DesignTokens.warning)
+                            .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.warning)
                     }
                     #endif
-                    Label(meeting.aiStatus, systemImage: "cloud").font(.caption)
+                    Label(meeting.aiStatus, systemImage: "cloud").font(DesignTokens.Typography.supporting)
                     if meeting.canStopAI {
                         Button("AI送信を停止") { meeting.setAIAllowed(false) }
                     }
-                    if let error = meeting.controller.lastError { SessionErrorBanner(message: error) }
+                    if let error = meeting.controller.lastError { InlineMessage(.failure, "音声入力に問題が発生しました。入力設定・権限を確認してください。停止できない場合は停止を再試行できます。確定済みの発話は保持しています。", details: error) }
                     if let insight = MeetingInsight.featured(in: meeting.insights) {
                         MeetingInsightCard(meeting: meeting, insight: insight, fontSize: fontSize, revealKnowledge: { reference in
                             expand()
@@ -133,16 +133,16 @@ private struct MeetingFloatingView: View {
                         Text(meeting.page == .review ? "会議を終了しました" : "AI提案はまだありません")
                             .font(.system(size: fontSize, weight: .semibold))
                         Text("発話はメイン画面で確認できます。")
-                            .font(.callout).foregroundStyle(DesignTokens.secondary)
+                            .font(DesignTokens.Typography.body).foregroundStyle(DesignTokens.secondary)
                     }
                     let transcript = meeting.transcriptEvents
                     if !transcript.isEmpty {
                         Divider()
-                        Text("直近の発話と翻訳").font(.headline)
+                        Text("直近の発話と翻訳").font(DesignTokens.Typography.heading)
                         ForEach(transcript.suffix(3)) { event in
                             VStack(alignment: .leading, spacing: 6) {
                                 Text(event.origin.label)
-                                    .font(.caption).foregroundStyle(DesignTokens.secondary)
+                                    .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                                 Text(event.text).font(.system(size: fontSize)).textSelection(.enabled)
                                 MeetingTranslationText(translations: meeting.translations, eventID: event.id, fontSize: fontSize,
                                                        sourceText: event.text, targetLanguage: meeting.translationTarget(for: event))
@@ -151,14 +151,14 @@ private struct MeetingFloatingView: View {
                         }
                     }
                     Text("非表示にしても音声収集は続きます。ウィンドウメニューから再表示できます。")
-                        .font(.caption).foregroundStyle(DesignTokens.secondary)
+                        .font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                 }
                 .padding(14)
             }
             Divider()
             if meeting.page == .setup || meeting.page == .review {
                 VStack(spacing: 8) {
-                    Text("マイク 停止 · 内部音声 停止").font(.caption).foregroundStyle(DesignTokens.secondary)
+                    Text("マイク 停止 · 内部音声 停止").font(DesignTokens.Typography.supporting).foregroundStyle(DesignTokens.secondary)
                     Button(meeting.page == .setup ? "メイン画面で準備" : "振り返りを開く", action: expand)
                 }
                 .padding(14)
@@ -169,6 +169,7 @@ private struct MeetingFloatingView: View {
         .background(DesignTokens.canvas)
         .foregroundStyle(DesignTokens.text)
         .tint(DesignTokens.accent)
+        .buttonStyle(AppButtonStyle())
         .preferredColorScheme(appearance == "light" ? .light : appearance == "dark" ? .dark : nil)
     }
 }
