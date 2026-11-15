@@ -51,6 +51,7 @@ Debugビルドを `--meeting-preview --meeting-state=live`（候補は `pr7-revi
 - **問題:** 終了ボタンを含む `MeetingTransport` は小窓（`MeetingFloatingPanel`）にも表示される。確認ダイアログはメイン画面の `MeetingWorkspaceView` に付いていた。そのため小窓で「会議を終了」を押しても、メイン画面が隠れていると何も表示されなかった。メイン画面がMeeting以外を表示していると、後でMeetingへ戻ったときに確認が出た。
 - **修正:** 確認ダイアログを `MeetingTransport` に移し、終了ボタンを押した窓にだけ出す。取消は `MeetingWorkspace.cancelEnd()` で確認状態を解除する。ダイアログを閉じるときの表示状態の解除は、確認状態を変えない。確定と取消の処理が、閉じる順序に左右されないようにするため。
 - **テスト:** `endConfirmationAppearsInTheWindowThatAsked` を追加した（2つの窓に操作部を置き、押した窓にだけシートが付く）。既存テストの取消は `cancelEnd()` に置き換えた。
+- **CI:** [修正後のCI](https://github.com/Ryuta1346/conflingo/actions/runs/43673431567)（head `b4b7cc0`）が成功した。719テスト・130スイート、Lint・Release両CPUも成功。追加テストの成功をログで確認した。修正前のコードでの失敗（Red）は確認していない。小窓での見え方は実機で未確認。
 
 ## 気づいた点（DR1の範囲外）
 

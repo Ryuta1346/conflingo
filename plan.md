@@ -1,4 +1,4 @@
-> 2026-11-15 DR1: 会議終了の確認（D03）・候補の状態ラベル（D05）・画面名の「履歴」統一（D14）を実装し、[Draft PR #46](https://github.com/Ryuta1346/conflingo/pull/46)を提出。Linux環境で作業したためローカルのビルド・テストは未実行で、自動検証はPRの[CI](https://github.com/Ryuta1346/conflingo/actions/runs/43672382848)で成功（全718テスト・130スイート、Lint277ファイル違反0、Release両CPU）。追加テストのRedと実機での見え方は未確認。[結果](docs/validation/dr1-small-fixes-2026-11-15.md)・[計画](docs/design/dr1-small-fixes-plan.md)。
+> 2026-11-15 DR1: 会議終了の確認（D03）・候補の状態ラベル（D05）・画面名の「履歴」統一（D14）を実装し、[Draft PR #46](https://github.com/Ryuta1346/conflingo/pull/46)を提出。Linux環境で作業したためローカルのビルド・テストは未実行で、自動検証はPRの[CI](https://github.com/Ryuta1346/conflingo/actions/runs/43672382848)で成功（全718テスト・130スイート、Lint277ファイル違反0、Release両CPU）。レビューで見つけた「小窓から終了確認が出ない」問題を修正し、[CI](https://github.com/Ryuta1346/conflingo/actions/runs/43673431567)で719テスト成功。追加テストのRedと実機での見え方は未確認。[結果](docs/validation/dr1-small-fixes-2026-11-15.md)・[計画](docs/design/dr1-small-fixes-plan.md)。
 
 > 2026-11-15 UIデザインレビュー: main `8a02bc8`の全画面を静的に確認（ビルド・起動は未実行）。高4・中10・低7件を指摘し、ユーザー指示により[UIデザインレビュー対応](#uiデザインレビュー対応2026-11-15)のDR1→DR5としてタスク化。コード変更なし・全項目未着手。[指摘一覧](docs/design/ui-design-review-2026-11-15.md)。
 
