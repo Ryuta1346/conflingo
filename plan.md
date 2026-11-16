@@ -1,3 +1,7 @@
+> 2026-11-16 追加実受入: 小窓→終了確認取消→展開後の実キー縮小、VoiceOverでの資料選択済み状態・詳細本文、LLM設定の読取・編集取消、履歴詳細・発話本文、小窓の展開を確認。Command＋Shift＋Eは実キーで不動作、メニュー経由は成功。VoiceOver off・文字16ptへ復元済み。Gate U全体は継続。[結果・残件](docs/validation/focus-voiceover-followup-2026-11-16.md)。
+
+> 2026-11-16 VoiceOver再開: ユーザー指示で従来の停止・保留を解除。読み上げ音声は利用者確認済み。ツール経由のVOキーは反応を観測できなかったが、実キーによるシートの「閉じる」は利用者確認・画面遷移の追認とも成功。検証後VoiceOverを初期状態のoffへ復元。現行mainはPR #51マージ済みの`81beffb`。以下のPR #51 Draft表記は過去時点の記録。[検証・確認票](docs/validation/voiceover-2026-11-16.md)。
+
 > 2026-11-16 キーフォーカス追補: 終了済み合成会議の小窓展開後・設定開閉後に、CUA経由の⌘＝／⌘＋／⌘−が成功。手動確認はユーザーがスマートフォン利用中のため保留。会議中の終了確認取消を含む経路と原因判定は未完了。PR #51は競合なし・Draftを維持し、修正・マージは切り分け後。[切り分け記録](docs/validation/compact-focus-triage-2026-11-16.md)。
 
 > 2026-11-16 DR5追補: 選択済み資料のアクセシビリティ名を修正・再受入。全783テスト・Lint・両CPU Release成功。合成会議の終了確定も確認済み。[Draft PR #51](https://github.com/Ryuta1346/conflingo/pull/51)でレビュー中。小窓復帰後のキーフォーカスは継続。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
@@ -47,7 +51,7 @@
 - **CI運用（2026-11-15、ユーザー指示）:** コスト上の理由からGitHub ActionsのCIは実行しない。`macOS validation`ワークフローはGitHub側で無効化済み。実行・再実行・再有効化は行わず、`bash scripts/ci.sh all`によるローカルのLint・全テスト・両CPU Releaseで検証する。
 
 - **資料追加導線（PR #24マージ済み）:** ライブラリ直接登録、Meeting／Conference実行中の資料追加・選択、Conferenceの資料質問・用語適用・補正を実装。自動検証・主要fake UIを確認し、実音声・実モデル品質とUI網羅受入を残す。[結果](docs/validation/knowledge-entry-points.md)。
-- 更新: **2026-11-16／main `4ad616e`からのローカル修正**。DR1〜DR5はPR #50までマージ済み。DR3・DR4修正差分は追加の独立レビュー指摘なし。DR5のMEDIUM 1件（選択済み資料のアクセシビリティ名）は承認後に修正・独立レビュー・ネイティブ再受入完了。全783テスト・146スイート、Lint310ファイル違反0、Release両CPU成功。合成会議の終了確定・時間固定も確認済み。小窓復帰後のキーフォーカス切り分けと網羅受入は継続。VoiceOverは保留。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
+- 更新: **2026-11-16／main `4ad616e`からのローカル修正**。DR1〜DR5はPR #50までマージ済み。DR3・DR4修正差分は追加の独立レビュー指摘なし。DR5のMEDIUM 1件（選択済み資料のアクセシビリティ名）は承認後に修正・独立レビュー・ネイティブ再受入完了。全783テスト・146スイート、Lint310ファイル違反0、Release両CPU成功。合成会議の終了確定・時間固定も確認済み。小窓復帰後のキーフォーカス切り分けと網羅受入は継続。VoiceOverは再開し、読み上げ音声を利用者確認済み（全経路未受入）。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
 - **実装:** PR0〜8、リポジトリ参照（PR #20）、Sessions（PR #21）、資料ライブラリ（PR #22）、LLM選択（PR #23）はマージ済み。PR9（結合・性能・安全性検証）は未着手。
 - **受入:** **2/12区分がDONE**（PR1・2）。これは実装率ではなく、マージと受入証跡が揃った区分数。PR0はDOING、PR3〜8はREVIEWを維持する。Gate A/B/C/U/Dはいずれも全体合格前。
 - **最新検証:** DR5ラベル修正後、783テスト・146スイート成功（164.413秒）、Lint310ファイル違反0、arm64／x86_64 Release成功。GitHub Actionsは実行せず、ローカル検証のみ。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
@@ -59,9 +63,9 @@
 
 ## 次の作業の優先順（提案）
 
-**先行完了:** PR #44までmainへマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の[独立レビューは修正指摘0件](docs/validation/pr42-pr43-independent-review-2026-11-15.md)。[UIのキー操作3件も修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。実音声待ちの間はPR #44の独立レビューと残るUI受入を進める。VoiceOverはユーザー指示で停止・保留（オフ確認済み）。
+**先行完了:** PR #44までmainへマージ済み、修正後CI成功。共通支援/通知統一・LLM分岐/SSE集約・CI修正の[独立レビューは修正指摘0件](docs/validation/pr42-pr43-independent-review-2026-11-15.md)。[UIのキー操作3件も修正・再受入済み](docs/validation/library-settings-ui-2026-11-15.md#修正と再受入)。実音声待ちの間はPR #44の独立レビューと残るUI受入を進める。VoiceOverは2026-11-16のユーザー指示で再開。読み上げ音声・実キーによるシート閉鎖は確認済み。全経路受入は継続中。
 
-**次の作業:** 小窓復帰後にキーウィンドウが得られない条件を切り分け、実配列の拡大・縮小・終了ショートカットを再受入する。DR5の選択済みアクセシビリティ名の修正と合成会議の終了確定は完了。DR1〜DR5の網羅受入とVoiceOverの保留は維持する。[修正・再受入結果](docs/validation/dr5-selection-fix-2026-11-16.md)。
+**次の作業:** 終了ショートカット（Command＋Shift＋E）が英数入力でも動かず、メニュー経由では動く条件を調査する。小窓復帰直後の縮小は実キーで確認済み。VoiceOverは資料の選択済み状態・詳細本文、LLM設定の読取・編集取消、履歴詳細・発話本文、小窓の展開を代表経路として確認済み。実配列の拡大、全状態の読み上げ順・残る操作経路とDR1〜DR5の網羅受入は継続。[今回の結果・残件](docs/validation/focus-voiceover-followup-2026-11-16.md)。
 
 1. **既存機能と入力の受入:** Conference回帰（Gate A）→ Zoom/Meet/Teams別の2入力受入（Gate B）。
 2. **会議全体の受入:** 実音声→AI回答・候補確認→資料参照→要約→Markdown出力・Sessions保存までを通して確認（Gate C）。リポジトリ参照と選択した実LLMの品質も個別に評価する。
@@ -135,9 +139,9 @@
 | [x] | PR8／レビュー・修正マージ | 独立レビュー・MEDIUM 2件の修正検証・実API評価を完了。PR #19はmain `7efbd3f`でマージ確認済み。PR8全体の受入は継続 | [レビュー](docs/validation/pr8-independent-review.md)・[結果](docs/validation/pr8-quality-acceptance.md) |
 | [x] | PR4（短時間ローカル） | 新しい文による再開と通常Meetingの開始・一時停止・再開・終了を確認。会議アプリ別・Gate B全体は次行で継続 | [実入力受入](docs/validation/meeting-real-input-2026-11-11.md)・[診断結果](docs/validation/microphone-diagnostics.md) |
 | [ ] | 資料追加導線／新規受入 | 用語ライブ更新競合・資料取り外し後の許可解除漏れをローカル修正し、自動検証・独立レビュー完了、PR #41マージ済み。日英精度・2入力・実モデル質問/補正・UI全経路は継続 | [検証記録](docs/validation/knowledge-entry-points.md)・[修正結果](docs/validation/remaining-implementation-2026-11-14.md) |
-| [ ] | Sessions／UI受入 | 狭幅・48pt・検索/詳細・保存パネル/削除取消のキー操作を確認。U01は上部操作の固定により修正・再受入済み（PR #44マージ済み）。VoiceOverは対象操作を確認できず、ユーザー指示で保留（オフ確認済み） | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[Sessions検証](docs/validation/sessions.md) |
-| [ ] | 資料ライブラリ／UI・レビュー | 狭幅・48pt・登録/検索/詳細/文書切替/削除取消を確認。U02は本文のネイティブ化で修正・再受入済み（PR #44マージ済み）。未実施経路、VoiceOver受入の保留（ユーザー指示・オフ確認済み）が残る。独立レビュー実施済み、指摘修正はPR #41マージ済み。最大容量の測定も未実施 | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[資料ライブラリ検証](docs/validation/knowledge-library.md) |
-| [ ] | LLM選択／実モデル・UI | 合成ローカルのモデル一覧選択→保存→再編集、狭幅の主要キー操作を確認。U03はフォーカス追従で修正・再受入済み（PR #44マージ済み）。VoiceOver受入の保留（ユーザー指示・オフ確認済み）、各社/Qwenの実生成・構造化応答・品質・速度が残る | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[LLM選択検証](docs/validation/llm-selection.md) |
+| [ ] | Sessions／UI受入 | 狭幅・48pt・検索/詳細・保存パネル/削除取消のキー操作を確認。U01は上部操作の固定により修正・再受入済み（PR #44マージ済み）。VoiceOverで履歴詳細を開く操作と発話本文の読み上げを利用者確認。検索・削除取消・書き出し等の残経路は継続 | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[Sessions検証](docs/validation/sessions.md) |
+| [ ] | 資料ライブラリ／UI・レビュー | 狭幅・48pt・登録/検索/詳細/文書切替/削除取消を確認。U02は本文のネイティブ化で修正・再受入済み（PR #44マージ済み）。VoiceOverの資料選択済み状態・詳細を開く操作・本文読み上げを利用者確認。残る操作経路の受入は継続。独立レビュー実施済み、指摘修正はPR #41マージ済み。最大容量の測定も未実施 | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[資料ライブラリ検証](docs/validation/knowledge-library.md) |
+| [ ] | LLM選択／実モデル・UI | 合成ローカルのモデル一覧選択→保存→再編集、狭幅の主要キー操作を確認。U03はフォーカス追従で修正・再受入済み（PR #44マージ済み）。VoiceOverの接続先・モデルIDの読み上げ、編集入口・取消を利用者確認。残るUI経路、各社/Qwenの実生成・構造化応答・品質・速度は継続 | [追加UI受入](docs/validation/library-settings-ui-2026-11-15.md)・[LLM選択検証](docs/validation/llm-selection.md) |
 | [ ] | PR0・5-B／Gate A | Conferenceの実翻訳・文字起こし専用・字幕・停止/再開・辞書・言語切替・Clear・Markdown保存・権限拒否/復旧など、回帰表の未実施項目を実機確認 | [Conference回帰表](docs/validation/conference-baseline.md#conference回帰表) |
 | [ ] | PR3・4／Gate B | Zoom/Meet/Teamsそれぞれで内部音声とマイクを識別。入力切替・機器/権限変更・切断/復旧・検証画面閉鎖時の停止、2系統STTの精度・時刻誤差・遅延・CPU/メモリを確認 | [2入力検証](docs/validation/dual-transcription.md)・[詳細計画](docs/meeting-copilot-plan.md) |
 | [ ] | PR5-C・6・7・8／Gate C | 通常Meetingの開始・一時停止/再開・終了は実音声で確認済み。候補確認/却下・要約・Markdown保存との結合受入が残る。根拠表示・誤確定防止・提案連発防止、通信断時の音声継続とAIのみの縮退、資料検索との結合を確認 | [PR5-C](docs/validation/pr5-c-meeting.md)・[PR6](docs/validation/pr6-model-adoption.md)・[PR7](docs/validation/pr7-meeting-state.md)・[PR8](docs/validation/pr8-local-rag.md) |
